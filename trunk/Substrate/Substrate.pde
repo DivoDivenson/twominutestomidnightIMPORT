@@ -11,7 +11,7 @@ import processing.opengl.*;
 int dimx = 1000;
 int dimy = 900;
 int num = 0;
-int maxnum = 100;
+int maxnum = 60;
 
 // grid of cracks
 int[] cgrid;
@@ -79,7 +79,7 @@ void begin() {
 
   // make just three cracks
   num=0;
-  for (int k=0;k<3;k++) {
+  for (int k=0;k<1;k++) {
     makeCrack();
   }
   background(255);
@@ -180,6 +180,7 @@ class Crack {
     // continue cracking
     x+=(0.42*cos(t*PI/180));
     y+=(0.42*sin(t*PI/180)); 
+   
     print("\n X: " + x);
     print(" Y: " + y);    
     // bound check

@@ -8,8 +8,8 @@
 
 int num = 0;
 int maxnum = 2000;
-int dimx = 1020;
-int dim = 660;
+int dimx = 1280;
+int dim = 1024;
 int dimborder = 20;
 int time;
 
@@ -23,17 +23,17 @@ PImage ab;
 // MAIN -----------------------------------------------------------
 
 void setup() {
-  size(1020,660,P2D);
-//  size(dimx,dim,P3D);
+  //size(1020,660,P2D);
+ size(dimx,dim,P2D);
   rectMode(CENTER);
   frameRate(30);
   noStroke();
   
   // create boxes
   boxes = new Box[maxnum];
-  
+
   // load background image
-  ab = loadImage("sky2.jpg");
+  ab = loadImage("yusuf.jpg");
 
   resetAll();
 }
@@ -59,7 +59,7 @@ void resetAll() {
   // initialize just five starting boxes
   // Fuck that, amke a shit ton for better resolution
   //Sweet christ im lazy
-  for(int amount = 0; amount < 30;amount++){
+  for(int amount = 0; amount < 1000;amount++){
       makeNewBox();
   }
  
