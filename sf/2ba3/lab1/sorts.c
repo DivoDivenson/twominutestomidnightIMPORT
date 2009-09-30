@@ -36,12 +36,13 @@ static void selectionSort(int a[], int size) {
    empty sorted part.*/
 void insertionSort(int a[], int size) {
   int i,j,temp;
-  for(i =1; i < size; i++){
-    for(j = size; j > 0; j--){  //Look, a for loop going backwards!
+  for(i=0;i < size; i++){  //When to stop the loop?
+    for(j = size-1; j > 0; j--){  //Look, a for loop going backwards!
       if(a[j] < a[j-1]){
         temp = a[j];
         a[j] = a[j-1];
         a[j-1] = temp;
+      //  printf("\nSwaping %d with %d\n", a[j],a[j-1]);
       }
     }
   }
@@ -149,13 +150,13 @@ int main()
   printf("\nAnd now for something completly different\n");
   /* flush output buffer, so all output appears on screen */
   fflush(stdout);
-  //nnums = read_in(nums, size, "numbers.txt");
+  nnums = read_in(nums, size, "numbers.txt");
   bubbleSort(nums, nnums);
   write_out(nums, nnums);
   printf("\nAnd now for something completly different\n");
   /* flush output buffer, so all output appears on screen */
   fflush(stdout);
-  //nnums = read_in(nums, size, "numbers.txt");
+  nnums = read_in(nums, size, "numbers.txt");
   selectionSort(nums, nnums);
   write_out(nums, nnums);
   /* flush output buffer, so all output appears on screen */
