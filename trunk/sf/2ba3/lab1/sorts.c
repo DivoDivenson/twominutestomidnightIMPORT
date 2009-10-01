@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 
+int bubbleCount,selectionCount,insertionCount,funnyCount;
+
 /* find smallest element between start and end of array */
 int findMin(int a[], int size, int start) {
   int min = a[start];
@@ -21,13 +23,15 @@ int findMin(int a[], int size, int start) {
 /* selection sort algorithm: repeatedly find smallest
    element and place at start of unsorted section. */
 static void selectionSort(int a[], int size) {
-
+  selectionCount = 0;
   int i,mIndex,temp;
   for(i=0;i<size;i++){
     mIndex = findMin(a,size,i);
     temp = a[i];
     a[i] = a[mIndex];
     a[mIndex]=temp;
+    selectionCount = selectionCount + size +1; /*Because findMin searchs
+                                                the entire array with each call*/
   }
 }
 
@@ -36,18 +40,20 @@ static void selectionSort(int a[], int size) {
    empty sorted part.*/
 void insertionSort(int a[], int size) {
   int i,j,temp;
-  for(i=0;i < size; i++){  //When to stop the loop?
-    for(j = size-1; j > 0; j--){  //Look, a for loop going backwards!
-      if(a[j] < a[j-1]){
-        temp = a[j];
-        a[j] = a[j-1];
-        a[j-1] = temp;
-      //  printf("\nSwaping %d with %d\n", a[j],a[j-1]);
+  insertionCount = 0;
+  for(i=1;i < size; i++){  //When to stop the loop?
+    j = i;
+    temp = a[j];
+    while (j>0 && a[j -1] > temp){    
+      a[j]=a[j-1];
+      j--;
+      insertionCount++;
       }
+    a[j] = temp;
     }
-  }
-
 }
+
+
 
 /* bubble sort algorithm: repeatedly compare and swap
    adjacent array elements. */
@@ -55,7 +61,7 @@ void bubbleSort(int a[], int size) {
   int i;
   int j;
   int temp;
-
+  bubbleCount=0;
   for(i =0; i < size; i++){
     for(j = 0; j < size-i-1;j++){
       if(a[j] > a[j+1]){
@@ -63,6 +69,7 @@ void bubbleSort(int a[], int size) {
         a[j] = a[j+1];
         a[j+1] = temp;
       }
+      bubbleCount++;
     }
   }
 }
@@ -72,7 +79,7 @@ void bubbleSort(int a[], int size) {
    out of order. */
 void funnySort(int a[], int size) {
   int j, temp;
-
+  funnyCount = 0;
   j = 0;
   while ( j < size - 1 ) {
     if ( a[j] > a[j+1] ) {
@@ -84,6 +91,7 @@ void funnySort(int a[], int size) {
     else {
       j++;
     }
+    funnyCount++;
   }
 }
 
@@ -143,25 +151,34 @@ int main()
   const int size = 1024;
   int nums[size];
   int nnums;
-
+  printf("Now sorting with insertionSort\n");
   nnums = read_in(nums, size, "numbers.txt");
   insertionSort(nums, nnums);
-  write_out(nums, nnums);
-  printf("\nAnd now for something completly different\n");
+  //write_out(nums, nnums);
+  printf("\nInsertion sort took %d passes.\nNow sorting with bubbleSort\n", insertionCount);
   /* flush output buffer, so all output appears on screen */
   fflush(stdout);
   nnums = read_in(nums, size, "numbers.txt");
   bubbleSort(nums, nnums);
-  write_out(nums, nnums);
-  printf("\nAnd now for something completly different\n");
+  //write_out(nums, nnums);
+  printf("\nBubble Sort took %d passes.\nNow sorting with slectionSort\n",bubbleCount);
   /* flush output buffer, so all output appears on screen */
   fflush(stdout);
   nnums = read_in(nums, size, "numbers.txt");
   selectionSort(nums, nnums);
-  write_out(nums, nnums);
+  //write_out(nums, nnums);
   /* flush output buffer, so all output appears on screen */
   fflush(stdout);
-
+  printf("\nSelection sort took %d passes.\nNow sorting with funnySort\n",selectionCount);
+  /* flush output buffer, so all output appears on screen */
+  fflush(stdout);
+  nnums = read_in(nums, size, "numbers.txt");
+  funnySort(nums, nnums);
+  //write_out(nums, nnums);
+  /* flush output buffer, so all output appears on screen */
+  fflush(stdout);
+  printf("\nFunny sort took %d passes\n",funnyCount);
+ 
   return 0;
 }
 
