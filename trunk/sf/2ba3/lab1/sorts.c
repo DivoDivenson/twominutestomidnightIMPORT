@@ -152,7 +152,7 @@ int main()
   int nums[size];
   int nnums;
   printf("Now sorting with insertionSort\n");
-  nnums = read_in(nums, size, "numbers.txt");
+  nnums = read_in(nums, size, "numbers.txt"); //Because I'm Lazzzzzzzzzzzyyyyyy
   insertionSort(nums, nnums);
   //write_out(nums, nnums);
   printf("\nInsertion sort took %d passes.\nNow sorting with bubbleSort\n", insertionCount);
