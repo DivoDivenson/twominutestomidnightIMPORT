@@ -43,6 +43,7 @@ feature
 
                end; -- make
 
+      
 	fib_rep(n:INTEGER) is
 	-- Zeckendorf representation
 	local
