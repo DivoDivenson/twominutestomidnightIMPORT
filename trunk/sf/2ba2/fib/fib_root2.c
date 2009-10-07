@@ -1899,8 +1899,8 @@ gcmt=((mch**)se_malloc((gcmt_max+1)*sizeof(void*)));
 if (!stack_bottom) stack_bottom=((void**)(void*)(&argc));
 #endif
 p[0]="???";
-p[49]="/home/divines/twominutestomidnight/sf/2ba2/fib.e";
-p[25]="/home/divines/twominutestomidnight/sf/2ba2/fib_root.e";
+p[49]="/home/divines/twominutestomidnight/sf/2ba2/fib/fib.e";
+p[25]="/home/divines/twominutestomidnight/sf/2ba2/fib/fib_root.e";
 p[102]="/usr/local/SmartEiffel/lib/kernel/procedure.e";
 p[96]="/usr/local/SmartEiffel/lib/kernel/memory.e";
 p[15]="/usr/local/SmartEiffel/lib/kernel/tuple.e";
