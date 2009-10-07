@@ -1,0 +1,96 @@
+2BA3 Lab 2 : Safer user input
+
+Thursday 8th October
+
+User input in C using scanf can be fraught with dangers and
+difficulties. One particular problem is that when scanf does not return
+the expected value, it can be difficult to figure out why. Another,
+perhaps bigger problem is that standard input routines are often
+used for "buffer overflow" attacks, where the user uses a longer input
+than the program expects.
+
+An alternative approach is to read in user input into a string, and
+then divide up that string into the bits you want.
+
+A string in C is simply an array of characters. You can declare a
+string like this:
+	#define MAX_STRING 256
+	char buffer[MAX_STRING];
+
+To read a line of user input into a string, use the fgets
+function. You can use it like this:
+
+	fgets(buffer, MAX_STRING, stdin);
+
+buffer 		is the name of the string to read into
+MAX_STRING 	the length of string that can be read is MAX_STRING-1
+stdin		is the name of the file that you are reading from
+		(in this case the keyboard)
+
+If you want to check that the string was read correctly, simply use:
+
+	printf("%s\n", buffer);
+
+Once you have read the string in, you can then use sscanf to find
+individual items in the string, just as you would use scanf to read
+directly from the keyboard. For example, if you are expecting a
+decimal integer and a double precision floating point number in the
+line, you could write:
+
+	int num1;
+	double num2;
+	sscanf(buffer, "%d %lf", &num1, &num2);
+
+As mentioned above, a string is simply an array of characters.
+However, the characters of the string does not have to take up all the
+space in the array. Instead, a zero character (written '\0') is used
+to mark the end of the string, which may or may not be the last
+element of the array. So simple code to write out a string character
+by character might look like:
+
+	for ( i = 0; buffer[i] != '\0'; i++ ) {
+	  printf("%c", buffer[i]);
+	}
+
+Write a C function that takes a string as a parameter. The contents
+of the string should be a valid decimal integer. The function should
+return the integer value, and have the following prototype:
+
+	int str2int(char str[]);
+
+Once you have this working, expand the function to make it a bit safer.
+You should add an integer parameter to specify the maximum length of the
+string, and another parameter to indicate success or failure of the
+conversion. Your new function prototype will look like:
+
+	int str2int(char str[], int max_length, int * success);
+
+The last parameter is a pointer to an integer. To call this function,
+you will need something like the following:
+
+	#define MAX_STRING 256
+	char buffer[MAX_STRING];
+	int valid;
+	int value;
+
+	fgets(buffer, MAX_STRING, stdin);
+	value = str2int(buffer, MAX_STRING, &valid);
+
+&valid takes the address of the variable 'valid'. This is passed to the
+function as a parameter, which will allow the value of the variable
+'valid' to be modified from within the function. If you have a pointer
+called 'success', you can assign a value to whatever variable is pointed
+to by 'success' as follows:
+
+	*success = 1;
+
+Generally, you can treat '*success' like any other variable.
+
+Finally, write a C program that reads in a string from the user, and
+writes out whether or not the string is a valid integer, and if so,
+writes out the value of the integer.
+
+If you have time left at the end, write a similar function for floats,
+doubles, and hexadecimal input.
+
+
