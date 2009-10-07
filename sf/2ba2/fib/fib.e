@@ -17,6 +17,24 @@ feature
 				Result := fib (k - 2) + fib (k - 1)
 			end
 		end;
+		
+	max_fib (max: INTEGER): INTEGER is
+	-- largest Fibonacci number less than max.
+		local
+		p, c, n: INTEGER
+		do
+		from	
+			p := 0;
+			c := 1
+		until
+			c > max
+		loop
+			n := p + c;
+			p := c;
+			c := n;
+		end;
+	Result := p
+	end; -- max_fib
 	
 	fib1 (k: INTEGER): INTEGER is
 		require
