@@ -1,0 +1,57 @@
+2BA3 Lab 3 : Simple string tokenising
+
+Thursday 30th October 2008
+
+A common task in string processing is to break up a line of text into
+its component words. A string tokeniser can be used to extract the
+individual words in a string.
+
+For example, given the string, "The glorified bricklayer picks up a
+spare", we would like to break it up into component words, ie "The",
+"glorified", "bricklayer", "picks", "up", "a", "spare". The individual
+words (tokens) are seperated by one or more spaces, and there may be
+any number of spaces before, after, or between tokens.
+
+Write a function with the following prototype:
+int tokenise(char str[], int start, char result[]);
+
+The function should find the next token starting at index 'start'
+in the string 'str'. The token should be copied into the string
+'result', which is another character array passed to the function,
+so that the string is communicated back to the caller. 
+
+The function returns an integer value, which should be the next
+position in 'str' after the returned token. Next time the function is
+called, this will be the next value of start. If there are no more
+tokens, then the returned integer value should be -1.
+
+You might use this function as follows:
+char line[] = "The glorified bricklayer picks up a spare";
+char result[256];
+char start;
+
+start = tokenise(line, 0, result);
+while ( start != -1 ) {
+  printf("%s\n", result);
+  start = tokenise(line, start, result);
+}
+
+Once you have this working, modify the function so that there
+are checks on the maximum lengths of the strings to ensure that
+you don't go over the ends of the array:
+
+int tokenise(char str[], int max_str, int start,
+             char result[], int max_result);
+
+If the length of a token to be returned is longer than will fit in
+'result', the token should be truncated.
+
+Write a small program to test all this stuff.
+
+This lab will be marked, and will count towards your end of year mark.
+You should submit a printout of your project work to the Computer
+Science front office by 4 pm Wednesday 5th November 2008. To be
+marked, you must demonstrate and answer questions on your project at
+your regular lab session on Thursday 6th November. You must
+demonstrate the same code that you submit. All work should be your
+own.
