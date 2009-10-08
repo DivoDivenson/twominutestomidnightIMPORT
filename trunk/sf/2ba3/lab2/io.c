@@ -62,6 +62,9 @@ main(){
   fgets(buffer, MAX_STRING, stdin);
   strlength = strlen(buffer);
   value = str2int(buffer, strlength, &valid);
+  if(!valid){
+    printf("Not a valid int\n");
+  }
 
   printf("Double\n");
   fgets(buffer, MAX_STRING, stdin);
