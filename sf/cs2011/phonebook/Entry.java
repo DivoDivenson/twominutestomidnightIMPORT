@@ -8,12 +8,13 @@ public class Entry{
     this.number = number;
     this.address = address;
     this.name = name;
+    splitName();
+ 
   }
 
 
   private void splitName(){
-    String delims = "[ ]";
-    String[] tokens = name.split(delims);
+    String[] tokens = this.name.split(" ");
     this.forName = tokens[0];
     this.surName = tokens[1]; //I hope the don't have a middle name(Fix this later)
   }
@@ -38,18 +39,21 @@ public class Entry{
 
   //</Getters><Setters>(May be redundant,remove later?)
 
-  public int setNumber(int input){
+  public void setNumber(int input){
     number = input;
   }
 
-  public String setAddress(String input){
+  public void setAddress(String input){
     address = input;
   }
 
-  public String setName(String input){
+  public void setName(String input){
     name = input;
     splitName();
   }
     
   //</Setters>
+  public String toString(){
+    return String.format("%s, %s\n%s\n%d\n", surName, forName, address, number);
+  }
 }
