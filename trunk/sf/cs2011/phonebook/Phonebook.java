@@ -2,7 +2,7 @@ import java.util.Scanner;
 class Phonebook{
   
   Scanner sc = new Scanner(System.in);
-  private Entry entry[] = new Entry[5]; /*Array of entries at the moment
+  private Entry entry[] = new Entry[10]; /*Array of entries at the moment
                      Change to arraylist sometime */
   int entryNo =0; 
   public Phonebook(){
@@ -29,14 +29,46 @@ class Phonebook{
   public int findEntry(int number){
     int result=0; //If the desierd entry cannot be found, 1st entry is returned.
     for(int x = 0; x < entryNo; x++){
-      if(entry[entryNo].getNumber() == number){
-        result = entryNo;
+      if(entry[x].getNumber() == number){
+        result = x;
       }
     }
     return result;
   }
+  
+  public int findEntry(String inputAddr){ //Find with address
+   int result=0; 
+   for(int x = 0; x < entryNo; x++){
+      if((entry[x].getAddress()).equals(inputAddr)){
+        result = x;
+      }
+    }
+    return result;
+  }
+  
+  public int findFor(String inputFor){ //Find with Forname
+   int result=0; 
+   for(int x = 0; x < entryNo; x++){
+      if((entry[x].getFor()).equals(inputFor)){
+        result = x;
+      }
+    }
+    return result;
+  }
+  
+ public int findSur(String inputSur){ //Find with surname
+   int result=0; 
+   for(int x = 0; x < entryNo; x++){
+      if((entry[x].getSur()).equals(inputSur)){
+        result = x;
+      }
+    }
+    return result;
+  }
+  
 
-  public String toString(int entNo){
+
+  public String displayEntry(int entNo){
      return entry[entNo].toString();
   }
 
