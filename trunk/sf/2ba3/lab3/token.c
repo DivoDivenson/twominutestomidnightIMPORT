@@ -1,21 +1,24 @@
 #include <stdio.h>
-
+#define  RESULTSIZE  40
 int tokenise(char str[], int start, char result[]){
   int resIdx = 0;
   int found = 0;
-  printf("%d\n",start);
   while(found == 0 && str[start] != '\0'){
     if(str[start] == ' '){
       if(resIdx > 0){
         found = 1;
-        printf("Found!\n");
         result[resIdx] = '\0';
       }
       start++;
     }else{  //assume valid
-      result[resIdx] = str[start];
-      resIdx++; //Make it explicit that ints are being incremented?
-      start++;
+      if(resIdx <= RESULTSIZE){
+        result[resIdx] = str[start];
+        resIdx++; //Make it explicit that ints are being incremented?
+        start++;
+      }else{
+        found = 1;
+        result[resIdx] = '\0';
+      }
     }
    }
   
@@ -32,10 +35,13 @@ int tokenise(char str[], int start, char result[]){
 
 main(){
 char line[] = "The glorified bricklayer picks up a spare\0";
-char result[256];
+char result[RESULTSIZE];
 char start=0;
 
 start = tokenise(line, 0, result);
-printf("%s %d\n",result,start);
+while( start != -1){
+  printf("%s\n",result);
+  start = tokenise(line, start, result);
+}
 return 0;
 }
