@@ -1,3 +1,7 @@
+/*************Please redo me from scratch. This is a crap
+ * algorhythm. OR AT LEAST REMOVE THIS MESSAGE************/
+
+
 #include <stdio.h>
 #define  RESULTSIZE  40
 int tokenise(char str[], int start, char result[]){
