@@ -4,11 +4,12 @@ int tokenise(char str[], int start, char result[]){
   int resIdx = 0;
   int found = 0;
   printf("%d\n",start);
-  while(found != 1 || str[start] != '\0'){
+  while(found == 0 && str[start] != '\0'){
     if(str[start] == ' '){
       if(resIdx > 0){
         found = 1;
-        printf("Found!");
+        printf("Found!\n");
+        result[resIdx] = '\0';
       }
       start++;
     }else{  //assume valid
