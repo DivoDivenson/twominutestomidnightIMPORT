@@ -13,12 +13,13 @@ class Phonebook{
     String name,address;
     int number;
     //Basic read in with no error checking (Thats for version 0.2)
-    System.out.printf("Please enter full name: ");
+    System.out.printf("\nPlease enter full name: ");
     name = sc.nextLine();
     System.out.printf("\nPlease enter address: ");
     address = sc.nextLine();
     System.out.printf("\nPlease enter phone number: ");
-    number = sc.nextInt();
+    number = Integer.parseInt(sc.nextLine());  //Read in string and convert it to int. nextInt() messess up the line order.
+
     entry[entryNo] = new Entry(number,address,name);
     entryNo++;
   }
