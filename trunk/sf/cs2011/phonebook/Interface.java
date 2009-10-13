@@ -12,8 +12,12 @@ static  Phonebook phonebook = new Phonebook();
       System.out.println("\"exit\" to exit");
       System.out.printf("Phonebook: $ ");
       String input = sc.nextLine();
+      String argument;
       while(!(input.equals("exit"))){
-        execute();
+        String[] tokens = input.split(" "); //Split input into comamnd and argument. Creats a new string each time... I'm sorry RAM.
+        input = tokens[0];
+        argument = tokens[1];
+        execute(input, argument);
         System.out.printf("\nPhonebook: $ ");
         input = sc.nextLine();
       }
@@ -21,9 +25,11 @@ static  Phonebook phonebook = new Phonebook();
     
     }
 
-    public static void execute(){
-      switch(input)
-        case (input.equals
+    public static void execute(String command,String argument){
+      if(command.equals("findSur")){
+            System.out.printf("Hello\n");
+          }
     }
 
 }
+
