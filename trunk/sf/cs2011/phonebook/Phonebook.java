@@ -4,7 +4,7 @@ class Phonebook{
   Scanner sc = new Scanner(System.in);
   private Entry entry[] = new Entry[10]; /*Array of entries at the moment
                      Change to arraylist sometime */
-  int entryNo =0; 
+  private int entryNo =0; 
   public Phonebook(){
   
   }
@@ -26,19 +26,21 @@ class Phonebook{
 
 
   /* Method to return the index of an Entry object in entry[] with the same
-   (phone) number as supplied by argument */
+   (phone) number as supplied by argument
+   
+   Various searching methods. Very simple. If no match is found, -1 is returned*/
   public int findEntry(int number){
-    int result=0; //If the desierd entry cannot be found, 1st entry is returned.
+    int result=-1; 
     for(int x = 0; x < entryNo; x++){
       if(entry[x].getNumber() == number){
         result = x;
-      }
+      }        
     }
     return result;
   }
   
   public int findEntry(String inputAddr){ //Find with address
-   int result=0; 
+   int result=-1; 
    for(int x = 0; x < entryNo; x++){
       if((entry[x].getAddress()).equals(inputAddr)){
         result = x;
@@ -48,7 +50,7 @@ class Phonebook{
   }
   
   public int findFor(String inputFor){ //Find with Forname
-   int result=0; 
+   int result=-1; 
    for(int x = 0; x < entryNo; x++){
       if((entry[x].getFor()).equals(inputFor)){
         result = x;
@@ -58,7 +60,7 @@ class Phonebook{
   }
   
  public int findSur(String inputSur){ //Find with surname
-   int result=0; 
+   int result=-1; 
    for(int x = 0; x < entryNo; x++){
       if((entry[x].getSur()).equals(inputSur)){
         result = x;
@@ -68,9 +70,19 @@ class Phonebook{
   }
   
 
-
+  /* Displays the entry givin it's index number in entry[].
+   * If -1 is supplied it returns a not found message (-1 given out
+   * by search methods if an entry cannot be found)(Kinda lazy)*/
   public String displayEntry(int entNo){
-     return entry[entNo].toString();
+    if(entNo == -1){
+      return "Not found";
+    }else{
+      return entry[entNo].toString();
+    }
+  }
+
+  public int bookSize(){
+      return entryNo;
   }
 
 }

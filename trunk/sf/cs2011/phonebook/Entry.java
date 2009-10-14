@@ -16,7 +16,9 @@ public class Entry{
   private void splitName(){
     String[] tokens = this.name.split(" ");
     this.forName = tokens[0];
-    this.surName = tokens[1]; //I hope the don't have a middle name(Fix this later)
+    if(tokens.length > 1){
+      this.surName = tokens[1]; //I hope the don't have a middle name(Fix this later)
+    }
   }
 
 
