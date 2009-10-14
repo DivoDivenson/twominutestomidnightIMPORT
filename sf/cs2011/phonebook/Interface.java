@@ -40,10 +40,24 @@ static  Phonebook phonebook = new Phonebook();
             System.out.printf("%s", phonebook.displayEntry(phonebook.findEntry(argumentInt)));
       }else if (command.equals("findAdd")){
             System.out.printf("%s", phonebook.displayEntry(phonebook.findEntry(argument)));
+      }else if (command.equals("newEntry")){
+            phonebook.newEntry();
+      }else if (command.equals("printAll")){
+            for(int x = 0; x < phonebook.bookSize(); x++){
+                System.out.printf("%s\n", phonebook.displayEntry(x));
+            }
+      }else if (command.equals("help")){
+        helpMe();
+     }else{
+            System.out.printf("Comamnd not found\n");
       }
 
 
 
+    }
+
+    public static void helpMe(){ //Print one big 'ol string.
+      System.out.printf("Input commands in command <argumet> format\nfindSur: Find surname.\nfindFor: Find forname.\nfindAdd: Find address.\nnewEntry: Add a new entry.\nprintAll: Print the contents of the phonebook.\n");
     }
 
 }
