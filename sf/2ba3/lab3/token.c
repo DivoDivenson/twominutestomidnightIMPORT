@@ -27,17 +27,15 @@ int tokenise(char str[], int start, char result[]){
    }
   
   if(str[start] == '\0'){  //Doing same check twice. Prehaps fix this if arsed.
-    start = -1;               
+    start = -1;
   }
   return start;
- 
-    
 }
 
 
 
 main(){
-char line[] = "The glorified bricklayer picks up a spare\0";
+char line[] = "The glorified bricklayer picks up a spare\0"; //Error if space at the end of the string
 char result[RESULTSIZE];
 char start=0;
 
