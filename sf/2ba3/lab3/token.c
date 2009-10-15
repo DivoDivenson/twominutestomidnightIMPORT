@@ -1,34 +1,33 @@
-/*************Please redo me from scratch. This is a crap
- * algorhythm. OR AT LEAST REMOVE THIS MESSAGE************/
-
-
 #include <stdio.h>
 #define  RESULTSIZE  40
+/*Returns the position of the next ' ' char in str[], -1 if '\0'
+  Writes every char until ' ' to result[]
+  If str[start]==' ' on first pass, start is incremented until something else is found */
+
 int tokenise(char str[], int start, char result[]){
   int resIdx = 0;
   int found = 0;
   while(found == 0 && str[start] != '\0'){
     if(str[start] == ' '){
-      if(resIdx > 0){
+      if(resIdx > 0){  //If valid chars have been found, finish up
         found = 1;
         result[resIdx] = '\0';
       }
       start++;
-    }else{  //assume valid
-      if(resIdx <= RESULTSIZE){
+    }else{  //assume valid char if not a  ' '.
+      if(resIdx <= RESULTSIZE){  //Stop from going out of bounds.
         result[resIdx] = str[start];
-        resIdx++; //Make it explicit that ints are being incremented?
+        resIdx++; 
         start++;
       }else{
-        found = 1;
+        found = 1; 
         result[resIdx] = '\0';
       }
     }
    }
   
-  if(str[start] == '\0'){
-    start = -1;               //Making check once until i figure out a
-                              //better way. ie, rewrite the entire method!
+  if(str[start] == '\0'){  //Doing same check twice. Prehaps fix this if arsed.
+    start = -1;               
   }
   return start;
  
@@ -42,10 +41,9 @@ char line[] = "The glorified bricklayer picks up a spare\0";
 char result[RESULTSIZE];
 char start=0;
 
-start = tokenise(line, 0, result);
 while( start != -1){
-  printf("%s\n",result);
   start = tokenise(line, start, result);
+  printf("%s\n",result);
 }
 return 0;
 }
