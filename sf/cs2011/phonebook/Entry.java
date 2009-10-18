@@ -3,10 +3,9 @@
 import java.util.Scanner;
 
 public class Entry{
-  int number;
-  String address,name,forName,surName;
+  String address,name,forName,surName,number;  //Store number as a string to preserve leading 0 if any.
 
-  public Entry(int number, String address,String name){
+  public Entry(String number, String address,String name){
     this.number = number;
     this.address = address;
     this.name = name;
@@ -25,7 +24,7 @@ public class Entry{
 
 
   //Get/Set methods.
-  public int getNumber(){
+  public String getNumber(){
     return number;
   }
 
@@ -43,7 +42,7 @@ public class Entry{
 
   //</Getters><Setters>(redundant,remove later?)
 
-  public void setNumber(int input){
+  public void setNumber(String input){
     number = input;
   }
 
@@ -58,6 +57,6 @@ public class Entry{
     
   //</Setters>
   public String toString(){
-    return String.format("%s, %s\n%s\n%d\n", surName, forName, address, number);
+    return String.format("%s, %s\n%s\n%s\n", surName, forName, address, number);
   }
 }
