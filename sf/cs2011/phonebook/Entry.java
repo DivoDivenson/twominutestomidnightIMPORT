@@ -1,3 +1,5 @@
+/* Basic storage object */
+
 import java.util.Scanner;
 
 public class Entry{
@@ -13,11 +15,11 @@ public class Entry{
   }
 
 
-  private void splitName(){
+  private void splitName(){ //Take the whole name as a string and split it into forname and surname.
     String[] tokens = this.name.split(" ");
     this.forName = tokens[0];
     if(tokens.length > 1){
-      this.surName = tokens[1]; //I hope the don't have a middle name(Fix this later)
+      this.surName = tokens[1]; //I hope the don't use a middle name. </Horribel assumption>
     }
   }
 
@@ -39,7 +41,7 @@ public class Entry{
     return surName;
   }
 
-  //</Getters><Setters>(May be redundant,remove later?)
+  //</Getters><Setters>(redundant,remove later?)
 
   public void setNumber(int input){
     number = input;
