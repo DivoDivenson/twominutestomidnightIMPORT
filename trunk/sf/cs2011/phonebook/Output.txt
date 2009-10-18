@@ -1,0 +1,83 @@
+Phonebook v0.1
+Please enter first record.
+
+
+Please enter full name: Steven Diviney
+
+Please enter address: 123 Fake St
+
+Please enter phone number: 0863809976
+
+Please enter full name: Micheal Murry
+
+Please enter address: 321 False Rd
+
+Please enter phone number: 0869056743
+"exit" to exit
+Phonebook: $ help
+Input commands in command <argumet> format
+findSur: Find surname.
+findFor: Find forname.
+findAdd: Find address.
+newEntry: Add a new entry.
+printAll: Print the contents of the phonebook.
+
+Phonebook: $ findAdd 
+Please enter the address: 123 Fake St
+Diviney, Steven
+123 Fake St
+0863809976
+
+Phonebook: $ findSur Diviney
+Diviney, Steven
+123 Fake St
+0863809976
+
+Phonebook: $ findFor Micheal
+Murry, Micheal
+321 False Rd
+0869056743
+
+Phonebook: $ newEntry
+
+Please enter full name: Shane Carthy
+
+Please enter address: 231 Real Ave
+
+Please enter phone number: 0865555555
+
+Phonebook: $ printAll
+Diviney, Steven
+123 Fake St
+0863809976
+
+Murry, Micheal
+321 False Rd
+0869056743
+
+Carthy, Shane
+231 Real Ave
+0865555555
+
+
+Phonebook: $ findDor
+Comamnd not found or incorrect. Try using "help".
+
+Phonebook: $ hello
+Comamnd not found or incorrect. Try using "help".
+
+Phonebook: $ findSur
+Comamnd not found or incorrect. Try using "help".
+
+Phonebook: $ help
+Input commands in command <argumet> format
+findSur: Find surname.
+findFor: Find forname.
+findAdd: Find address.
+newEntry: Add a new entry.
+printAll: Print the contents of the phonebook.
+
+Phonebook: $ exit
+//Back to shell
+divo@cyssor:~/media/sata/College/twominutestomidnight/sf/cs2011/phonebook$ 
+
