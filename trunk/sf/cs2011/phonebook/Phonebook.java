@@ -28,7 +28,8 @@ class Phonebook{
   /* Method to return the index of an Entry object in entry[] with the same
    (phone) number as supplied by argument
    
-   Various searching methods. Very simple. If no match is found, -1 is returned*/
+   Various searching methods. Very simple. If no match is found, -1 is returned
+   PROBLEM, if more than one entries share the same infomation only the last one will be found*/
   public int findEntry(int number){
     int result=-1; 
     for(int x = 0; x < entryNo; x++){

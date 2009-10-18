@@ -31,29 +31,32 @@ static  Phonebook phonebook = new Phonebook();
     }
 
     public static void execute(String command,String argument){
-      if(command.equals("findSur")){
+      if(argument != null){
+        if(command.equals("findSur")){
             System.out.printf("%s", phonebook.displayEntry(phonebook.findSur(argument)));
-      }else if (command.equals("findFor")){
+        }else if (command.equals("findFor")){
             System.out.printf("%s", phonebook.displayEntry(phonebook.findFor(argument)));
-      }else if (command.equals("findNum")){
+        }else if (command.equals("findNum")){
             int argumentInt = Integer.parseInt(argument);
             System.out.printf("%s", phonebook.displayEntry(phonebook.findEntry(argumentInt)));
-      }else if (command.equals("findAdd")){
+        }else if (command.equals("findAdd")){
             System.out.printf("%s", phonebook.displayEntry(phonebook.findEntry(argument)));
-      }else if (command.equals("newEntry")){
+        }else{
+            System.out.printf("Comamnd not found or incorrect. Try using \"help\".\n");
+        } 
+      }else{
+         if (command.equals("newEntry")){
             phonebook.newEntry();
-      }else if (command.equals("printAll")){
+        }else if (command.equals("printAll")){
             for(int x = 0; x < phonebook.bookSize(); x++){
                 System.out.printf("%s\n", phonebook.displayEntry(x));
-            }
-      }else if (command.equals("help")){
-        helpMe();
-     }else{
-            System.out.printf("Comamnd not found\n");
-      }
-
-
-
+              }
+        }else if (command.equals("help")){
+          helpMe();
+        }else{
+            System.out.printf("Comamnd not found or incorrect. Try using \"help\".\n");
+         }
+       }
     }
 
     public static void helpMe(){ //Print one big 'ol string.
