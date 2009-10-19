@@ -1,13 +1,14 @@
 import java.util.Scanner;
-//import tcdIO.Terminal;
+import tcdIO.Terminal;
 class Interface {
 static  Phonebook phonebook = new Phonebook();
+static  Terminal terminal = new Terminal("Phonebook");
+  
   static Scanner sc = new Scanner(System.in);
     public static void main (String Args[]){
             for(int x = 0; x < 2; x++){
         phonebook.newEntry();
       }
-  //    Terminal terminal = new Terminal("Phonebook");
       //Create a basic command interface.
       System.out.printf("Phonebook v0.1\nPlease enter first record.\n\n");
       System.out.println("\"exit\" to exit"); //Write a quick comamnd summary
@@ -65,6 +66,8 @@ static  Phonebook phonebook = new Phonebook();
 
     public static void helpMe(){ //Print one big help string.
       System.out.printf("Input commands in command <argumet> format\nfindSur: Find surname.\nfindFor: Find forname.\nfindAdd: Find address.\nnewEntry: Add a new entry.\nprintAll: Print the contents of the phonebook.\n");
+    }
+       terminal.printf("Input commands in command <argumet> format\nfindSur: Find surname.\nfindFor: Find forname.\nfindAdd: Find address.\nnewEntry: Add a new entry.\nprintAll: Print the contents of the phonebook.\n");
     }
 
 }
