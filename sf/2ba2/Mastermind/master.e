@@ -4,7 +4,7 @@ class
 
 feature
 
-     split (in: INTEGER): INTEGER is
+     split (in: INTEGER):INTEGER is
                   --Split user input into 4 integers
               do
                 print("Hello")

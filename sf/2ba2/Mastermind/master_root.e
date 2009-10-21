@@ -14,9 +14,9 @@ feature
         do
            create mmind;
            from
-                guess := 4 
+                guess := 0 
            until
-                (mmind.split(guess)) != 4
+                (mmind.split(guess)) = 4
            loop
                 print("%N Please enter guess :");
                 io.read_integer;
