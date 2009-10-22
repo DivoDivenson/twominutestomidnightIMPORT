@@ -1,0 +1,81 @@
+CS2014 Lab 4 : English to American Translator
+
+Thursday 22nd October
+
+The goal of this project is to develop a very simple program for
+translating text files from English to American. Your program
+should read in two files: a dictionary file and the file to translate.
+
+The dictionary file should contain lines, where each line contains
+and English word, followed by its American translation. For example:
+
+tap faucet
+spanner wrench
+bonnet hood
+honour honor
+colour color
+aluminium aluminum
+crisps chips
+chips French-fries
+Mrs Mrs.
+Mr Mr.
+aubergine eggplant
+hoover vacuum-cleaner
+
+Your program should read in the English text, perform the necessary
+substitutions, and write out the American translation to the screen.
+You can assume that lines of the input do not contain more than 80
+characters (so your input strings need to be at least 81 characters,
+to hold the '\0' character).
+
+Once you have this working, modify your program so that you translate
+to Californian rather than simple American. Californian is the same
+as American except that the word "like" is inserted at random points
+before or after words. You should fix the odds of insertion so that
+the word "like" makes up about one word in eight in the outputted text.
+
+Pseudo-random numbers can be generated in C using the 'long random(void)'
+function. The small program below shows how the random function can be
+used.
+
+/* program to demonstrate the use of the random function */
+#include <stdio.h>
+#include <stdlib.h>
+
+/* generate random numbers in the range 0..limit-1 */
+int main()
+{
+  const int limit = 8;
+  const int seed = 13;
+  long num;
+  int i;
+
+  /* set the seed that initialises the generator */
+  srandom(seed);
+  
+  /* generate 100 pseudo-random numbers between 0..limit-1 */
+  for ( i = 0; i < 100; i++ ) {
+    num = random() % limit;
+    printf("%d ", num);
+  }
+  printf("\n");
+  fflush(stdout);
+
+  return 0;
+}
+
+
+Note that this program will always generate the same sequence of
+pseudo-random numbers. To vary the sequence, you need to vary the
+initial starting seed. One way to make the initial seed unpredictable
+is to use the 'gettimeofday' to choose an initial seed based on the
+current time. If you want to do this, you'll need to figure it out
+yourself.
+
+This lab will be marked, and will count towards your end of year mark.
+You should submit a printout of your project work to the Computer
+Science front office by 4 pm on Wednesday 28th October 2009. To be
+marked, you must demonstrate and answer questions on your project at
+your regular lab session on Thursday 29th October. You must
+demonstrate the same code that you submit. All work should be your
+own.
