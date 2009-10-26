@@ -31,20 +31,18 @@ int read_in(char *result[], int maxline, char *input){
 /*pseudo split an array into two. Inserts a terminating character at the first space (' ')
   in input and writes a pointer to the next element into the result */
 void split(char *input[],char *result[], int length){
-  int dict_index,line_index;
+  int line_index,char_index;
 
-  for(dict_index = 0; dict_index < length; dict_index++){
-    line_index = 0;
-    while((*(input[dict_index] + line_index)) != ' '){
-      // if(*(input[dict_index] + line_index) == ' '){
-        //  *(input[dict_index] + line_index +1) = '\0';
-        line_index++;
+  for(line_index = 0; line_index < length; line_index++){
+    char_index = 0;
+    while((*(input[line_index] + char_index)) != ' '){
+        char_index++;
     }
-      *(input[dict_index] + line_index +1) = '\0';
-     // result[dict_index] = malloc(1);STOPPED HERE, NOT WORKING
-      result[dict_index] = (input[dict_index] + line_index);
-    printf("%s %s\n",input[dict_index],result[0]);
-   // *(input[dict_index] + line_index) = '\0';
+    *(input[line_index] + char_index) = '\0'; /*Assume the while loop exits with line 
+                                                   index pointing to the first space.*/
+
+    result[line_index] = (input[line_index] + char_index + 1); /*Store a pointer to the begging of the next string into
+                                                                 result */
   }
 
 
@@ -52,10 +50,12 @@ void split(char *input[],char *result[], int length){
 
 int main(){
 
-  int nLines;
-  nLines = read_in(dict,MAXLEN, "dict.txt");
-  char *american[nLines];
-  split(dict,american,nLines);
+  int dictLines,nLines;
+  dictLines = read_in(dict,MAXLEN, "dict.txt");
+  char *american[dictLines],*input_file[MAXLINES];
+  split(dict,american,dictLines);
+  nLines = read_in(input_file,MAXLEN, "translate.txt");
+  
   return 0;
 }
 
