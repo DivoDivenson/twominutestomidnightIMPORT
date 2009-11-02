@@ -30,7 +30,6 @@ int read_in(char *result[], int maxline, char *input){
       strcpy(p,line);
       result[noLines++] = p;
     }
-
    return noLines;
 }
 
@@ -67,13 +66,11 @@ void separate(char *input[], char *result[]){
          char_Index = getWord(input[line_Index],word,char_Index);
          char *final = malloc(strlen(word)); //Create another string to store the result, to save memory
          strcpy(final,word);
-         free(word);
+         //free(word); // Calling free here causes the program to crash at runtime.
          result[resIndex++] = final;
       }
    }
-
    result[resIndex] = "EOF"; //Another cheat
-
 }
 
 /*Destroys input atm */
@@ -85,24 +82,27 @@ int getWord(char *input, char *word, int index){
    while(isspace(line[index])){
       index++;
    }
-   if(line[index] == '\0'){
+   if(ispunct(line[index]) ){
+      printf("Punct\n");
+   }else if(line[index] == '\0'){
       index = -1;
       strcpy(word,"\0");  /*Cheat. Insert terminating charcter as string to signify the start of a new line
                            Assuming the "\0" never appears in the input file is... lazy FIX
-                           (FIX THIS LATER)*/
+                         (FIX THIS LATER)*/  
    }else{
       char *start = &line[index];
-      while(isgraph(line[index])){
+      while(isgraph(line[index])){// && !(ispunct(line[index])) ){// && (ispunct(line[index])) != 0){ //ispunct NOT WORKING,K FIX
          index++;
+         if(ispunct(line[index])){
+            printf("Punct\n");
+      //Detect punct here, but what to do with it?      
+            
+         }                 
       }
       line[index] = '\0';
       strcpy(word,start);
    }
-      
    return index;
-
-
-
 }
 
 void replace(char *text[], char *search[], char *replace[]){
@@ -111,14 +111,11 @@ void replace(char *text[], char *search[], char *replace[]){
 
    for(textIdx = 0; strcmp(text[textIdx],"EOF"); textIdx++){
       for(searchIdx = 0; search[searchIdx] != NULL; searchIdx++){
-         if(!strcmp(text[textIdx],search[searchIdx])){
+         if(!strcasecmp(search[searchIdx],text[textIdx])){
             replacement = malloc(strlen(replace[searchIdx]));
             strcpy(replacement,replace[searchIdx]);
             text[textIdx] = replacement;
-
          }
-
-    
       }
    }
 
@@ -133,7 +130,6 @@ void printOut(char *print[]){
       }else{
          printf("%s ", print[index]);
       }
-      
    }
 }
 
@@ -143,15 +139,17 @@ int main(){
 
    int dictLines,nLines;
    dictLines = read_in(dict,MAXLEN, "dict.txt");
+
    char *american[dictLines],*input_file[MAXLINES];
    split(dict,american,dictLines);
 
    nLines = read_in(input_file,MAXLEN, "translate.txt");
-  
-   char *inputSeparate[MAXLINES]; //Assumption about the number of words in the file to translate
+   char *inputSeparate[1000]; //Assumption about the number of words in the file to translate. Make method to calculate this value
    separate(input_file,inputSeparate);
+
    replace(inputSeparate,dict,american);
-   printOut(inputSeparate);
+  printOut(inputSeparate);
+
    return 0;
 }
 
