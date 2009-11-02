@@ -1,0 +1,23 @@
+Demo all Point methods.
+
+Point
+5.000000 6.900000
+Point X: 5.000000 Y: 6.900000
+
+Demo all polygon methods.
+
+Surface: Polygon
+
+Points:
+
+ Point X: 5.600000 Y: 4.800000
+ Point X: 3.700000 Y: 4.000000
+ Point X: 10.900000 Y: 13.600000
+
+Demo all surface methods
+Geometry Type: Surface
+Type: Surface
+
+Demo Polymorphism
+Surface: Polygon
+

@@ -1,32 +1,20 @@
-class Surface extends Gemoetry{
+class Surface extends Geometry{
 
-  private String type = "Surface";
+   private String type = "Surface";
 
-  public Surface(){
+   public Surface(){
     
-  }
+   }
 
-  /*public double Area(){   Requiers spatial thing-a-whck, leave out?
+   public String geometryType(){
+      return type;
+   }
 
-  }*/
+   public String asText(){
+      return type;
+   }
 
-  public Point centroid(){
-    return -1; //-1 if unknown
-  }
-
-  /*public Point point_on_surface(){
-    
-  }*/
-
-  public String geometryType(){
-    return type;
-  }
-
-  public String asText(){
-    return type;
-  }
-
-
+   //All other elements outlined in the spec require spatial reference system?
 
 
 }
