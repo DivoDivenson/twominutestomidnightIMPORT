@@ -5,8 +5,10 @@
 #define MAXLINES 100 //Max no line in input file
 #define MAXLEN   81  //Max length of any line in input file
 
+
 char *dict[MAXLINES];
 
+void numWords();
 /* Reads a file, input, in from disk and stores each line as seperate string.
    Result is an array of character _pointers_. 
    Each pointer is the location of one of the strings
@@ -83,7 +85,8 @@ int getWord(char *input, char *word, int index){
       index++;
    }
    if(ispunct(line[index]) ){
-      printf("Punct\n");
+//      printf("Punct\n");
+      ;
    }else if(line[index] == '\0'){
       index = -1;
       strcpy(word,"\0");  /*Cheat. Insert terminating charcter as string to signify the start of a new line
@@ -91,7 +94,7 @@ int getWord(char *input, char *word, int index){
                          (FIX THIS LATER)*/  
    }else{
       char *start = &line[index];
-      while(isgraph(line[index])){// && !(ispunct(line[index])) ){// && (ispunct(line[index])) != 0){ //ispunct NOT WORKING,K FIX
+      while(isgraph(line[index])){
          index++;
          if(ispunct(line[index])){
             printf("Punct\n");
@@ -135,7 +138,12 @@ void printOut(char *print[]){
 
 
 
+
+/* Count the number of words in the translate file, or close to it */
+
 int main(){
+
+
 
    int dictLines,nLines;
    dictLines = read_in(dict,MAXLEN, "dict.txt");
@@ -144,11 +152,11 @@ int main(){
    split(dict,american,dictLines);
 
    nLines = read_in(input_file,MAXLEN, "translate.txt");
-   char *inputSeparate[1000]; //Assumption about the number of words in the file to translate. Make method to calculate this value
+   char *inputSeparate[10000]; //Assumption about the number of words in the file to translate. Ugh
    separate(input_file,inputSeparate);
 
    replace(inputSeparate,dict,american);
-  printOut(inputSeparate);
+   printOut(inputSeparate);
 
    return 0;
 }
