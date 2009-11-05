@@ -4,11 +4,12 @@
 #include <ctype.h>
 #define MAXLINES 100 //Max no line in input file
 #define MAXLEN   81  //Max length of any line in input file
-
+/* Does not detect punctuation or translate to  Californian.*/
 
 char *dict[MAXLINES];
 
-void numWords();
+//void numWords();
+
 /* Reads a file, input, in from disk and stores each line as seperate string.
    Result is an array of character _pointers_. 
    Each pointer is the location of one of the strings
@@ -22,7 +23,7 @@ int read_in(char *result[], int maxline, char *input){
    char line[MAXLEN];
         
    FILE * file;
-   file = fopen(input, "r");
+   file = fopen(input, "r"); //Assume file is there
    noLines = 0;
 
    while(fgets(line, maxline, file) != NULL){
@@ -35,7 +36,8 @@ int read_in(char *result[], int maxline, char *input){
    return noLines;
 }
 
-/*pseudo split an array of two strings per line into two. Inserts a terminating character at the first space (' ')
+/*pseudo split an array of two strings per line into two. 
+  Inserts a terminating character at the first space (' ')
   in input and writes a pointer to the next element into the result */
 void split(char *input[],char *result[], int length){
    int line_index,char_index;
@@ -47,38 +49,42 @@ void split(char *input[],char *result[], int length){
       }
       *(input[line_index] + char_index) = '\0'; /*Assume the while loop exits with line 
                                                    index pointing to the first space.*/
-      result[line_index] = (input[line_index] + char_index + 1); /*Store a pointer to the begging of the next string into
-                                                                 result */
+      result[line_index] = (input[line_index] + char_index + 1); /*Store a pointer to the begging 
+                                                                   of the next string into result */
    }
 }
 
-/*Seperate each word in a given string into a its own postion in result array. The words are copied, not 
-  just pointers to them. This makes switching them really simple*/
+/*Seperate each word in a given string into a its own postion in result array. 
+  The words are copied, not  just pointers to them. 
+  This makes switching them really simple but uses many memories. */
 
-void separate(char *input[], char *result[]){
+void separate(int length, char *input[], char *result[]){
    int line_Index;
    int char_Index, resIndex = 0;
    char *temp,*word; 
-
-   for(line_Index = 0; input[line_Index] != NULL; line_Index++){ //Parse each line in input
+   //Parse each line in input.
+   for(line_Index = 0; line_Index < length; line_Index++){ 
       char_Index = 0;
 
       while(char_Index != -1){
-         char *word = malloc(100); //Create string to store result of getword
+         char *word = malloc(MAXLEN); //Create string to store result of getword
          char_Index = getWord(input[line_Index],word,char_Index);
-         char *final = malloc(strlen(word)); //Create another string to store the result, to save memory
+         char *final = malloc(strlen(word) + 1); //Create another string to store the result, to save memory
          strcpy(final,word);
          //free(word); // Calling free here causes the program to crash at runtime.
          result[resIndex++] = final;
       }
    }
-   result[resIndex] = "EOF"; //Another cheat
+   result[resIndex] = "EOF"; /*Another cheat. Assume that "EOF" will never
+                               appear in the input...*/
 }
 
-/*Destroys input atm */
+/* separate and getWord should be 10 line collectivly. Oh well */
+
+/* Tokenise method, returns the position of where it left off */
 int getWord(char *input, char *word, int index){
    
-   char line[strlen(input)]; //Temp array to avoid changing the input
+   char line[MAXLEN]; //Temp array to avoid changing the input
    strcpy(line,input);
 
    while(isspace(line[index])){
@@ -89,18 +95,18 @@ int getWord(char *input, char *word, int index){
       ;
    }else if(line[index] == '\0'){
       index = -1;
-      strcpy(word,"\0");  /*Cheat. Insert terminating charcter as string to signify the start of a new line
-                           Assuming the "\0" never appears in the input file is... lazy FIX
-                         (FIX THIS LATER)*/  
+      strcpy(word,"\0");  /*Cheat. Insert terminating charcter as 
+                            string to signify the start of a new line
+                           Assuming the "\0" never appears in the input file*/
    }else{
       char *start = &line[index];
       while(isgraph(line[index])){
          index++;
-         if(ispunct(line[index])){
+      /*   if(ispunct(line[index])){
             printf("Punct\n");
       //Detect punct here, but what to do with it?      
-            
-         }                 
+            I dont care
+         }*/                 
       }
       line[index] = '\0';
       strcpy(word,start);
@@ -108,6 +114,10 @@ int getWord(char *input, char *word, int index){
    return index;
 }
 
+/* Search text of entries in search and 
+   replace them with the string in replace. 
+   The word, if found, shares the same index in replace
+   */
 void replace(char *text[], char *search[], char *replace[]){
    int textIdx,searchIdx;
    char *replacement;
@@ -123,7 +133,8 @@ void replace(char *text[], char *search[], char *replace[]){
    }
 
 }
-/* At the moment just dumps out a printf. Change to return a string of formated output with strcnt() */
+/* At the moment just dumps out a printf. 
+   Change to return a string of formated output with strcnt() */
 void printOut(char *print[]){
    int index;
 
@@ -139,7 +150,6 @@ void printOut(char *print[]){
 
 
 
-/* Count the number of words in the translate file, or close to it */
 
 int main(){
 
@@ -152,8 +162,9 @@ int main(){
    split(dict,american,dictLines);
 
    nLines = read_in(input_file,MAXLEN, "translate.txt");
-   char *inputSeparate[10000]; //Assumption about the number of words in the file to translate. Ugh
-   separate(input_file,inputSeparate);
+   char *inputSeparate[10000]; /*Assumption about the number of
+                                 words in the file to translate. Ugh */
+   separate(nLines,input_file,inputSeparate);
 
    replace(inputSeparate,dict,american);
    printOut(inputSeparate);
