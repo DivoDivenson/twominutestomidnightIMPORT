@@ -78,7 +78,28 @@ There exists no element $k \in N$ such that $2^k = 1/4$.
 \\*
 \\
 Let $x,y \in N$, $x,y > 0$ satisfy $xRy$. Then $x^2 / y^2 = 2^k$ for some $k \in N$.
-Then $y^2 / x^2 = 2^{-k}$, but $-k \notin N$. Therefore the realtion is not anti-symmetric.
+Then $y^2 / x^2 = 2^{-k}$, but $-k \notin N$. Therefore the relation is not anti-symmetric.
+\\*
+\\
+Let $x,y,z \in N$,$>0$ satisfy $xRy$ and $yRz$. Then there exists $k,l \in N$ such that $k = x / y$ and $l = y / z$.
+It follows that $l = x / yz$. As all three terms are a factor of $l$ $xRz$. Thus $R$ is transitive.
+\\*
+\\
+The relation $R$ is not symmetric, therefore it is not an equivalence relation.
+As it is not anti-symmetric, the relation $R$ is not a partial order.
 
+\section{Question 4}
+Let $x,y \in [0,+\infty)$. If $x < y$ then $\frac{1}{1 + x^2} > \frac{1}{1 + y^2}$. 
+If $x > y$ then $\frac{1}{1 + x^2} < \frac{1}{1 + y^2}$. If $x \not= y$ then either 
+$\frac{1}{1 + x^2} > \frac{1}{1 + y^2}$ or $\frac{1}{1 + x^2} < \frac{1}{1 + y^2}$. It follows that $f(x) \not= f(y)$.
+Therefore the function is injective.
+\\*
+\\
+Given any $y \in (0,1]$ there exists an $x \in [0,+\infty]$ such that $x = \sqrt{\frac{1}{y} -1}$.
+It follows that $f$ is also surjective.
+\\*
+\\
+As the function is injective and surjective it is also bijective, and as per theorem 2.4 it may be invertible.
+It has an inverse, such that $f^{-1} =  \sqrt{\frac{1}{y} -1}$.
 
 \end{document}
