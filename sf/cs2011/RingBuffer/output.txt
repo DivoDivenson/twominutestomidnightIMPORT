@@ -1,0 +1,31 @@
+The ringBuffer contains:
+5
+6
+2
+3
+4
+
+ RingBuffer contains 5
+The ringBuffer contains:
+null
+null
+null
+null
+null
+The ringBuffer contains:
+Hello
+World
+null
+null
+null
+
+Demo the equals method for string:
+true
+
+The ringBuffer contains:
+Point X: 12.500000 Y: 123.600000
+Point X: 34.600000 Y: 56.800000
+Point X: 3.000000 Y: 5.000000
+
+With reference types, Object.equals() only returns true if the two objects passed are a refernce to the same object.
+true : false
