@@ -8,7 +8,7 @@ feature
 
       make is
           do
-          answer := 1234
+          answer := 3541
           end --make
 
        countbulls (guess: INTEGER): INTEGER is  --Return out number of bulls
@@ -47,9 +47,10 @@ feature
             cows,tempguess,tempans,count_guess,count_ans: INTEGER --temp* stores a sigle digit of *
                                                                     --divide_* stores the number to divide * by
             localguess, localanswer : INTEGER
+            found : INTEGER
                 --Subdivide the guess and the answer to get one digit from each. Compare them and increment cows
                 --if they match. Continue until every number has been compared. If the answer contains the same 
-                --number twice two cows are counted.
+                --number twice two cows are counted.Sometimes.
           do
                 localanswer := answer
             from
@@ -62,16 +63,24 @@ feature
                 localanswer := localanswer // 10
                 from
                     count_guess := 0
-                    localguess := guess 
+                    localguess := guess
+                    found := 0
                 until
                     count_guess = 4
                 loop
                     tempguess := localguess \\ 10;
                     localguess := localguess // 10;
                     if count_guess = count_ans then --avoid counting a bull as a cow by skipping 
-                                                      --corrisponding positions
+                                                    --corrisponding positions
+                    elseif found = 1 then
+
                     elseif tempans = tempguess then
+                        print("%N");
+                        io.put_integer(tempans);
+                        print(" ");
+                        io.put_integer(tempguess)
                         cows := cows + 1
+                        found := 1
                     else
 
                     end --end if
