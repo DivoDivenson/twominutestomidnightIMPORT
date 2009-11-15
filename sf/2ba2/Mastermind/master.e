@@ -47,6 +47,9 @@ feature
             cows,tempguess,tempans,count_guess,count_ans: INTEGER --temp* stores a sigle digit of *
                                                                     --divide_* stores the number to divide * by
             localguess, localanswer : INTEGER
+                --Subdivide the guess and the answer to get one digit from each. Compare them and increment cows
+                --if they match. Continue until every number has been compared. If the answer contains the same 
+                --number twice two cows are counted.
           do
                 localanswer := answer
             from
