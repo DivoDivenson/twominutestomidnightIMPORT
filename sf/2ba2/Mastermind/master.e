@@ -88,8 +88,9 @@ feature
 end --end method
        
         genrandom is
+          --Generate a random answer
           local
-              rand:PRESS_RANDOM_NUMBER_GENERATOR
+            rand:PRESS_RANDOM_NUMBER_GENERATOR --Eiffel docs said so
               temp,final,count:INTEGER
           do
             from
@@ -97,6 +98,9 @@ end --end method
                 !!rand.make
                 rand.next
                 final := rand.last_integer(6)
+                --Generate the first random number, then loop 3 times
+                --for the rest. This is because the number must be
+                --multiplied by 10 each time
             until
                 count =3
             loop
