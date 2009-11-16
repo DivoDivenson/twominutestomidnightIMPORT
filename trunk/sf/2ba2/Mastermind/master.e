@@ -8,7 +8,7 @@ feature
 
       make is
           do
-          answer := 3541
+
           end --make
 
        countbulls (guess: INTEGER): INTEGER is  --Return out number of bulls
@@ -75,10 +75,6 @@ feature
                     elseif found = 1 then
 
                     elseif tempans = tempguess then
-                        print("%N");
-                        io.put_integer(tempans);
-                        print(" ");
-                        io.put_integer(tempguess)
                         cows := cows + 1
                         found := 1
                     else
@@ -90,10 +86,35 @@ feature
             end --end loop
             Result := cows
 end --end method
-                
+       
+        genrandom is
+          local
+              rand:PRESS_RANDOM_NUMBER_GENERATOR
+              temp,final,count:INTEGER
+          do
+            from
+                count := 0
+                !!rand.make
+                rand.next
+                final := rand.last_integer(6)
+            until
+                count =3
+            loop
+              final := final * 10
+              rand.next
+              temp := rand.last_integer(6)
+              final := final + temp
+              count := count + 1
+            end
+            answer := final
+          end --end method
+          
+          
+end --End master
+
+    
 
 
-end
 
                      
 
