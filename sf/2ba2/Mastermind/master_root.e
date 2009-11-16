@@ -12,6 +12,7 @@ feature
            bulls: INTEGER
         do
            !!mmind.make;
+           mmind.genrandom
            from
                 guess := 0 
                 bulls := 0
