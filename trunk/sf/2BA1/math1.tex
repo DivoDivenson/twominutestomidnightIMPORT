@@ -1,6 +1,14 @@
 \documentclass[a4paper,12pt]{article}
 \begin{document}
 
+\begin{center}
+  {\large Steven Diviney} \\*
+  08462267 \\*
+  MA2C01 \\*
+
+\end{center}
+
+\clearpage
 \section{Question 1}
 
 Prove that$(3n)! \leq {27}^n(n!)^3$ for all $n \in N$
@@ -16,7 +24,8 @@ But \[(3m)! \leq 27^m(m!)^3\]
 \\*
 Which leaves \[(3m + 3)(3m + 2)(3m + 1) \leq 27{(m + 1)}^3\]
 \[27{m}^3 + 54{m}^2 + 33m + 6 \leq 27{m}^3 + 81{m}^2 + 81m + 27\]
-Which holds for all $m \in N$.
+\[0 \leq 27m^2 + 48m + 21\]
+Which holds for all $m \in N$,$m > 0$.
 It now follows from the Principle of Mathematical Induction that this identity holds for all natural numbers m.
 
 \section{Question 2}
@@ -37,13 +46,15 @@ have the same elements, and thus that $(A \cup B) \backslash (A \cap B) = (A \ba
 
 \section{Question 3}
 \subsection{Relation Q on N}
-The relation $Q$ on $N$ is not reflexive as \[(1)^2 - (1)^2 = 2^k\]
+\begin{enumerate}
+  \item    The relation $Q$ on $N$ is not reflexive as \[(1)^2 - (1)^2 = 2^k\]
 \[1 - 1 = 2^k\]
 \[0 = 2^k\]
 There is no $k \in N$ such that $2^k = 0$.
 \\*
 \\
-The relation $Q$ on $N$ is not symmetric. \[(3)^2 - (1)^2 = 2^k\]
+\item
+  The relation $Q$ on $N$ is not symmetric. \[(3)^2 - (1)^2 = 2^k\]
 \[9 -1 = 2^k\]
 \[8 = 2^k\]
 \[8 = 2^3\]
@@ -54,22 +65,29 @@ But \[(1)^2 - (3)^2 = 2^k\]
 There exists no $k \in N$ such that $2^k = -8$.
 \\*
 \\
-The relation $Q$ is not antisymmetric. $1Q3$ and $3Q1$ but $ 1 \not= 3$
+\item
+  $xQy$ holds if $x > y$. But $yQx$ is false if $x > y$. There is no element k if $x \leq y$.As $xQy$ and $yQx$ can never be true when $x,y \in N$ where $x,y > 0$. Therefore the function is anti-symmetric.
 \\* 
-\\
-The relation $Q$ is not transitive. $10Q6$ and $6Q2$ but $10\not Q 2$
+\\ 
+\item
+  The relation $Q$ is not transitive. $10Q6$ and $6Q2$ but $10 \not= 2$.
 \\*
 \\
-As the relation $Q$ is not reflexive, symmetric, anti-symmetric or transitive it is not an equivalence 
+\item
+  As the relation $Q$ is not reflexive, symmetric or transitive it is not an equivalence 
 relation or a partial order.
+\end{enumerate}
 \subsection{Relation R on N}
-The relation $R$ on $N$ is reflexive as \[n^2 / n^2 = 2^k\]
+\begin{enumerate}
+  \item
+    The relation $R$ on $N$ is reflexive as \[n^2 / n^2 = 2^k\]
 Where $n \in N$,$n > 0$
 \[1 = 2^k\]
 \[1 = 2^0\]
 \\*
 \\
-The relation $R$ is not symmetric as \[ 2^2 / 1^2 = 2^k\]
+\item
+  The relation $R$ is not symmetric as \[ 2^2 / 1^2 = 2^k\]
 \[4 / 1 = 2^k\]
 \[ 4 = 2^2\]
 But \[ 1^2 / 2^2 = 2^k\]
@@ -77,17 +95,28 @@ But \[ 1^2 / 2^2 = 2^k\]
 There exists no element $k \in N$ such that $2^k = 1/4$.
 \\*
 \\
+\item
 Let $x,y \in N$, $x,y > 0$ satisfy $xRy$. Then $x^2 / y^2 = 2^k$ for some $k \in N$.
-Then $y^2 / x^2 = 2^{-k}$, but $-k \notin N$. Therefore the relation is not anti-symmetric.
+Now let the same $x,y$ satisfy $yRx$. 
+Then $y^2 / x^2 = 2^{-k}$, but $-k \not> 0$. 
+Therefore for $x,y$ to satisfy $xRy$ and $yRx$, $k$ must equal $0$. $k = 0$ if and only if $x = y$. $R$ is anti-symmetric.
 \\*
 \\
-Let $x,y,z \in N$,$>0$ satisfy $xRy$ and $yRz$. Then there exists $k,l \in N$ such that $k = x / y$ and $l = y / z$.
-It follows that $l = x / yz$. As all three terms are a factor of $l$ $xRz$. Thus $R$ is transitive.
+\item
+ Let $x,y,z \in N$ where $x,y,z > 0$ satisfy $xRy$ and $yRz$. 
+ The there exists $k,l \in N$ such that $\frac{x^2}{y^2} = 2^k$ and $\frac{y^2}{z^2} = 2^l$. Assume $\frac{x^2}{z^2} = 2^m$.
+  \[x^2 = 2^k.y^2 , z^2 = \frac{y^2}{2^l}\]
+  \[\frac{(2^k.y^2)}{\frac{y^2}{2^l}} = 2^m\]
+  \[\frac{2^k.y^2.2^k}{y^2}\]
+  \[2^k.2^l = 2^m\]
+  \[2^{k + l} = 2^m\]
+  Therefore the relation is transitive as all three terms are a factor of xRz.
 \\*
 \\
-The relation $R$ is not symmetric, therefore it is not an equivalence relation.
+\item 
+  The relation $R$ is not symmetric, therefore it is not an equivalence relation.
 As it is not anti-symmetric, the relation $R$ is not a partial order.
-
+\end{enumerate}
 \section{Question 4}
 Let $x,y \in [0,+\infty)$. If $x < y$ then $\frac{1}{1 + x^2} > \frac{1}{1 + y^2}$. 
 If $x > y$ then $\frac{1}{1 + x^2} < \frac{1}{1 + y^2}$. If $x \not= y$ then either 
@@ -96,10 +125,11 @@ Therefore the function is injective.
 \\*
 \\
 Given any $y \in (0,1]$ there exists an $x \in [0,+\infty]$ such that $x = \sqrt{\frac{1}{y} -1}$.
-It follows that $f$ is also surjective.
+As $f$ has an inverse, it follows that $f$ is also surjective.
 \\*
 \\
-As the function is injective and surjective it is also bijective, and as per theorem 2.4 it may be invertible.
+As shown above the function has an inverse, it follows that the function is surjective and therefore bijective, 
+as per theorem 2.4.
 It has an inverse, such that $f^{-1} =  \sqrt{\frac{1}{y} -1}$.
 
 \end{document}
