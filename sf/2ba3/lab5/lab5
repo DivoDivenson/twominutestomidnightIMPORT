@@ -1,0 +1,50 @@
+CS2014 Lab 5 : Reverse Polish Notation Calculator
+
+Thursday 19th November
+
+The goal of this project is to develop a calculator for expressions
+in reverse Polish notation. Your program should read in an expression
+in reverse Polish notation and write out the value of that expression.
+
+For example, if the input is:
+	7 8 3 * 28 + +
+The output should be:
+	59
+
+To split the line of text containing the expression into its component
+tokens you should use the string tokeniser that you developed in lab3.
+
+When writing your program, you should build a stack abstract data type
+(ADT), which can store double precision floating point numbers. Your
+stack ADT should provide functions to implement at least the following
+operation: push, pop, isempty. You should then use this stack ADT to
+evaulate the expressions.
+
+Note that you must create and use a stack ADT in your program if you
+want the marks for this lab.
+
+The algorithm for computing the value of an expression in reverse
+Polish notation is simple:
+
+for each token in the input string {
+  if ( token is a number ) {
+    push token onto the stack
+  }
+  else if ( token is an operator ) {
+    pop the top two items off the stack
+    apply the operator to the two items
+    push the result onto the stack
+  }
+}
+
+At the end of this computation, if you are dealing with a correctly-
+formed expression, there should be exactly one number on the stack.
+This is the result of the expression.
+
+This lab will be marked, and will count towards your end of year mark.
+You should submit a printout of your project work to the Computer
+Science front office by 4pm on Wednesday 25th November 2008. To be
+marked, you must demonstrate and answer questions on your project at
+your regular lab session on Thursday 26th November. You must
+demonstrate the same code that you submit. All work should be your
+own.
