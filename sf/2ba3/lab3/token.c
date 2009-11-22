@@ -32,12 +32,7 @@ int tokenise(char str[], int start, char result[]){
     }
    }
   
-<<<<<<< .mine
   if(str[start] == '\0'){  //Doing same check twice...
-    printf("%d\n", start);
-=======
-  if(str[start] == '\0'){  //Doing same check twice...
->>>>>>> .r56
     start = -1;
   }
   return start;
@@ -45,30 +40,15 @@ int tokenise(char str[], int start, char result[]){
 
 
 
-<<<<<<< .mine
-main(){
-char line[] = "The glorified bricklayer picks up a spare\0 "; //Error if space at the end of the string
-char result[RESULTSIZE];
-char start=0;
-=======
 int main(){
   char line[] = "      The     glorified bricklayer picks up a       spare              "; //Error if space at the end of the string
   char result[RESULTSIZE];
   char start=0;
->>>>>>> .r56
-
-<<<<<<< .mine
-//Assuming line is a valid string.
-while( start != -1){
-  start = tokenise(line, start, result);
-  printf("%s\n",result);
-}
-=======
+  
   while( start != -1){
     start = tokenise(line, start, result);
     printf("%s\n",result);
   }
 
->>>>>>> .r56
 return 0;
 }
