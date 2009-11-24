@@ -22,3 +22,17 @@ double pop(struct stack * this){
    return this -> value[this -> sp];
 }
 
+int isfull(struct stack * this){
+   if(this -> sp >= this -> size){
+      return 1;
+   }else{
+      return 0;
+   }
+}
+
+void flush(struct stack * this){
+   while(this -> sp >= 0){
+      pop(this);
+   }
+}
+

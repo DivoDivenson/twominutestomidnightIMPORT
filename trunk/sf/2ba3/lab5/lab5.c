@@ -30,10 +30,11 @@ int main(){
 
    char input[MAX]; //Buffer for input
 
+
    while((getline(input,MAX)) !=  0){
       char * value = strtok(input, " "); //Use strtok to parse input
       double operand;  //Temp storage in the case of - and /
-      while(value != NULL){
+      while(value != NULL && !isfull(myStack)){
          /* If a digit is enterd push to stack, else apply operand to 2 top most vales
             and push the result back on */
          if(isdigit(value[0])){
@@ -41,7 +42,9 @@ int main(){
          }else if(value[0] == '-' && isdigit(value[1])){       
                                     /* Deal with negative numbers. Skips the minus and writes in the double
                                         as a positive value. Multiply it by -1 to make it negative again.
-                                        Best way I think of at the moment...*/
+                                        Best way I think of at the moment...
+                                     Also, operators are not checked for. Assume user only uses an operator when there
+                                     are >= two elements on the stack*/
             char * temp;
             temp = &value[0];
             push(myStack,(atof((temp + 1)) * -1));
@@ -64,6 +67,9 @@ int main(){
                   }else{
                      printf("Division by 0. Ignoring instruction\n");
                   }
+                  break;
+               case 'f':
+                  flush(myStack);
                   break;
                default:
                   printf("Error: unknow operator %c\n", value);
