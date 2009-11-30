@@ -1,7 +1,14 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include "bitset.h"
 
 int main(){
 
-  printf("%d\n",!((14 % 8) == 0));
+   struct bitset * mybitset;
+   mybitset = bitset_new(8); //Make pointer from int without cast. What?
+   printf("%s\n",print_set(mybitset));
+   return 0;
     
 }
+
+
