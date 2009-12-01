@@ -15,20 +15,31 @@ struct bitset * bitset_new(int size){
 
 int bitset_lookup(struct bitset * this, int item){
    if(item >= 0){
-      return(this->bits[0] & (1<<item));
+     if(this->bits[0] & (1<<item)){
+          return 1;
+         }else{
+           return 0;
+         }
    }else{
       return -1;
    }
 }
 
 int bitset_add(struct bitset * this, int item){
-  if(item >= 0)
-    this->bits[0] | (1<<item);
-    printf("Set\n");
+  if(item >= 0){
+    int index = set_byte(item);
+    item = set_bit(item,index);
+    this->bits[index] |= (1<<item);
     return 1;
   }else{
     return 0;
   }
 }
 
-   
+int set_byte(int item){
+  return item / 8;
+}
+
+int set_bit(int item, int index){
+  return (item - (8*index));
+}
