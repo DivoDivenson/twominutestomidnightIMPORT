@@ -1,6 +1,7 @@
 struct bitset{
   unsigned char * bits;
   int size;
+  int bit_size;
 };
 
 
@@ -22,10 +23,10 @@ int bitset_add(struct bitset * this,int item);
 
 /*remove an item with number 'item' from the set
 (returns 0 if item is out of bounds, 1 otherwise)*/
-// int bitset_remove(struct bitset * this, int item);
+int bitset_remove(struct bitset * this, int item);
 
-/*place the union of src1 and src2 into dest*/
-//void bitset_union(struct bitset * dest, struct bitset * src1,struct bitset * src2);
+/*Return the union of the two input sets*/
+struct bitset * mk_union(struct bitset * one, struct bitset * two);
 
 /*place the intersection of src1 and src2 into dest*/
 //void bitset_intersect(struct bitset * dest, struct bitset * src1,struct bitset * src2);
