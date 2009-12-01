@@ -13,28 +13,22 @@ struct bitset * bitset_new(int size){
 
 }
 
-/*int bitset_lookup(struct bitset * this, int item){
+int bitset_lookup(struct bitset * this, int item){
    if(item >= 0){
-      return(this->bits & (1<<item));
+      return(this->bits[0] & (1<<item));
+   }else{
+      return -1;
    }
-}*/
-
-char print_set(struct bitset * this){
-
-   //Copy the bitset so not to effect it
-   struct bitset * tempset;
-   tempset = bitset_new(this->size);
-   tempset->size = this->size;
-   tempset->bits = this->bits;
-
-   //Create a string to store representation of bitset
-   char result[100];
-   
-   
-
-   sprintf(result,"%c",'\0');
-
-   return * result;
-
- 
 }
+
+int bitset_add(struct bitset * this, int item){
+  if(item >= 0)
+    this->bits[0] | (1<<item);
+    printf("Set\n");
+    return 1;
+  }else{
+    return 0;
+  }
+}
+
+   
