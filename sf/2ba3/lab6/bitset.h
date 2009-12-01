@@ -6,12 +6,11 @@ struct bitset{
 
 
 /*create a new, empty bit vector set of 'size' items*/
-struct bitset * biset_new(int size);
+struct bitset *bitset_new(int size);
 
 /*check to see if an item is in the set
 returns 1 if in the set, 0 if not, and -1 if 'item' is out of bounds*/
 int bitset_lookup(struct bitset * this, int item);
-
 /*Print the entire bitset. Mainly for debugging*/
 //char print_set(struct bitset * this);
 
@@ -19,6 +18,7 @@ int bitset_lookup(struct bitset * this, int item);
 (returns 0 if item is out of bounds, 1 otherwise)
 has no effect if the item is already in the set*/
 //int bitset_add(struct bitset * this, int item);
+int bitset_add(struct bitset * this,int item);
 
 /*remove an item with number 'item' from the set
 (returns 0 if item is out of bounds, 1 otherwise)*/
