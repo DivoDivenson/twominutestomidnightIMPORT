@@ -30,6 +30,7 @@ struct bitset * mk_union(struct bitset * one, struct bitset * two);
 
 /*place the intersection of src1 and src2 into dest*/
 //void bitset_intersect(struct bitset * dest, struct bitset * src1,struct bitset * src2);
+struct bitset * intersect(struct bitset * one, struct bitset * two);
 
 /*Returns a string representation of the set*/
 char * print_set(struct bitset * this);
