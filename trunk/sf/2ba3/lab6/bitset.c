@@ -69,13 +69,6 @@ struct bitset * mk_union(struct bitset * one, struct bitset * two){
   
   int index=0;
   int small_set = 0; //Container for bitset_lookup(small) to save calling the method twice
-  /*{ //Union of two sets
-     small_set = bitset_lookup(small,index);
-     if(small_set || bitset_lookup(big,index)){
-        bitset_add(result,index);
-     }
-     index++;     
-  }while(small_set != -1);*/
 
   while(small_set = (bitset_lookup(small,index)) != -1){
      if(small_set || bitset_lookup(big,index)){
@@ -90,10 +83,23 @@ struct bitset * mk_union(struct bitset * one, struct bitset * two){
      if(bitset_lookup(big,index)){
         bitset_add(result,index);         
      }
+     index++;
   }
   
   return result;
       
+}
+
+char * print_set(struct bitset * this){
+  char * result;
+  result = malloc(this->size);
+  int temp;
+  int index = this->bit_size;
+  while(temp = (bitset_lookup(this,index)) != -1){
+    sscanf(result,"%s %d",result,temp);
+    index--;
+    printf("hello\n");
+  }
 }
 
 int outOfrange(struct bitset * this, int item){
