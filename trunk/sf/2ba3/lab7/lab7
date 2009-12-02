@@ -1,0 +1,36 @@
+CS2014 Lab 7 : Spam detection
+
+Thursday 3rd January 2009
+
+One way of detecting spam email is to search the text of the email for
+certain words. One problem with this approach is that spammers
+sometimes rewrite words so that they are no longer correctly spelt,
+but are still recognisable to readers. One way to do this is to
+replace individual letters in the word with other characters. For
+example, the letter 'S' might be replace by '5', the letter 'O' might
+be replace by '0' or the leter 's' might be replaced by '$'. The goal
+of this project is to write a program that matches strings even if
+some of the characters have been mutated in ths way.
+
+Write a C function that has the following prototype: 
+
+int spam_search(char word[], int max_length, char text[], char *
+		mutations[]) 
+
+You should search for occurences of the string 'word'
+(which should not be longer than 'max_length) in the string
+'text'. The array of strings 'mutations' is an array containing 256
+strings --- one string for each character in the character set. Each
+of the strings in 'mutations' contains the list of characters that the
+character with the corresonding ASCII code can be mutated to. So, for
+example, mutations['S'] might contain the string "s$5". Write a small
+C program to show your your function in action.
+
+This lab will be marked, and will count towards your end of year
+mark. You should submit a printout of your work for both labs to the
+Computer Science front office by 4pm on Wednesday 10th December
+2009. To be marked, you must demonstrate and answer questions on your
+project at your regular lab session on Thursday 15th January. You must
+demonstrate the same code that you submit. All work should be your
+own.
+
