@@ -17,23 +17,25 @@
 }*/
 
 int read_in(char *result[], int maxline, char *input){
-   int noLines,length;
+   //int noLines = 0
+   int length;
    char * p;
    char line[MAXLEN];
+   int x = 0;   //No lines to return, noLines stopped working
         
    FILE * file;
    file = fopen(input, "r"); //Assume file is there
-   noLines = 0;
 
    while(fgets(line, maxline, file) != NULL){
       length = strlen(line);
       line[length-1] = '\0';
       p = malloc(length); //Turns out this bit is VERY important
       strcpy(p,line);
-      result[noLines++] = p;
+      result[x] = p;
+      x++;
     }
    fclose(file);
-   return noLines;
+   return x;
 }
 
 //Return 1 if the text is spam, 0 if not//
@@ -51,41 +53,16 @@ int spam_search(char word[], int max_length, char text[], char *mutations[]){
       }
    }
    printf("%s\n",temp);
-
-   /* Now search the clean "text" for "word"*/
-   i = 0;
-   int j = 0;
-  
-   while(temp[j] != '\0'  && word[i] != '\0'){//!isspace(word[i])){
-      if(temp[j] == word[i]){
-         i++;
-         j++;
-//         printf("%d %d\n",i,j);
-      }else{
-         i = 0;
-         /*for(j; text[j] != ' ' || text[j] != '\0'; j++){  //Skip the spaces to the next word
-            ;
-            }*/
-         j++;
-      }
-   }//End while
-
-   printf("%c| %c\n",temp[j], word[i]);
-   if(word[i] == '\0'){
-      return 1;
-   }else{
-      return 0;
-   }
-
    
 }
 
 int main(){
   
-  char * mutations[254];
+  char * mutations[256];
   int x;
   read_in(mutations,4,"mutations.txt");
   char text[] = "w0rd th3re\0";
-  printf("%d\n",spam_search("word\0",1,text,mutations));
+
+  spam_search("word\0",1,text,mutations);
   return 0;
 }
