@@ -3,18 +3,6 @@
 #include <string.h>
 #define MAXLEN 2
 
-/*char * import_mut(){ /Read in mutations file, return it in character array.
-  FILE *fp;
-  fp = fopen("mutations.txt","r");
-  char *result[257];
-  int i;
-  for(i=0; i <= 256; i++){
-    result[i] = malloc(1);
-    fscanf(fp,"%s\n",result[i]);
-    printf("%s",result);
-  }
-
-}*/
 
 int read_in(char *result[], int maxline, char *input){
    //int noLines = 0
@@ -36,6 +24,8 @@ int read_in(char *result[], int maxline, char *input){
     }
    fclose(file);
    return x;
+
+
 }
 
 //Return 1 if the text is spam, 0 if not//
@@ -47,13 +37,21 @@ int spam_search(char word[], int max_length, char text[], char *mutations[]){
    int i;
    /*First, go through text[] swapping out any mutated characters*/
    for(i = 0; temp[i]!='\0'; i++){
-      printf("%c\n",mutations[temp[i]+1][0]);  //text[i]+1, +1 to account for array starting at 0
+      //printf("%c\n",mutations[temp[i]+1][0]);  //text[i]+1, +1 to account for array starting at 0
       if(mutations[text[i]+1][1] != '\0'){
          temp[i] = mutations[temp[i]+1][1];
       }
    }
-   printf("%s\n",temp);
+   //printf("%s\n",temp); //Demo working function
    
+   char *token; 
+   token = strtok(temp," ");
+   do{
+    if(strcmp(token,word)==0){
+      return 1;
+    }
+   }while((token = strtok(NULL," ")) != NULL);
+   return 0;
 }
 
 int main(){
@@ -61,8 +59,12 @@ int main(){
   char * mutations[256];
   int x;
   read_in(mutations,4,"mutations.txt");
-  char text[] = "w0rd th3re\0";
+  char text[] = "w0rd $ir and stuff\0";
 
-  spam_search("word\0",1,text,mutations);
+  if(spam_search("word",1,text,mutations)){
+    printf("Spam\n");
+  }else{
+    printf("Not spam\n");
+  }
   return 0;
 }
