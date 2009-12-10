@@ -1,0 +1,46 @@
+CS2014 Lab 8: Linked List Sets
+Thursday 10th December 2009
+
+Write an abstract data type (ADT) to represent sets of integer items
+using linked lists. Note that the purpose of this lab is to learn to
+write (and especially debug) linked lists, so you should write the
+linked list code yourself.
+
+Your ADT, called listset should support the following methods:
+/* create a new, empty linked list set */
+struct listset * listset_new();
+
+/* check to see if an item is in the set
+   returns 1 if in the set, 0 if not */
+int listset_lookup(struct listset * this, int item);
+
+/* add an item, with number 'item' to the set
+   has no effect if the item is already in the set */
+void listset_add(struct listset * this, int item);
+
+/* remove an item with number 'item' from the set */
+void listset_remove(struct listset * this, int item);
+
+/* place the union of src1 and src2 into dest */
+void listset_union(struct listset * dest, struct listset * src1,
+		  struct listset * src2);
+
+/* place the intersection of src1 and src2 into dest */
+void listset_intersect(struct listset * dest, struct listset * src1,
+                  struct listset * src2);
+
+Once you have constructed your ADT, write a small test program that
+reads in two lines of text from the user. You program should write out
+(1) the set of characters appearing in the first line; (2) the set of
+characters appearing in the second line; (3) the union of sets (1) and
+(2); (4) the interssection of sets (1) and (2).
+
+Note that you must create and use a listset ADT in your program if you
+want the marks for this lab.
+
+This lab will be marked, and will count towards your end of year mark.
+You should submit a printout of your project work to the Computer
+Science front office by 4pm on Wednesday 16th December. To be marked,
+you must demonstrate and answer questions on your project at your
+regular lab session on Thursday 17th December. You must demonstrate the
+same code that you submit. All work should be your own.
