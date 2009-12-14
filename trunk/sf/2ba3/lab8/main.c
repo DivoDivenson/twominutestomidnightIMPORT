@@ -14,11 +14,15 @@ int main(){
    printlist(new);
    listset_remove(new,77);
    //listset_remove(new,13);
-   printf("New\n");
+   printf("Demo remove\n");
    printlist(new);
+
    struct listset * two = listset_new();
    listset_add(two,12);
+   listset_add(two,14);
    printf("Union\n");
+   printlist(set_union(new,two));
+   printf("Intersect\n");
    printlist(set_intersect(new,two));
    return 0;
 }
