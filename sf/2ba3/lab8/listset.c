@@ -22,24 +22,21 @@ void listset_add(struct listset *this, int item){
 }
 
 void printlist(struct listset * this){
-   
-   struct listelement * temp;
-   while((temp = this->current)){
-      printf("%d\n",temp->value);
-      this->current = temp->next;
+   while((this->current)){
+      printf("%d\n",this->current->value);
+      this->current = this->current->next;
    }
    this->current = this->head;  /*Reset the listset. Point current 
                                   back to the "top"(head)*/
 }
 
 int listset_lookup(struct listset * this,int item){
-   struct listelement * temp;
    int result;
-   while((temp = this->current)){
-      if(temp->value == item){
+   while((this->current)){
+      if(this->current->value == item){
          result = 1;
       }
-      this->current = temp->next;
+      this->current = this->current->next;
    }
    this->current = this->head;  //Reset the list set
    return result;
@@ -86,7 +83,6 @@ struct listset * set_union(struct listset * one, struct listset * two){
 struct listset * set_intersect(struct listset * one, struct listset * two){
   struct listset * result = listset_new();
   struct listset * n;
-  n = one->current; 
   while(one->current && two->current){ 
       if(listset_lookup(one,two->current->value)){
          listset_add(result,two->current->value);
