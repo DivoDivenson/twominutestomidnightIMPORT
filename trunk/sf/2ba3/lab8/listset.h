@@ -10,12 +10,13 @@ struct listelement{
    struct listelement * next;
 };
 
-
+/* Intialize the header */
 struct listset * listset_new();
 
-/* As above, inserts new element to top of list */
+/* Creats new element, inserts it to top of list */
 void listset_add(struct listset * this, int item);
 
+/*Parses list while printing out values */
 void printlist(struct listset * this);
 
 /* 1 if there, 0 if not*/
