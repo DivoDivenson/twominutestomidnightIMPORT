@@ -5,8 +5,7 @@
 struct listset * listset_new(){
    struct listset * result;
    result = malloc(sizeof(struct listelement));
-   result->head = NULL;
-   
+   //result->head = NULL;
    return result;
    
 }
@@ -19,10 +18,11 @@ void listset_add(struct listset *this, int item){
    new->next = this->head;
    this->current = new;
    this->head = this->current;
+
 }
 
 void printlist(struct listset * this){
-   while((this->current)){
+   while((this->current)){                   /*This parse code used everywhere*/
       printf("%d\n",this->current->value);
       this->current = this->current->next;
    }
@@ -43,6 +43,9 @@ int listset_lookup(struct listset * this,int item){
 }
 
 void listset_remove(struct listset * this, int item){ 
+  /* Parse the list, but keep a pointer to the previous element.
+     When the element to be removed is found, the element pointing
+     to it (prev) is linked to the element pointed to by the one to be removed*/
    struct listelement * prev = this->head;
    while(this->current){
       if(this->current->value == item){
