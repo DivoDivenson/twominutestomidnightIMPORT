@@ -2,7 +2,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+struct listset * read_in(){
+  struct listset * result = listset_new();
+  printf("Enter: ");
+  char temp[100];
+  fgets(temp,100,stdin);
+  int i;
+  for(i = 0;temp[i] != '\0';i++){
+    listset_add(result,temp[i]);
+    printf("%d\n",temp[i]);
+  }
 
+}
 
 int main(){
 
@@ -28,5 +39,11 @@ int main(){
    printlist(set_intersect(new,two));
 
    /*End demo*/
+   struct listset * input1 = read_in();
+   struct listset * input2 = read_in();
+   printf("First Line:\n");
+   printlist(input1);
+   printf("Second Line:\n");
+   printlist(input2);
    return 0;
 }

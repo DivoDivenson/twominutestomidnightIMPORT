@@ -5,7 +5,7 @@
 struct listset * listset_new(){
    struct listset * result;
    result = malloc(sizeof(struct listelement));
-   //result->head = NULL;
+   result->head = NULL;
    return result;
    
 }
@@ -22,7 +22,7 @@ void listset_add(struct listset *this, int item){
 }
 
 void printlist(struct listset * this){
-   while((this->current)){                   /*This parse code used everywhere*/
+   while((this->current) != NULL){                   /*This parse code used everywhere*/
       printf("%d\n",this->current->value);
       this->current = this->current->next;
    }
