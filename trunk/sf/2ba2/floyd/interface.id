@@ -93,6 +93,43 @@ class-name: MINIMAL_RANDOM_NUMBER_GENERATOR
 assertion-level: all
 parent-count: 1 inherit: 90
 #
+|lib:abilities/
+33 "STORABLE" l
+class-path: "/usr/local/SmartEiffel/lib/abilities/storable.e"
+class-name: STORABLE
+assertion-level: all
+parent-count: 1 insert: 13 
+#
+28 "RECYCLABLE" l
+class-path: "/usr/local/SmartEiffel/lib/abilities/recyclable.e"
+class-name: RECYCLABLE
+assertion-level: all
+parent-count: 1 insert: 13 
+#
+35 "HASHABLE" l
+class-path: "/usr/local/SmartEiffel/lib/abilities/hashable.e"
+class-name: HASHABLE
+assertion-level: all
+parent-count: 1 insert: 13 
+#
+32 "TRAVERSABLE" l
+class-path: "/usr/local/SmartEiffel/lib/abilities/traversable.e"
+class-name: TRAVERSABLE
+assertion-level: all
+parent-count: 1 insert: 13 
+#
+99 "DISPOSABLE" l
+class-path: "/usr/local/SmartEiffel/lib/abilities/disposable.e"
+class-name: DISPOSABLE
+assertion-level: all
+parent-count: 1 insert: 13 
+#
+34 "COMPARABLE" l
+class-path: "/usr/local/SmartEiffel/lib/abilities/comparable.e"
+class-name: COMPARABLE
+assertion-level: all
+parent-count: 1 insert: 13 
+#
 |lib:io/loadpath.se:terminal/
 58 "TEXT_FILE_READ" l
 class-path: "/usr/local/SmartEiffel/lib/io/terminal/text_file_read.e"
@@ -148,42 +185,28 @@ run-time-set-count: 1
 run-time-set:
 	STD_INPUT_OUTPUT (40)
 #
-|lib:abilities/
-33 "STORABLE" l
-class-path: "/usr/local/SmartEiffel/lib/abilities/storable.e"
-class-name: STORABLE
-assertion-level: all
-parent-count: 1 insert: 13 
+|lib:storage/loadpath.se:collection/
+132 "ARRAY[ARRAY[INTEGER_32]]" l
 #
-28 "RECYCLABLE" l
-class-path: "/usr/local/SmartEiffel/lib/abilities/recyclable.e"
-class-name: RECYCLABLE
+82 "FAST_ARRAY" l
+class-path: "/usr/local/SmartEiffel/lib/storage/collection/fast_array.e"
+class-name: FAST_ARRAY
 assertion-level: all
-parent-count: 1 insert: 13 
+parent-count: 3 inherit: 64 insert: 69 68 
 #
-35 "HASHABLE" l
-class-path: "/usr/local/SmartEiffel/lib/abilities/hashable.e"
-class-name: HASHABLE
+108 "RING_ARRAY" l
+class-path: "/usr/local/SmartEiffel/lib/storage/collection/ring_array.e"
+class-name: RING_ARRAY
 assertion-level: all
-parent-count: 1 insert: 13 
+parent-count: 3 inherit: 64 insert: 69 68 
 #
-32 "TRAVERSABLE" l
-class-path: "/usr/local/SmartEiffel/lib/abilities/traversable.e"
-class-name: TRAVERSABLE
-assertion-level: all
-parent-count: 1 insert: 13 
+128 "ARRAY[INTEGER_32]" l
 #
-99 "DISPOSABLE" l
-class-path: "/usr/local/SmartEiffel/lib/abilities/disposable.e"
-class-name: DISPOSABLE
+67 "ARRAY" l
+class-path: "/usr/local/SmartEiffel/lib/storage/collection/array.e"
+class-name: ARRAY
 assertion-level: all
-parent-count: 1 insert: 13 
-#
-34 "COMPARABLE" l
-class-path: "/usr/local/SmartEiffel/lib/abilities/comparable.e"
-class-name: COMPARABLE
-assertion-level: all
-parent-count: 1 insert: 13 
+parent-count: 3 inherit: 64 insert: 69 68 
 #
 |lib:numeric/loadpath.se:internal/
 77 "INTEGER_GENERAL_NUMBER" l
@@ -215,29 +238,6 @@ class-path: "/usr/local/SmartEiffel/lib/numeric/internal/big_integer_number.e"
 class-name: BIG_INTEGER_NUMBER
 assertion-level: all
 parent-count: 1 inherit: 77
-#
-|lib:storage/loadpath.se:collection/
-132 "ARRAY[ARRAY[INTEGER_32]]" l
-#
-82 "FAST_ARRAY" l
-class-path: "/usr/local/SmartEiffel/lib/storage/collection/fast_array.e"
-class-name: FAST_ARRAY
-assertion-level: all
-parent-count: 3 inherit: 64 insert: 69 68 
-#
-108 "RING_ARRAY" l
-class-path: "/usr/local/SmartEiffel/lib/storage/collection/ring_array.e"
-class-name: RING_ARRAY
-assertion-level: all
-parent-count: 3 inherit: 64 insert: 69 68 
-#
-128 "ARRAY[INTEGER_32]" l
-#
-67 "ARRAY" l
-class-path: "/usr/local/SmartEiffel/lib/storage/collection/array.e"
-class-name: ARRAY
-assertion-level: all
-parent-count: 3 inherit: 64 insert: 69 68 
 #
 |lib:kernel/
 14 "TUPLE" l
@@ -296,17 +296,17 @@ class-name: TUPLE 2
 assertion-level: all
 parent-count: 1 inherit: 15
 #
-17 "TUPLE 3" l
-class-path: "/usr/local/SmartEiffel/lib/kernel/tuple.e"
-class-name: TUPLE 3
-assertion-level: all
-parent-count: 1 inherit: 16
-#
 13 "ANY" l
 class-path: "/usr/local/SmartEiffel/lib/kernel/any.e"
 class-name: ANY
 assertion-level: all
 parent-count: 0
+#
+17 "TUPLE 3" l
+class-path: "/usr/local/SmartEiffel/lib/kernel/tuple.e"
+class-name: TUPLE 3
+assertion-level: all
+parent-count: 1 inherit: 16
 #
 18 "TUPLE 4" l
 class-path: "/usr/local/SmartEiffel/lib/kernel/tuple.e"
@@ -356,23 +356,30 @@ class-name: SAFE_EQUAL
 assertion-level: all
 parent-count: 1 insert: 13 
 #
-106 "PROCEDURE" l
-class-path: "/usr/local/SmartEiffel/lib/kernel/procedure.e"
-class-name: PROCEDURE
-assertion-level: all
-parent-count: 1 inherit: 66
-#
 24 "TUPLE 10" l
 class-path: "/usr/local/SmartEiffel/lib/kernel/tuple.e"
 class-name: TUPLE 10
 assertion-level: all
 parent-count: 1 inherit: 23
 #
+106 "PROCEDURE" l
+class-path: "/usr/local/SmartEiffel/lib/kernel/procedure.e"
+class-name: PROCEDURE
+assertion-level: all
+parent-count: 1 inherit: 66
+#
 131 "SAFE_EQUAL[INTEGER_32]" l
 #
 101 "MEMORY" l
 class-path: "/usr/local/SmartEiffel/lib/kernel/memory.e"
 class-name: MEMORY
+assertion-level: all
+parent-count: 1 insert: 13 
+#
+|lib:iterator/loadpath.se:
+63 "ITERATOR" l
+class-path: "/usr/local/SmartEiffel/lib/iterator/iterator.e"
+class-name: ITERATOR
 assertion-level: all
 parent-count: 1 insert: 13 
 #
@@ -388,13 +395,6 @@ class-path: "/usr/local/SmartEiffel/lib/net/socket_input_output_stream.e"
 class-name: SOCKET_INPUT_OUTPUT_STREAM
 assertion-level: all
 parent-count: 3 inherit: 41 insert: 95 31 
-#
-|lib:iterator/loadpath.se:
-63 "ITERATOR" l
-class-path: "/usr/local/SmartEiffel/lib/iterator/iterator.e"
-class-name: ITERATOR
-assertion-level: all
-parent-count: 1 insert: 13 
 #
 |lib:numeric/loadpath.se:
 70 "NUMBER_TOOLS" l
@@ -617,17 +617,17 @@ assertion-level: all
 parent-count: 2 insert: 35 34 
 #
 |lib:kernel/internal/
-87 "NATIVE_ARRAY_INTERNALS" l
-class-path: "/usr/local/SmartEiffel/lib/kernel/internal/native_array_internals.e"
-class-name: NATIVE_ARRAY_INTERNALS
-assertion-level: all
-parent-count: 1 inherit: 45
-#
 68 "NATIVE_ARRAY_COLLECTOR" l
 class-path: "/usr/local/SmartEiffel/lib/kernel/internal/native_array_collector.e"
 class-name: NATIVE_ARRAY_COLLECTOR
 assertion-level: all
 parent-count: 1 insert: 13 
+#
+87 "NATIVE_ARRAY_INTERNALS" l
+class-path: "/usr/local/SmartEiffel/lib/kernel/internal/native_array_internals.e"
+class-name: NATIVE_ARRAY_INTERNALS
+assertion-level: all
+parent-count: 1 inherit: 45
 #
 74 "INTERNALS_HANDLER" l
 class-path: "/usr/local/SmartEiffel/lib/kernel/internal/internals_handler.e"
@@ -702,17 +702,17 @@ ref-status: dead
 destination-graph-nodes: none
 run-time-set-count: 0
 #
-50 "FILTER" l
-class-path: "/usr/local/SmartEiffel/lib/io/filter.e"
-class-name: FILTER
-assertion-level: all
-parent-count: 1 insert: 13 
-#
 38 "TERMINAL_OUTPUT_STREAM" l
 class-path: "/usr/local/SmartEiffel/lib/io/terminal_output_stream.e"
 class-name: TERMINAL_OUTPUT_STREAM
 assertion-level: all
 parent-count: 1 inherit: 26
+#
+50 "FILTER" l
+class-path: "/usr/local/SmartEiffel/lib/io/filter.e"
+class-name: FILTER
+assertion-level: all
+parent-count: 1 insert: 13 
 #
 72 "FILTER_INPUT_STREAM" l
 class-path: "/usr/local/SmartEiffel/lib/io/filter_input_stream.e"
@@ -792,18 +792,14 @@ class-name: PATH_JOINER
 assertion-level: all
 parent-count: 1 insert: 13 
 #
-|lib:storage/loadpath.se:
-135 "COLLECTION2" l
-class-path: "/usr/local/SmartEiffel/lib/storage/collection2.e"
-class-name: COLLECTION2
-assertion-level: all
-parent-count: 1 insert: 52 
+|lib:storage/loadpath.se:collection2/
+136 "ARRAY2[INTEGER_32]" l
 #
-64 "COLLECTION" l
-class-path: "/usr/local/SmartEiffel/lib/storage/collection.e"
-class-name: COLLECTION
+134 "ARRAY2" l
+class-path: "/usr/local/SmartEiffel/lib/storage/collection2/array2.e"
+class-name: ARRAY2
 assertion-level: all
-parent-count: 3 inherit: 13 33 32
+parent-count: 2 inherit: 135 insert: 68 
 #
 |Local Cluster
 25 "INTERFACE" l
@@ -842,14 +838,18 @@ run-time-set-count: 1
 run-time-set:
 	BOARD (49)
 #
-|lib:storage/loadpath.se:collection2/
-136 "ARRAY2[INTEGER_32]" l
-#
-134 "ARRAY2" l
-class-path: "/usr/local/SmartEiffel/lib/storage/collection2/array2.e"
-class-name: ARRAY2
+|lib:storage/loadpath.se:
+135 "COLLECTION2" l
+class-path: "/usr/local/SmartEiffel/lib/storage/collection2.e"
+class-name: COLLECTION2
 assertion-level: all
-parent-count: 2 inherit: 135 insert: 68 
+parent-count: 1 insert: 52 
+#
+64 "COLLECTION" l
+class-path: "/usr/local/SmartEiffel/lib/storage/collection.e"
+class-name: COLLECTION
+assertion-level: all
+parent-count: 3 inherit: 13 33 32
 #
 |lib:storage/loadpath.se:low_level/
 133 "NATIVE_ARRAY[ARRAY[INTEGER_32]]" l
