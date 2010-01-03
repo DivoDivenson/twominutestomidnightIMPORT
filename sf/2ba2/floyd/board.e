@@ -2,34 +2,36 @@ class BOARD
 creation
 	make
 feature
-  board_array : ARRAY2[INTEGER]
+  board_array : ARRAY2[INTEGER] --2D array, the actual 'board'
   sz,size_row : INTEGER --Number of elements total, number of elements per row
   blank_row,blank_col : INTEGER --Grid cords of the blank tile
 
 	make (size : INTEGER) is
 		local
-			rand_perm : ARRAY[INTEGER]
+			rand_perm : ARRAY[INTEGER] --Result from FLOYD_RAND class
       rand : FLOYD_RAND
       i,rowi,coli :INTEGER
     do
-      size_row := size
+      size_row := size  -- User enters N
       sz := size * size -- User enters N, board has N*N spaces
       !!rand.make;
       
       from
       rand_perm := rand.floyd_perm(sz-1,sz-1) -- -1 to account for blank space
       until 
-        (inversions(rand_perm,sz-1,sz-1) \\ 2) = 0
+        (inversions(rand_perm,sz-1,sz-1) \\ 2) = 0 --Keep generating a board until
+                                                   --a solvable one is made
       loop
       rand_perm := rand.floyd_perm(sz-1,sz-1)
       end
 
       !!board_array.make(1,size,1,size)
 
-      blank_row := size --Blank tile will be set to lower left corner
+      blank_row := size --Position of the blank tile. First set to lower left corner
       blank_col := size --These vars are manually updated...
 
-        from
+        from  --Parse through the "board" and copy in the random numbers from FLOYD_RAND
+              --Basic 2D array parse code used throught program
           i := rand_perm.lower
           rowi := 1
           coli := 1
@@ -51,13 +53,16 @@ feature
 
 		end -- make
   
-  print_out() is  --Print the board, shield client from "print_board" arguments
+  print_out is  --Print the board, shield client from "print_board" arguments
     do
       print_board(board_array,size_row)
     end
 
 
-  won() : BOOLEAN is
+  won : BOOLEAN is  --Return true if user has won
+                    --Simply counts from 1 up through the board, comparing
+                    --each array position with the count. If the array elements are in 
+                    --sequence the game has been one
     local
       i,rowi,coli : INTEGER
     do
@@ -66,9 +71,10 @@ feature
           rowi := 1
           coli := 1
         until
-          i /= board_array.item(rowi, coli)
+          i /= board_array.item(rowi, coli) --Until the count does not match the 
+                                            --corisponding array value
         loop
-        if (i \\ size_row) = 0 then
+        if (i \\ size_row) = 0 then 
           coli := coli + 1
           rowi := 1
           i := i + 1
@@ -79,7 +85,7 @@ feature
  
       end --Loop end
  
-     Result := i = sz
+     Result := i = sz --If the count = board size, assume game has been won
     end -- Won
 
     --Move methods
@@ -122,13 +128,6 @@ move_right is
         board_array.swap(blank_row,blank_col,blank_row +1,blank_col)
         blank_row := blank_row +1
       end --if
-  end
-
-print_blank is 
-  do
-  io.put_string("%N row and col %N")
-  io.put_integer(blank_row)
-  io.put_integer(blank_col)
   end
 
 

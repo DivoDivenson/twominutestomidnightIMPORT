@@ -3,7 +3,6 @@ class
 
 creation
     make
---PROBLEM WITH INPUT, NEED SOME KIND OF SCREEN FLUSH
 feature
     make is
        local
@@ -22,7 +21,7 @@ feature
             move := 0 
             quit := False
            until
-            board.won() or quit
+            board.won or quit
            loop
             move := move + 1
             board.print_out
@@ -32,6 +31,10 @@ feature
             c := io.last_character
             io.put_new_line
             --Need someway to clear the screen
+            --For some reason this loop executes, bypasses user input
+            --then executes again and waits for input the second time round
+            --Suspect there are characters still bufferd. Unable to find 'clear'
+            --or something like it in documentation
             if c = 'k' then
               board.move_up
             elseif c = 'j' then
@@ -43,12 +46,13 @@ feature
             elseif c = 'q' then
               quit := True
               move := move - 1
+            else --As per comment above, problem with loop. Fix counter to compensate
+             move := move -1 
             end
-            io.put_integer(move)
            end --end loop. Why is it looping twice....
         board.print_out
---        io.put_string("Number of moves: ")
---        io.put_integer(move)
+        io.put_string("Number of moves: ")
+        io.put_integer(move)
         end
 end
            
