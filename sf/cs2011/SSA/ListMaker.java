@@ -3,15 +3,14 @@ import java.util.Scanner;
 class ListMaker{
 
    static Scanner sc = new Scanner(System.in);
-   public static void main(String Args[]){
-     List shoppinglist = new Singleperson(); //Init here to avoid errors
-     
-    
-     shoppinglist = setProfile(shoppinglist);
-     System.out.printf("\n%s selected\n", shoppinglist); 
-     Item finalList = getShoppingList(shoppinglist);
-     System.out.printf("\n%s\n",finalList); //Calls the Items toString method and prints the result
 
+   public static void main(String Args[]){
+     List shoppinglist = new Singleperson();            //Init here to stop the compiler moaning.
+     shoppinglist = setProfile(shoppinglist);           //Set shopper profile (Single, Married, Retired)
+     System.out.printf("\n%s selected\n", shoppinglist);//Return string representation of profile to user
+     Item finalList = getShoppingList(shoppinglist);    //Set circumstances. This returns an array of strings
+                                                        //in a container class "Item"
+     System.out.printf("\n%s\n",finalList);             //Calls the Items toString method and prints the result
    }
 
 
@@ -26,8 +25,9 @@ class ListMaker{
             System.out.printf("Please select profile type:\nRetired(1)\nSingle(2)\nMarried(3)\nChoose :");
             selection = sc.nextInt();
             valid = true; //Assume true for the moment
-        }catch (InputMismatchException InputMismatchException){
+        }catch (InputMismatchException inputMismatchException){
             selection = 0; //Stop the program from crashing, but keep "invalid" input
+            //System.err.printf("\nException; %s\n", inputMismatchException); Better to hide mess from user?
             sc.nextLine(); //Discard input so user can try again
                            //Using the switch to handle invalid input
         }
@@ -44,7 +44,7 @@ class ListMaker{
      return list;
    }
 
-   //Returns the given lists Item(s)
+   //Returns the given lists Item(s), More or less the same as setProfile
    public static Item getShoppingList(List list){
       int selection;
       Item result = list.getWeekday();  //Init here to get the compiler to shut up
