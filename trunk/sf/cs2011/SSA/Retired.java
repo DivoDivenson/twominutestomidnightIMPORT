@@ -1,3 +1,4 @@
+//Not much to see here
 public class Retired extends List{
    
    public Item getWeekday(){

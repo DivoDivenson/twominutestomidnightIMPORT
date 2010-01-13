@@ -10,6 +10,8 @@ public class Item{ //Simply stores 5 strings
       items[4] = item4;
    }
 
+   //Main purpose of this class is to provide a quick method get a string representation
+   //of the array or "shopping list"
    public String toString(){
       String result = "Items:\n";
       for(String element : items){
