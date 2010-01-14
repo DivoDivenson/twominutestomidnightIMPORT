@@ -53,13 +53,14 @@ char names[MAXNAMES];
 #define NAMES "return\0if\0else\0while\0do\0int\0char\0getchar\0putchar\0eputchar\0exit"
 #define NAMESSIZE 62
 
-int
+int  //Why use this over fprintf to stderr?
 eputstr(char *s)
 {
     while(*s)
 	eputchar(*s++);
 }
 
+//Put *s to stderr, print 20 chars of problem, exit(1)
 int
 error(char *s)
 {
@@ -77,19 +78,20 @@ error(char *s)
 }
 
 int
-digit(int c)
+digit(int c)  //isdigit()
 {
     return '0' <= c && c <= '9';
 }
 
 int
-letter(int c)
+letter(int c) //isgraph(), more or less
 {
     return 'a' <= c && c <= 'z' || 'A'<=c && c<='Z' || c == '_' || digit(c);
 }
 
+//compare two strings
 int
-eqstr(char *p, char *q)
+eqstr(char *p, char *q) //You know, a import a few headers and all this is done... Must be a good reason
 {
     while(*p) {
 	if (*p++ != *q++)
@@ -98,6 +100,9 @@ eqstr(char *p, char *q)
     return !*q;
 }
 
+
+/*If name is in names (names appears to be basic language keywords) return 0
+  If its not do some other stuff...*/
 int
 lookup(char *name)
 {
@@ -107,7 +112,7 @@ lookup(char *name)
     ns = names;
     i = 0;
     while(i < nsym) {
-	if (eqstr(ns, name)) {
+	   if (eqstr(ns, name)) { //No idea why this check is in a loop
 	    return i;
 	}
 	while(*ns++)
@@ -119,6 +124,7 @@ lookup(char *name)
     return nsym++;
 }
 
+//Assign r (register?) as thechar, get the next char, return r 
 int
 next()
 {
@@ -129,6 +135,7 @@ next()
     return r;
 }
 
+// rr if t==thechar, r if not
 int
 gobble(int t, int rr, int r)
 {
@@ -139,6 +146,7 @@ gobble(int t, int rr, int r)
     return r;
 }
 
+//Use next to read a string into symbol[]
 int
 getstring(int delim)
 {
@@ -156,6 +164,7 @@ getstring(int delim)
     symbol[strsize++] = 0;
 }
 
+//lowk
 int
 instr(char *s, int c)
 {
@@ -166,6 +175,7 @@ instr(char *s, int c)
     return 0;
 }
 
+//Skip comments, convert characters into their int codes, or if and int is found, return the code for integer etc
 int
 getlex()
 {
@@ -238,6 +248,7 @@ getlex()
     error("Bad input");
 }
 
+//if input is token, token = getlex(), return 1
 int 
 istoken(int t)
 {
@@ -247,7 +258,7 @@ istoken(int t)
     }
     return 0;
 }
-
+//If input is not  a token, throw exception
 int
 expect(int t)
 {
@@ -255,7 +266,7 @@ expect(int t)
 	error("syntax error");
     }
 }
-
+//pff
 int
 type()
 {
@@ -263,7 +274,7 @@ type()
     while(istoken(T_MUL))
 	;
 }
-
+//if token is not keyword, erroe, else getlex()
 int
 name()
 {
@@ -275,20 +286,20 @@ name()
     token = getlex();
     return r;
 }
-
+//pff
 int
 emit(int opc)
 {
     code[curloc++] = opc;
 }
-
+//pfffff
 int
 emitat(int a, int c)
 {
     code[a++] = c;
     code[a] = c/256;
 }
-
+//pfffffffffff
 int
 emitop(int rator, int rand)
 {
@@ -321,6 +332,7 @@ pushloop(int puop, int max, int *arr)
 }
 
 /* return 1 if lvalue */
+//no idea
 int
 pushval()
 {
@@ -347,7 +359,7 @@ pushval()
     emitop(pushop, pusharg);
     return lval;
 }
-
+//?
 int
 pderef(int l)
 {
@@ -355,6 +367,8 @@ pderef(int l)
 	emit(C_DEREF);
 }
 
+//I'll never use another global again, make it stop.
+//Please.
 /* returns true if lvalue, else false */
 int
 expr(int needval, int prec)
@@ -470,7 +484,7 @@ pexpr()
     expr(1, P_NONE);
     expect(')');
 }
-
+//havent a dammed clue, constants everywhere
 int
 stmt()
 {

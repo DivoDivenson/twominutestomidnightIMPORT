@@ -16,7 +16,8 @@ int mem[MAXMEM];
 int verbosef;
 
 #define code mem
-#include "dumpcode.c"
+#include "dumpcode.c" //This be the thing that dumps info on each bytecode instruction
+                      //See it work by giving intrp any argument at all
 
 int
 main(int argc, char **argv)
@@ -26,9 +27,12 @@ main(int argc, char **argv)
 
     verbosef = argc > 1;
 
-    codesize = getchar();
+    codesize = getchar();  //Im gonna have a wild guess here and say the first two characters in the input 
+                           //are expected to be the code size
     codesize = codesize + getchar()*256;
     pc = codesize;
+    //eputchar(pc);
+    //printf("%d\n",pc);
     q = mem;
     /* read the code */
     while(pc--)
@@ -46,6 +50,10 @@ main(int argc, char **argv)
 	}
 	oldpc = pc;
 	switch (opc = mem[pc++]) {
+      //The following switch statment distinguishes operatoions and preforms them
+      //each one corrisponding to and integer code in defs.h
+
+      //Also, there is no real way to clean up a giant switch statment is there?
 	  /* unary operators */
 	case C_NOT: mem[sp] = ! mem[sp]; break;
 	case C_NEG: mem[sp] = - mem[sp]; break;
@@ -89,6 +97,7 @@ main(int argc, char **argv)
 		lit = lit+mem[pc++]*256;
 	    } else if (LITMAX < lit)
 		lit = lit + mem[pc++]*LITMUL - 1;
+       //This switch is more to do with program stack n such lark
 	    switch(opc) {
 	    case X_PUSHAA: sp--; mem[sp] = fp+lit; break;
 	    case X_PUSHAL: sp--; mem[sp] = fp-lit-FRAMESIZE-1; break;
