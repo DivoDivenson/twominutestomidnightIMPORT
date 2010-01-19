@@ -1,9 +1,21 @@
+FILE * open_file(char filename[]){
+   FILE * file;
+
+   file = fopen(filename,"w");
+   if(file == NULL){
+     fprintf(stderr,"Error opening file\n");
+     exit(1);
+   }
+   return file;
+}
+
 //Oh good god
 void
-dumpcode(int from, int to)
+dumpcode(int from, int to, char * filename)
 {
     int n, opc, oopc, lit, ofrom;
     char buf[200], *p;
+    //FILE * file = open_file(filename);
 
     while(from < to) {
 	ofrom = from;

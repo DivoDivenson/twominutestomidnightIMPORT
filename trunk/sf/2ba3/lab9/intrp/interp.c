@@ -46,7 +46,7 @@ main(int argc, char **argv)
     while(1) {
 	if (verbosef) {
 	    fprintf(stderr, "%5d %5d(%5d,%5d,%5d) ", fp, sp, mem[sp], mem[sp+1], mem[sp+2]);
-	    dumpcode(pc, pc+1);
+	    dumpcode(pc, pc+1,argv[1]);
 	}
 	oldpc = pc;
 	switch (opc = mem[pc++]) {
