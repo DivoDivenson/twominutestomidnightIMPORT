@@ -25,16 +25,22 @@ int main(){
    printf("%d\n",isEven(mybitset));
    print_set(mybitset);
    //End checking*/
-   
+  
+   int reverse_x = 0,length,bit_index;
    char input[100]; //Assumtion about user input....
    printf("Please enter in string of bits to process: ");
    scanf("%s",&input);
    printf("\n%s\n",input);
-   int x = 0;
-   while(input[x] != NULL){
-      printf("%c\n",input[x]);
-      x++;
+   length = strlen(input);
+   reverse_x = length;
+   while(reverse_x-- > 0){
+      if(input[reverse_x] == '1'){
+         printf("Hello\n");
+      }
    }
+
+   struct bitset * sets[(length / 8) + 1];
+
 
 
    /*This block creates two sets and reads in two strings
