@@ -77,9 +77,9 @@ dumpcode(int from, int to, FILE * file)
 	    while(n--) *p++ = code[from++] ? code[from-1] : '' ;
 	    strcpy(p, "\" */ sp--; mem[sp] = pc; pc = pc + lit;");
 	    break;
-	case C_CALL: sprintf(p, "CALL %d  Leave this for later */", lit); break;
-	case C_ALLOC: sprintf(p, "ALLOC %d */ sp = sp - lit;", lit); break;
-	case C_EXIT: sprintf(p, "EXIT */ return mem[sp];"); break;
+	case C_CALL: sprintf(p, "CALL %d", lit); break;
+	case C_ALLOC: sprintf(p, "ALLOC %d", lit); break;
+	case C_EXIT: sprintf(p, "EXIT"); break;
 	default: sprintf(p, "unknown %d", oopc);
 	}
    //sprintf(p,"*/");

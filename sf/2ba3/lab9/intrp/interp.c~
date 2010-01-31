@@ -7,17 +7,6 @@ eputchar(int c)
     return fputc(c, stderr);
 }
 
-//Setup the start of the finished c code file. Dumpcode fills in the middle,
-//end_file finishes up
-void start_file(FILE * file){
-   fprintf(file,"#include \"defs.h\"\n#define MAXSTACK 10000\n#define MAXMEM (MAXCODE+MAXDATA+MAXSTACK)\n");
-   fprintf(file,"#define code mem\nint main(){\nint mem[MAXMEM];\n");
-   fprintf(file,"int sp, fp, r, opc, lit, pc;\nsp = MAXMEM;\npc =0;\nint oldpc = pc;\nopc = mem[pc++];\n");
-   fprintf(file,"//This is where dumpcode takes over\n");
-
-
-}
-
 #include "defs.h"
 #define MAXSTACK 10000
 #define MAXMEM (MAXCODE+MAXDATA+MAXSTACK)
@@ -53,7 +42,6 @@ main(int argc, char **argv)
     if (verbosef){
       fprintf(stderr, "code size %d\n", codesize);
       file = open_file(argv[1]);
-      start_file(file);
     }
 
     sp = MAXMEM;
