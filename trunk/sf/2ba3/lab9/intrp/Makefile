@@ -14,12 +14,12 @@ parse.oc:	parse.c defs.h
 	$(CC) -E -DSELF parse.c | sed -e '/^#/d' -e '/^$$/d' > parse.oc
 
 test: parse interp parse.oc
-	$(CC) fac.c -o fac
+	$(CC) straight-line-fac.c -o fac
 	./fac > fac.out.cc
-	./parse < fac.c > fac.oo.1
+	./parse < straight-line-fac.c > fac.oo.1
 	./interp < fac.oo.1 > fac.out.1
 	./parse < parse.oc > parse.oo
-	cat parse.oo fac.c | ./interp > fac.oo.2
+	cat parse.oo straight-line-fac.c | ./interp > fac.oo.2
 	./interp < fac.oo.2 > fac.out.2
 	cmp fac.out.cc fac.out.1
 	cmp fac.out.cc fac.out.2
