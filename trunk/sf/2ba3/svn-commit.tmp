@@ -1,0 +1,29 @@
+Blah blah
+--This line, and those below, will be ignored--
+
+R    lab9
+A    lab9/lab10
+A    lab9/clean
+A    lab9/clean/intrp
+A    lab9/clean/intrp/dumpcode.c
+A    lab9/clean/intrp/interp.c
+A    lab9/clean/intrp/fac.out.cc
+AM   lab9/clean/intrp/parse.oo.1
+AM   lab9/clean/intrp/parse.oo
+AM   lab9/clean/intrp/fac
+A    lab9/clean/intrp/parse.c
+A    lab9/clean/intrp/README
+A    lab9/clean/intrp/fac.out.1
+A    lab9/clean/intrp/fac.out.2
+AM   lab9/clean/intrp/interp
+AM   lab9/clean/intrp/oc.zip
+A    lab9/clean/intrp/t
+AM   lab9/clean/intrp/fac.oo.1
+AM   lab9/clean/intrp/fac.oo.2
+A    lab9/clean/intrp/defs.h
+A    lab9/clean/intrp/parse.oc
+AM   lab9/clean/intrp/parse
+A    lab9/clean/intrp/fac.c
+A    lab9/clean/intrp/Makefile
+M    lab9/intrp/dumpcode.c
+M    lab9/intrp/interp.c

@@ -1,0 +1,2188 @@
+%!PS-Adobe-3.0
+%%Title: parse.c
+%%For: Mr.Divenson
+%%Creator: a2ps version 4.14
+%%CreationDate: Tue Feb  2 23:25:34 2010
+%%BoundingBox: 24 24 571 818
+%%DocumentData: Clean7Bit
+%%Orientation: Landscape
+%%Pages: 6
+%%PageOrder: Ascend
+%%DocumentMedia: A4 595 842 0 () ()
+%%DocumentNeededResources: font Courier
+%%+ font Courier-Bold
+%%+ font Courier-BoldOblique
+%%+ font Courier-Oblique
+%%+ font Helvetica
+%%+ font Helvetica-Bold
+%%+ font Symbol
+%%+ font Times-Bold
+%%+ font Times-Roman
+%%DocumentProcessColors: Black 
+%%DocumentSuppliedResources: procset a2ps-a2ps-hdr
+%%+ procset a2ps-black+white-Prolog
+%%+ encoding ISO-8859-1Encoding
+%%EndComments
+/a2psdict 200 dict def
+a2psdict begin
+%%BeginProlog
+%%Copyright: (c) 1988, 89, 90, 91, 92, 93 Miguel Santana
+%%Copyright: (c) 1995, 96, 97, 98 Akim Demaille, Miguel Santana
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+
+% EPSF import as in the Red Book
+/BeginInclude {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack 
+  userdict begin
+    0 setgray 0 setlinecap
+    1 setlinewidth 0 setlinejoin
+    10 setmiterlimit [ ] 0 setdash newpath
+    gs_languagelevel 1 ne {
+      false setstrokeadjust false setoverprint 
+    } if
+} bind def
+
+/EndInclude {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+/BeginEPSF {
+  BeginInclude
+  /showpage { } def
+} bind def
+
+/EndEPSF {
+  EndInclude
+} bind def
+
+% Page prefeed
+/page_prefeed {         % bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} bind def
+
+/deffont {
+  findfont exch scalefont def
+} bind def
+
+/reencode_font {
+  findfont reencode 2 copy definefont pop def
+} bind def
+
+% Function c-show (str => -)
+% centers text only according to x axis.
+/c-show { 
+  dup stringwidth pop
+  2 div neg 0 rmoveto
+  show
+} bind def
+
+% Function l-show (str => -)
+% prints texts so that it ends at currentpoint
+/l-show {
+  dup stringwidth pop neg 
+  0 
+  rmoveto show
+} bind def
+
+% center-fit show (str w => -)
+% show centered, and scale currentfont so that the width is less than w
+/cfshow {
+  exch dup stringwidth pop
+  % If the title is too big, try to make it smaller
+  3 2 roll 2 copy
+  gt
+  { % if, i.e. too big
+    exch div
+    currentfont exch scalefont setfont
+  } { % ifelse
+    pop pop 
+  }
+  ifelse
+  c-show			% center title
+} bind def
+
+% Return the y size of the current font
+% - => fontsize
+/currentfontsize {
+  currentfont /FontType get 0 eq {
+    currentfont /FontMatrix get 3 get
+  }{
+    currentfont /FontMatrix get 3 get 1000 mul
+  } ifelse
+} bind def
+
+% reencode the font
+% <encoding-vector> <fontdict> -> <newfontdict>
+/reencode { %def
+  dup length 5 add dict begin
+    { %forall
+      % <vector> <key> <val>
+      1 index /FID ne 
+      { def }{ pop pop } ifelse
+    } forall
+    /Encoding exch def % -
+
+    % Use the font's bounding box to determine the ascent, descent,
+    % and overall height; don't forget that these values have to be
+    % transformed using the font's matrix.
+    % We use `load' because sometimes BBox is executable, sometimes not.
+    % Since we need 4 numbers an not an array avoid BBox from being executed
+    /FontBBox load aload pop
+    FontMatrix transform /Ascent exch def pop
+    FontMatrix transform /Descent exch def pop
+    /FontHeight Ascent Descent sub def
+
+    % Get the underline position and thickness if they're defined.
+    % Use 1 if they are not defined.
+    currentdict /FontInfo 2 copy known
+    { get
+      /UnderlinePosition 2 copy % <FontInfo> /UP <FontInfo> /UP
+      2 copy known
+      { get }{ pop pop 1 } ifelse
+      0 exch FontMatrix transform exch pop
+      def % <FontInfo>
+
+      /UnderlineThickness 2 copy % <FontInfo> /UT <FontInfo> /UT
+      2 copy known
+      { get }{ pop pop 1 } ifelse
+      0 exch FontMatrix transform exch pop
+      def % <FontInfo>
+      pop % -
+    }{ pop pop
+    } ifelse
+
+    currentdict
+  end 
+} bind def
+
+% composite fonts for ASCII-EUC mixed strings
+% Version 1.2 1/31/1990
+% Original Ken'ichi HANDA (handa@etl.go.jp)
+% Modified Norio Katayama (katayama@rd.nacsis.ac.jp),1998
+% Extend & Fix Koji Nakamaru (maru@on.cs.keio.ac.jp), 1999
+% Anyone can freely copy, modify, distribute this program.
+
+/copyfont {	% font-dic extra-entry-count  copyfont  font-dic
+	1 index maxlength add dict begin
+	{	1 index /FID ne 2 index /UniqueID ne and
+		{def} {pop pop} ifelse
+	} forall
+	currentdict
+	end
+} bind def
+
+/compositefont { % ASCIIFontName EUCFontName RomanScale RomanOffset Rot(T/F) compositefont font
+    /RomanRotation exch def
+    /RomanOffset exch def
+    /RomanScale exch def
+    userdict /fixeucfont_dict known not {
+	userdict begin
+	    /fixeucfont_dict 2 dict begin
+		/UpperByteEncoding [
+		    16#00 1 16#20 { pop 0 } for
+		    16#21 1 16#28 { 16#20 sub } for
+		    16#29 1 16#2F { pop 0 } for
+		    16#30 1 16#74 { 16#27 sub } for
+		    16#75 1 16#FF { pop 0 } for
+		] def
+	        /LowerByteEncoding [
+		    16#00 1 16#A0 { pop /.notdef } for
+		    16#A1 1 16#FE { 16#80 sub 16 2 string cvrs
+				    (cXX) dup 1 4 -1 roll
+				    putinterval cvn } for
+		    /.notdef
+		] def
+		currentdict
+	    end def
+	end
+    } if
+    findfont dup /FontType get 0 eq {
+	14 dict begin
+	    %
+	    % 7+8 bit EUC font
+	    %
+	    12 dict begin
+		/EUCFont exch def
+		/FontInfo (7+8 bit EUC font) readonly def
+		/PaintType 0 def
+		/FontType 0 def
+		/FontMatrix matrix def
+		% /FontName
+		/Encoding fixeucfont_dict /UpperByteEncoding get def
+		/FMapType 2 def
+		EUCFont /WMode known
+		{ EUCFont /WMode get /WMode exch def }
+		{ /WMode 0 def } ifelse
+		/FDepVector [
+		    EUCFont /FDepVector get 0 get
+		    [ 16#21 1 16#28 {} for 16#30 1 16#74 {} for ]
+		    {
+			13 dict begin
+			    /EUCFont EUCFont def
+			    /UpperByte exch 16#80 add def	
+			    % /FontName
+			    /FontInfo (EUC lower byte font) readonly def
+			    /PaintType 0 def
+			    /FontType 3 def
+			    /FontMatrix matrix def
+			    /FontBBox {0 0 0 0} def
+			    /Encoding
+				fixeucfont_dict /LowerByteEncoding get def
+			    % /UniqueID
+			    % /WMode
+			    /BuildChar {
+				gsave
+				exch dup /EUCFont get setfont
+				/UpperByte get
+				2 string
+				dup 0 4 -1 roll put
+				dup 1 4 -1 roll put
+				dup stringwidth setcharwidth
+				0 0 moveto show
+				grestore
+			    } bind def
+			    currentdict
+			end
+			/lowerbytefont exch definefont
+		    } forall
+		] def
+		currentdict
+	    end
+	    /eucfont exch definefont
+	    exch
+	    findfont 1 copyfont dup begin
+		RomanRotation {
+			/FontMatrix FontMatrix
+			[ 0 RomanScale neg RomanScale 0 RomanOffset neg 0 ]
+			matrix concatmatrix def
+		}{
+			/FontMatrix FontMatrix
+			[ RomanScale 0 0 RomanScale 0 RomanOffset ] matrix concatmatrix
+			def
+			/CDevProc
+			    {pop pop pop pop 0 exch -1000 exch 2 div 880} def
+		} ifelse
+	    end
+	    /asciifont exch definefont
+	    exch
+	    /FDepVector [ 4 2 roll ] def
+	    /FontType 0 def
+	    /WMode 0 def
+	    /FMapType 4 def
+	    /FontMatrix matrix def
+	    /Encoding [0 1] def
+	    /FontBBox {0 0 0 0} def
+%	    /FontHeight 1.0 def % XXXX
+	    /FontHeight RomanScale 1.0 ge { RomanScale }{ 1.0 } ifelse def
+	    /Descent -0.3 def   % XXXX
+	    currentdict
+	end
+	/tmpfont exch definefont
+	pop
+	/tmpfont findfont
+    }{
+	pop findfont 0 copyfont
+    } ifelse
+} def	
+
+/slantfont {	% FontName slant-degree  slantfont  font'
+    exch findfont 1 copyfont begin
+    [ 1 0 4 -1 roll 1 0 0 ] FontMatrix exch matrix concatmatrix
+    /FontMatrix exch def
+    currentdict
+    end
+} def
+
+% Function print line number (<string> # -)
+/# {
+  gsave
+    sx cw mul neg 2 div 0 rmoveto
+    f# setfont
+    c-show
+  grestore
+} bind def
+
+% -------- Some routines to enlight plain b/w printings ---------
+
+% Underline
+% width --
+/dounderline {
+  currentpoint
+  gsave
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    0 rlineto
+    stroke
+  grestore
+} bind def
+
+% Underline a string
+% string --
+/dounderlinestring {
+  stringwidth pop
+  dounderline
+} bind def
+
+/UL {
+  /ul exch store
+} bind def
+
+% Draw a box of WIDTH wrt current font
+% width --
+/dobox {
+  currentpoint
+  gsave
+    newpath
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    dup 0 rlineto
+    0 currentfont /FontHeight get currentfontsize mul rlineto
+    neg 0 rlineto
+    closepath
+    stroke
+  grestore
+} bind def
+
+/BX {
+  /bx exch store
+} bind def
+
+% Box a string
+% string --
+/doboxstring {
+  stringwidth pop
+  dobox
+} bind def
+
+%
+% ------------- Color routines ---------------
+%
+/FG /setrgbcolor load def
+
+% Draw the background
+% width --
+/dobackground {
+  currentpoint
+  gsave
+    newpath
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    dup 0 rlineto
+    0 currentfont /FontHeight get currentfontsize mul rlineto
+    neg 0 rlineto
+    closepath
+    bgcolor aload pop setrgbcolor
+    fill
+  grestore
+} bind def
+
+% Draw bg for a string
+% string --
+/dobackgroundstring {
+  stringwidth pop
+  dobackground
+} bind def
+
+
+/BG {
+  dup /bg exch store
+  { mark 4 1 roll ] /bgcolor exch store } if
+} bind def
+
+
+/Show {
+  bg { dup dobackgroundstring } if
+  ul { dup dounderlinestring } if
+  bx { dup doboxstring } if
+  show
+} bind def
+
+% Function T(ab), jumps to the n-th tabulation in the current line
+/T {
+  cw mul x0 add
+  bg { dup currentpoint pop sub dobackground } if
+  ul { dup currentpoint pop sub dounderline } if
+  bx { dup currentpoint pop sub dobox } if
+  y0 moveto
+} bind def
+
+% Function n: move to the next line
+/n {
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+% Function N: show and move to the next line
+/N {
+  Show
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+/S {
+  Show
+} bind def
+
+%%BeginResource: procset a2ps-a2ps-hdr 2.0 2
+%%Copyright: (c) 1988, 89, 90, 91, 92, 93 Miguel Santana
+%%Copyright: (c) 1995, 96, 97, 98 Akim Demaille, Miguel Santana
+% Function title: prints page header.
+% <ct> <rt> <lt> are passed as argument
+/title { 
+  % 1. Draw the background
+  x v get y v get moveto
+  gsave
+    0 th 2 div neg rmoveto 
+    th setlinewidth
+    0.95 setgray
+    pw 0 rlineto stroke
+  grestore
+  % 2. Border it
+  gsave
+    0.7 setlinewidth
+    pw 0 rlineto
+    0 th neg rlineto
+    pw neg 0 rlineto
+    closepath stroke
+  grestore
+  % stk: ct rt lt
+  x v get y v get th sub 1 add moveto
+%%IncludeResource: font Helvetica
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  % 3. The left title
+  gsave
+    dup stringwidth pop fnfs 0.8 mul add exch % leave space took on stack
+    fnfs 0.8 mul hm rmoveto
+    show			% left title
+  grestore
+  exch
+  % stk: ct ltw rt
+  % 4. the right title
+  gsave
+    dup stringwidth pop fnfs 0.8 mul add exch % leave space took on stack
+    dup
+    pw exch stringwidth pop fnfs 0.8 mul add sub
+    hm
+    rmoveto
+    show			% right title
+  grestore
+  % stk: ct ltw rtw
+  % 5. the center title
+  gsave
+    pw 3 1 roll
+    % stk: ct pw ltw rtw
+    3 copy 
+    % Move to the center of the left room
+    sub add 2 div hm rmoveto
+    % What is the available space in here?
+    add sub fnfs 0.8 mul sub fnfs 0.8 mul sub
+    % stk: ct space_left
+%%IncludeResource: font Helvetica-Bold
+  fHelvetica-Bold fnfs scalefont setfont
+    cfshow
+  grestore
+} bind def
+
+% Function border: prints virtual page border
+/border { %def
+  gsave				% print four sides
+    0 setgray
+    x v get y v get moveto
+    0.7 setlinewidth		% of the square
+    pw 0 rlineto
+    0 ph neg rlineto
+    pw neg 0 rlineto
+    closepath stroke
+  grestore
+} bind def
+
+% Function water: prints a water mark in background
+/water { %def
+  gsave
+    scx scy moveto rotate
+%%IncludeResource: font Times-Bold
+  fTimes-Bold 100 scalefont setfont
+    .97 setgray
+    dup stringwidth pop 2 div neg -50 rmoveto
+    show
+  grestore
+} bind def
+
+% Function rhead: prints the right header
+/rhead {  %def
+  lx ly moveto
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  l-show
+} bind def
+
+% Function footer (cf rf lf -> -)
+/footer {
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  dx dy moveto
+  show
+
+  snx sny moveto
+  l-show
+  
+  fnx fny moveto
+  c-show
+} bind def
+%%EndResource
+%%BeginResource: procset a2ps-black+white-Prolog 2.0 1
+
+% Function T(ab), jumps to the n-th tabulation in the current line
+/T { 
+  cw mul x0 add y0 moveto
+} bind def
+
+% Function n: move to the next line
+/n { %def
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+% Function N: show and move to the next line
+/N {
+  Show
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+}  bind def
+
+/S {
+  Show
+} bind def
+
+/p {
+  false UL
+  false BX
+  fCourier bfs scalefont setfont
+  Show
+} bind def
+
+/sy {
+  false UL
+  false BX
+  fSymbol bfs scalefont setfont
+  Show
+} bind def
+
+/k {
+  false UL
+  false BX
+  fCourier-Oblique bfs scalefont setfont
+  Show
+} bind def
+
+/K {
+  false UL
+  false BX
+  fCourier-Bold bfs scalefont setfont
+  Show
+} bind def
+
+/c {
+  false UL
+  false BX
+  fCourier-Oblique bfs scalefont setfont
+  Show
+} bind def
+
+/C {
+  false UL
+  false BX
+  fCourier-BoldOblique bfs scalefont setfont
+  Show 
+} bind def
+
+/l {
+  false UL
+  false BX
+  fHelvetica bfs scalefont setfont
+  Show
+} bind def
+
+/L {
+  false UL
+  false BX
+  fHelvetica-Bold bfs scalefont setfont
+  Show 
+} bind def
+
+/str{
+  false UL
+  false BX
+  fTimes-Roman bfs scalefont setfont
+  Show
+} bind def
+
+/e{
+  false UL
+  true BX
+  fHelvetica-Bold bfs scalefont setfont
+  Show
+} bind def
+
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier
+%%IncludeResource: font Courier-Oblique
+%%IncludeResource: font Courier-Bold
+%%IncludeResource: font Times-Roman
+%%IncludeResource: font Symbol
+%%IncludeResource: font Courier-BoldOblique
+%%BeginResource: encoding ISO-8859-1Encoding
+/ISO-8859-1Encoding [
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quoteright 
+/parenleft /parenright /asterisk /plus /comma /minus /period /slash 
+/zero /one /two /three /four /five /six /seven 
+/eight /nine /colon /semicolon /less /equal /greater /question 
+/at /A /B /C /D /E /F /G 
+/H /I /J /K /L /M /N /O 
+/P /Q /R /S /T /U /V /W 
+/X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore 
+/quoteleft /a /b /c /d /e /f /g 
+/h /i /j /k /l /m /n /o 
+/p /q /r /s /t /u /v /w 
+/x /y /z /braceleft /bar /braceright /asciitilde /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/space /exclamdown /cent /sterling /currency /yen /brokenbar /section 
+/dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron 
+/degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /bullet 
+/cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown 
+/Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla 
+/Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis 
+/Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply 
+/Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls 
+/agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla 
+/egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis 
+/eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide 
+/oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis 
+] def
+%%EndResource
+% Initialize page description variables.
+/sh 595 def
+/sw 842 def
+/llx 24 def
+/urx 818 def
+/ury 571 def
+/lly 24 def
+/#copies 1 def
+/th 15.000000 def
+/fnfs 11 def
+/bfs 8.005733 def
+/cw 4.803440 def
+
+% Dictionary for ISO-8859-1 support
+/iso1dict 8 dict begin
+  /fCourier ISO-8859-1Encoding /Courier reencode_font
+  /fCourier-Bold ISO-8859-1Encoding /Courier-Bold reencode_font
+  /fCourier-BoldOblique ISO-8859-1Encoding /Courier-BoldOblique reencode_font
+  /fCourier-Oblique ISO-8859-1Encoding /Courier-Oblique reencode_font
+  /fHelvetica ISO-8859-1Encoding /Helvetica reencode_font
+  /fHelvetica-Bold ISO-8859-1Encoding /Helvetica-Bold reencode_font
+  /fTimes-Bold ISO-8859-1Encoding /Times-Bold reencode_font
+  /fTimes-Roman ISO-8859-1Encoding /Times-Roman reencode_font
+currentdict end def
+/bgcolor [ 0 0 0 ] def
+/bg false def
+/ul false def
+/bx false def
+% The font for line numbering
+/f# /Helvetica findfont bfs .6 mul scalefont def
+/fSymbol /Symbol findfont def
+/hm fnfs 0.25 mul def
+/pw
+   cw 81.400000 mul
+def
+/ph
+   501.959430 th add
+def
+/pmw urx llx sub pw 2 mul sub 1 div def
+/pmh 0 def
+/v 0 def
+/x [
+  0
+  dup pmw add pw add
+] def
+/y [
+  pmh ph add 0 mul ph add
+  dup
+] def
+/scx sw 2 div def
+/scy sh 2 div def
+/snx urx def
+/sny lly 2 add def
+/dx llx def
+/dy sny def
+/fnx scx def
+/fny dy def
+/lx snx def
+/ly ury fnfs 0.8 mul sub def
+/sx 0 def
+/tab 8 def
+/x0 0 def
+/y0 0 def
+%%EndSetup
+
+%%Page: (1-2) 1
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(#ifndef) K
+( SELF) p n
+(#include) K
+( <stdio.h>) p n
+(int) k n
+(eputchar\() p
+(int) k
+( c\)) p n
+({) N
+(    ) S
+(return) K
+( fputc\(c, stderr\);) p n
+(}) N
+(#endif) K n
+() p n
+(#define) K
+( T_NAME 256) p n
+(#define) K
+( T_CONST 257) p n
+(#define) K
+( T_STRING 258) p n
+() N
+(#define) K
+( RESBASE 512) p n
+(#define) K
+( T_RETURN 512) p n
+(#define) K
+( T_IF 513) p n
+(#define) K
+( T_ELSE 514) p n
+(#define) K
+( T_WHILE 515) p n
+(#define) K
+( T_DO 516) p n
+(#define) K
+( T_INT 517) p n
+(#define) K
+( I_CHAR 6) p n
+() N
+(#define) K
+( RES 7) p n
+() N
+(#include) K
+( ") p
+(defs.h) str
+(") p n
+() N
+(/* Keep scalars early to get compact addressing modes. */) c n
+(int) k
+( curloc;) p n
+(int) k
+( lexval;) p n
+(int) k
+( token;) p n
+(int) k
+( pusharg;) p n
+(int) k
+( thechar;) p n
+(int) k
+( nglob;) p n
+(int) k
+( nlocal;) p n
+(int) k
+( nfun;) p n
+(int) k
+( strsize;) p n
+(int) k
+( narg;) p n
+(int) k
+( curgloboffs;) p n
+(int) k
+( nsym;) p n
+(int) k
+( pushop;) p n
+() N
+(int) k
+( argids[NARG];) p n
+(int) k
+( globids[NGLOB];) p n
+(int) k
+( globoffs[NGLOB];) p n
+(int) k
+( globscalar[NGLOB];) p n
+(int) k
+( funids[NFUN];) p n
+(int) k
+( funoffs[NFUN];) p n
+(int) k
+( localids[NLOCAL];) p n
+() N
+(char) k
+( symbol[MAXSYM];) p n
+(char) k
+( code[MAXCODE];) p n
+(char) k
+( names[MAXNAMES];) p n
+(#define) K
+( NAMES ") p
+(return\\0if\\0else\\0while\\0do\\0int\\0char\\0getchar\\0putchar\\0eputchar\\0exit) str
+(") p n
+(#define) K
+( NAMESSIZE 62) p n
+() N
+(int) k
+(  ) p
+(//Why use this over fprintf to stderr?) c n
+(eputstr\() p
+(char) k
+( *s\)) p n
+({) N
+(    ) S
+(while) K
+(\(*s\)) p n
+() S 8 T (eputchar\(*s++\);) N
+(}) N
+() N
+(parse.c) (Page 1/11) (Feb 02, 10 23:25) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(//Put *s to stderr, print 20 chars of problem, exit\(1\)) c n
+(int) k n
+(error\() p
+(char) k
+( *s\)) p n
+({) N
+(    ) S
+(int) k
+( i;) p n
+() N
+(    eputstr\(s\);) N
+(    eputstr\(") S
+( at: ) str
+("\);) p n
+(    i = 0;) N
+(    ) S
+(while) K
+(\(i<20\) {) p n
+() S 8 T (eputchar\(getchar\(\)\);) N
+() S 8 T (i++;) N
+(    }) N
+(    eputstr\(") S
+(\\n) str
+("\);) p n
+(    exit\(1\);) N
+(}) N
+() N
+(int) k n
+(digit\() p
+(int) k
+( c\)  ) p
+(//isdigit\(\)) c n
+({) p n
+(    ) S
+(return) K
+( ') p
+(0) str
+(' <= c && c <= ') p
+(9) str
+(';) p n
+(}) N
+() N
+(int) k n
+(letter\() p
+(int) k
+( c\) ) p
+(//isgraph\(\), more or less) c n
+({) p n
+(    ) S
+(return) K
+( ') p
+(a) str
+(' <= c && c <= ') p
+(z) str
+(' || ') p
+(A) str
+('<=c && c<=') p
+(Z) str
+(' || c == ') p
+(_) str
+(' || digit\(c\);) p n
+(}) N
+() N
+(//compare two strings) c n
+(int) k n
+(eqstr\() p
+(char) k
+( *p, ) p
+(char) k
+( *q\) ) p
+(//You know, a import a few headers and all this is done.) c n
+(.. Must be a good reason) N
+({) p n
+(    ) S
+(while) K
+(\(*p\) {) p n
+() S 8 T () S
+(if) K
+( \(*p++ != *q++\)) p n
+() S 8 T (    ) S
+(return) K
+( 0;) p n
+(    }) N
+(    ) S
+(return) K
+( !*q;) p n
+(}) N
+() N
+() N
+(/*If name is in names \(names appears to be basic language keywords\) return 0) c n
+(  If its not do some other stuff...*/) N
+(int) k n
+(lookup\() p
+(char) k
+( *name\)) p n
+({) N
+(    ) S
+(int) k
+( i;) p n
+(    ) S
+(char) k
+( *ns;) p n
+() N
+(    ns = names;) N
+(    i = 0;) N
+(    ) S
+(while) K
+(\(i < nsym\) {) p n
+() S 8 T (   ) S
+(if) K
+( \(eqstr\(ns, name\)\) { ) p
+(//No idea why this check is in a loop) c n
+() p 8 T (    ) S
+(return) K
+( i;) p n
+() S 8 T (}) N
+() S 8 T () S
+(while) K
+(\(*ns++\)) p n
+() S 8 T (    ;) N
+() S 8 T (i++;) N
+(    }) N
+(    ) S
+(while) K
+(\(*ns++ = *name++\)) p n
+() S 8 T (;) N
+(parse.c) (Page 2/11) (Feb 02, 10 23:25) title
+border
+grestore
+(Printed by Mr.Divenson) rhead
+(./parse.c) (1/6) (Tuesday February 02, 2010) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (3-4) 2
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(    ) p
+(return) K
+( nsym++;) p n
+(}) N
+() N
+(//Assign r \(register?\) as thechar, get the next char, return r ) c n
+(int) k n
+(next\(\)) p n
+({) N
+(    ) S
+(int) k
+( r;) p n
+() N
+(    r = thechar;) N
+(    thechar = getchar\(\);) N
+(    ) S
+(return) K
+( r;) p n
+(}) N
+() N
+(// rr if t==thechar, r if not) c n
+(int) k n
+(gobble\() p
+(int) k
+( t, ) p
+(int) k
+( rr, ) p
+(int) k
+( r\)) p n
+({) N
+(    ) S
+(if) K
+( \(thechar == t\) {) p n
+() S 8 T (next\(\);) N
+() S 8 T () S
+(return) K
+( rr;) p n
+(    }) N
+(    ) S
+(return) K
+( r;) p n
+(}) N
+() N
+(//Use next to read a string into symbol[]) c n
+(int) k n
+(getstring\() p
+(int) k
+( delim\)) p n
+({) N
+(    ) S
+(int) k
+( c;) p n
+() N
+(    strsize = 0;) N
+(    ) S
+(while) K
+(\(\(c = next\(\)\) != delim\) {) p n
+() S 8 T () S
+(if) K
+( \(c == ') p
+(\\\\) str
+('\) {) p n
+() S 8 T (    ) S
+(if) K
+( \( \(c = next\(\)\) == ') p
+(n) str
+('\) c = ') p
+(\\n) str
+(';) p n
+() S 8 T (    ) S
+(else) K
+( ) p
+(if) K
+( \(c == ') p
+(t) str
+('\) c = ') p
+(\\t) str
+(';) p n
+() S 8 T (    ) S
+(else) K
+( ) p
+(if) K
+( \(c == ') p
+(0) str
+('\) c = 0;) p n
+() S 8 T (}) N
+() S 8 T (symbol[strsize++] = c;) N
+(    }) N
+(    symbol[strsize++] = 0;) N
+(}) N
+() N
+(//lowk) c n
+(int) k n
+(instr\() p
+(char) k
+( *s, ) p
+(int) k
+( c\)) p n
+({) N
+(    ) S
+(while) K
+(\(*s\) {) p n
+() S 8 T () S
+(if) K
+( \(*s++ == c\)) p n
+() S 8 T (    ) S
+(return) K
+( 1;) p n
+(    }) N
+(    ) S
+(return) K
+( 0;) p n
+(}) N
+() N
+(//Skip comments, convert characters into their int codes, or if and int is found) c n
+(, return the code for integer etc) N
+(int) k n
+(getlex\(\)) p n
+({) N
+(    ) S
+(int) k
+( c;) p n
+(    ) S
+(char) k
+( *p;) p n
+() N
+(parse.c) (Page 3/11) (Feb 02, 10 23:25) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(    ) p
+(while) K
+(\( 0 <= \(c = next\(\)\) && c <= ') p
+( ) str
+('\)) p 48 T () S
+(/* consider all control chars as) c n
+( whitespace */) N
+() p 8 T (;) N
+() N
+(    ) S
+(if) K
+( \(c == -1 || instr\(") p
+(\(\)[]{},;) str
+(", c\)\) {) p n
+() S 8 T () S
+(return) K
+( c;) p n
+(    }) N
+(    ) S
+(if) K
+( \(c == ') p
+(/) str
+('\) {) p n
+() S 8 T () S
+(if) K
+( \(thechar == ') p
+(*) str
+('\) {) p n
+() S 8 T (    ) S
+(/* next\(\); dropping this is wrong */) c n
+() p 8 T (    ) S
+(while) K
+(\(next\(\) != ') p
+(*) str
+(' || thechar != ') p
+(/) str
+('\)) p n
+() S 8 T () S 16 T (;) N
+() S 8 T (    next\(\);) N
+() S 8 T (    ) S
+(return) K
+( getlex\(\);) p n
+() S 8 T (} ) S
+(else) K n
+() p 8 T (    ) S
+(return) K
+( T_DIV;) p n
+(    }) N
+(    ) S
+(if) K
+( \(c == ') p
+(*) str
+('\) ) p
+(return) K
+( T_MUL;) p n
+(    ) S
+(if) K
+( \(c == ') p
+(%) str
+('\) ) p
+(return) K
+( T_MOD;) p n
+(    ) S
+(if) K
+( \(c == ') p
+(-) str
+('\)) p n
+() S 8 T () S
+(return) K
+( gobble\(c,T_POSTDEC,T_SUB\);) p n
+(    ) S
+(if) K
+( \(c == ') p
+(>) str
+('\)) p n
+() S 8 T () S
+(return) K
+( gobble\(') p
+(=) str
+(',T_GE,T_GT\);) p n
+(    ) S
+(if) K
+( \(c == ') p
+(<) str
+('\)) p n
+() S 8 T () S
+(return) K
+( gobble\(') p
+(=) str
+(',T_LE,T_LT\);) p n
+(    ) S
+(if) K
+( \(c == ') p
+(=) str
+('\)) p n
+() S 8 T () S
+(return) K
+( gobble\(c,T_EQ,T_ASSIGN\);) p n
+(    ) S
+(if) K
+( \(c == ') p
+(+) str
+('\)) p n
+() S 8 T () S
+(return) K
+( gobble\(c,T_POSTINC,T_ADD\);) p n
+(    ) S
+(if) K
+( \(c == ') p
+(!) str
+('\)) p n
+() S 8 T () S
+(return) K
+( gobble\(') p
+(=) str
+(',T_NE,T_NOT\);) p n
+(    ) S
+(if) K
+( \(c == ') p
+(&) str
+('\)) p n
+() S 8 T () S
+(return) K
+( gobble\(c,T_ANDAND,T_AND\);) p n
+(    ) S
+(if) K
+( \(c == ') p
+(|) str
+('\)) p n
+() S 8 T () S
+(return) K
+( gobble\(c,T_OROR,T_OR\);) p n
+(    ) S
+(if) K
+( \(c == ') p
+(\\') str
+('\) {) p n
+() S 8 T (getstring\(c\);) N
+() S 8 T (lexval = symbol[0];) N
+() S 8 T () S
+(return) K
+( T_CONST;) p n
+(    }) N
+(    ) S
+(if) K
+( \(c == ') p
+(") str
+('\) {) p n
+() S 8 T (getstring\(c\);) N
+() S 8 T () S
+(return) K
+( T_STRING;) p n
+(    }) N
+(    ) S
+(if) K
+( \(digit\(c\)\) {) p n
+() S 8 T (lexval = c - ') S
+(0) str
+(';) p n
+() S 8 T () S
+(while) K
+(\(digit\(thechar\)\) {) p n
+() S 8 T (    lexval = lexval * 10 + next\(\) - ') S
+(0) str
+(';) p n
+() S 8 T (}) N
+() S 8 T () S
+(return) K
+( T_CONST;) p n
+(    }) N
+(    ) S
+(if) K
+( \(letter\(c\)\) {) p n
+() S 8 T (p = symbol;) N
+() S 8 T (*p++ = c;) N
+() S 8 T () S
+(while) K
+(\(letter\(thechar\)\)) p n
+() S 8 T (    *p++ = next\(\);) N
+() S 8 T (*p = 0;) N
+() S 8 T () S
+(if) K
+( \( \(lexval = lookup\(symbol\)\) < RES\) {) p n
+() S 8 T (    ) S
+(if) K
+( \(lexval == I_CHAR\)) p n
+() S 8 T () S 16 T () S
+(return) K
+( T_INT;) p n
+() S 8 T (    ) S
+(return) K
+( lexval + RESBASE;) p n
+() S 8 T (}) N
+(parse.c) (Page 4/11) (Feb 02, 10 23:25) title
+border
+grestore
+(Printed by Mr.Divenson) rhead
+(./parse.c) (2/6) (Tuesday February 02, 2010) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (5-6) 3
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p 8 T () S
+(return) K
+( T_NAME;) p n
+(    }) N
+(    error\(") S
+(Bad input) str
+("\);) p n
+(}) N
+() N
+(//if input is token, token = getlex\(\), return 1) c n
+(int) k
+( ) p n
+(istoken\() S
+(int) k
+( t\)) p n
+({) N
+(    ) S
+(if) K
+( \(token == t\) {) p n
+() S 8 T (token = getlex\(\);) N
+() S 8 T () S
+(return) K
+( 1;) p n
+(    }) N
+(    ) S
+(return) K
+( 0;) p n
+(}) N
+(//If input is not  a token, throw exception) c n
+(int) k n
+(expect\() p
+(int) k
+( t\)) p n
+({) N
+(    ) S
+(if) K
+( \(!istoken\(t\)\) {) p n
+() S 8 T (error\(") S
+(syntax error) str
+("\);) p n
+(    }) N
+(}) N
+(//pff) c n
+(int) k n
+(type\(\)) p n
+({) N
+(    expect\(T_INT\);) N
+(    ) S
+(while) K
+(\(istoken\(T_MUL\)\)) p n
+() S 8 T (;) N
+(}) N
+(//if token is not keyword, erroe, else getlex\(\)) c n
+(int) k n
+(name\(\)) p n
+({) N
+(    ) S
+(int) k
+( r;) p n
+() N
+(    ) S
+(if) K
+( \(token != T_NAME\)) p n
+() S 8 T (error\(") S
+(name expected) str
+("\);) p n
+(    r = lexval;) N
+(    token = getlex\(\);) N
+(    ) S
+(return) K
+( r;) p n
+(}) N
+(//pff) c n
+(int) k n
+(emit\() p
+(int) k
+( opc\)) p n
+({) N
+(    code[curloc++] = opc;) N
+(}) N
+(//pfffff) c n
+(int) k n
+(emitat\() p
+(int) k
+( a, ) p
+(int) k
+( c\)) p n
+({) N
+(    code[a++] = c;) N
+(    code[a] = c/256;) N
+(}) N
+(//pfffffffffff) c n
+(int) k n
+(emitop\() p
+(int) k
+( rator, ) p
+(int) k
+( rand\)) p n
+({) N
+(    ) S
+(int) k
+( r;) p n
+() N
+(parse.c) (Page 5/11) (Feb 02, 10 23:25) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(    emit\(rator+LITMAX\);) p n
+(    r = curloc;) N
+(    emit\(rand\);) N
+(    emit\(rand/256\);) N
+(    ) S
+(return) K
+( r;) p n
+(}) N
+() N
+(#define) K
+( emitj emitop) p n
+() N
+(int) k n
+(pushloop\() p
+(int) k
+( puop, ) p
+(int) k
+( max, ) p
+(int) k
+( *arr\)) p n
+({) N
+(    ) S
+(int) k
+( i;) p n
+() N
+(    i = 0;) N
+(    pushop = puop;) N
+(    ) S
+(while) K
+( \(i < max\) {) p n
+() S 8 T () S
+(if) K
+( \(arr[i] == lexval\) {) p n
+() S 8 T (    pusharg = i;) N
+() S 8 T (    ) S
+(return) K
+( 1;) p n
+() S 8 T (}) N
+() S 8 T (i++;) N
+(    }) N
+(    ) S
+(return) K
+( 0;) p n
+(}) N
+() N
+(/* return 1 if lvalue */) c n
+(//no idea) N
+(int) k n
+(pushval\(\)) p n
+({) N
+(    ) S
+(int) k
+( lval;) p n
+() N
+(    lval = 1;) N
+(    ) S
+(if) K
+( \(pushloop\(C_PUSHAL, nlocal, localids\)\) {) p n
+(    } ) S
+(else) K
+( ) p
+(if) K
+( \(pushloop\(C_PUSHAA, narg, argids\)\) {) p n
+() S 8 T (pusharg = narg-pusharg-1;) N
+(    } ) S
+(else) K
+( ) p
+(if) K
+( \(pushloop\(C_PUSHAG, nglob, globids\)\) {) p n
+() S 8 T (lval = globscalar[pusharg];) N
+() S 8 T (pusharg = globoffs[pusharg];) N
+(    } ) S
+(else) K
+( {) p n
+() S 8 T (lval = 0;) N
+() S 8 T () S
+(if) K
+( \(pushloop\(C_PUSHAC, nfun, funids\)\) {) p n
+() S 8 T (    pusharg = funoffs[pusharg];) N
+() S 8 T (} ) S
+(else) K
+( ) p
+(if) K
+( \(lexval < RES+NPRECALL\) {) p n
+() S 8 T (    ) S
+(/* predefined function is the last possibility, reuse C_PUSHAC */) c n
+() p 8 T (    pusharg = lexval-RES;) N
+() S 8 T (} ) S
+(else) K
+( {) p n
+() S 8 T (    error\(") S
+(undefined variable) str
+("\);) p n
+() S 8 T (}) N
+(    }) N
+(    emitop\(pushop, pusharg\);) N
+(    ) S
+(return) K
+( lval;) p n
+(}) N
+(//?) c n
+(int) k n
+(pderef\() p
+(int) k
+( l\)) p n
+({) N
+(    ) S
+(if) K
+( \(l\)) p n
+() S 8 T (emit\(C_DEREF\);) N
+(}) N
+() N
+(parse.c) (Page 6/11) (Feb 02, 10 23:25) title
+border
+grestore
+(Printed by Mr.Divenson) rhead
+(./parse.c) (3/6) (Tuesday February 02, 2010) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (7-8) 4
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(//I'll never use another global again, make it stop.) c n
+(//Please.) N
+(/* returns true if lvalue, else false */) N
+(int) k n
+(expr\() p
+(int) k
+( needval, ) p
+(int) k
+( prec\)) p n
+({) N
+(    ) S
+(int) k
+( na;) p n
+(    ) S
+(int) k
+( islval;) p n
+(    ) S
+(int) k
+( jdst;) p n
+(    ) S
+(int) k
+( op;) p n
+(    ) S
+(int) k
+( any;) p n
+(    ) S
+(int) k
+( opprec;) p n
+() N
+(    islval = 0;) N
+() N
+(    ) S
+(/* parse one expr */) c n
+(    ) p
+(if) K
+( \(istoken\(T_CONST\)\) {) p n
+() S 8 T (emitop\(C_PUSHC, lexval\);) N
+(    } ) S
+(else) K
+( ) p
+(if) K
+( \(istoken\(T_STRING\)\) {) p n
+() S 8 T () S
+(/* If the syntax is ok the string must still be in the symbol buffer.) c n
+() S 8 T (   Stuff it into global space. */) N
+() p 8 T (emitop\(C_PUSHS, strsize\);) N
+() S 8 T (any = 0;) N
+() S 8 T () S
+(while) K
+(\(any < strsize\)) p n
+() S 8 T (    emit\(symbol[any++]\);) N
+(    } ) S
+(else) K
+( ) p
+(if) K
+( \(istoken\(T_NAME\)\) {) p n
+() S 8 T (islval = pushval\(\);) N
+(    } ) S
+(else) K
+( ) p
+(if) K
+( \(istoken\(') p
+(\() str
+('\)\) {) p n
+() S 8 T (islval = expr\(0, P_NONE\);) N
+() S 8 T (expect\(') S
+(\)) str
+('\);) p n
+(    } ) S
+(else) K
+( ) p
+(if) K
+( \(istoken\(T_NOT\)\) {) p n
+() S 8 T (expr\(1, P_PRE\);) N
+() S 8 T (emit\(C_NOT\);) N
+(    } ) S
+(else) K
+( ) p
+(if) K
+( \(istoken\(T_SUB\)\) {) p n
+() S 8 T (expr\(1, P_PRE\);) N
+() S 8 T (emit\(C_NEG\);) N
+(    } ) S
+(else) K
+( ) p
+(if) K
+( \(istoken\(T_MUL\)\) {) p n
+() S 8 T (expr\(1, P_PRE\);) N
+() S 8 T (islval = 1;) N
+(    } ) S
+(else) K
+( ) p
+(if) K
+( \(istoken\(T_AND\)\) {) p n
+() S 8 T () S
+(if) K
+( \(expr\(0, P_PRE\) == 0\)) p n
+() S 8 T (    error\(") S
+(lvalue required) str
+("\);) p n
+(    } ) S
+(else) K n
+() p 8 T (error\(") S
+(syntax error in expr) str
+("\);) p n
+() N
+(    ) S
+(/* one expression parsed, try for hi prec ops */) c n
+(    any = 1;) p n
+(    ) S
+(while) K
+(\(any\) {) p n
+() S 8 T (op = token % OPMOD;) N
+() S 8 T () S
+(if) K
+( \(istoken\(') p
+(\() str
+('\)\) {) p n
+() S 8 T (    ) S
+(/* function call */) c n
+() p 8 T (    pderef\(islval\);) N
+() S 8 T (    na = 0;) N
+() S 8 T (    ) S
+(if) K
+( \(!istoken\(') p
+(\)) str
+('\)\) {) p n
+() S 8 T () S 16 T () S
+(do) K
+( {) p n
+() S 8 T () S 16 T (    expr\(1, P_NONE\);) N
+() S 8 T () S 16 T (    na++;) N
+() S 8 T () S 16 T (} ) S
+(while) K
+(\(istoken\(') p
+(,) str
+('\)\);) p n
+() S 8 T () S 16 T (expect\(') S
+(\)) str
+('\);) p n
+() S 8 T (    }) N
+() S 8 T (    emitop\(C_CALL, na*2\);) N
+() S 8 T (    islval = 0;) N
+(parse.c) (Page 7/11) (Feb 02, 10 23:25) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p 8 T (} ) S
+(else) K
+( ) p
+(if) K
+( \(istoken\(') p
+([) str
+('\)\) {) p n
+() S 8 T (    ) S
+(/* array ref */) c n
+() p 8 T (    pderef\(islval\);) N
+() S 8 T (    expr\(1, P_NONE\);) N
+() S 8 T (    emit\(C_ADD\);) N
+() S 8 T (    expect\(') S
+(]) str
+('\);) p n
+() S 8 T (    islval = 1;) N
+() S 8 T (} ) S
+(else) K
+( ) p
+(if) K
+( \(istoken\(T_POSTINC\) || istoken\(T_POSTDEC\)\) {) p n
+() S 8 T (    ) S
+(if) K
+( \(!islval\)) p n
+() S 8 T () S 16 T (error\(") S
+(no lval for ++) str
+("\);) p n
+() S 8 T (    emit\(op\);) N
+() S 8 T (    islval = 0;) N
+() S 8 T (} ) S
+(else) K n
+() p 8 T (    any = 0;) N
+(    }) N
+() N
+(    opprec = token / OPMOD;) N
+(    ) S
+(while) K
+( \(prec < opprec\) {) p n
+() S 8 T () S
+(if) K
+( \( \(op = token % OPMOD\) != C_ASSIGN\) {) p n
+() S 8 T (    pderef\(islval\);) N
+() S 8 T (} ) S
+(else) K
+( {) p n
+() S 8 T (    ) S
+(if) K
+( \(!islval\)) p n
+() S 8 T () S 16 T (error\(") S
+(no lval for =) str
+("\);) p n
+() S 8 T (}) N
+() S 8 T () S
+(if) K
+( \(istoken\(T_ANDAND\) || istoken\(T_OROR\)\) {) p n
+() S 8 T (    emit\(C_DUP\);) N
+() S 8 T (    ) S
+(if) K
+( \(op == C_OROR\)) p n
+() S 8 T () S 16 T (emit\(C_NOT\);) N
+() S 8 T (    jdst = emitj\(C_JFALSE, 0\);) N
+(            emit\(C_POP\);) N
+() S 8 T (    expr\(1, opprec\);) N
+() S 8 T (    emitat\(jdst, curloc\);) N
+() S 8 T (} ) S
+(else) K
+( {) p n
+() S 8 T (    ) S
+(/* emit binop code */) c n
+() p 8 T (    token = getlex\(\);) N
+() S 8 T (    expr\(1, opprec\);) N
+() S 8 T (    emit\(op\);) N
+() S 8 T (}) N
+() S 8 T (islval = 0;) N
+() S 8 T (opprec = token / OPMOD;) N
+(    }) N
+(    ) S
+(if) K
+( \(needval\) {) p n
+() S 8 T (pderef\(islval\);) N
+() S 8 T (islval = 0;) N
+(    }) N
+(    ) S
+(return) K
+( islval;) p n
+(}) N
+() N
+(int) k n
+(pexpr\(\)) p n
+({) N
+(    expect\(') S
+(\() str
+('\);) p n
+(    expr\(1, P_NONE\);) N
+(    expect\(') S
+(\)) str
+('\);) p n
+(}) N
+(//havent a dammed clue, constants everywhere) c n
+(int) k n
+(stmt\(\)) p n
+({) N
+(    ) S
+(int) k
+( jdest;) p n
+(    ) S
+(int) k
+( tst;) p n
+() N
+(parse.c) (Page 8/11) (Feb 02, 10 23:25) title
+border
+grestore
+(Printed by Mr.Divenson) rhead
+(./parse.c) (4/6) (Tuesday February 02, 2010) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (9-10) 5
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(    ) p
+(if) K
+( \(istoken\(') p
+({) str
+('\)\) {) p n
+() S 8 T () S
+(while) K
+(\(!istoken\(') p
+(}) str
+('\)\)) p n
+() S 8 T (    stmt\(\);) N
+(    } ) S
+(else) K
+( ) p
+(if) K
+( \(istoken\(T_IF\)\) {) p n
+() S 8 T (pexpr\(\);) N
+() S 8 T (jdest = emitj\(C_JFALSE, 0\);) N
+() S 8 T (stmt\(\);) N
+() S 8 T () S
+(if) K
+( \(istoken\(T_ELSE\)\) {) p n
+() S 8 T (    tst = emitj\(C_JUMP, 0\);) N
+() S 8 T (    emitat\(jdest, curloc\);) N
+() S 8 T (    stmt\(\);) N
+() S 8 T (    emitat\(tst, curloc\);) N
+() S 8 T (} ) S
+(else) K
+( {) p n
+() S 8 T (    emitat\(jdest, curloc\);) N
+() S 8 T (}) N
+(    } ) S
+(else) K
+( ) p
+(if) K
+( \(istoken\(T_WHILE\)\) {) p n
+() S 8 T (tst = curloc;) N
+() S 8 T (pexpr\(\);) N
+() S 8 T (jdest = emitj\(C_JFALSE, 0\);) N
+() S 8 T (stmt\(\);) N
+() S 8 T (emitj\(C_JUMP, tst\);) N
+() S 8 T (emitat\(jdest, curloc\);) N
+(    } ) S
+(else) K
+( ) p
+(if) K
+( \(istoken\(T_DO\)\) {) p n
+() S 8 T (jdest = curloc;) N
+() S 8 T (stmt\(\);) N
+() S 8 T (expect\(T_WHILE\);) N
+() S 8 T (pexpr\(\);) N
+() S 8 T (emit\(C_NOT\);) N
+() S 8 T (emitj\(C_JFALSE, jdest\);) N
+(    } ) S
+(else) K
+( ) p
+(if) K
+( \(istoken\(T_RETURN\)\) {) p n
+() S 8 T (expr\(1, P_NONE\);) N
+() S 8 T (expect\(') S
+(;) str
+('\);) p n
+() S 8 T (emit\(C_RETURN\);) N
+(    } ) S
+(else) K
+( ) p
+(if) K
+( \(istoken\(') p
+(;) str
+('\)\) {) p n
+() S 8 T () S
+(/* empty */) c n
+(    } ) p
+(else) K
+( {) p n
+() S 8 T () S
+(/* just an expression */) c n
+() p 8 T (expr\(1, P_NONE\);) N
+() S 8 T (emit\(C_POP\);) N
+() S 8 T (expect\(') S
+(;) str
+('\);) p n
+(    }) N
+(}) N
+() N
+(int) k n
+(parse\(\)) p n
+({) N
+(    ) S
+(int) k
+( objid;) p n
+() N
+(    token = getlex\(\);) N
+(    ) S
+(while) K
+(\(1\) {) p n
+() S 8 T () S
+(if) K
+( \(token < 0\)) p n
+() S 8 T (    ) S
+(return) K
+( 1;) p n
+() S 8 T (type\(\);) S 16 T () S 24 T () S 32 T () S
+(/* T_INT or CHAR */) c n
+() p 8 T (objid = name\(\);) S 24 T () S 32 T () S
+(/* T_NAME */) c n
+() p 8 T () S
+(if) K
+( \(istoken\(') p
+(\() str
+('\)\) {) p n
+() S 8 T (    ) S
+(/* function */) c n
+() p 8 T (    funids[nfun] = objid;) N
+() S 8 T (    funoffs[nfun++] = curloc;) N
+() S 8 T (    narg = 0;) N
+() S 8 T (    ) S
+(if) K
+( \(!istoken\(') p
+(\)) str
+('\)\) {) p n
+() S 8 T () S 16 T () S
+(do) K
+( {) p n
+() S 8 T () S 16 T (    type\(\);) N
+(parse.c) (Page 9/11) (Feb 02, 10 23:25) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p 8 T () S 16 T (    argids[narg++] = name\(\);) N
+() S 8 T () S 16 T (} ) S
+(while) K
+(\(istoken\(') p
+(,) str
+('\)\);) p n
+() S 8 T () S 16 T (expect\(') S
+(\)) str
+('\);) p n
+() S 8 T (    }) N
+() S 8 T (    expect\(') S
+({) str
+('\);) p n
+() S 8 T (    ) S
+(/* body */) c n
+() p 8 T (    ) S
+(/* decls */) c n
+() p 8 T (    nlocal = 0;) N
+() S 8 T (    ) S
+(while) K
+(\(token == T_INT\) {) p n
+() S 8 T () S 16 T (type\(\);) N
+() S 8 T () S 16 T () S
+(do) K
+( {) p n
+() S 8 T () S 16 T (    localids[nlocal++] = name\(\);) N
+() S 8 T () S 16 T (} ) S
+(while) K
+( \(istoken\(') p
+(,) str
+('\)\);) p n
+() S 8 T () S 16 T (expect\(') S
+(;) str
+('\);) p n
+() S 8 T (    }) N
+() S 8 T (    ) S
+(if) K
+( \(DEFSTK < nlocal\)) p n
+() S 8 T () S 16 T (emitop\(C_ALLOC, nlocal\);) N
+() S 8 T (    ) S
+(/* stmts */) c n
+() p 8 T (    ) S
+(while) K
+(\(!istoken\(') p
+(}) str
+('\)\)) p n
+() S 8 T () S 16 T (stmt\(\);) N
+() S 8 T (    emit\(C_RETURN\);) N
+() S 8 T (} ) S
+(else) K
+( {) p n
+() S 8 T (    globoffs[nglob] = curgloboffs;) N
+() S 8 T (    ) S
+(if) K
+( \(istoken\(') p
+([) str
+('\)\) {) p n
+() S 8 T () S 16 T () S
+(/* array */) c n
+() p 8 T () S 16 T (expect\(T_CONST\);) N
+() S 8 T () S 16 T (curgloboffs = curgloboffs + lexval;) N
+() S 8 T () S 16 T (expect\(') S
+(]) str
+('\);) p n
+() S 8 T () S 16 T (globscalar[nglob] = 0;) N
+() S 8 T (    } ) S
+(else) K
+( {) p n
+() S 8 T () S 16 T (curgloboffs++;) N
+() S 8 T () S 16 T (globscalar[nglob] = 1;) N
+() S 8 T (    }) N
+() S 8 T (    globids[nglob++] = objid;) N
+() S 8 T (    expect\(') S
+(;) str
+('\);) p n
+() S 8 T (}) N
+(    }) N
+(}) N
+() N
+(int) k n
+(main\(\)) p n
+({) N
+(    ) S
+(int) k
+( n;) p n
+(    ) S
+(char) k
+( *p;) p n
+(    ) S
+(char) k
+( *q;) p n
+() N
+(    ) S
+(/* Initialize symbol table */) c n
+(    nsym = RES+NPRECALL;) p n
+(    p = names;) N
+(    q = NAMES;) N
+(    n = NAMESSIZE;) N
+(    ) S
+(do) K n
+() p 8 T (*p++ = *q++;) N
+(    ) S
+(while) K
+(\(n--\);) p n
+() N
+(    curloc = 10;) S 24 T () S
+(/* some space to avoid low addrs */) c n
+(    thechar = getchar\(\);) p n
+(    parse\(\);) N
+(    n = curloc;) N
+() N
+(    ) S
+(/* Generate code to jump to main */) c n
+(    curloc = 0;) p n
+(parse.c) (Page 10/11) (Feb 02, 10 23:25) title
+border
+grestore
+(Printed by Mr.Divenson) rhead
+(./parse.c) (5/6) (Tuesday February 02, 2010) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (11) 6
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(    lexval = lookup\(") p
+(main) str
+("\);) p n
+(    pushval\(\);) N
+(    emitop\(C_CALL, 0\);) N
+(    emit\(C_EXIT\);) N
+(    ) N
+(    putchar\(n\);) N
+(    putchar\(n/256\);) N
+(    p = code;) N
+(    ) S
+(while) K
+(\(n--\) {) p n
+() S 8 T (putchar\(*p++\);) N
+(    }) N
+(    ) S
+(return) K
+( 0;) p n
+(}) N
+() N
+(parse.c) (Page 11/11) (Feb 02, 10 23:25) title
+border
+grestore
+(Printed by Mr.Divenson) rhead
+(./parse.c) (6/6) (Tuesday February 02, 2010) footer
+end % of iso1dict
+pagesave restore
+showpage
+
+%%Trailer
+end
+%%EOF
