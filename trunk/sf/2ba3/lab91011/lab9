@@ -1,0 +1,69 @@
+CS2014 Lab 9 : Understanding Existing Code
+             (Or why you should write simple, clean, self-documenting code)
+
+Thursday 17th December 2009
+
+Most software construction does not involve designing and building
+software from scratch. Building new systems is only a small proportion
+of the work done by people who write programs. A much more common task
+is to take an existing program and modify it to change its behaviour.
+
+I have downloaded a program from the web, and modified it to make it a
+little easier to compile and understand. The program is representative
+of a lot of software that people use and modify. By the standards of
+software that you run into, it is not badly written, and it has some
+very clever ideas in it. However, it is not at all representative of
+the kind of simple, clear, maintainable and (mostly) correct software
+that we write in our course. In other words, other people may write
+software like this, but you shouldn't.
+
+You can download my modified version of the code from:
+http://www.cs.tcd.ie/David.Gregg/2BA3/labs/intrp.tar.gz
+
+The files are represented in a packed, compressed format. To extract the files
+type:
+	tar -zxvf intrp.tar.gz
+
+Next, switch to the intrp directory:
+	cd intrp
+
+To compile the code, and test that it's working, use the command:
+	make test
+
+To run a test program you can type:
+	./interp < fac.oo.1
+
+The file fac.oo.1 is a bytecode version of the C program fac.c. The
+program fac.c has been written in a small subset of C. This is compiled
+to a bytecode, which is then interpreted by the program interp. If you
+want to look more closely at how this all works, and you are feeling
+a bit adventurous, take a look at the file Makefile. (We'll be looking
+at makefiles next term).
+
+Your job is to examine and modify the file interp.c (the bytecode
+interpreter).  You should do three things with this file: (1) You
+should add appropriate commments to the file to make it easier for the
+reader to understand (this will involve you figuring it out
+sufficiently to explain it). (2) You should rewrite the code in areas
+of the file where you think it could be simplified and clarified. (I
+suggest that you avoid really large changes that would completely
+restructure the program). (3) There is a facility in the program to
+dump out information on each bytecode instruction as it is being
+executed. You should figure out how to use this, and dump out the
+trace of executed bytecode instructions for the sample program
+(fac.c).
+
+Finally, just to familiarise yourself with the wider system, modify
+fac.c so that it computes the factorial of all positive integers
+up to 11 (instead of 10). Compile the modified program to bytecode
+with the command:
+	./parse < fac.c > fac.oo.1
+
+Now run the modified version with your modified bytecode interpreter:
+	./interp < fac.oo.1
+
+This lab will not be marked. The main goal is to get used to reading
+other people's code, and to understand better why it is important that
+code is readable. We will, however, be doing exciting things with this
+code over the next couple of labs, and the resulting modified code
+will be submitted and marked.

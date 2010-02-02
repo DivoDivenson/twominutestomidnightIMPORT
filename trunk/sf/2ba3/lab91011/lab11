@@ -1,0 +1,43 @@
+CS2015 Lab 11 : Modifying Existing Code II
+              (Or why you really should write simple,
+               clean, self-documenting code)
+
+Thursday 28th January 2010
+
+In the previous two weeks you have understood and commented the
+program we are looking at, and modified it so that in addition to
+disassembling the bytecode for the program, it also dumps the C code
+from the interpreter that implements instruction.
+
+Building on your existing work modify your disassembler routine so
+that it dumps working C code for each instruction in a bytecode
+program. You should then be able to compile this C code using a
+regular C compiler, and the resulting code will correctly implement
+the same behaviour as the bytecode running on the interpreter.
+
+Note that dealing with calls and returns is really complicated.  For
+this reason, I have created a sample program that contains only calls
+to built-in functions, and never executes a return (it uses the exit()
+call to get out of this program). I strongly recommend using this as
+the input program to get your system working. If you use only this
+program you don't need to handle returns at all. You can find this
+program at:
+http://www.cs.tcd.ie/David.Gregg/2BA3/labs/straight-line-fac.c
+
+If you are really good, you can then get the full call/return
+functionality working. But even the simple subset of using only the
+built in calls is pretty complicated. Hint: the instruction PUSHAC is
+used to push the index of the call onto the stack, and the CALL
+instruction takes this index from the stack. The simplest way to
+handle this is to keep track of the index specified by the most recent
+PUSHAC instruction when generating C code. (This is not fully correct,
+but it will correctly handle _almost_ all cases).
+
+This lab will be marked, and will count towards your end of year mark.
+You should submit a printout of your project work to the Computer
+Science front office by 4pm on Wednesday 4th February 20010. To be
+marked, you must demonstrate and answer questions on your project at
+your regular lab session on Thursday 5th February. You must
+demonstrate the same code that you submit. Note that this lab work is
+the result of three weeks' lab work, so it will count for three times
+as many marks as a regular, one-week lab. All work should be your own.
