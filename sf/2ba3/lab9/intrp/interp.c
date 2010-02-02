@@ -101,7 +101,7 @@ main(int argc, char **argv)
 	     sp = sp + lit/2;mem[sp] = r;if (lit%2) sp++; /* do return */
 	     break;
 	case C_POP: sp++; break;
-	case C_EXIT: return mem[sp];
+	case C_EXIT:fprintf(stderr,"Hello\n"); return mem[sp];
 	case C_DUP: r = mem[sp]; sp--; mem[sp] = r; break;
 	case C_DEREF: mem[sp] = mem[mem[sp]]; break;
 	case C_POSTINC: mem[sp] = mem[mem[sp]]++; break;
@@ -152,7 +152,7 @@ main(int argc, char **argv)
 	    case X_JFALSE: if (!mem[sp++]) pc = lit; break;
 	    default:
 	    fprintf(stderr, "unimpl op %d at %d\n", mem[oldpc], oldpc);
-	    exit(1);
+      fprintf(file,"\n}\n");
 	    }
 	  }
 	}

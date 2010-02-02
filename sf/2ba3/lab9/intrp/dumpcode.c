@@ -79,7 +79,7 @@ dumpcode(int from, int to, FILE * file)
 	    break;
 	case C_CALL: sprintf(p, "CALL %d  Leave this for later */", lit); break;
 	case C_ALLOC: sprintf(p, "ALLOC %d */ sp = sp - lit;", lit); break;
-	case C_EXIT: sprintf(p, "EXIT */ return mem[sp];"); break;
+  case C_EXIT: sprintf(p, "EXIT */ return mem[sp];\n}"); break; //Insert final brace here to finish program
 	default: sprintf(p, "unknown %d", oopc);
 	}
    //sprintf(p,"*/");
