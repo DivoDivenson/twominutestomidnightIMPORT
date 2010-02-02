@@ -1,6 +1,6 @@
 all:
 
-	gcc -o ./bitset.c ./lab6.c 
+	gcc -o bits ./bitset.c ./lab6.c 
 
 debug:
 
@@ -9,5 +9,5 @@ debug:
 clean:
 	rm ./bitset.o
 	rm ./lab6.o
-	rm ./bits
+#	rm ./bits
 
