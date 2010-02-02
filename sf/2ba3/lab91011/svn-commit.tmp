@@ -1,0 +1,14 @@
+Started C lab
+--This line, and those below, will be ignored--
+
+A    intrp/interp.c~
+A    intrp/dumpcode.c
+A    intrp/interp.c
+AM   intrp/oc.zip
+A    intrp/t
+A    intrp/defs.h
+A    intrp/fac.c
+A    intrp/Makefile~
+A    intrp/parse.c
+A    intrp/Makefile
+A    intrp/README

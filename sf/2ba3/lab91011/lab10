@@ -1,0 +1,81 @@
+CS2015 Lab 10 :  Modifying Existing Code
+              (Or why you should write simple, clean, self-documenting code)
+
+Thursday 21st January 2009
+
+Understanding other people's code can be a bit difficult, especially
+if it is not simple, clear and well documented. Modifying other
+people's code to change the behaviour is perhaps even more of a
+challenge. This is especially true if the existing behaviour is not
+clear from the program's documentation. The documentation is usually
+just the source code. If there are no comments describing the
+behaviour, all you have is the code itself. Let's hope it was well
+written.
+
+The goal of this lab is to modify the behaviour of the program we
+looked at last week. First, we should modify the system so that it
+writes a dissassembled version of the program bytecode to a file.  You
+can use the exist dumpcode function to do this. Before the program
+starts to run, the interpreter should dump the dissassembled code to a
+file.
+
+The way to run the interpreter if you want to dump the dissassembled
+code should be:
+	./interp < fac.oo.1 filename
+Where filename is the name of the file that you want to write to.
+
+Here is some sample code for writing to a file:
+
+/* Open a file. Abort progam if file cannot be opened */
+FILE * open_file(char filename[])
+{
+  FILE * file;
+
+  file = fopen(filename, "w");
+  if ( file == NULL ) {
+    printf("FATAL: Error opening file %s. Aborting program.\n", filename);
+    exit(1);
+  }
+
+  return file;
+}
+
+/* write out an array of 'size' integers to a text file*/
+int write_out(int a[], int size, char filename[])
+{
+  int i;
+  FILE * file;
+
+  file = open_file(filename);
+
+  /* write out the ints - one per line */
+  for ( i = 0; i < size; i++ ) {
+    fprintf(file, "%d\n", a[i]);
+  }
+  fclose(file);
+  return i;
+}
+
+Next, create a new version of the dumpcode function that writes out
+the disassembled version of the code in a C comment, and also writes
+out the C source code that implements the instruction. (This is the
+bit of C code inside the case for IADD in interp.c). For example, for
+an add instruction, the following would be written out:
+
+/* ADD */ mem[sp+1] = mem[sp+1] + mem[sp]; sp++;
+
+Note that you are now generating C source code. It won't compile or
+run correctly. But next week we'll be looking at what we need to do to
+generate working C source code.
+
+When modifying an existing program you need to be VERY careful about
+the changes you make. You need to recompile and test the program after
+every small change. You must always be aware of what change you just
+made, so that you know what you broke if the program stops working. If
+you make larger changes and are not able to get back to a previous
+working version, there is very little that anyone can do to fix your
+program.
+
+This lab will not be marked by itself. However next week we will be
+building on the work of this lab to create a bigger program.
+
