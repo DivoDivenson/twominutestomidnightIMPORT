@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "bitset.h"
 #define MAX 100
 
@@ -16,12 +17,27 @@ struct bitset * parse_string(char *input){
   return result;
 }
 
+//Write the input into a 2D array of bits, with LSB being a parity
+struct bitset * bitset2D(struct bitset * input){
+   struct bitset * result[input->size -1];
+   
+   int i,j, inputPos = input->bit_size;
+   printf("%d\n",inputPos);
+   for(i = 0;i <= input->size -1;i++){
+      result[i] = bitset_new(8);
+      for(j = 8; j < 0; j++){
 
+      }
+   }
+
+   return * result;
+
+}
 
 int main(){
 
 
-   //Never mind good practise, lets just fire ir all into main.
+   //Never mind good practise, lets just fire it all into main.
    int reverse_x = 0,length,bit_index;
    char input[100]; //Assumtion about user input....
    printf("Please enter in string of bits to process: ");
@@ -32,21 +48,15 @@ int main(){
    length = strlen(input);
    reverse_x = length;
    struct bitset * input_set = bitset_new(length);
-   while(reverse_x-- > 0){
+   while(reverse_x-- >= 0){
       if(input[reverse_x] == '1'){
         bitset_add(input_set,reverse_x);
       }
    }
   
-   printf("%s\n",print_set(input_set));
+   struct bitset * twoDset = bitset2D(input_set);
+   //printset_line(twoDset);
 
-
-   struct bitset * sets[(length / 8) + 1];
-
-
-
-   /*This block creates two sets and reads in two strings
-     It the puts the strings in the set */
   
    return 0;
     
