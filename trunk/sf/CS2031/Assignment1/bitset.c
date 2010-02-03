@@ -136,17 +136,30 @@ struct bitset * intersect(struct bitset * one, struct bitset * two){
 
 /*Simply dumps each element and its index to screen. Not enough
   time to do a return string and such */
-char * print_set(struct bitset * this){
+void print_set(struct bitset * this){
   char * result;
   result = malloc(this->size+1);
   int temp;
   int index = this->bit_size;
 
   while(index >= 0){
-    printf("%d : %d\n ", index, bitset_lookup(this,index));
+    printf("%d : %d\n", index, bitset_lookup(this,index));
     index--;
   }
-  printf("\n");
+}
+
+void printset_line(struct bitset * this){
+   char * result;
+   result = malloc(this->size+1);
+   int temp;
+   int index = 0;//this->bit_size;
+   
+   while(index <= this->bit_size){
+      printf("%d",bitset_lookup(this,index++));
+      if((index % 8) == 0){
+         printf(" ");
+      }
+   }
 }
 
 /* Quick check to see if item is outside of bitset */

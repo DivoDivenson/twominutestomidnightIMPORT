@@ -33,7 +33,8 @@ struct bitset * mk_union(struct bitset * one, struct bitset * two);
 struct bitset * intersect(struct bitset * one, struct bitset * two);
 
 /*Returns a string representation of the set*/
-char * print_set(struct bitset * this);
+void print_set(struct bitset * this);
+void printset_line(struct bitset * this);
 
 /*Return 1 if the parity of the bitset is 1, 0 if odd */
 int isEven(struct bitset * this);
