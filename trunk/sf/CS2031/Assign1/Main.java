@@ -37,14 +37,29 @@ class Main{
       //This will make values easier to calcualte, print etc
       String grid[] = SetOps.toGrid(inputString);
 
-      //Calcualte the parity of each row. -1 because last row is null. Ugh
-      for(int count = 0; count < grid.length -1; count++){ 
-         grid[count] = SetOps.rowParity(grid[count]);
+      //Ask user which op to prefrom
+      System.out.printf("Preform 2D parity check (1) ir Hamming Code calculation(2) :");
+      boolean again = true;
+      int choice = 1;
+      while(again){
+         try{
+            choice = in.read();
+            again = false;
+         }catch(IOException ioex){
+            System.out.printf("I'm sorry Dave, I can't do that\n");
+         }
       }
-
-      
-      grid[grid.length -1] = SetOps.colParity(grid);
-
+      if(choice == '1'){
+         for(int count = 0; count < grid.length -1; count++){ 
+            grid[count] = SetOps.rowParity(grid[count]);
+         }
+         //Calcualte the parity of each row. -1 because last row is null. Ugh
+         grid[grid.length -1] = SetOps.colParity(grid);
+      }else if(choice == '2'){
+         for(int count = 0; count < grid.length -1; count++){ 
+            grid[count] = SetOps.hamming(grid[count]);
+         }
+      }
       printGrid(grid);
 
    }
