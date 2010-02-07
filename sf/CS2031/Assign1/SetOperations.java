@@ -1,4 +1,6 @@
-
+//Put the string as an atribute of the class and have the operations 
+//be prefromed on it directly?
+//Then again, user data methods etc...
 
 class SetOperations{
    
@@ -77,6 +79,33 @@ class SetOperations{
       }
 
       return result;
+   }
+
+   //Strings of 7 "bits" only please
+   String hamming(String input){
+      String result;
+      int i,r1,r2,r4,r8;
+      //I could call check set here, but im gonna presum valid input
+      //Parity of bits 11,9,7,5,3 (bits 7,5,4,2,1 in original input, 
+      // the indexs may seem a bit insane, but java strings start at index 0,
+      //ie, bit 7 is index 0. Yeah, its horrible but it works)
+      r1 = getValue(input,0) + getValue(input,2) + getValue(input,3) + getValue(input,5) +
+         getValue(input,6);
+      r2 = getValue(input,0) + getValue(input,1) + getValue(input,3) + getValue(input,4) +
+         getValue(input,6);
+      r4 = getValue(input,3) + getValue(input,4) + getValue(input,5);
+      r8 = getValue(input,0) + getValue(input,1) + getValue(input,2);
+      //Write the result to a string
+      result = String.format("%s%d",input,r2 % 2);
+      System.out.printf("%s\n",result);
+      result = String.format("%s%d",result,r1 % 2);
+      //String.substring(inclusive,exclusive) Ugh. Better to read how hamming code works
+      //and just take it as granted that those bits are indeed being accessed
+      result = String.format("%s%d%s",result.substring(0,6),(r4 % 2), result.substring(6,9)); //Ugh
+      result = String.format("%s%d%s",result.substring(0,3),(r8 % 2), result.substring(3,10));
+      return result;
+
+
    }
 
    

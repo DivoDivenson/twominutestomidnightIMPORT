@@ -1,0 +1,42 @@
+CS2031 Assignment 1
+2d parity checking and hamming code calculation
+Steven Diviney
+08462267
+
+This assignment is broken into two parts. A Main class and a Set Operations class.
+The user can supply the bits to be processed as an argument or if not will be asked for
+them on program start.
+
+The data is then checked for validity (ie, a string of only 1's and 0's that is a multiple 
+      of 7). If the data is invalid the program terminates.
+The data is then split into a 2D array, where each row is seven "bits" long.
+An extra column is inserted to store the result of the 2D parity check.
+
+Then user is then asked if they want to perform a parity check or hamming calculation.
+
+The row parity check simply steps through the supplied 2D array rows and calculates the
+parity of each, appending it to the end of the row.
+The column parity check simply steps thorough the columns of the array and calculates the 
+parity of each, writing the result of each to the empty final row.
+These two operations result in a 2D parity check. Row parity must be called before 
+column parity for obvious reasons.
+
+The hamming code calculation, which also takes in an array of "bits", works for 7 
+bits of data as stipulated by the requirements. As each 7 bits of data is stored in it's 
+row in the array it is easy to calculate the hamming code for 7*n bits.
+The method itself simply looks at various positions and calculates their parity, writing it
+the relevant position of the array.
+ie, r1 = parity of bits 11,9,7,5,3
+
+
+I chose to simply perform operations on the input string and to keep the data as a string.
+Although this would produce large computational overhead and introduce needless complexity
+into the code, as opposed to using a BitSet object or something similar, it was useful for
+me as I have experience with string manipulation.
+
+The data (string) is kept in the main class, while Set Operations contains various methods 
+that perform operations on the data. While this approach does not make much use of object 
+oriented programming, it keeps the data and the data manipulation distinct. As the data
+is so simple I saw no need for a third class to store it.
+
+
