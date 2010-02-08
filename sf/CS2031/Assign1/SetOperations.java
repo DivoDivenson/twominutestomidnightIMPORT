@@ -50,9 +50,9 @@ class SetOperations{
    String rowParity(String input){
    int count = 0;
       for(int x = 0; x < input.length();x++){
-        count += getValue(input, x); 
+        count ^= getValue(input, x); 
       }
-      input = String.format("%s%d",input,count % 2);
+      input = String.format("%s%d",input,count);
       return input;
    }
 
@@ -70,9 +70,9 @@ class SetOperations{
       while(rowi < 8){ //Everything else implictly relies on a valid set,
                         //May as well hard code it. Sigh
          for(int coli = 0; coli <= input.length -2; coli++){
-            count += getValue(input[coli],rowi);
+            count ^= getValue(input[coli],rowi);
          }
-         result = String.format("%s%d",result, count % 2);
+         result = String.format("%s%d",result, count);
          rowi++;
          count = 0;
 
@@ -89,20 +89,20 @@ class SetOperations{
       //Parity of bits 11,9,7,5,3 (bits 7,5,4,2,1 in original input, 
       // the indexs may seem a bit insane, but java strings start at index 0,
       //ie, bit 7 is index 0. Yeah, its horrible but it works)
-      r1 = getValue(input,0) + getValue(input,2) + getValue(input,3) + getValue(input,5) +
+      r1 = getValue(input,0) ^ getValue(input,2) ^ getValue(input,3) ^ getValue(input,5) ^
          getValue(input,6);
-      r2 = getValue(input,0) + getValue(input,1) + getValue(input,3) + getValue(input,4) +
+      r2 = getValue(input,0) ^ getValue(input,1) ^ getValue(input,3) ^ getValue(input,4) ^
          getValue(input,6);
-      r4 = getValue(input,3) + getValue(input,4) + getValue(input,5);
-      r8 = getValue(input,0) + getValue(input,1) + getValue(input,2);
+      r4 = getValue(input,3) ^ getValue(input,4) ^ getValue(input,5);
+      r8 = getValue(input,0) ^ getValue(input,1) ^ getValue(input,2);
       //Write the result to a string
-      result = String.format("%s%d",input,r2 % 2);
+      result = String.format("%s%d",input,r2);
       System.out.printf("%s\n",result);
-      result = String.format("%s%d",result,r1 % 2);
+      result = String.format("%s%d",result,r1);
       //String.substring(inclusive,exclusive) Ugh. Better to read how hamming code works
       //and just take it as granted that those bits are indeed being accessed
-      result = String.format("%s%d%s",result.substring(0,6),(r4 % 2), result.substring(6,9)); //Ugh
-      result = String.format("%s%d%s",result.substring(0,3),(r8 % 2), result.substring(3,10));
+      result = String.format("%s%d%s",result.substring(0,6),r4, result.substring(6,9)); //Ugh
+      result = String.format("%s%d%s",result.substring(0,3),r8, result.substring(3,10));
       return result;
 
 
