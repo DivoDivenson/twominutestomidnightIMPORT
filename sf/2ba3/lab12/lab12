@@ -1,0 +1,84 @@
+CS2015 Lab 12 : Hash Tables and C++
+
+Thursday 4th February 2010
+
+Hash tables are one of the most important and commonly used data
+structures. Insertion, deletion and retrival from a hash table are
+average-case constant time (ie O(1)) operations. Hash tables are also
+straighforward to implement. In contrast, balanced binary trees are
+difficult to implement, and have worse average case performance.
+
+Implement a hash table class in C++. Each hash table object will be
+able to hold a set of integers. You should use chaining for collision
+resolution in your hash table. That is, each element of the hash table
+should be a linked list, and where a collision occurs, just add a new
+element to the list at that element. Your class should look something
+like:
+
+#include <iostream>
+using namespace std;
+
+class intListElement {
+public:
+  int num;
+  intListElement * next;
+};
+
+class intHashTable {
+private:
+  int size;
+  intListElement ** table;
+public:
+  intHashTable(int size);  // construct a new hash table with size elements
+  ~intHashTable();	   // delete the memory for all internal components
+  void insert(int num);    // insert num into the hash table, no effect
+			   // if num is already in table
+  void remove(int num);    // remove num from the hash table, no effect if not in table
+  int lookup(int num);     // return 1 if num is already in table, 0 otherwise
+  void print(void);        // print the elements of the hash table to the screen
+};
+
+// construct a new hash table with nelements elements
+intHashTable::intHashTable(int nelements)
+{
+  size = nelements;
+  table = new intListElement*[size];
+  for ( int i = 0; i < size; i++ ) {
+    table[i] = NULL;
+  }
+}
+
+// .... and so on.....
+
+You can use a simple hash function to convert the number being stored
+to a hash table location, such as 'number % size'.
+
+You can compile your program using g++, such as:
+	g++ -o myhash myhash.cc
+Generally g++ works very much in the same way as gcc.
+
+To declare a variable of type intHashTable, you just declare it
+as usual, but with the parameter(s) to the constructor in brackets:
+intHashTable * table = new intHashTable(10); // declare a new hash table of size 10
+
+Once this works, modify your program so that the table can hold
+multiple versions of the same integer. You should associate a counter
+with each integer. When an integer is first inserted, its count should
+be 1. If the integer is added again, its count should be
+incremented. If the integer is removed then its count should be
+decremented. If the count ever reaches zero, the integer should be
+removed from the table. The lookup table should then be modified so
+that it return the count if the integer is in the table, zero
+otherwise.
+
+Write a very small C++ program that shows the class working, with an
+object of the class being created, numbers bring added, looked up and
+removed, and the object being deleted.
+
+This lab will be marked, and will count towards your end of year mark.
+You should submit a printout of your project work to the Computer
+Science front office by 4pm on Wednesday 10th February 2010. To be
+marked, you must demonstrate and answer questions on your project at
+your regular lab session on Thursday 11th February. You must
+demonstrate the same code that you submit. All work should be your
+own.
