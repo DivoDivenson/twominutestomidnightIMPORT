@@ -1,3 +1,6 @@
+/* Steven Diviney
+   08462267 */
+
 //Put the string as an atribute of the class and have the operations 
 //be prefromed on it directly?
 //Then again, user data methods etc...
