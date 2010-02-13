@@ -1,3 +1,5 @@
+//Maybe implement count later if arsed
+
 #include <iostream>
 using namespace std;
 
@@ -6,6 +8,11 @@ public:
   int num;
   intListElement * next;
 };
+
+/*class headElement : public intListElement{
+   public:
+
+};*/
 
 class intHashTable {
 private:
@@ -34,9 +41,9 @@ intHashTable::intHashTable(int nelements)
 
 int intHashTable::insert(int num){
  
-  if(lookup(num)){
+  /*if(lookup(num)){
    return(1); 
-  }
+  }*/
   int key = getKey(num);
   intListElement * tempElement;// = new intListElement;
   tempElement = this->table[key];
@@ -75,28 +82,30 @@ int intHashTable::lookup(int num){
 void intHashTable::remove(int num){
    int key = getKey(num);
    if(lookup(num)){
-      intListElement *tempElement,*prevElement;
-      tempElement = this->table[key];
-      prevElement = this->table[key];
-      //Should have a fancy while to do this, but meh
-/*      if(tempElement->num = num){ //Start of list
-         table[key] = tempElement->next;
+      intListElement * tempElement = this->table[key];
+      if(this->table[key]->num == num){  //If element to delete is first
+         delete(table[key]);
+         this->table[key] = tempElement->next;
          return;
-      }else{
-         tempElement = tempElement->next;
-         while(tempElement != NULL){
-            if(tempElement->num = num){
-               prevElement->next = tempElement->next;
-               delete(tempElement);
-               return;
-            }
-            tempElement = tempElement->next;
-            prevElement = prevElement->next;
-         }
       }
-   }else{
-      return;
-   } KEEPS REMOVING FIRST ELEMENT*/ 
+      //If element is in middle of list
+      intListElement *prevElement;
+      prevElement = this->table[key];
+      tempElement = tempElement->next;
+      while(tempElement->next != NULL){
+         if(tempElement->num ==num){
+            prevElement->next = tempElement->next;
+            delete(tempElement);
+            return;
+         }
+         tempElement = tempElement->next;
+         prevElement = prevElement->next;
+      }
+      //If element is at the end of the list
+      prevElement->next = NULL;
+      delete(tempElement);
+
+   }
 }
 
 void intHashTable::print(){
@@ -130,7 +139,7 @@ int main(){
   intHashTable * hashTable = new intHashTable(2);
   hashTable->insert(12);
   //cout << hashTable->lookup(12);
-  hashTable->insert(22);
+  hashTable->insert(12);
   hashTable->insert(24);
   //cout << hashTable->lookup(12);
   hashTable->print();
