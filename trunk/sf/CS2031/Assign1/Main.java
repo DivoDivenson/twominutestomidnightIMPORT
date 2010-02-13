@@ -1,3 +1,6 @@
+/* Steven Diviney
+   08462267 */
+
 import java.io.*; //Meh, too lazy to import indivdual libs
 
 class Main{
