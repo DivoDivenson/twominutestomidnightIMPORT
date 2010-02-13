@@ -1,5 +1,5 @@
 import java.util.InputMismatchException;
-import java.util.Scanner;
+impor java.util.Scanner;
 class ListMaker{
 
    static Scanner sc = new Scanner(System.in);
