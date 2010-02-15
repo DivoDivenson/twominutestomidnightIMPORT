@@ -6,13 +6,10 @@ using namespace std;
 class intListElement {
 public:
   int num;
+  int count;
   intListElement * next;
 };
 
-/*class headElement : public intListElement{
-   public:
-
-};*/
 
 class intHashTable {
 private:
@@ -39,26 +36,40 @@ intHashTable::intHashTable(int nelements)
   }
 }
 
+intHashTable::~intHashTable(){
+
+  delete(table);
+
+}
+
 int intHashTable::insert(int num){
  
-  /*if(lookup(num)){
-   return(1); 
-  }*/
   int key = getKey(num);
   intListElement * tempElement;// = new intListElement;
   tempElement = this->table[key];
 
-  if(tempElement != NULL){
-     while(tempElement->next != NULL){
-       tempElement = tempElement->next;
-     }
-       tempElement->next = new intListElement;
-       tempElement->next->num = num;
-  }else{ //If element is first in that position
-     //tempElement = new intListElement;  //Had some trouble with pointers here, now it seems to work.
-     //tempElement->num = num;
-     this->table[key] = new intListElement;
-     this->table[key]->num = num;
+  if(lookup(num)){
+    while(tempElement != NULL){
+      if(tempElement->num == num){
+        tempElement->count++;
+      }
+      tempElement = tempElement->next;
+    }
+  }else{
+    if(tempElement != NULL){
+      while(tempElement->next != NULL){
+        tempElement = tempElement->next;
+      }
+        tempElement->next = new intListElement;
+        tempElement->next->num = num;
+        tempElement->next->count = 1;
+    }else{ //If element is first in that position
+      //tempElement = new intListElement;  //Had some trouble with pointers here, now it seems to work.
+      //tempElement->num = num;
+      this->table[key] = new intListElement;
+      this->table[key]->num = num;
+      this->table[key]->count = 1;
+    }
       
   }
     return(0);
@@ -71,7 +82,7 @@ int intHashTable::lookup(int num){
   tempElement = this->table[key];
   while(tempElement != NULL){
     if(tempElement->num == num){
-      return(1);
+      return(tempElement->count);
     }
     tempElement = tempElement->next;
 
@@ -84,9 +95,14 @@ void intHashTable::remove(int num){
    if(lookup(num)){
       intListElement * tempElement = this->table[key];
       if(this->table[key]->num == num){  //If element to delete is first
-         delete(table[key]);
-         this->table[key] = tempElement->next;
-         return;
+        if(this->table[key]->count > 1){
+          this->table[key]->count--;
+          return;
+        }else{
+          delete(table[key]);
+          this->table[key] = table[key]->next;
+          return;
+        }
       }
       //If element is in middle of list
       intListElement *prevElement;
@@ -94,33 +110,42 @@ void intHashTable::remove(int num){
       tempElement = tempElement->next;
       while(tempElement->next != NULL){
          if(tempElement->num ==num){
-            prevElement->next = tempElement->next;
-            delete(tempElement);
-            return;
+           if(tempElement->count > 1){
+              tempElement->count--;
+              return;
+           }else{
+              prevElement->next = tempElement->next;
+              delete(tempElement);
+              return;
+           }
          }
          tempElement = tempElement->next;
          prevElement = prevElement->next;
       }
       //If element is at the end of the list
-      prevElement->next = NULL;
-      delete(tempElement);
+      if(tempElement->count > 1){
+        tempElement->count--;
+      }else{
+        prevElement->next = NULL;
+        delete(tempElement);
+      }
 
    }
 }
 
 void intHashTable::print(){
    int index = 0;
-   cout << "Index\tValues\n";
+   cout << "Index\tValue : Count\n";
    while(index < this->size){
       if(this->table[index] == NULL){
          index++;
       }else{
-         cout << index << "\t " <<table[index]->num;
+         cout << index << "\t " <<table[index]->num << " : " << table[index]->count;
          if(table[index]->next != NULL){
             intListElement * tempElement;
             tempElement = table[index]->next;
             while(tempElement != NULL){
-               cout << " -> " << tempElement->num;
+               cout << " -> " << tempElement->num << " : " << tempElement->count;
                tempElement = tempElement->next;
             }
          }
@@ -136,19 +161,19 @@ int intHashTable::getKey(int data){
 
 int main(){
   
-  intHashTable * hashTable = new intHashTable(2);
-  hashTable->insert(12);
+  intHashTable * hashTable = new intHashTable(13);
+  hashTable->insert(123);
   //cout << hashTable->lookup(12);
   hashTable->insert(12);
   hashTable->insert(24);
   //cout << hashTable->lookup(12);
   hashTable->print();
   hashTable->remove(24);
+  hashTable->remove(12);
   hashTable->print();
 
   
   return(0);
 }
 
-// .... and so on.....
 
