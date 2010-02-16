@@ -1,11 +1,11 @@
 
 
-class Record{
+class Record implements Comparable<Record>{
 
-   private int ID,size;
+   private int ID;
    private String lastname,firstname,position;
    private boolean x;
-   private char valueDel,fieldDel;
+   private static char valueDel,fieldDel;
 
    public Record(int ID, String lastname, String firstname, String position, 
          boolean x){
@@ -41,6 +41,37 @@ class Record{
       return this.x;
    }
 
+   public void deleteRecord(){
+      this.x = true;
+   }
+
+   public void setID(int ID){
+      this.ID = ID;
+   }
+
+   public void setFN(String name){
+      this.firstname = name;
+   }
+
+   public void setLN(String name){
+      this.lastname = name;
+   }
+
+   public void setPOS(String position){
+      this.position = position;
+   }
+
+   //Read in a string, just to keep things the same   
+   public void setX(String xin){
+      if(xin.compareTo("0") == 0){
+         this.x = false;
+      }else if(xin.compareTo("1") == 0){
+         this.x = true;
+      }//else do nothing
+
+
+   }
+
    public void setDelim(char value, char field){
       this.valueDel = value;
       this.fieldDel = field;
@@ -52,6 +83,10 @@ class Record{
       }else{
          return false;
       }
+   }
+
+   public int compareTo(Record other){
+      return this.ID - other.getID();
    }
    public String toString(){
       int xint;

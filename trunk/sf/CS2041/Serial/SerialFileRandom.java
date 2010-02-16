@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.*;
 
 /* Quick note. I was going to use RandomAccessFile but has trouble writing 
    out. Improper encoding was used on some platforms and as a result lots of
@@ -59,8 +60,6 @@ class SerialFileRandom{
       }catch(IOException ioex){
          handleException(ioex);
       }
-
-      
    }
 
    public SerialFileRandom(String filename){
@@ -68,6 +67,8 @@ class SerialFileRandom{
    }
 
 
+   //Read in the file and create a series of records based on it
+   //Nothing too exciting
    private void readIn(){
       String input = new String();
       Record temprecord;
@@ -87,15 +88,14 @@ class SerialFileRandom{
       }catch(IOException ioex){
          handleException(ioex);
       }
-      //System.out.print(printRecord(431223));
-      //writeOut();
-      //System.out.println(addRecord(431543,"Hender","Mark","Scrub",false));
-      System.out.println(searchRecord("LN","Hender"));
+            //writeOut();
+      //System.out.println(searchRecord("LN","Hender"));
    }
 
-   String printRecord(int ID){
+   //Print out the record given by ID. Argument must be a valid integer
+   public String printRecord(int ID){
       Record result = findRecord(ID);
-      if(result != null){
+      if(result != null && !(result.getX())){
          return result.toString();
       }else{
          return "Not Found";
@@ -103,6 +103,51 @@ class SerialFileRandom{
 
    }
 
+   //Set the delete marker in record ID. ID must be a valid int
+   public boolean deleteRecord(int ID){
+      Record tempRecord;
+      if((tempRecord = findRecord(ID)) != null){
+         tempRecord.deleteRecord();
+         writeOut();
+         return true;
+      }
+      return false;
+   }
+
+   //As above. Arguments must be valid strings although any values can safely be supplied
+   public boolean deleteRecord(String fieldname, String value){
+      int ID;
+      if((ID = searchRecord(fieldname,value)) != 0){
+         deleteRecord(ID);
+         return true;
+      }
+      return false;
+   }
+
+   //Modify the record ID. Input must be of valid types although the record need not be valid
+   public boolean updateField(int ID, String field, String value){
+      Record tempRecord;
+      boolean result = true;
+      if((tempRecord = findRecord(ID)) == null && !(tempRecord.getX())){ //Initial check for record
+         return false;
+      }
+
+      switch(getField(field)){
+         case 1: tempRecord.setID(Integer.parseInt(value)); break;
+         case 2: tempRecord.setLN(value); break;
+         case 3: tempRecord.setFN(value); break;
+         case 4: tempRecord.setPOS(value); break;
+         case 5: tempRecord.setX(value); break;
+         default: result = false; break;
+      }
+      writeOut();
+      return result;
+
+
+   }
+
+   //Add new record to file. If record exists (Identified by ID) then return false.
+   //Again, input must be of valid types
    public boolean addRecord(int ID, String lastname, String firstname, String position,
          boolean x){
       boolean result = false;
@@ -117,6 +162,10 @@ class SerialFileRandom{
       return result;
    }
 
+   //Open a PrintWriter and write out the entire intenal representation of the file,
+   // erasing the previous contents. This aproach is explained above
+   //Probably no need to close the file each time, needless expense and such, but
+   //just to keep things clean
    private void writeOut(){
       try{
          writer = new FileWriter(filename);
@@ -135,7 +184,7 @@ class SerialFileRandom{
 
    /* Not implementing search by delete. It's not so much data on the person as it is
     * on the entry and should not be presented to the user*/
-   int searchRecord(String fieldname, String value){
+   public int searchRecord(String fieldname, String value){
      int ID;
      Record tempRecord;
       switch(getField(fieldname)){
@@ -153,6 +202,9 @@ class SerialFileRandom{
       return ID;
    }
 
+   //Convert fieldname into a value betweem 1 and 5
+   //This makes it easier for methods that take fieldname as an argument
+   //as the relevant action can be decided by a switch. Makes the code neater
    private int getField(String fieldname){
     if(fieldname.compareTo("ID") == 0){
       return 1;
@@ -162,12 +214,21 @@ class SerialFileRandom{
       return 3;
     }else if(fieldname.compareTo("POS") == 0){
       return 4;
+    }else if(fieldname.compareTo("X") ==0){
+      return 5;
     }
-    return 5;
+    return 0;
 
    }
-   //Write all records to in
-   Record findRecord(int ID){
+
+
+   /* The next few methods all find a _single_ record 
+      according to a field value. Which field 
+      is searched should be obvious from the mathod names */
+
+
+   //Return record specified by ID
+   private Record findRecord(int ID){
       for(Record record : records){
          if(record.getID() == ID){
             return record;
@@ -176,33 +237,39 @@ class SerialFileRandom{
       return null;
    }
 
-   Record findRecordLN(String ln){
+   private Record findRecordLN(String ln){
       for(Record record : records){
-        if((record.getLN()).compareTo(ln) == 0){
+        if((record.getLN()).compareToIgnoreCase(ln) == 0){
           return record;
         }
       }
       return null;
    }
 
-   Record findRecordFN(String fn){
+   private Record findRecordFN(String fn){
       for(Record record : records){
-        if((record.getFN()).compareTo(fn) == 0){
+        if((record.getFN()).compareToIgnoreCase(fn) == 0){
           return record;
         }
       }
       return null;
    }
 
-   Record findRecordPOS(String pos){
+   private Record findRecordPOS(String pos){
       for(Record record : records){
-        if((record.getPOS()).compareTo(pos) == 0){
+        if((record.getPos()).compareToIgnoreCase(pos) == 0){
           return record;
         }
       }
       return null;
    }
 
+   /* End find methods. No find by deletion marker.
+      Its not part of record data, its part of record managemt */
+
+
+   //Extract the "fieldname" value of input string
+   //ie,("FN",input) extracts the persons first name
    private String parse(String fieldname, String input){
       Pattern pattern = Pattern.compile(fieldname+this.valueDel+"[^"+this.fieldDel+"]+");
       Matcher matcher = pattern.matcher(input);
@@ -217,6 +284,46 @@ class SerialFileRandom{
       /* Chop off the ID= or whatever and return the value */
    }
 
+
+   public void compress(){
+      for(int x = 0; x < records.size(); x++){
+         if((records.get(x)).getX()){
+            records.remove(x);
+         }
+      }
+      records.trimToSize();
+      writeOut();
+   }
+
+   //Use comparator objects to sort the array by fieldname
+   //Switch statement used as per all methods that operate on fieldname
+   public void sort(String fieldname){
+      boolean write = true;
+      switch(getField(fieldname)){
+         case 1: Collections.sort(records); break;
+         case 2: Collections.sort(records, new RecordSortByLN()); break;
+         case 3: Collections.sort(records, new RecordSortByFN()); break;
+         case 4: Collections.sort(records, new RecordSortByPOS()); break;
+         default: write = false; break;
+      }
+      if(write){
+         writeOut();
+      }
+   }
+
+   //Dumps out the entire set of records, including deleted ones
+   //Mainly for debuging
+   public String toString(){
+      return records.toString();
+   }
+
+   //Not changing record delim as readLine() will no longer work
+   //the next time the program runs. I could try to override it but im
+   //not botherd
+   public void changeDelim(char newValueDelim, char newFieldDelim){
+      (records.get(0)).setDelim(newValueDelim,newFieldDelim);
+      writeOut();
+   }
 
    /*Because im sick of having to re-write this code so much
      Simply prints the exception and exit(1) */
