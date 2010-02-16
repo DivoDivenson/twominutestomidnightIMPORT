@@ -87,9 +87,10 @@ class SerialFileRandom{
       }catch(IOException ioex){
          handleException(ioex);
       }
-      System.out.print(printRecord(431223));
+      //System.out.print(printRecord(431223));
       //writeOut();
-      System.out.println(addRecord(431543,"Hender","Mark","Scrub",false));
+      //System.out.println(addRecord(431543,"Hender","Mark","Scrub",false));
+      System.out.println(getField("FN"));
    }
 
    String printRecord(int ID){
@@ -134,12 +135,25 @@ class SerialFileRandom{
 
 
    int searchRecord(String fieldname, String value){
-     return 12; 
+      switch(getField(fieldname))
    }
 
+   private int getField(String fieldname){
+    if(fieldname.compareTo("ID") == 0){
+      return 1;
+    }else if(fieldname.compareTo("LN") == 0){
+      return 2;
+    }else if(fieldname.compareTo("FN") == 0){
+      return 3;
+    }else if(fieldname.compareTo("POS") == 0){
+      return 4;
+    }
+    return 5;
+
+   }
    //Write all records to in
    Record findRecord(int ID){
-           for(Record record : records){
+      for(Record record : records){
          if(record.getID() == ID){
             return record;
          }
