@@ -1,10 +1,8 @@
-ID=845377|FN=Michael|LN=Murphy|POS=General Manager|X=0
-ID=119824|FN=Matthew|LN=McGuinness|POS=Research Assistant|X=0
-ID=908791|FN=Silvia|LN=Norton|POS=Accountant|X=0
-ID=276987|FN=Eoghan|LN=Ryan|POS=Programmer|X=0
-ID=102745|FN=Peter|LN=Duggan|POS=Programmer|X=0
-ID=431223|FN=John|LN=ONeill|POS=Receptionist|X=0
-ID=54444|FN=Mike|LN=Flood|POS=Tea Maker|X=0
-ID=999800|FN=Cormac|LN=Jones|POS=Sweeper|X=0
-ID=8832321|FN=James|LN=Behan|POS=Tecnician|X=0
-ID=431543|FN=Mark|LN=Hender|POS=Scrub|X=0
+ID~8832321#FN~James#LN~Behan#POS~Tecnician#X~0
+ID~431223#FN~John#LN~ONeill#POS~Receptionist#X~0
+ID~119824#FN~Matthew#LN~McGuinness#POS~Research Assistant#X~0
+ID~845377#FN~Michael#LN~Murphy#POS~General Manager#X~0
+ID~54444#FN~Mike#LN~Flood#POS~Tea Maker#X~0
+ID~102745#FN~Peter#LN~Duggan#POS~Programmer#X~0
+ID~276987#FN~Ross#LN~Ryan#POS~Programmer#X~0
+ID~908791#FN~Silvia#LN~Norton#POS~Accountant#X~0
