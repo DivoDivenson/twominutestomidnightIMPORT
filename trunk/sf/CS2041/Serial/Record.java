@@ -25,6 +25,22 @@ class Record{
       return this.ID;
    }
 
+   public String getFN(){
+      return this.firstname;
+   }
+
+   public String getLN(){
+      return this.lastname;
+   }
+
+   public String getPos(){
+      return this.position;
+   }
+
+   public boolean getX(){
+      return this.x;
+   }
+
    public void setDelim(char value, char field){
       this.valueDel = value;
       this.fieldDel = field;

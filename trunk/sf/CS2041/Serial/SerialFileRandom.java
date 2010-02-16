@@ -90,7 +90,7 @@ class SerialFileRandom{
       //System.out.print(printRecord(431223));
       //writeOut();
       //System.out.println(addRecord(431543,"Hender","Mark","Scrub",false));
-      System.out.println(getField("FN"));
+      System.out.println(searchRecord("LN","Hender"));
    }
 
    String printRecord(int ID){
@@ -133,9 +133,24 @@ class SerialFileRandom{
 
    }
 
-
+   /* Not implementing search by delete. It's not so much data on the person as it is
+    * on the entry and should not be presented to the user*/
    int searchRecord(String fieldname, String value){
-      switch(getField(fieldname))
+     int ID;
+     Record tempRecord;
+      switch(getField(fieldname)){
+        case 1: tempRecord = findRecord(Integer.parseInt(value)); break;
+        case 2: tempRecord = findRecordLN(value); break;
+        case 3: tempRecord = findRecordFN(value); break;
+        case 4: tempRecord = findRecordPOS(value); break;
+        default: tempRecord = null; break;
+      }
+      if(tempRecord == null){
+        ID = 0;
+      }else{
+        ID = tempRecord.getID();
+      }
+      return ID;
    }
 
    private int getField(String fieldname){
@@ -157,6 +172,33 @@ class SerialFileRandom{
          if(record.getID() == ID){
             return record;
          }
+      }
+      return null;
+   }
+
+   Record findRecordLN(String ln){
+      for(Record record : records){
+        if((record.getLN()).compareTo(ln) == 0){
+          return record;
+        }
+      }
+      return null;
+   }
+
+   Record findRecordFN(String fn){
+      for(Record record : records){
+        if((record.getFN()).compareTo(fn) == 0){
+          return record;
+        }
+      }
+      return null;
+   }
+
+   Record findRecordPOS(String pos){
+      for(Record record : records){
+        if((record.getPOS()).compareTo(pos) == 0){
+          return record;
+        }
       }
       return null;
    }
