@@ -1,6 +1,5 @@
-import java.io.RandomAccessFile;
+//import java.io.RandomAccessFile;
 import java.io.FileNotFoundException;
-import java.lang.SecurityException;
 import java.util.Formatter;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -13,7 +12,7 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.*;
+import java.util.Collections;
 
 /* Quick note. I was going to use RandomAccessFile but has trouble writing 
    out. Improper encoding was used on some platforms and as a result lots of
@@ -27,7 +26,7 @@ import java.util.*;
 
 class SerialFileRandom{
 
-   private final int RECORD_SIZE = 100;
+//   private final int RECORD_SIZE = 100;
 // private RandomAccessFile in;
    private File filepointer;
    private String filename;
@@ -319,7 +318,7 @@ class SerialFileRandom{
 
    //Not changing record delim as readLine() will no longer work
    //the next time the program runs. I could try to override it but im
-   //not botherd
+   //not bothered
    public void changeDelim(char newValueDelim, char newFieldDelim){
       (records.get(0)).setDelim(newValueDelim,newFieldDelim);
       writeOut();
