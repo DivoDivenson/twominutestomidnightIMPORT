@@ -1,7 +1,7 @@
 //Maybe implement count later if arsed
 
 #include <iostream>
-using namespace std;
+using namespace std;  //Don't do this for some reason
 
 class intListElement {
 public:
@@ -37,16 +37,14 @@ intHashTable::intHashTable(int nelements)
 }
 
 intHashTable::~intHashTable(){
-
-  delete(table);
-
+  delete[] table; //Have to delete arrays like this. delete(table) deletes only the first element
 }
 
 int intHashTable::insert(int num){
  
   int key = getKey(num);
   intListElement * tempElement;// = new intListElement;
-  tempElement = this->table[key];
+  tempElement = table[key];
 
   if(lookup(num)){
     while(tempElement != NULL){
@@ -161,10 +159,10 @@ int intHashTable::getKey(int data){
 
 int main(){
   
-  intHashTable * hashTable = new intHashTable(13);
+  intHashTable * hashTable = new intHashTable(2);
   hashTable->insert(123);
   //cout << hashTable->lookup(12);
-  hashTable->insert(12);
+  hashTable->insert(24);
   hashTable->insert(24);
   //cout << hashTable->lookup(12);
   hashTable->print();
