@@ -139,6 +139,7 @@ class SerialFileRandom{
          case 5: tempRecord.setX(value); break;
          default: result = false; break;
       }
+      //if(result) etc
       writeOut();
       return result;
 
