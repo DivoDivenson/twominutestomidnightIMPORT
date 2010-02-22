@@ -1,0 +1,64 @@
+CS2015 Lab 13 : Huffman Coding
+
+Thursday 11th February 2009
+
+Huffman coding can be used to remap the encoding of characters so that
+the frequent characters require fewer bits than less frequent
+characters. Typically, the frequencies are based on looking at some
+sample text files to get some estimate of the relative commonness of
+different characters.
+
+The basic approach of Huffman coding is as follows:
+o List all possible characters with their frequncies
+o Locate the characters with the smallest frequencies
+o Replace these with a pseudo character pair representing them both,
+  whose frequency is the sum of the individual freuqncies
+o Repeat until the list contains only one member
+
+This process builds a tree-like structure of nested pairs, with real
+characters at the leaves. To find the encoding of a character,
+traverse the tree from the root to that character and record 0 for a
+left branch and 1 for a right branch.
+
+Write a C++ program that reads in a file of text and computes Huffman
+codes for all the characters based on the frequencies of the
+characters. You should write out to the screen each of the characters
+and the corresponding encodings. One common problem is that some
+characters may not appear in the sample file at all; these should be
+assigned a frequency of 1, to make sure that they get some sort of
+sensible encoding. 
+
+In your solution you should build a linked tree structure representing
+the Huffman tree. You nodes of the tree should come in two varieties:
+(1) simple nodes representing a single character and (2) compound
+nodes representing a pair of (possibly compound) characters. You
+should use inheritance to allow your tree to contain both types of
+node. The purpose of this lab is to investigate inheritance and linked
+data structures, so you must implement your Huffman tree like this.
+
+The following code reads in the contents of a file character by
+character.
+#include <iostream>
+#include <fstream> /* header file for file handling */
+using namespace std;
+
+int main()
+{
+  unsigned char c;
+  ifstream file;
+
+  file.open("lab12");
+  while( !file.eof() ) {
+    c = file.get();
+    cout << c;
+  }
+  file.close();
+}
+
+This lab will be marked, and will count towards your end of year mark.
+You should submit a printout of your project work to the Computer
+Science front office by close of business on Wednesday 17th February
+2020. To be marked, you must demonstrate and answer questions on your
+project at your regular lab session on Thursday 18th February. You
+must demonstrate the same code that you submit. All work should be
+your own.
