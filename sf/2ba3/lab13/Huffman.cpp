@@ -1,24 +1,32 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <typeinfo>
 
 using std::cout;
 
 class node{
   public:  //Simple containers. Use public instead of setter?
     int freq;
-    virtual ~node() {}
+    bool parsed;
+    virtual bool getType() {} //true == compund_node. Yes, this is a hack
 };
 
 class compound_node : public node{
    public:
       node * left;
       node * right;
+      bool getType(){
+        return true;
+      }
 };
 
 class simple_node : public node{
    public:
       char c;
+      bool getType(){
+        return false;
+      }
 };
 
 class Huffman{
@@ -32,6 +40,7 @@ class Huffman{
     Huffman();
     void print(); //Debug method
     //open_file(); To hell with it, open it in constructor
+    //int * genEncoding();
 
 };
 
@@ -45,17 +54,52 @@ void Huffman::print(){
 
 }
 
+/*int * Huffman::genEncoding(){
+  int * result;
+  int sz = size;
+  int encoding;
+  result = new int;//[sz--];
+  node * tempNode = table[0];
+  node * top = table[0];
+  node * prevNode = table[0];
+  for(int i = 0; i <= sz; i++){
+    while((tempNode->getType())){
+      if(prevNode->parsed){
+        //tempNode->parsed = true;
+        tempNode = prevNode;
+        tempNode = ((compound_node*)tempNode)->right;
+        encoding++;
+      }else{
+        tempNode = ((compound_node*)tempNode)->left;
+      }
+    }
+      cout << tempNode->freq << "\n";
+      tempNode = ((compound_node*)tempNode)->left;
+      cout << tempNode->freq;
+    prevNode->parsed = true;
+    tempNode->parsed = true;
+    cout << ((simple_node*)tempNode)->c;
+    tempNode = table[0];
+    //cout << tempNode->freq;
+    prevNode = table[0];
+    result[i] = encoding;
+    cout << result[i];
+  }
+
+
+  return result;
+  
+}*/
 Huffman::Huffman(){
    size = 256; //Full ascii character set
    table = new node*[size];
    for(int i = 0; i < size; i++){
-      table[i] = new node;
-      //simple_node * tempNode = static_cast<simple_node*>(table[i]);
-      table[i] = dynamic_cast<simple_node*>(table[i]);
-      //table[i] = tempNode;
+      table[i] = new simple_node;
       table[i]->freq = 1;
-      table[i]->c = 'i';
+      ((simple_node*)table[i])->c = (char) i;
+      table[i]->parsed = false;
    }
+
    std::ifstream file;
    file.open("input.txt");
    char c;
@@ -64,27 +108,36 @@ Huffman::Huffman(){
       table[(int) c]->freq++;
    }
    file.close();
-   print();
+   //print();
    //Generate the tree here
    genTree();
+   //cout << ((compound_node*) table[0])->freq;
+   //genEncoding();
 }
+/* Sort the array,
+ * the first two nodes in the array are of lowest freq, so take
+ * these and merge them into a compund node.
+ * Then write this new node into position 0 and the 
+ * value at the end of the array into position 1. Then
+ * null the last element. Go until one node remains in the array */
 
 void Huffman::genTree(){
-   size -= 1; //Compensate for array
+   int sz = size;
+   sz -= 1; //Compensate for array
    while(table[1] != NULL){
-      sortTable(0, size);
+      sortTable(0, sz);
       table[0] = merge(table[0], table[1]);
-      table[1] = table[size];
-      table[size--] = NULL;
+      table[1] = table[sz];
+      table[sz--] = NULL;
    }
 }
 //node1 <= node2
 node * Huffman::merge(node * node1, node * node2){
    compound_node * result = new compound_node();
+   result->parsed = false;
    result->left = node1;
    result->right = node2;
    result->freq = node1->freq + node2->freq;
-
    return result;
 }
 
