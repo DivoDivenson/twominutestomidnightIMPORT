@@ -1,0 +1,44 @@
+CS2015 Lab 15 : Overloading and Templates
+
+Thursday 11th March
+
+Create a fixed-point number class, called FixedPoint. The class should
+represent a fixed point number as an integer value with a notional
+binary point. The position of the binary point is specified by a
+constant in the class, which may be negative.
+
+Your fixed point class should support as standard operators that we
+associate with numbers, such as +, -, *, /, >, <=, >, >=, ==, !=, etc.
+These operators should be implemented using operator overloding.  So
+if you have three fixed point variables a, b and c, you should be able
+to write a = b + c;
+
+Next add the << and >> operators so that you can write out and read in
+rational numbers from the user and from files. Hint: In lectures, we
+looked at the bones of a rational number class (See overloading
+notes). This should get you started.
+
+The program at the following URL is a simple testbed to make sure that
+your fixed point type (mostly) supports the same interface as the
+integer and double types. It uses a template function with the types
+of the parameters specified at the point that the function is
+called. By using the same template function for all types, we can be
+pretty sure that the interface of our fixed point class is compatible
+with that of other types.
+
+https://www.cs.tcd.ie/David.Gregg/2BA3/labs/basic.cc
+
+Note that when templates are used, syntax errors in your program will
+often result in the compiler outputting _extremely_ cryptic error
+messages. You should therefore get your interface working one operator
+at a time, in an incremental process, rather than trying to get them
+all working at once. Overloading and templates are simply difficult too
+get to work together (possibly the reason that most programming
+languages do not support them).
+
+This lab will be marked, and will count towards your end of year
+mark. You should submit a printout of your work to the Computer
+Science front office by 10am on Thursday 18th March 2009. To be marked,
+you must demonstrate and answer questions on your project at your
+regular lab session on Thursday 10th April. You must demonstrate the
+same code that you submit. All work should be your own.
