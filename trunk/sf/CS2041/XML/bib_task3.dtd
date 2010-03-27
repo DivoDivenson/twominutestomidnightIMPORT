@@ -1,0 +1,23 @@
+<!--This doc type will validate the XML file given, I know it could be extended -->
+<!DOCTYPE bib [
+
+<!ELEMENT bib (book+)>
+
+<!ELEMENT book(title, author*, publisher, price, editor?, year+)>
+
+<!ELEMENT title (#PCDATA)>
+
+<!ELEMENT author (first+, surname)>
+<!ELEMENT first (#PCDATA)>
+<!ELEMENT surname (#PCDATA)>
+<!ELEMENT year (#PCDATA)>
+
+<!ELEMENT publisher (#PCDATA)>
+<!ELEMENT price (dollarsUS, euro)>
+<!ELEMENT dollarsUS (#PCDATA)>
+<!ELEMENT euro (#PCDATA)>
+
+<!ELEMENT editor (author, affiliation)>
+<!ELEMENT affiliation (#PCDATA)>
+
+]>
