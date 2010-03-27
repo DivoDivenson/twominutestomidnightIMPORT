@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+ 
+
+  <xsd:element name="bib">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="book" maxOccurs="unbounded" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="book">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="title" />
+        <xsd:element ref="author" maxOccurs="unbounded" />
+        <xsd:element ref="publisher" />
+        <xsd:element ref="price" />
+        <xsd:element ref="editor" minOccurs="0" />
+      </xsd:sequence>
+      <xsd:attribute name="year" type="xsd:NMTOKEN" use="required" />
+    </xsd:complexType>
+  </xsd:element>
+
+
+  <xsd:element name="author">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="last" />
+        <xsd:element ref="first" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+
+  <xsd:element name="editor">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="last" />
+        <xsd:element ref="first" />
+        <xsd:element ref="affiliation" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="first">
+    <xsd:complexType mixed="true" />
+  </xsd:element>
+
+  <xsd:element name="last">
+    <xsd:complexType mixed="true" />
+  </xsd:element>
+
+  <xsd:element name="price">
+    <xsd:complexType mixed="true" />
+  </xsd:element>
+
+  <xsd:element name="publisher">
+    <xsd:complexType mixed="true" />
+  </xsd:element>
+
+  <xsd:element name="title">
+    <xsd:complexType mixed="true" />
+  </xsd:element>
+
+ <xsd:element name="affiliation">
+    <xsd:complexType mixed="true" />
+  </xsd:element>
+
+</xsd:schema>
