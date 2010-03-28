@@ -14,59 +14,38 @@
   <xsd:element name="book">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element ref="title" />
+        <xsd:element name="title" type="xsd:string" />
         <xsd:element ref="author" maxOccurs="unbounded" />
-        <xsd:element ref="publisher" />
-        <xsd:element ref="price" />
-        <xsd:element ref="editor" minOccurs="0" />
+        <xsd:element name="publisher" type="xsd:string" />
+        <xsd:element name="price" type="xsd:double" />
+        <xsd:element name="editor" type="editor" minOccurs="0" />
       </xsd:sequence>
-      <xsd:attribute name="year" type="xsd:NMTOKEN" use="required" />
+      <xsd:attribute name="year" type="xsd:gYear" use="required"/>
     </xsd:complexType>
   </xsd:element>
+
+
 
 
   <xsd:element name="author">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element ref="last" />
-        <xsd:element ref="first" />
+        <xsd:element name="last" type="xsd:string" />
+        <xsd:element name="first" type="xsd:string" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
 
 
-  <xsd:element name="editor">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:element ref="last" />
-        <xsd:element ref="first" />
-        <xsd:element ref="affiliation" />
-      </xsd:sequence>
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:complexType name="editor" />
+    <xsd:complexContent>
+      <xsd:extension base="aurthor">
+        <xsd:sequence>
+          <xsd:element name="affiliation" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
 
-  <xsd:element name="first">
-    <xsd:complexType mixed="true" />
-  </xsd:element>
-
-  <xsd:element name="last">
-    <xsd:complexType mixed="true" />
-  </xsd:element>
-
-  <xsd:element name="price">
-    <xsd:complexType mixed="true" />
-  </xsd:element>
-
-  <xsd:element name="publisher">
-    <xsd:complexType mixed="true" />
-  </xsd:element>
-
-  <xsd:element name="title">
-    <xsd:complexType mixed="true" />
-  </xsd:element>
-
- <xsd:element name="affiliation">
-    <xsd:complexType mixed="true" />
-  </xsd:element>
-
-</xsd:schema>
+  
+  </xsd:schema>
