@@ -14,24 +14,32 @@
   <xsd:element name="book">
     <xsd:complexType>
       <xsd:sequence>
+        <xsd:element name="year" type="xsd:gYear"/>
         <xsd:element name="title" type="xsd:string" />
-        <xsd:element ref="editor"  minOccurs="0" />
         <xsd:element ref="author" maxOccurs="unbounded" minOccurs="0" />
-        <xsd:element name="publisher" type="xsd:string" minOccurs="0" />
-        <xsd:element name="price" type="xsd:double" />
+        <xsd:element name="publisher" type="xsd:string"  minOccurs="0" />
+        <xsd:element ref="price" />
+        <xsd:element ref="editor"  minOccurs="0" />
        </xsd:sequence>
-      <xsd:attribute name="year" type="xsd:gYear" use="required"/>
     </xsd:complexType>
   </xsd:element>
 
 
+  <xsd:element name="price">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="dollarsUS" type="xsd:double"/>
+        <xsd:element name="euro" type="xsd:double"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
 
 
   <xsd:element name="author">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element name="last" type="xsd:string" />
         <xsd:element name="first" type="xsd:string" />
+        <xsd:element name="last" type="xsd:string" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
@@ -40,11 +48,11 @@
   <xsd:element name="editor">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element name="last" type="xsd:string" />
         <xsd:element name="first" type="xsd:string" />
+        <xsd:element name="last" type="xsd:string" />
         <xsd:element name="affiliation" type="xsd:string" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
-
-</xsd:schema>
+  
+  </xsd:schema>

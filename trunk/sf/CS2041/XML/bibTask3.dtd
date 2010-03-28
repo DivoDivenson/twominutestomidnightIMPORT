@@ -1,0 +1,26 @@
+<!ELEMENT affiliation ( #PCDATA ) >
+
+<!ELEMENT author ( first, last ) >
+
+<!ELEMENT bib ( book+ ) >
+
+<!ELEMENT book ( author | editor | price | publisher | title | year )* >
+
+<!ELEMENT dollarsUS ( #PCDATA ) >
+
+<!ELEMENT editor ( first, last, affiliation ) >
+
+<!ELEMENT euro ( #PCDATA ) >
+
+<!ELEMENT first ( #PCDATA ) >
+
+<!ELEMENT last ( #PCDATA ) >
+
+<!ELEMENT price ( dollarsUS, euro ) >
+
+<!ELEMENT publisher ( #PCDATA ) >
+
+<!ELEMENT title ( #PCDATA ) >
+
+<!ELEMENT year ( #PCDATA ) >
+
