@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bib>
+	<book>
+		<year>1994</year>
+		<title>TCP/IP Illustrated</title>
+		<author>
+			<first>W.</first>
+			<last>STEVENS</last>
+		</author>
+		<publisher>Addison-Wesley</publisher>
+		<price>65.95</price>
+	</book>
+	<book>
+		<year>1992</year>
+		<title>Advanced Programming in the Unix environment</title>
+		<author>
+			<first>W.</first>
+			<last>STEVENS</last>
+		</author>
+		<publisher>Addison-Wesley</publisher>
+		<price>65.95</price>
+	</book>
+	<book>
+		<year>2000</year>
+		<title>Data on the Web</title>
+		<author>
+			<first>SERGE</first>
+			<last>ABITEBOUL</last>
+		</author>
+		<author>
+			<first>PETER</first>
+			<last>BUNEMAN</last>
+		</author>
+		<author>
+			<first>DAN</first>
+			<last>SUCIU</last>
+		</author>
+		<publisher>Morgan Kaufmann Publishers</publisher>
+		<price>39.95</price>
+	</book>
+	<book>
+		<year>1999</year>
+		<title>Economics of ... for Digital TV</title>
+		<publisher>Kluwer Academic Publishers</publisher>
+		<price>129.95</price>
+		<editor>
+			<first>Darcy</first>
+			<last>Gerbarg</last>
+			<affiliation>CITI</affiliation>
+		</editor>
+	</book>
+</bib>
+
