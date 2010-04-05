@@ -1,65 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bib>
-	<book>
-		<year>1994</year>
-		<title>TCP/IP Illustrated</title>
-		<author>
-			<first>W.</first>
-			<last>STEVENS</last>
-		</author>
-		<publisher>Addison-Wesley</publisher>
-		<price>
-			<dollarsUS>65.95</dollarsUS>
-			<euro>42.35</euro>
-		</price>
-	</book>
-	<book>
-		<year>1992</year>
-		<title>Advanced Programming in the Unix environment</title>
-		<author>
-			<first>W.</first>
-			<last>STEVENS</last>
-		</author>
-		<publisher>Addison-Wesley</publisher>
-		<price>
-			<dollarsUS>65.95</dollarsUS>
-			<euro>42.35</euro>
-		</price>
-	</book>
-	<book>
-		<year>2000</year>
-		<title>Data on the Web</title>
-		<author>
-			<first>SERGE</first>
-			<last>ABITEBOUL</last>
-		</author>
-		<author>
-			<first>PETER</first>
-			<last>BUNEMAN</last>
-		</author>
-		<author>
-			<first>DAN</first>
-			<last>SUCIU</last>
-		</author>
-		<publisher>Morgan Kaufmann Publishers</publisher>
-		<price>
-			<dollarsUS>39.95</dollarsUS>
-			<euro>25.66</euro>
-		</price>
-	</book>
-	<book>
-		<year>1999</year>
-		<title>Economics of ... for Digital TV</title>
-		<publisher>Kluwer Academic Publishers</publisher>
-		<price>
-			<dollarsUS>129.95</dollarsUS>
-			<euro>83.45</euro>
-		</price>
-		<editor>
-			<first>Darcy</first>
-			<last>Gerbarg</last>
-			<affiliation>CITI</affiliation>
-		</editor>
-	</book>
-</bib>
+<BIB>
+	<BOOK>
+		<YEAR>1994</YEAR>
+		<TITLE>TCP/IP Illustrated</TITLE>
+		<AUTHOR>
+			<FIRST>W.</FIRST>
+			<LAST>Stevens</LAST>
+		</AUTHOR>
+		<PUBLISHER>Addison-Wesley</PUBLISHER>
+		<PRICE>
+			<DOLLARSUS>65.95</DOLLARSUS>
+			<EURO>42.35</EURO>
+		</PRICE>
+	</BOOK>
+	<BOOK>
+		<YEAR>1992</YEAR>
+		<TITLE>Advanced Programming in the Unix environment</TITLE>
+		<AUTHOR>
+			<FIRST>W.</FIRST>
+			<LAST>Stevens</LAST>
+		</AUTHOR>
+		<PUBLISHER>Addison-Wesley</PUBLISHER>
+		<PRICE>
+			<DOLLARSUS>65.95</DOLLARSUS>
+			<EURO>42.35</EURO>
+		</PRICE>
+	</BOOK>
+	<BOOK>
+		<YEAR>2000</YEAR>
+		<TITLE>Data on the Web</TITLE>
+		<AUTHOR>
+			<FIRST>Serge</FIRST>
+			<LAST>Abiteboul</LAST>
+		</AUTHOR>
+		<AUTHOR>
+			<FIRST>Peter</FIRST>
+			<LAST>Buneman</LAST>
+		</AUTHOR>
+		<AUTHOR>
+			<FIRST>Dan</FIRST>
+			<LAST>Suciu</LAST>
+		</AUTHOR>
+		<PUBLISHER>Morgan Kaufmann Publishers</PUBLISHER>
+		<PRICE>
+			<DOLLARSUS>39.95</DOLLARSUS>
+			<EURO>25.66</EURO>
+		</PRICE>
+	</BOOK>
+	<BOOK>
+		<YEAR>1999</YEAR>
+		<TITLE>Economics of ... for Digital TV</TITLE>
+		<PUBLISHER>Kluwer Academic Publishers</PUBLISHER>
+		<PRICE>
+			<DOLLARSUS>129.95</DOLLARSUS>
+			<EURO>83.45</EURO>
+		</PRICE>
+		<EDITOR>
+			<FIRST>Darcy</FIRST>
+			<LAST>Gerbarg</LAST>
+			<AFFILIATION>CITI</AFFILIATION>
+		</EDITOR>
+	</BOOK>
+</BIB>
 

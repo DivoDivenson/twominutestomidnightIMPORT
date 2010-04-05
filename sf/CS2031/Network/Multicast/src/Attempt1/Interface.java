@@ -77,8 +77,9 @@ public class Interface extends javax.swing.JFrame {
 	private void send_buttonActionPerformed(java.awt.event.ActionEvent evt) {
 		//System.out.println(sender_input.getText());
 		//receiver_pane.appendText(sender_input.getText() + "\n");
-		//sender_input.setText("");
 		client.send(sender_input.getText());
+		sender_input.setText("");
+
 	}
 	
 	public void update(String text){

@@ -35,6 +35,7 @@ public class MulticastClient {
 		DatagramPacket packet = null;
 		try{
 			packet = new DatagramPacket(msg.getBytes(), msg.length(), address, port);
+			System.out.println(msg.getBytes()[1]);
 			socket.send(packet);
 			System.out.println("Message sent");
 		}catch(Exception e){
