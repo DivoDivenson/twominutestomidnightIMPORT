@@ -37,7 +37,7 @@ public class XMLReader {
 			//get the root “element”
 			Element rt = doc.getRootElement();
 
-			List nodeLst = rt.getChildren("book");
+			List nodeLst = rt.getChildren("BOOK");
 			Element titleEle, pubEle, priceEle,editEle;
 			List authorList;
 			Book book;
@@ -47,12 +47,12 @@ public class XMLReader {
 				Element empElement = (Element)(iter.next());
 				book = new Book();
 
-				titleEle = empElement.getChild("title");
-				authorList = empElement.getChildren("author");
-				pubEle = empElement.getChild("publisher");
-				priceEle = empElement.getChild("price");
-				editEle = empElement.getChild("editor");
-				Attribute yearAttr = empElement.getAttribute("year");
+				titleEle = empElement.getChild("TITLE");
+				authorList = empElement.getChildren("AUTHOR");
+				pubEle = empElement.getChild("PUBLISHER");
+				priceEle = empElement.getChild("PRICE");
+				editEle = empElement.getChild("EDITOR");
+				Attribute yearAttr = empElement.getAttribute("YEAR");
 				book.setTitle(titleEle.getText());
 				book.setYear(yearAttr.getIntValue());
 				book.setPublisher(pubEle.getText());
@@ -60,12 +60,12 @@ public class XMLReader {
 				if(authorList != null){
 					for(Iterator authorIter = authorList.iterator(); authorIter.hasNext();){
 						Element tempEle = (Element)(authorIter.next());
-						book.addAuthor(tempEle.getChildText("first"), tempEle.getChildText("last"));
+						book.addAuthor(tempEle.getChildText("FIRST"), tempEle.getChildText("LAST"));
 					}
 				}
 				book.setPrice(Double.parseDouble(priceEle.getText()));
 				if(editEle != null){
-					book.setEditor(editEle.getChildText("affiliation"), editEle.getChildText("first"), editEle.getChildText("last"));
+					book.setEditor(editEle.getChildText("AFFILIATION"), editEle.getChildText("FIRST"), editEle.getChildText("LAST"));
 				}
 				books.add(book);
 

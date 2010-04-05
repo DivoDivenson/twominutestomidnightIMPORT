@@ -3,54 +3,54 @@
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
  
 
-  <xsd:element name="bib">
+  <xsd:element name="BIB">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element ref="book" maxOccurs="unbounded" />
+        <xsd:element ref="BOOK" maxOccurs="unbounded" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
 
-  <xsd:element name="book">
+  <xsd:element name="BOOK">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element name="year" type="xsd:gYear"/>
-        <xsd:element name="title" type="xsd:string" />
-        <xsd:element ref="author" maxOccurs="unbounded" minOccurs="0" />
-        <xsd:element name="publisher" type="xsd:string"  minOccurs="0" />
-        <xsd:element ref="price" />
-        <xsd:element ref="editor"  minOccurs="0" />
+        <xsd:element name="YEAR" type="xsd:gYear"/>
+        <xsd:element name="TITLE" type="xsd:string" />
+        <xsd:element ref="AUTHOR" maxOccurs="unbounded" minOccurs="0" />
+        <xsd:element name="PUBLISHER" type="xsd:string"  minOccurs="0" />
+        <xsd:element ref="PRICE" />
+        <xsd:element ref="EDITOR"  minOccurs="0" />
        </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
 
 
-  <xsd:element name="price">
+  <xsd:element name="PRICE">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element name="dollarsUS" type="xsd:double"/>
-        <xsd:element name="euro" type="xsd:double"/>
+        <xsd:element name="DOLLARSUS" type="xsd:double"/>
+        <xsd:element name="EURO" type="xsd:double"/>
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
 
 
-  <xsd:element name="author">
+  <xsd:element name="AUTHOR">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element name="first" type="xsd:string" />
-        <xsd:element name="last" type="xsd:string" />
+        <xsd:element name="FIRST" type="xsd:string" />
+        <xsd:element name="LAST" type="xsd:string" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
 
 
-  <xsd:element name="editor">
+  <xsd:element name="EDITOR">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element name="first" type="xsd:string" />
-        <xsd:element name="last" type="xsd:string" />
-        <xsd:element name="affiliation" type="xsd:string" />
+        <xsd:element name="FIRST" type="xsd:string" />
+        <xsd:element name="LAST" type="xsd:string" />
+        <xsd:element name="AFFILIATION" type="xsd:string" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>

@@ -1,26 +1,26 @@
-<!ELEMENT affiliation ( #PCDATA ) >
+<!ELEMENT AFFILIATION ( #PCDATA ) >
 
-<!ELEMENT author ( first, last ) >
+<!ELEMENT AUTHOR ( first, last ) >
 
-<!ELEMENT bib ( book+ ) >
+<!ELEMENT BIB ( book+ ) >
 
-<!ELEMENT book ( author | editor | price | publisher | title | year )* >
+<!ELEMENT BOOK ( AUTHOR | EDITOR | PRICE | PUBLISHER | TITLE | YEAR )* >
 
-<!ELEMENT dollarsUS ( #PCDATA ) >
+<!ELEMENT DOLLARSUS ( #PCDATA ) >
 
-<!ELEMENT editor ( first, last, affiliation ) >
+<!ELEMENT EDITOR ( FIRST, LAST, AFFILIATION ) >
 
-<!ELEMENT euro ( #PCDATA ) >
+<!ELEMENT EURO ( #PCDATA ) >
 
-<!ELEMENT first ( #PCDATA ) >
+<!ELEMENT FIRST ( #PCDATA ) >
 
-<!ELEMENT last ( #PCDATA ) >
+<!ELEMENT LAST ( #PCDATA ) >
 
-<!ELEMENT price ( dollarsUS, euro ) >
+<!ELEMENT PRICE ( dollarsUS, euro ) >
 
-<!ELEMENT publisher ( #PCDATA ) >
+<!ELEMENT PUBLISHER ( #PCDATA ) >
 
-<!ELEMENT title ( #PCDATA ) >
+<!ELEMENT TITLE ( #PCDATA ) >
 
-<!ELEMENT year ( #PCDATA ) >
+<!ELEMENT YEAR ( #PCDATA ) >
 
