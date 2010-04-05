@@ -13,26 +13,16 @@ public class AppendingTextPane extends JTextPane{
 	}
 
 	public void appendText(String text){
-		try {
-			Document doc = getDocument();
 
-			// Move the insertion point to the end
-			setCaretPosition(doc.getLength());
+		Document doc = getDocument();
 
-			// Insert the text
-			replaceSelection(text);
+		// Move the insertion point to the end
+		setCaretPosition(doc.getLength());
 
-			// Convert the new end location
-			// to view co-ordinates
-			Rectangle r = modelToView(doc.getLength());
+		// Insert the text
+		replaceSelection(text);
 
-			// Finally, scroll so that the new text is visible
-			if (r != null) {
-				scrollRectToVisible(r);
-			}
-		} catch (BadLocationException e) {
-			System.out.println("Failed to append text: " + e);
-		}
+
 	}
 
 
