@@ -14,9 +14,13 @@ import javax.swing.JScrollPane;
  * @author  divo
  */
 public class Interface extends javax.swing.JFrame {
+	MulticastServer server;
+	MulticastClient client;
 
 	/** Creates new form Interface */
-	public Interface() {
+	public Interface(MulticastClient client) {
+		this.server = server;
+		this.client = client;
 		initComponents();
 	}
 
@@ -72,8 +76,13 @@ public class Interface extends javax.swing.JFrame {
 
 	private void send_buttonActionPerformed(java.awt.event.ActionEvent evt) {
 		//System.out.println(sender_input.getText());
-		receiver_pane.appendText(sender_input.getText() + "\n");
-		sender_input.setText("");
+		//receiver_pane.appendText(sender_input.getText() + "\n");
+		//sender_input.setText("");
+		client.send(sender_input.getText());
+	}
+	
+	public void update(String text){
+		receiver_pane.appendText(text + "\n");
 	}
 
 	/**
