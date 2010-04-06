@@ -45,6 +45,19 @@ public class MulticastClient {
 			e.printStackTrace();
 		}
 
+	}
+	
+	public void logoff(){
+		byte[] buffer = {2};
+		DatagramPacket packet = null;
+		try{
+			packet = new DatagramPacket(buffer, buffer.length, address, port);
+			System.out.println(buffer[0]);
+			socket.send(packet);
+			System.out.println("Logoff packet sent");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 
 	}
 

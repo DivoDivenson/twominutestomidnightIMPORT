@@ -47,31 +47,40 @@ public class MulticastServer implements Runnable {
 				packet = new DatagramPacket(buffer, buffer.length);
 				socket.receive(packet);
 				//If other user is registering 
-				if(buffer[0] == 1){
-					System.out.println("Register" + packet.getAddress());
-					//If user not already on registered.
-					if(!(users.contains(packet.getAddress()))){
-						users.add(packet.getAddress());
-						System.out.println("Addeding new client");
-						//Update to gui
-						iface.updateList(users);
-						//Reply with own register packet.
-						Thread.sleep(2000); //HACK. Give the other client a chance to get online. Have to do this because the
-											//client (and thus the register packet) is sent before the server is set up and has a chance to respond. Bad design.
-						iface.register();
+				if(buffer != null){
+					if(buffer[0] == 1){
+						System.out.println("Register" + packet.getAddress());
+						//If user not already on registered.
+						if(!(users.contains(packet.getAddress()))){
+							users.add(packet.getAddress());
+							System.out.println("Addeding new client");
+							//Update to gui
+							iface.updateList(users);
+							//Reply with own register packet.
+							Thread.sleep(2000); //HACK. Give the other client a chance to get online. Have to do this because the
+							//client (and thus the register packet) is sent before the server is set up and has a chance to respond. Bad design.
+							iface.register();
+						}
+					//If logoff packet received
+					}else if(buffer[0] == 2){
+						if(users.contains(packet.getAddress())){
+							users.remove(packet.getAddress());
+							System.out.println("Removing client");
+							iface.updateList(users);
+						}
+					}else{
+						msg = new String(String.format("%s%s%s", packet.getAddress(), " : ", (new String(buffer, 0, packet.getLength()))));
+						iface.update(msg);
 					}
-				}else{
-					msg = new String(String.format("%s%s%s", packet.getAddress(), " : ", (new String(buffer, 0, packet.getLength()))));
-					iface.update(msg);
+
 				}
-				
 			}
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 	}
 
-	
+
 
 
 }
