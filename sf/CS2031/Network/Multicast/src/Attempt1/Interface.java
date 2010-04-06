@@ -1,5 +1,7 @@
 package Attempt1;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Iterator;
@@ -74,6 +76,12 @@ public class Interface extends javax.swing.JFrame {
 		scrollPeers.setViewportView(peer_list);
 		scrollPeers.setBounds(400, 10, 170, 160);
 		add(scrollPeers);
+		
+		this.addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent evt){
+				closeWindow();
+			}
+		});
 
 
 
@@ -95,6 +103,7 @@ public class Interface extends javax.swing.JFrame {
 		setResizable( false );
 
 		setBounds((screenSize.width-586)/2, (screenSize.height-330)/2, 586, 330);
+		//Have program add itself to own list of peers.
 		Vector<InetAddress> temp = new Vector<InetAddress>();
 		try {
 			temp.add(InetAddress.getLocalHost());
@@ -138,11 +147,12 @@ public class Interface extends javax.swing.JFrame {
 	public void register(){
 		client.register();
 	}
+	
+	
 
-	/**
-	 * @param args the command line arguments
-	 */
-
+	public void closeWindow(){
+		client.logoff();
+	}
 
 
 }
