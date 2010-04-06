@@ -15,8 +15,10 @@ public class Main {
 			UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
 		} catch (Exception evt) {}
 		Interface gui = new Interface(client);
-		gui.setVisible(true);
+		//gui.setVisible(false);			//Don't let the user do anything until the backend is set up
 		server = new MulticastServer(gui);
 		server.run();
+		client.setIface(gui);
+		gui.setVisible(true);
 	}
 }
