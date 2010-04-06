@@ -1,5 +1,11 @@
 package Attempt1;
 
+import java.net.InetAddress;
+import java.util.Iterator;
+import java.util.Vector;
+
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
 import javax.swing.JScrollPane;
 
 /*
@@ -16,6 +22,15 @@ import javax.swing.JScrollPane;
 public class Interface extends javax.swing.JFrame {
 	MulticastServer server;
 	MulticastClient client;
+
+	private AppendingTextPane receiver_pane;
+	private JScrollPane scrollpane;
+	private javax.swing.JButton send_button;
+	private javax.swing.JTextField sender_input;
+	private JList peer_list;;
+	private JScrollPane scrollPeers;
+	private DefaultListModel model;
+
 
 	/** Creates new form Interface */
 	public Interface(MulticastClient client) {
@@ -35,6 +50,9 @@ public class Interface extends javax.swing.JFrame {
 		receiver_pane = new AppendingTextPane();
 		sender_input = new javax.swing.JTextField();
 		send_button = new javax.swing.JButton();
+		model = new DefaultListModel();
+		peer_list = new JList(model);
+		scrollPeers = new JScrollPane();
 
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 		getContentPane().setLayout(null);
@@ -51,6 +69,20 @@ public class Interface extends javax.swing.JFrame {
 		scrollpane.setVisible(true);
 		getContentPane().add(scrollpane);
 		setVisible(true);
+		
+		/*peer_list.setModel(new javax.swing.AbstractListModel() {
+	            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4" };
+	            public int getSize() { 
+	            	return strings.length; 
+	            }
+	            public Object getElementAt(int i) { 
+	            	return strings[i]; 
+	            }
+	        });*/
+		 
+		 scrollPeers.setViewportView(peer_list);
+		 scrollPeers.setBounds(400, 10, 170, 160);
+		 add(scrollPeers);
 
 
 
@@ -69,7 +101,10 @@ public class Interface extends javax.swing.JFrame {
 		send_button.setBounds(310, 253, 80, 40);
 
 		java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-		setBounds((screenSize.width-410)/2, (screenSize.height-330)/2, 410, 330);
+		setResizable( false );
+
+		setBounds((screenSize.width-586)/2, (screenSize.height-330)/2, 586, 330);
+
 	}// </editor-fold>
 
 
@@ -85,17 +120,27 @@ public class Interface extends javax.swing.JFrame {
 	public void update(String text){
 		receiver_pane.appendText(text + "\n");
 	}
+	
+	public void updateList(Vector<InetAddress> address){
+		address.trimToSize();
+		model.clear();
+		for(int i = 0; i < address.size(); i++){
+			model.add(i, address.elementAt(i).toString());
+		}
+	}
+	
+	/**
+	 * Allow MulticastServer to tell the MulticatClient to send a registration packet. Silly doing it this way, but thats just how the object
+	 * relations turned out.
+	 */
+	public void register(){
+		client.register();
+	}
 
 	/**
 	 * @param args the command line arguments
 	 */
 
 
-	// Variables declaration - do not modify
-	private AppendingTextPane receiver_pane;
-	private JScrollPane scrollpane;
-	private javax.swing.JButton send_button;
-	private javax.swing.JTextField sender_input;
-	// End of variables declaration
 
 }

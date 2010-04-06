@@ -22,11 +22,29 @@ public class MulticastClient {
 			socket = new MulticastSocket(MCAST_PORT);
 			socket.joinGroup(address);
 			port = MCAST_PORT;
+			register();
 		}
 		catch(Exception e) {
 			e.printStackTrace();
 			System.exit(-1);
 		}
+	}
+	/**
+	 * Register presence with all existing clients.
+	 */
+	public void register(){
+		byte[] buffer = {1};
+		DatagramPacket packet = null;
+		try{
+			packet = new DatagramPacket(buffer, buffer.length, address, port);
+			System.out.println(buffer[0]);
+			socket.send(packet);
+			System.out.println("Register packet sent");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+
+
 	}
 
 
@@ -35,7 +53,7 @@ public class MulticastClient {
 		DatagramPacket packet = null;
 		try{
 			packet = new DatagramPacket(msg.getBytes(), msg.length(), address, port);
-			System.out.println(msg.getBytes()[1]);
+			System.out.println(msg.getBytes());
 			socket.send(packet);
 			System.out.println("Message sent");
 		}catch(Exception e){

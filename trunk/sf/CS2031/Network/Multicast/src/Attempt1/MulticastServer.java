@@ -19,8 +19,10 @@ public class MulticastServer implements Runnable {
 	MulticastSocket socket;
 	InetAddress address;
 	Interface iface;
+	Vector<InetAddress> users;		//List of all the other users connected
 
 	public MulticastServer(Interface iface){
+		users = new Vector<InetAddress>();
 		this.iface = iface;
 		try{
 			address = InetAddress.getByName(MCAST_ADDR);
@@ -44,65 +46,29 @@ public class MulticastServer implements Runnable {
 				buffer = new byte[MAX_BUFFER];
 				packet = new DatagramPacket(buffer, buffer.length);
 				socket.receive(packet);
-				if(buffer[0] == 0){
+				//If other user is registering 
+				if(buffer[0] == 1){
 					System.out.println(packet.getAddress());
+					//If user not already on registered.
+					if(!(users.contains(packet.getAddress()))){
+						users.add(packet.getAddress());
+						//Update to gui
+						iface.updateList(users);
+						//Reply with own register packet.
+						iface.register();
+					}
 				}else{
 					msg = new String(String.format("%s%s%s", packet.getAddress(), " : ", (new String(buffer, 0, packet.getLength()))));
+					iface.update(msg);
 				}
-				iface.update(msg);
+				
 			}
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 	}
 
-	/**
-	 * Maintains a list of all the clients on the network
-	 */
-	class PeerList implements Runnable{
-		Vector<AddressEntry> peers;
-
-		public void add(InetAddress address){
-			if(peers.contains(address)){
-				;
-			}else{
-				peers.add(new AddressEntry(address));
-			}
-		}
-		/**
-		 * Loop every time interval and see if there are any old peers that need to be flushed.
-		 */
-		public void run(){
-
-		}
-	}
-
-	/**
-	 * 
-	 * An InetAddress with a timestamp.
-	 *
-	 */
-	class AddressEntry{
-		private InetAddress address;
-		private long creationTime;
-
-		public AddressEntry(InetAddress address){
-			this.address = address;
-			creationTime = System.currentTimeMillis();
-		}
-		
-		public void refresh(){
-			creationTime = System.currentTimeMillis();
-		}
-
-		public boolean equals(AddressEntry obj){
-			return this.address.equals(obj.getAddress());
-		}
-
-		public InetAddress getAddress(){
-			return this.address;
-		}
-	}
+	
 
 
 }
