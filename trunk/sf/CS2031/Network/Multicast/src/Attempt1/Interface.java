@@ -27,9 +27,8 @@ public class Interface extends javax.swing.JFrame {
 	private JScrollPane scrollpane;
 	private javax.swing.JButton send_button;
 	private javax.swing.JTextField sender_input;
-	private JList peer_list;;
+	private AppendingTextPane peer_list;;
 	private JScrollPane scrollPeers;
-	private DefaultListModel model;
 
 
 	/** Creates new form Interface */
@@ -50,8 +49,8 @@ public class Interface extends javax.swing.JFrame {
 		receiver_pane = new AppendingTextPane();
 		sender_input = new javax.swing.JTextField();
 		send_button = new javax.swing.JButton();
-		model = new DefaultListModel();
-		peer_list = new JList(model);
+		peer_list = new AppendingTextPane();
+		peer_list.setFocusable(false);
 		scrollPeers = new JScrollPane();
 
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -123,11 +122,13 @@ public class Interface extends javax.swing.JFrame {
 	
 	public void updateList(Vector<InetAddress> addressInput){
 		addressInput.trimToSize();
-		model.clear();
+		peer_list.setText("");
 		System.out.println(addressInput.elementAt(0));
 		for(int i = 0; i < addressInput.size(); i++){
-			model.add(i, addressInput.elementAt(i).toString());
+			peer_list.appendText(addressInput.elementAt(i).toString() + "\n");
 		}
+		System.out.println("Should not be set in GUI");
+		
 	}
 	
 	/**
