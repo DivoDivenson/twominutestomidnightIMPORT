@@ -68,25 +68,16 @@ public class Interface extends javax.swing.JFrame {
 		scrollpane.setVisible(true);
 		getContentPane().add(scrollpane);
 		setVisible(true);
-		
-		/*peer_list.setModel(new javax.swing.AbstractListModel() {
-	            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4" };
-	            public int getSize() { 
-	            	return strings.length; 
-	            }
-	            public Object getElementAt(int i) { 
-	            	return strings[i]; 
-	            }
-	        });*/
-		 
-		 scrollPeers.setViewportView(peer_list);
-		 scrollPeers.setBounds(400, 10, 170, 160);
-		 add(scrollPeers);
+
+
+		scrollPeers.setViewportView(peer_list);
+		scrollPeers.setBounds(400, 10, 170, 160);
+		add(scrollPeers);
 
 
 
 
-		
+
 		getContentPane().add(sender_input);
 		sender_input.setBounds(10, 257, 290, 30);
 
@@ -115,11 +106,11 @@ public class Interface extends javax.swing.JFrame {
 		sender_input.setText("");
 
 	}
-	
+
 	public void update(String text){
 		receiver_pane.appendText(text + "\n");
 	}
-	
+
 	public void updateList(Vector<InetAddress> addressInput){
 		addressInput.trimToSize();
 		peer_list.setText("");
@@ -128,9 +119,9 @@ public class Interface extends javax.swing.JFrame {
 			peer_list.appendText(addressInput.elementAt(i).toString() + "\n");
 		}
 		System.out.println("Should not be set in GUI");
-		
+
 	}
-	
+
 	/**
 	 * Allow MulticastServer to tell the MulticatClient to send a registration packet. Silly doing it this way, but thats just how the object
 	 * relations turned out.

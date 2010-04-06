@@ -56,6 +56,8 @@ public class MulticastServer implements Runnable {
 						//Update to gui
 						iface.updateList(users);
 						//Reply with own register packet.
+						Thread.sleep(2000); //HACK. Give the other client a chance to get online. Have to do this because the
+											//client (and thus the register packet) is sent before the server is set up and has a chance to respond. Bad design.
 						iface.register();
 					}
 				}else{
