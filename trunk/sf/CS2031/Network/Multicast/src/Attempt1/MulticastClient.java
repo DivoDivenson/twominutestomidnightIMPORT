@@ -14,6 +14,7 @@ public class MulticastClient {
 	MulticastSocket socket;
 	InetAddress address;
 	int port;
+	Interface iface;
 
 
 	public MulticastClient() {
@@ -60,6 +61,13 @@ public class MulticastClient {
 			e.printStackTrace();
 		}
 
+	}
+	/**
+	 * Setup link between the client and the interface
+	 * @param iface
+	 */
+	public void setIface(Interface iface){
+		this.iface = iface;
 	}
 
 }

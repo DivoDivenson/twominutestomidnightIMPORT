@@ -1,6 +1,7 @@
 package Attempt1;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -94,6 +95,14 @@ public class Interface extends javax.swing.JFrame {
 		setResizable( false );
 
 		setBounds((screenSize.width-586)/2, (screenSize.height-330)/2, 586, 330);
+		Vector<InetAddress> temp = new Vector<InetAddress>();
+		try {
+			temp.add(InetAddress.getLocalHost());
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		updateList(temp);
 
 	}// </editor-fold>
 
