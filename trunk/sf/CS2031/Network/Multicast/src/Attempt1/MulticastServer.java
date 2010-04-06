@@ -48,10 +48,11 @@ public class MulticastServer implements Runnable {
 				socket.receive(packet);
 				//If other user is registering 
 				if(buffer[0] == 1){
-					System.out.println(packet.getAddress());
+					System.out.println("Register" + packet.getAddress());
 					//If user not already on registered.
 					if(!(users.contains(packet.getAddress()))){
 						users.add(packet.getAddress());
+						System.out.println("Addeding new client");
 						//Update to gui
 						iface.updateList(users);
 						//Reply with own register packet.

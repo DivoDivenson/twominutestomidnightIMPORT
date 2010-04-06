@@ -121,11 +121,12 @@ public class Interface extends javax.swing.JFrame {
 		receiver_pane.appendText(text + "\n");
 	}
 	
-	public void updateList(Vector<InetAddress> address){
-		address.trimToSize();
+	public void updateList(Vector<InetAddress> addressInput){
+		addressInput.trimToSize();
 		model.clear();
-		for(int i = 0; i < address.size(); i++){
-			model.add(i, address.elementAt(i).toString());
+		System.out.println(addressInput.elementAt(0));
+		for(int i = 0; i < addressInput.size(); i++){
+			model.add(i, addressInput.elementAt(i).toString());
 		}
 	}
 	
