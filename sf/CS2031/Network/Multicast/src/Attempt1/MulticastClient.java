@@ -26,8 +26,9 @@ public class MulticastClient {
 			register();
 		}
 		catch(Exception e) {
+			System.err.println("No network connection found. Abort");
 			e.printStackTrace();
-			System.exit(-1);
+			//System.exit(1);
 		}
 	}
 	/**
