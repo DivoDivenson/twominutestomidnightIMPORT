@@ -64,11 +64,13 @@ public class MulticastClient {
 
 
 	public void send(String msg){
-		byte[] buffer;
+		//Make room for leading byte
+		byte[] buffer = new byte[(msg.getBytes().length)+1];
+		System.arraycopy(msg.getBytes(), 0, buffer, 1, buffer.length -1);
+		buffer[0] = 0;
 		DatagramPacket packet = null;
 		try{
-			packet = new DatagramPacket(msg.getBytes(), msg.length(), address, port);
-			System.out.println(msg.getBytes());
+			packet = new DatagramPacket(buffer, buffer.length, address, port);
 			socket.send(packet);
 			System.out.println("Message sent");
 		}catch(Exception e){
