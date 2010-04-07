@@ -30,8 +30,9 @@ public class MulticastServer implements Runnable {
 			socket.joinGroup(address);
 
 		}catch(Exception e){
+			System.err.println("No network connection found. Abort");
 			e.printStackTrace();
-			System.exit(1);
+			//System.exit(1);
 		}
 	}
 
