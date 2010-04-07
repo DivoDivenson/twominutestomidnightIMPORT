@@ -47,9 +47,14 @@ public class MulticastServer implements Runnable {
 				buffer = new byte[MAX_BUFFER];
 				packet = new DatagramPacket(buffer, buffer.length);
 				socket.receive(packet);
-				//If other user is registering 
 				if(buffer != null){
-					if(buffer[0] == 1){
+					//If data packet
+					if(buffer[0] == 0){
+						System.out.println("Data received");
+						msg = new String(String.format("%s%s%s", packet.getAddress(), " : ", (new String(buffer, 1, packet.getLength()-1))));
+						iface.update(msg);
+						//If register packet
+					}else if(buffer[0] == 1){
 						System.out.println("Register" + packet.getAddress());
 						//If user not already on registered.
 						if(!(users.contains(packet.getAddress()))){
@@ -62,7 +67,7 @@ public class MulticastServer implements Runnable {
 							//client (and thus the register packet) is sent before the server is set up and has a chance to respond. Bad design.
 							iface.register();
 						}
-					//If logoff packet received
+						//If logoff packet received
 					}else if(buffer[0] == 2){
 						if(users.contains(packet.getAddress())){
 							users.remove(packet.getAddress());
@@ -70,8 +75,8 @@ public class MulticastServer implements Runnable {
 							iface.updateList(users);
 						}
 					}else{
-						msg = new String(String.format("%s%s%s", packet.getAddress(), " : ", (new String(buffer, 0, packet.getLength()))));
-						iface.update(msg);
+						;//msg = new String(String.format("%s%s%s", packet.getAddress(), " : ", (new String(buffer, 0, packet.getLength()))));
+						//iface.update(msg);
 					}
 
 				}
