@@ -3,7 +3,7 @@ public class DesEncrypter {
 	int key;
 
 
-    DesEncrypter(int key)  {
+    public DesEncrypter(int key)  {
     	
             this.key = key;
     }

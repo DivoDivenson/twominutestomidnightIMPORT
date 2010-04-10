@@ -51,10 +51,7 @@ public class Interface extends javax.swing.JFrame {
 		scrollpane.setVisible(true);
 		getContentPane().add(scrollpane);
 		setVisible(true);
-
-
-
-
+		
 		
 		getContentPane().add(sender_input);
 		sender_input.setBounds(10, 257, 290, 30);
@@ -75,11 +72,10 @@ public class Interface extends javax.swing.JFrame {
 
 
 	private void send_buttonActionPerformed(java.awt.event.ActionEvent evt) {
-		//System.out.println(sender_input.getText());
-		//receiver_pane.appendText(sender_input.getText() + "\n");
-		client.send(sender_input.getText());
-		sender_input.setText("");
-
+		if(client.awaitingack == 0){ // Only if there are no acknowledgements pending, will the msg send
+			client.send(sender_input.getText());
+			sender_input.setText("");
+		}
 	}
 	
 	public void update(String text){

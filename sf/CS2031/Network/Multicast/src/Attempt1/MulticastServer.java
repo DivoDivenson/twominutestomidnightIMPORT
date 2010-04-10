@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.Date;
 import java.util.Vector;
+import Encryption.DesEncrypter;
 
 /**
  * 
@@ -20,10 +21,14 @@ public class MulticastServer implements Runnable {
 	InetAddress address;
 	Interface iface;
 	Vector<InetAddress> users;		//List of all the other users connected
+	DesEncrypter decryptor;
+
 
 	public MulticastServer(Interface iface){
 		users = new Vector<InetAddress>();
 		this.iface = iface;
+		decryptor = new DesEncrypter(3);
+		
 		try{
 			address = InetAddress.getByName(MCAST_ADDR);
 			socket = new MulticastSocket(MCAST_PORT);
@@ -51,7 +56,9 @@ public class MulticastServer implements Runnable {
 					//If data packet
 					if(buffer[0] == 0){
 						System.out.println("Data received");
-						msg = new String(String.format("%s%s%s", packet.getAddress(), " : ", (new String(buffer, 1, packet.getLength()-1))));
+						msg =new String(buffer, 1, packet.getLength()-1);
+						msg = decryptor.decrypt(msg);
+						msg = new String(String.format("%s%s%s", packet.getAddress().toString(), ": ", msg));
 						iface.update(msg);
 						//If register packet
 					}else if(buffer[0] == 1){

@@ -3,6 +3,7 @@ package Attempt1;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import Encryption.DesEncrypter;
 
 public class MulticastClient {
 
@@ -15,6 +16,8 @@ public class MulticastClient {
 	InetAddress address;
 	int port;
 	Interface iface;
+	DesEncrypter encryptor;
+	
 
 
 	public MulticastClient() {
@@ -24,6 +27,8 @@ public class MulticastClient {
 			socket.joinGroup(address);
 			port = MCAST_PORT;
 			register();
+			encryptor = new DesEncrypter(3);
+			
 		}
 		catch(Exception e) {
 			System.err.println("No network connection found. Abort");
@@ -65,6 +70,7 @@ public class MulticastClient {
 
 	public void send(String msg){
 		//Make room for leading byte
+		msg = encryptor.encrypt(msg);
 		byte[] buffer = new byte[(msg.getBytes().length)+1];
 		System.arraycopy(msg.getBytes(), 0, buffer, 1, buffer.length -1);
 		buffer[0] = 0;
