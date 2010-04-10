@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.Date;
 import java.util.Vector;
+import java.sql.Time;
 
 /**
  * 
@@ -47,9 +48,16 @@ public class MulticastServer implements Runnable {
 				if(buffer[0] == 0){
 					System.out.println(packet.getAddress());
 				}else{
-					msg = new String(String.format("%s%s%s", packet.getAddress(), " : ", (new String(buffer, 0, packet.getLength()))));
+					String content = new String(buffer,0,packet.getLength());
+					if(content.equals("ACK")){//If msg is an acknowledgment of a previous msg
+						iface.client.ackreceived++;
+						System.out.println("ACK RECEIVED");
+					}else{
+						msg = new String(String.format("%s%s%s", packet.getAddress(), " : ", (new String(buffer, 0, packet.getLength()))));
+						iface.update(msg);
+						iface.client.send("ACK");
+					}
 				}
-				iface.update(msg);
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -103,6 +111,4 @@ public class MulticastServer implements Runnable {
 			return this.address;
 		}
 	}
-
-
 }
