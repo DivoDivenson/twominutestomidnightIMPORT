@@ -11,7 +11,7 @@ import javax.swing.JScrollPane;
 
 /**
  *
- * @author  divo
+ * @author  mark
  */
 public class Interface extends javax.swing.JFrame {
 	MulticastServer server;

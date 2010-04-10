@@ -3,9 +3,10 @@ package Attempt1;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.util.Date;
 import java.util.Vector;
 import Encryption.DesEncrypter;
+import java.sql.Time;
+
 
 /**
  * 
@@ -41,6 +42,7 @@ public class MulticastServer implements Runnable {
 		}
 	}
 
+	
 	public void run(){
 		DatagramPacket packet = null;
 		byte[] buffer = null;
@@ -60,6 +62,8 @@ public class MulticastServer implements Runnable {
 						msg = decryptor.decrypt(msg);
 						msg = new String(String.format("%s%s%s", packet.getAddress().toString(), ": ", msg));
 						iface.update(msg);
+						iface.client.acknowledge();
+
 						//If register packet
 					}else if(buffer[0] == 1){
 						System.out.println("Register" + packet.getAddress());
@@ -81,6 +85,10 @@ public class MulticastServer implements Runnable {
 							System.out.println("Removing client");
 							iface.updateList(users);
 						}
+						//If ACK packet
+					}else if(buffer[0] == 3){
+						iface.client.ackreceived++;
+						System.out.println("Ack received");
 					}else{
 						;//msg = new String(String.format("%s%s%s", packet.getAddress(), " : ", (new String(buffer, 0, packet.getLength()))));
 						//iface.update(msg);

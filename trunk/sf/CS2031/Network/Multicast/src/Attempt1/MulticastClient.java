@@ -3,6 +3,8 @@ package Attempt1;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+
+import flow.MulticastClient.updateAck;
 import Encryption.DesEncrypter;
 
 public class MulticastClient {
@@ -18,6 +20,12 @@ public class MulticastClient {
 	Interface iface;
 	DesEncrypter encryptor;
 	
+	int awaitingack; //Amount of acks waiting for
+	String prevmessage;
+	int peersnum;
+	int ackreceived;
+	Thread ac; //Thread for continuously checking for acknowledgements
+	
 
 
 	public MulticastClient() {
@@ -28,6 +36,12 @@ public class MulticastClient {
 			port = MCAST_PORT;
 			register();
 			encryptor = new DesEncrypter(3);
+			
+			awaitingack = 0;
+			peersnum = 1; //Includes self
+			ackreceived = 0;
+			ac = new Thread(new updateAck());
+			ac.start();
 			
 		}
 		catch(Exception e) {
@@ -40,21 +54,28 @@ public class MulticastClient {
 	 * Register presence with all existing clients.
 	 */
 	public void register(){
-		byte[] buffer = {1};
-		DatagramPacket packet = null;
-		try{
-			packet = new DatagramPacket(buffer, buffer.length, address, port);
-			System.out.println(buffer[0]);
-			socket.send(packet);
-			System.out.println("Register packet sent");
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+		notify((byte) 1);
 
 	}
 	
 	public void logoff(){
-		byte[] buffer = {2};
+		notify((byte) 2);
+
+	}
+	
+	public void acknowledge(){
+		notify((byte)3);
+	}
+	
+	/**
+	 * Used to send information (Ack etc) to other client.
+	 * 1 == Register with peers
+	 * 2 == Inform peers of program termination.
+	 * 3 = Ack
+	 * @param code
+	 */
+	private void notify(byte code){
+		byte[] buffer = {code};
 		DatagramPacket packet = null;
 		try{
 			packet = new DatagramPacket(buffer, buffer.length, address, port);
@@ -64,7 +85,6 @@ public class MulticastClient {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-
 	}
 
 
@@ -79,11 +99,19 @@ public class MulticastClient {
 			packet = new DatagramPacket(buffer, buffer.length, address, port);
 			socket.send(packet);
 			System.out.println("Message sent");
+			prevmessage = msg;
+            awaitingack = peersnum;
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 
 	}
+	
+	public void setpeersnum(int num){
+		this.peersnum = num;
+	}
+	
+	
 	/**
 	 * Setup link between the client and the interface
 	 * @param iface
@@ -91,5 +119,50 @@ public class MulticastClient {
 	public void setIface(Interface iface){
 		this.iface = iface;
 	}
-
+	
+	/**
+	 *  Separate process that looks for acknowledgements. 
+	 * @author Mark
+	 *
+	 */
+public class updateAck implements Runnable{
+		
+		public updateAck(){}
+		
+		public void run(){
+			int loopswaiting = 0;
+			while(true){
+				//If acknowledgement(s) received.
+				if(ackreceived > 0){
+					System.out.println("Ack received = " + ackreceived);
+					awaitingack = 0;//awaitingack - ackreceived;
+					//ackreceived -= ackreceived;
+					ackreceived = 0;
+				}
+				if(awaitingack > 0){
+					loopswaiting++;
+				}
+				else{
+					loopswaiting = 0;
+				}
+				/*if(ackreceived < 0){
+					ackreceived = 0;
+				}*/
+				if(loopswaiting > 3){
+					//Resend previous message if the program has waiting
+					//more than 3 loops to receive all acks
+					send(prevmessage);
+					awaitingack = peersnum;
+					ackreceived = 0;
+				}
+				//System.out.println("loop");
+				System.out.flush();
+				try {
+					Thread.sleep(300);
+				} catch (InterruptedException e) {e.printStackTrace();}
+			}
+		}
+	}
 }
+
+
