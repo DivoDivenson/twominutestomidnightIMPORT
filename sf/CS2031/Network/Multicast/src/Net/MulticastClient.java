@@ -11,7 +11,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 
-import flow.MulticastClient.updateAck;
+import Net.MulticastClient.updateAck;
 import Encryption.DesEncrypter;
 
 public class MulticastClient {
