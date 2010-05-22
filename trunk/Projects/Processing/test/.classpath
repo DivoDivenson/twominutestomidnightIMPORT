@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="/home/divo/media/sata/College/twominutestomidnight/Projects/Processing/processing-1.1/lib/core.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
