@@ -17,6 +17,7 @@ public class test extends PApplet {
 	String title;
 	
 	float barWidth;
+	int rowCount;
 	
 	int columnCount, currentColumn = 0;
 	int yearInterval = 10;
@@ -50,6 +51,7 @@ public class test extends PApplet {
 		textFont(font);
 		textSize(12);
 		barWidth = ((plotX1 - plotX2) / data.getRowCount());
+		rowCount = data.getRowCount();
 
 
 		
@@ -60,21 +62,29 @@ public class test extends PApplet {
 	
 	public void draw(){
 		
-		background(224);
+		background(255);
 		
 		
 		fill(255);
 		
-		rectMode(CORNERS);
-		noStroke();
-		rect(plotX1, plotY1, plotX2, plotY2);
+		//rectMode(CORNERS);
+		//noStroke();
+		//rect(plotX1, plotY1, plotX2, plotY2);
 		
 		columnCount = data.getColumnCount();
-		drawYearLabels();
+		//drawYearLabels();
 
 		strokeWeight(5);
 		stroke(86, 121, 193);
-		drawDataPoints(currentColumn, true);
+		/*********/
+		noFill();
+		strokeWeight(2);
+		drawDataCurve(currentColumn);
+		//drawDataLine(currentColumn);
+		//drawDataHighlight(currentColumn);		
+		/*********/
+		
+		//drawDataPoints(currentColumn, true);
 		if (!type) {
 			switch (currentColumn) {
 			case 0: {
@@ -118,18 +128,63 @@ public class test extends PApplet {
 		
 		drawTitle();
 		if(press){
-			drawBar();
+			//drawBar();
+			drawDataHighlight(currentColumn);
 		}
 		drawVolumeLabel();
 		drawAxisLabels();
+		drawYearLabels();
+	
+		
+		
 	}
+	
+	void drawDataLine(int col) {
+		  beginShape( );
+		  int rowCount = data.getRowCount( );
+		  for (int row = 0; row < rowCount; row++) {
+		    if (data.isValid(row, col)) {
+		      float value = data.getFloat(row, col);
+		      float x = map(years[row], yearMin, yearMax, plotX1, plotX2);
+		      float y = map(value, dataMin, dataMax, plotY2, plotY1);
+		      vertex(x, y);
+		    }
+		  }
+		  endShape( );
+		}
+	
+	void drawDataCurve(int col) {
+		  beginShape( );
+		  int rowCount = data.getRowCount( );
+		  for (int row = 0; row < rowCount; row++) {
+		    if (data.isValid(row, col)) {
+		      float value = data.getFloat(row, col);
+		      float x = map(years[row], yearMin, yearMax, plotX1, plotX2);
+		      float y = map(value, dataMin, dataMax, plotY2, plotY1);
+		      curveVertex(x, y);
+		      if((row == 0) || (row == rowCount -1)){
+		    	  curveVertex(x,y);
+		      }
+		    }
+		  }
+		if (type) {
+			fill(86, 121, 193);
+			vertex(plotX2, plotY2);
+			vertex(plotX1, plotY2);
+			endShape(CLOSE);
+		}else{
+			endShape();
+		}
+		  //endShape( );
+		}
+
 	
 	public void drawYearLabels(){
 		fill(0);
 		textSize(10);
 		textAlign(CENTER, TOP);
 		int rowCount = data.getRowCount();
-		stroke(244);
+		stroke(255);
 		strokeWeight(1);
 		for(int row = 0; row < rowCount; row++){
 			if(years[row] % yearInterval ==0 ){
@@ -229,6 +284,25 @@ public class test extends PApplet {
 		}
 	}
 	
+	public void drawDataHighlight(int col){
+		for(int row = 0; row < rowCount; row++){
+			if(data.isValid(row,col)){
+				float value = data.getFloat(row, col);
+				float x = map(years[row], yearMin, yearMax, plotX1, plotX2);
+				float y = map(value, dataMin, dataMax, plotY2, plotY1);
+				if(dist(mouseX, 0, x, 0) < 3){
+				//if((mouseX - x) < 3 ){
+					strokeWeight(10);
+					point(x, y);
+					fill(0);
+					textSize(10);
+					textAlign(CENTER);
+					text(nf(value, 0, 2) + " (" + years[row] + ")", x,y-8);
+				}
+			}
+		}
+	}
+	
 	public void drawBar(){
 		strokeWeight(0);
 		fill(120, 50);
@@ -269,12 +343,7 @@ public class test extends PApplet {
 	}
 	
 	public void mousePressed(){
-		if(press){
-			press = false;
-		}else{
-			press = true;
-		}
-		
+		press = !press;		
 	}
 	
 
