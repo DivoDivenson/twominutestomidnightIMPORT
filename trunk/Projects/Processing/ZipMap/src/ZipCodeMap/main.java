@@ -1,4 +1,4 @@
-package BaseBall;
+package ZipCodeMap;
 import processing.core.PApplet;
 
 
@@ -6,7 +6,7 @@ public class main{
 
 	
 	public static void main(String args[]){
-	    PApplet.main(new String[] {  "BaseBall.test" });
+	    PApplet.main(new String[] {  "ZipCodeMap.ZipMap" });
 
 	}
 }
