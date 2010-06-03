@@ -4,5 +4,8 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="/home/divo/media/sata/College/twominutestomidnight/Projects/Processing/processing-1.1/lib/core.jar"/>
 	<classpathentry kind="lib" path="/home/divo/media/sata/College/twominutestomidnight/Projects/Processing/processing-1.1/lib/pde.jar"/>
+	<classpathentry kind="lib" path="/home/divo/media/sata/College/twominutestomidnight/Projects/Processing/ZipMap/src/data/treemap/library/treemap.jar"/>
+	<classpathentry kind="lib" path="/home/divo/media/sata/College/twominutestomidnight/Projects/Processing/Test/pdf.jar"/>
+	<classpathentry kind="lib" path="/home/divo/media/sata/College/twominutestomidnight/Projects/Processing/Test/itext.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
