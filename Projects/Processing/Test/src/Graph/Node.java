@@ -25,7 +25,7 @@ class Node {
 		float ddx = 0;
 		float ddy = 0;
 		// System.err.println(g.getNodeCount());
-		for (int j = 0; j < g.nodeCount; j++) {
+		for (int j = 0; j < g.nodeCount/10; j++) {
 			// System.err.println(j);
 			Node n = g.nodes[j];
 			if (n != this) {
@@ -72,6 +72,9 @@ class Node {
 																	// specific
 																	// to the
 																	// Data set
+		if(count >= g.nodes.length -3){
+			fixed = true;
+		}
 		if (fixed) {
 			g.fill(g.nodeColor.getRGB());
 			g.stroke(0);
@@ -93,6 +96,7 @@ class Node {
 			g.strokeWeight(0.5f);
 			g.ellipse(x, y, rad, rad);
 		}
+		//g.background(255);
 	}
 
 	void increment() {
