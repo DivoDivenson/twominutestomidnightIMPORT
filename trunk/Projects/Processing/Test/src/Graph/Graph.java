@@ -30,12 +30,13 @@ public class Graph extends PApplet {
 		font = createFont("Liberation Mono Bold", 15);
 		textFont(font);
 		smooth();
-		String[] fonts = PFont.list();
-		for(int i = 0; i < fonts.length; i++){
+		//String[] fonts = PFont.list();
+		/*for(int i = 0; i < fonts.length; i++){
 			System.out.println(fonts[i]);
-		}
-		writeData();
+		}*/
+		//writeData();
 		// frameRate(30);
+		
 	}
 
 	public void draw() {
@@ -61,6 +62,7 @@ public class Graph extends PApplet {
 		for (int i = 0; i < nodeCount; i++) {
 			nodes[i].draw();
 		}
+		//background(255);
 
 		if (record) {
 			endRecord();
@@ -124,24 +126,31 @@ public class Graph extends PApplet {
 	}
 
 	void loadData() {
+		int wordscount = 0;
 		String[] lines = loadStrings("src/data/huckfinn.old");
 		// Make the text into a single String object.
 		String line = join(lines, " ");
 		// Replace -- with an actual em dash.
 		line = line.replaceAll("--", "\u2014");
+		//System.out.println(line);
 		// Split into phrases using any of the provided tokens.
 		String[] phrases = splitTokens(line, ".,;:?!\u2014\"");
-		for (int i = 0; i < phrases.length; i++) {
+		//System.err.println(phrases.length);
+		/*
+		 * Hurpeity durp, look at failure clause
+		 */
+		for (int i = 0; i <  50/*phrases.length*/; i++) {
 			// Make this phrase lowercase.
 			String phrase = phrases[i].toLowerCase();
 			// Split each phrase into individual words at one or more spaces.
 			String[] words = splitTokens(phrase, " ");
 			for (int w = 0; w < words.length - 1; w++) {
 				addEdge(words[w], words[w + 1]);
+				//System.out.println(words[w] + " : " + words[w + 1]);
 			}
 		}
 
-		System.out.println(nodeCount);
+		//System.out.println(nodeCount);
 	}
 
 	void addEdge(String fromLabel, String toLabel) {
@@ -178,6 +187,7 @@ public class Graph extends PApplet {
 
 	Node addNode(String label) {
 		Node n = new Node(label, this);
+		//System.out.println(label);
 		if (nodeCount == nodes.length) {
 			nodes = (Node[]) expand(nodes);
 		}
