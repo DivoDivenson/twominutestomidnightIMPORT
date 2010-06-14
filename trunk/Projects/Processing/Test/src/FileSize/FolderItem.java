@@ -39,8 +39,7 @@ class FolderItem extends FileItem implements MapModel {
 				}
 				FileItem newItem = null;
 				if (fileItem.isDirectory()) {
-					newItem = new FolderItem(this, fileItem, level + 1, count,
-							p);
+					newItem = new FolderItem(this, fileItem, level + 1, count, p);
 				} else {
 					newItem = new FileItem(this, fileItem, level + 1, count, p);
 				}
