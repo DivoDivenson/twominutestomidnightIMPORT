@@ -129,7 +129,7 @@ public class setup extends PApplet {
 						if (!(newUrl.contains(".jpg"))
 								|| (newUrl.contains("static"))) {
 							saveStream(filename,
-									"src/data/facebook/pictures/default.jpg");
+									"src/data/facebook/pictures/default.jpg"); //IF NO IMAGE FOUND, USE THE DEFAULT INSTEAD, DO THIS IN A SEPERATE ASSOCIATION METHOD
 						} else {
 							saveStream(filename, newUrl);
 						}
