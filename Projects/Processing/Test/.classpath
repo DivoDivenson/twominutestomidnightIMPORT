@@ -7,5 +7,6 @@
 	<classpathentry kind="lib" path="/home/divo/media/sata/College/twominutestomidnight/Projects/Processing/ZipMap/src/data/treemap/library/treemap.jar"/>
 	<classpathentry kind="lib" path="/home/divo/media/sata/College/twominutestomidnight/Projects/Processing/Test/pdf.jar"/>
 	<classpathentry kind="lib" path="/home/divo/media/sata/College/twominutestomidnight/Projects/Processing/Test/itext.jar"/>
+	<classpathentry kind="lib" path="/home/divo/media/sata/College/twominutestomidnight/Projects/Processing/Test/src/data/httpunit.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
