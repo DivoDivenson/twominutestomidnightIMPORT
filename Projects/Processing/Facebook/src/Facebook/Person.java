@@ -1,6 +1,7 @@
 package Facebook;
 
 import processing.core.PApplet;
+import processing.core.PImage;
 import treemap.SimpleMapItem;
 
 public class Person extends SimpleMapItem {
@@ -10,6 +11,7 @@ public class Person extends SimpleMapItem {
 	long id;
 	int level;
 	PApplet p;
+	PImage image;
 
 	float textPadding = 8;
 	float boxLeft, boxTop, boxRight, boxBottom;
@@ -20,9 +22,20 @@ public class Person extends SimpleMapItem {
 		this.id = Long.parseLong(id);
 		this.p = p;
 		// this.order = order;
-		//size =  p.random(1, 3);
-		//size = 1;
+		size = p.random(1, 2);
+		// size = 1;
 		// System.out.println(first);
+	}
+
+	public Person(String name, String id, PApplet p, int order, PImage image) {
+		this(name, id, p, order);
+		this.image = image;
+	}
+
+	public void setImage(PImage image, String temp) {
+		this.image = image;
+		System.out.println("Images loaded for " + id + " " + temp);
+		//image.resize((int) calcWidth(),(int) calcHeight());
 	}
 
 	public String toString() {
@@ -35,22 +48,51 @@ public class Person extends SimpleMapItem {
 		boxRight = x + w;
 		boxBottom = y + w;
 	}
+	
+	/*
+	 * But in some sort of check so the images size does dnot have to be recalculted every time, just when the layout is changed
+	 * @see treemap.SimpleMapItem#draw()
+	 */
+	
+	public float calcWidth(){
+		float result;
+		if(image.width > image.height){
+			result = w;
+		}else{
+			result = image.width - (image.height - h);
+		}
+		return result;
+	}
 
+	public float calcHeight(){
+		float result;
+		if(image.width > image.height){
+			result = image.height - (image.width -w);
+		}else{
+			result = h;
+		}
+		
+		return result;
+	}
 	public void draw() {
 		p.fill(0);
-		p.rect(x-2, y-2, w-2, h-2);
-		
-		//if (w > p.textWidth(first) + 6) {
-			//if (h > p.textAscent() + 6) {
-		p.fill(100,122);
-		p.rect(x-2, y-2, p.textWidth(first) + 12, p.textAscent() + 7);
-				p.textAlign(p.CORNER, p.CORNER);
-				p.fill(150);
-				String temp = new String(String.format(" %.2f", size));
-				p.text(first + temp, x + 3, y + 12);
-				
-			//}
-		//}
+		p.rect(x - 2, y - 2, w - 2, h - 2);
+		p.imageMode(p.CORNER);
+		p.image(image, x-2, y-2, w-2, h-2);
+		//p.image(image, x - 2, y - 2, calcWidth() - 2, calcHeight() - 2);
+
+		// if (w > p.textWidth(first) + 6) {
+		// if (h > p.textAscent() + 6) {
+		p.noStroke();
+		p.fill(100, 122);
+		p.rect(x - 2, y - 2, p.textWidth(first) + 10, p.textAscent() + 6);
+		p.textAlign(p.CORNER, p.CORNER);
+		p.fill(210);
+		// String temp = new String(String.format(" %.2f", size));
+		p.text(first, x + 3, y + 12);
+
+		// }
+		// }
 	}
 
 	/*
@@ -86,12 +128,12 @@ public class Person extends SimpleMapItem {
 	public long getID() {
 		return this.id;
 	}
-	
-	public String getFirst(){
+
+	public String getFirst() {
 		return this.first;
 	}
-	
-	public String getName(){
+
+	public String getName() {
 		return this.first + " " + this.last;
 	}
 

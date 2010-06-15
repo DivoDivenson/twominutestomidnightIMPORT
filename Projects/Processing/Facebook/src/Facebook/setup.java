@@ -2,6 +2,7 @@ package Facebook;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,7 +20,7 @@ public class setup extends PApplet {
 	People contacts;
 
 	public void setup() {
-		size(800, 800);
+		size(1000, 1000);
 		// rectMode(CORNERS);
 		smooth();
 		strokeWeight(0.25f);
@@ -29,6 +30,7 @@ public class setup extends PApplet {
 
 		contacts = new People(people);
 		//getImages();
+		loadImages();
 		/*
 		 * for(Person n : people){ contacts.addPerson(n); }
 		 * contacts.finishAdd();
@@ -48,15 +50,20 @@ public class setup extends PApplet {
 		map.draw();
 
 	}
+	
+	public void saveImage(){
+		save("src/data/facebook/friends.tiff");
+		System.out.println("Image saved");
+	}
 
 	/**
 	 * Switch between the various drawing algorithms
 	 */
 	public void keyPressed() {
 		System.out.println("Press");
-		people = loadFriends();
-		contacts = new People(people);
-		map = new Treemap(contacts, 0, 0, width, height);
+		//people = loadFriends();
+		//contacts = new People(people);
+		//map = new Treemap(contacts, 0, 0, width, height);
 		if (key == 'r') {
 			map.setLayout(new SquarifiedLayout());
 			map.updateLayout();
@@ -89,11 +96,53 @@ public class setup extends PApplet {
 			map.setLayout(new OrderedTreemap());
 			map.updateLayout();
 			System.out.println("ordered");
+		}else if(key == 's'){
+			saveImage();
 		}
+	}
+	
+	/**
+	 * Associate the relevant profile pictures/persons
+	 */
+	public void loadImages(){
+		//sortPeople();
+		
+		File pictures = new File("src/data/facebook/pictures");
+		File[] files = pictures.listFiles();
+		for(int i = 0; i < files.length; i++){
+			String name = (files[i].getName().split("\\."))[0];
+			int index;
+			//System.out.println(n);
+		
+			/*if((index = Arrays.binarySearch(people, Long.parseLong(name), new IDNoComparator())) != -1){
+				System.out.println("Found " + files[i] + " @ " + index);
+				people[i].setImage(loadImage(files[i].getPath()));
+				}*/
+			
+			if((index = crapFind(Long.parseLong(name))) != -1){
+				System.out.println("Found " + files[i] + " @ " + index);
+				people[index].setImage(loadImage(files[i].getPath()), files[i].getName());
+			}
+			
+		}
+	}
+	
+	private int crapFind(long id){
+		for(int i = 0; i < people.length; i++){
+			if(people[i].getID() == id){
+				//System.out.println(people[i].getName() + " : " + id);
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	public void sortPeople(){
+		Arrays.sort(people, new IDComparator());
 	}
 
 	/**
-	 * Get the profile picture for each Person
+	 * Get the profile picture for each Person and store them in src/data/facebook/pictures
 	 */
 	public void getImages() {
 		WebConversation wc = new WebConversation();
@@ -126,14 +175,13 @@ public class setup extends PApplet {
 						// Append proper file extension later
 						// Also, if the user has never changed their image, use
 						// the default onr
-						if (!(newUrl.contains(".jpg"))
-								|| (newUrl.contains("static"))) {
-							saveStream(filename,
-									"src/data/facebook/pictures/default.jpg"); //IF NO IMAGE FOUND, USE THE DEFAULT INSTEAD, DO THIS IN A SEPERATE ASSOCIATION METHOD
-						} else {
+						if ((newUrl.contains(".jpg"))
+								&& !(newUrl.contains("static"))) {
 							saveStream(filename, newUrl);
+							System.out.println("Imaged saved");
+						}else{
+							System.out.println("Imaged not valid");
 						}
-						System.out.println("Imaged saved");
 
 					} else {
 						throw new Exception("Image not found");
@@ -177,7 +225,7 @@ public class setup extends PApplet {
 				Matcher m = idPattern.matcher(n);
 				if (m.find()) {
 					id = m.group(0);
-					people.add(new Person(name, id, this, 4));
+					people.add(new Person(name, id, this, 4, loadImage("src/data/facebook/pictures/0000.jpg")));
 				}
 			} else {
 				// System.out.println();
