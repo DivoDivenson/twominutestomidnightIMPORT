@@ -11,10 +11,11 @@ public class Person extends SimpleMapItem {
 	long id;
 	int level;
 	PApplet p;
-	PImage image;
+	PImage image, orgImage;
+	boolean calcImage;
 
 	float textPadding = 8;
-	float boxLeft, boxTop, boxRight, boxBottom;
+	float imageX, imageY, imageW, imageH;
 
 	public Person(String name, String id, PApplet p, int order) {
 		first = name.split(" ")[0];
@@ -25,6 +26,11 @@ public class Person extends SimpleMapItem {
 		size = p.random(1, 2);
 		// size = 1;
 		// System.out.println(first);
+		imageX = x;
+		imageY = y;
+		imageW = w;
+		imageH = h;
+		calcImage();
 	}
 
 	public Person(String name, String id, PApplet p, int order, PImage image) {
@@ -34,52 +40,53 @@ public class Person extends SimpleMapItem {
 
 	public void setImage(PImage image, String temp) {
 		this.image = image;
+		this.orgImage = image;
 		System.out.println("Images loaded for " + id + " " + temp);
-		//image.resize((int) calcWidth(),(int) calcHeight());
+		// image.resize((int) calcWidth(),(int) calcHeight());
 	}
 
 	public String toString() {
 		return new String(first + " " + last + " : " + id);
 	}
 
-	private void calcBox() {
-		boxLeft = x;
-		boxTop = y;
-		boxRight = x + w;
-		boxBottom = y + w;
-	}
-	
 	/*
-	 * But in some sort of check so the images size does dnot have to be recalculted every time, just when the layout is changed
+	 * But in some sort of check so the images size does dnot have to be
+	 * recalculted every time, just when the layout is changed
+	 * 
 	 * @see treemap.SimpleMapItem#draw()
 	 */
-	
-	public float calcWidth(){
+
+	public float calcWidth() {
 		float result;
-		if(image.width > image.height){
+		if (image.width > image.height) {
 			result = w;
-		}else{
+		} else {
 			result = image.width - (image.height - h);
 		}
 		return result;
 	}
 
-	public float calcHeight(){
+	public float calcHeight() {
 		float result;
-		if(image.width > image.height){
-			result = image.height - (image.width -w);
-		}else{
+		if (image.width > image.height) {
+			result = image.height - (image.width - w);
+		} else {
 			result = h;
 		}
-		
+
 		return result;
 	}
+
 	public void draw() {
+		if (calcImage) {
+
+			calcImage = false;
+		}
 		p.fill(0);
 		p.rect(x - 2, y - 2, w - 2, h - 2);
 		p.imageMode(p.CORNER);
-		p.image(image, x-2, y-2, w-2, h-2);
-		//p.image(image, x - 2, y - 2, calcWidth() - 2, calcHeight() - 2);
+		p.image(image, x - 2, y - 2, w - 2, h - 2);
+		// p.image(image, x - 2, y - 2, calcWidth() - 2, calcHeight() - 2);
 
 		// if (w > p.textWidth(first) + 6) {
 		// if (h > p.textAscent() + 6) {
@@ -107,7 +114,7 @@ public class Person extends SimpleMapItem {
 	private void drawTitle() {
 		p.fill(0);
 		p.textAlign(p.LEFT);
-		p.text(first + size, boxLeft + textPadding, boxBottom - textPadding);
+		p.text(first + size, x + w + textPadding, y + h - textPadding);
 	}
 
 	/*
@@ -135,6 +142,22 @@ public class Person extends SimpleMapItem {
 
 	public String getName() {
 		return this.first + " " + this.last;
+	}
+
+	public void calcImage() {
+		calcImage = true;
+		this.image = orgImage;
+		if (this.image != null) {
+			System.out.println(image);
+			if (image.width < image.height) {
+				p.copy(image, 0, 0, image.width, image.height, 0, 0,
+						image.width, (int) (image.height - (image.width - w)));
+			} else {
+				p.copy(image, 0, 0, image.width, image.height, 0, 0,
+						(int) ((image.width) - (image.height - h)),
+						image.height);
+			}
+		}
 	}
 
 	/*

@@ -29,6 +29,10 @@
          "id": "601598584"
       },
       {
+         "name": "Derval McCormack",
+         "id": "628502102"
+      },
+      {
          "name": "Hideo Oda",
          "id": "638072647"
       },
@@ -153,7 +157,7 @@
          "id": "1369420407"
       },
       {
-         "name": "Dave Ganter",
+         "name": "Dave Chris Chris Ganter",
          "id": "1380874278"
       },
       {
@@ -189,6 +193,10 @@
          "id": "1758134868"
       },
       {
+         "name": "Gina DeBrun",
+         "id": "1791333282"
+      },
+      {
          "name": "Yusuf Bhujwalla",
          "id": "100000090615562"
       },
@@ -201,7 +209,7 @@
          "id": "100000263412199"
       },
       {
-         "name": "Jessica Hales",
+         "name": "Jealousica Hales",
          "id": "100000289315169"
       },
       {

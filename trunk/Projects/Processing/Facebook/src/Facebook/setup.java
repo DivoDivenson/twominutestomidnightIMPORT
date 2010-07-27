@@ -20,26 +20,30 @@ public class setup extends PApplet {
 	People contacts;
 
 	public void setup() {
-		size(1000, 1000);
+		size(800, 800);
 		// rectMode(CORNERS);
 		smooth();
 		strokeWeight(0.25f);
 		PFont font = createFont("DejaVu Sans Condensed Bold", 13);
 		textFont(font);
-		people = loadFriends();
+		people = loadFriends("src/data/facebook/friends.txt");
 
 		contacts = new People(people);
-		//getImages();
+		getImages();
 		loadImages();
 		/*
 		 * for(Person n : people){ contacts.addPerson(n); }
 		 * contacts.finishAdd();
 		 */
-		//contacts.addAll(people);
+		// contacts.addAll(people);
 
 		map = new Treemap(contacts, 0, 0, width, height);
 		map.setLayout(new SquarifiedLayout());
-		//noLoop();
+		/*
+		 * for(Person n : people){ System.err.println(n); n.calcImage(); }
+		 */
+		System.out.println(people.length);
+		// noLoop();
 
 	}
 
@@ -50,8 +54,8 @@ public class setup extends PApplet {
 		map.draw();
 
 	}
-	
-	public void saveImage(){
+
+	public void saveImage() {
 		save("src/data/facebook/friends.tiff");
 		System.out.println("Image saved");
 	}
@@ -61,9 +65,9 @@ public class setup extends PApplet {
 	 */
 	public void keyPressed() {
 		System.out.println("Press");
-		//people = loadFriends();
-		//contacts = new People(people);
-		//map = new Treemap(contacts, 0, 0, width, height);
+		// people = loadFriends();
+		// contacts = new People(people);
+		// map = new Treemap(contacts, 0, 0, width, height);
 		if (key == 'r') {
 			map.setLayout(new SquarifiedLayout());
 			map.updateLayout();
@@ -96,53 +100,69 @@ public class setup extends PApplet {
 			map.setLayout(new OrderedTreemap());
 			map.updateLayout();
 			System.out.println("ordered");
-		}else if(key == 's'){
+		} else if (key == 's') {
 			saveImage();
 		}
+		for(int i = 0; i < people.length; i++){
+			people[i].calcImage();
+			System.out.println(people[i] + " : " + i);
+		}
+		
 	}
-	
+
 	/**
 	 * Associate the relevant profile pictures/persons
 	 */
-	public void loadImages(){
-		//sortPeople();
-		
+	public void loadImages() {
+		// sortPeople();
+
 		File pictures = new File("src/data/facebook/pictures");
 		File[] files = pictures.listFiles();
-		for(int i = 0; i < files.length; i++){
+		for (int i = 0; i < files.length; i++) {
 			String name = (files[i].getName().split("\\."))[0];
 			int index;
-			//System.out.println(n);
-		
-			/*if((index = Arrays.binarySearch(people, Long.parseLong(name), new IDNoComparator())) != -1){
-				System.out.println("Found " + files[i] + " @ " + index);
-				people[i].setImage(loadImage(files[i].getPath()));
-				}*/
-			
-			if((index = crapFind(Long.parseLong(name))) != -1){
-				System.out.println("Found " + files[i] + " @ " + index);
-				people[index].setImage(loadImage(files[i].getPath()), files[i].getName());
-			}
-			
+			// System.out.println(n);
+
+			/*
+			 * if((index = Arrays.binarySearch(people, Long.parseLong(name), new
+			 * IDNoComparator())) != -1){ System.out.println("Found " + files[i]
+			 * + " @ " + index);
+			 * people[i].setImage(loadImage(files[i].getPath())); }
+			 */
+
+			if ((index = crapFind(Long.parseLong(name))) != -1) {
+				//System.out.println("Found " + files[i] + " @ " + index);
+				people[index].setImage(loadImage(files[i].getPath()), files[i]
+						.getName());
+			}// else {
+				//System.out.println(index + " : " + name);
+			//}
+
 		}
 	}
+
 	
-	private int crapFind(long id){
-		for(int i = 0; i < people.length; i++){
-			if(people[i].getID() == id){
-				//System.out.println(people[i].getName() + " : " + id);
+	/*
+	 * 
+	 * FIX THIS SHIT METHOD
+	 */
+	private int crapFind(long id) {
+		for (int i = 0; i < people.length; i++) {
+			if (people[i].getID() == id) {
+				// System.out.println(people[i].getName() + " : " + id);
 				return i;
 			}
 		}
 		return -1;
 	}
-	
-	public void sortPeople(){
+
+	public void sortPeople() {
 		Arrays.sort(people, new IDComparator());
 	}
 
 	/**
-	 * Get the profile picture for each Person and store them in src/data/facebook/pictures
+	 * Get the profile picture for each Person and store them in
+	 * src/data/facebook/pictures
 	 */
 	public void getImages() {
 		WebConversation wc = new WebConversation();
@@ -169,8 +189,7 @@ public class setup extends PApplet {
 						// I really REALLY hope they only use 'q' in the image
 						// name
 						newUrl = newUrl.replace('q', 'n');
-						System.out.println(people[i].getName() + " : "
-								+ newUrl);
+						//System.out.println(people[i].getName() + " : " + newUrl);
 						// Lazy, if it's not a jpg just use the default image.
 						// Append proper file extension later
 						// Also, if the user has never changed their image, use
@@ -178,10 +197,10 @@ public class setup extends PApplet {
 						if ((newUrl.contains(".jpg"))
 								&& !(newUrl.contains("static"))) {
 							saveStream(filename, newUrl);
-							System.out.println("Imaged saved");
-						}else{
-							System.out.println("Imaged not valid");
-						}
+							//System.out.println("Imaged saved");
+						}// else {
+							//System.out.println("Imaged not valid");
+						//}
 
 					} else {
 						throw new Exception("Image not found");
@@ -191,7 +210,7 @@ public class setup extends PApplet {
 					e.printStackTrace();
 				}
 			} else {
-				System.out.println("File exists");
+				//System.out.println("File exists");
 			}
 
 		}
@@ -203,9 +222,9 @@ public class setup extends PApplet {
 	 * 
 	 * @return
 	 */
-	public Person[] loadFriends() {
+	public Person[] loadFriends(String file) {
 		System.out.println("Loading");
-		String[] friends = loadStrings("src/data/facebook/friends.txt");
+		String[] friends = loadStrings(file);
 		Vector<Person> people = new Vector<Person>();
 		String name = "";
 		String id = "";
@@ -225,7 +244,8 @@ public class setup extends PApplet {
 				Matcher m = idPattern.matcher(n);
 				if (m.find()) {
 					id = m.group(0);
-					people.add(new Person(name, id, this, 4, loadImage("src/data/facebook/pictures/0000.jpg")));
+					people.add(new Person(name, id, this, 4,
+					loadImage("src/data/facebook/pictures/0000.jpg")));
 				}
 			} else {
 				// System.out.println();
