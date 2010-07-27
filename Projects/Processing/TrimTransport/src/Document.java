@@ -1,71 +1,32 @@
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+
+import org.jopendocument.dom.OOUtils;
+import org.jopendocument.dom.spreadsheet.Sheet;
+import org.jopendocument.dom.spreadsheet.SpreadSheet;
 
 public class Document {
 	final int BUFFER = 2048;
-	
-	public Document() {
+	Sheet sheet;
 
+	public Document() {
 		
+		open();
+
+	}
+
+	private void open() {
 		
-		File file = new File("src/data/tmp/SCSS.odt");
-		File dir = new File("src/data/tmp");
 		try {
-			BufferedOutputStream dest = null;
-			FileInputStream fis = new FileInputStream(file);
-			ZipInputStream zin = new ZipInputStream(new BufferedInputStream(fis));
-			ZipEntry entry;
-			while((entry = zin.getNextEntry()) != null){
-				String name = entry.getName();
-				String outputPath = String.format("%s%s%s",dir.getAbsolutePath(), "/", name);
-				System.out.println(name);
-				/*if(entry.isDirectory()){
-					File tempDir = new File(outputPath);
-					dir.mkdirs();
-				}else{
-					int count;
-					byte data[] = new byte[BUFFER];
-					FileOutputStream fos = new FileOutputStream(outputPath);
-					dest = new BufferedOutputStream(fos, BUFFER);
-					while((count = zin.read(data, 0, BUFFER)) != -1 ){
-						dest.write(data, 0, count);
-					}
-					dest.flush();
-					dest.close();
-				}*/
-				
-			}
-			zin.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			File file = new File("src/data/tmp/invoice.ods");
+			sheet = SpreadSheet.createFromFile(file).getSheet(0);
+			sheet.getCellAt("B12").setValue("Hello, this is a test");
+			File outputFile = new File("src/data/invoice1.ods");
+			sheet.getSpreadSheet().saveAs(outputFile);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-
-		
-	
-	}
-	
-	private void open(){
-		File doc = new File("src/data/tmp/doc.odt");
-		File dir = new File("src/data/tmp");
-		try{
-			BufferedOutputStream dest = null;
-			FileInputStream fis = new FileInputStream(doc);
-			ZipInputStream zin = new ZipInputStream(new BufferedInputStream(fis));
-			
-		}catch(Exception e){
-			
 		}
 	}
 }
