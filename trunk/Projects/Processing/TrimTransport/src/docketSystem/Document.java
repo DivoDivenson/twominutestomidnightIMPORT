@@ -15,8 +15,10 @@ public class Document {
 	final int BUFFER = 2048;
 	Sheet sheet;
 	OpenDocument doc;
+	Invoice invoice; //Get data from this
 
-	public Document() {
+	public Document(Invoice invoice) {
+		this.invoice = invoice;
 		open();
 
 	}
@@ -26,27 +28,28 @@ public class Document {
 		try {
 			File file = new File("src/data/tmp/invoice.ods");
 			sheet = SpreadSheet.createFromFile(file).getSheet(0);
-			sheet.getCellAt("B12").setValue("Hello, this is a test");
+			//sheet.getCellAt("B12").setValue("Hello, this is a test");
+			write();
 			File outputFile = new File("src/data/invoice1.ods");
 			sheet.getSpreadSheet().saveAs(outputFile);
 
-			final OpenDocument doc = new OpenDocument();
-			doc.loadFrom("src/data/tmp/invoice.ods");
-
-			// Show time !
-			final JFrame mainFrame = new JFrame("Viewer");
-			DefaultDocumentPrinter printer = new DefaultDocumentPrinter();
-
-			ODSViewerPanel viewerPanel = new ODSViewerPanel(doc, printer, true);
-
-			mainFrame.setContentPane(viewerPanel);
-			mainFrame.pack();
-			mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			mainFrame.setVisible(true);
+			
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private void write(){
+		/*sheet.getCellAt("B14").setValue(invoice.getEqupNo());
+		sheet.getCellAt("E14").setValue(invoice.getSize());
+		sheet.getCellAt("G14").setValue(invoice.getBerth());
+		sheet.getCellAt("B18").setValue(invoice.getFrom());
+		sheet.getCellAt("F18").setValue(invoice.getTo());
+		sheet.getCellAt("F26").setValue(invoice.getWeight());
+		sheet.getCellAt("F26").setValue(invoice.getCustomerRefer());
+		sheet.getCellAt("B30").setValue(invoice.getDescript());*/
+		
 	}
 }
