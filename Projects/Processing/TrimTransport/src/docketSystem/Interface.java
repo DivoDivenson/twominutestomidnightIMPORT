@@ -6,6 +6,10 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 
+import org.jopendocument.model.OpenDocument;
+import org.jopendocument.panel.ODSViewerPanel;
+import org.jopendocument.print.DefaultDocumentPrinter;
+
 public class Interface extends JFrame {
 
 	JPanel main;
@@ -15,8 +19,10 @@ public class Interface extends JFrame {
 
 	JButton newDoc;
 
-	Invoice newInvoice;
+	Invoice invoice;
 	NewDocForm newDocForm;
+	
+	Document document;
 
 	public Interface() {
 		initComponents();
@@ -43,6 +49,33 @@ public class Interface extends JFrame {
 		setBounds((screenSize.width - 410) / 2, (screenSize.height - 330) / 2,
 				410, 330);
 
+	}
+	
+	public void saveActionPreformed(){
+		;
+	}
+	
+	public void printActionPreformed(Invoice invoice){
+		document = new Document(invoice);
+		final OpenDocument doc = new OpenDocument();
+		doc.loadFrom("src/data/invoice1.ods");
+		
+
+		// Show time !
+		final JFrame mainFrame = new JFrame("Viewer");
+		DefaultDocumentPrinter printer = new DefaultDocumentPrinter();
+		
+
+		ODSViewerPanel viewerPanel = new ODSViewerPanel(doc, printer, true);
+		
+
+		java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit()
+		.getScreenSize();
+		mainFrame.setContentPane(viewerPanel);
+		mainFrame.pack();
+		mainFrame.setLocation(screenSize.width /2, (screenSize.height)/2);
+		mainFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		mainFrame.setVisible(true);
 	}
 
 	private void initPanel() {
@@ -76,12 +109,28 @@ public class Interface extends JFrame {
 	private void newDocActionPerformed(java.awt.event.ActionEvent evt) {
 		
 		//SET THE DOC NUMBER IF IT IS USED
-		newInvoice = new Invoice();
-		if (newDocForm == null) {
-			newDocForm = new NewDocForm(newInvoice);
-			newDocForm.setVisible(true);
-		}
+		//newInvoice = new Invoice();
+		if (newDocForm != null)
+			newDocForm = null;	//Just in case
+		newDocForm = new NewDocForm(this);
+		newDocForm.setVisible(true);
+		
 
+	}
+	
+	public void setInvoice(Invoice invoice){
+		this.invoice = invoice;
+		saveActionPreformed();
+		//printActionPreformed(this.invoice);
+	}
+	
+	
+	
+	
+	
+	
+	public Invoice getInvoice(){
+		return invoice;
 	}
 
 	private void initMenu() {

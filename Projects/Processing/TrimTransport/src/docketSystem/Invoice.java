@@ -3,26 +3,12 @@ import java.util.Date;
 
 public class Invoice {
 
-	private String equpNo, payLen, berth, from, to, weight, customerRefer,
-			descript;
+	private String equpNo, size, berth, from, to, weight, customerRefer,
+			descript, seal;
 	private int docNo;
 	Date date;
 
-	public Invoice(String equpNo, String paylen, String berth, String from,
-			String to, String weight, String customerRefer, String descript,
-			int docNo) {
-		
-		this.equpNo = equpNo;
-		this.payLen = payLen;
-		this.berth = berth;
-		this.from = from;
-		this.to = to;
-		this.weight = weight;
-		this.customerRefer = customerRefer;
-		this.descript = descript;
-		this.docNo = docNo;	
 
-	}
 	
 	public Invoice(){
 		;
@@ -36,12 +22,12 @@ public class Invoice {
 		this.equpNo = equpNo;
 	}
 
-	public String getPayLen() {
-		return payLen;
+	public String getSize() {
+		return size;
 	}
 
-	public void setPayLen(String payLen) {
-		this.payLen = payLen;
+	public void setSize(String size) {
+		this.size = size;
 	}
 
 	public String getBerth() {
@@ -106,6 +92,14 @@ public class Invoice {
 
 	public void setDate(Date date) {
 		this.date = date;
+	}
+
+	public String getSeal() {
+		return seal;
+	}
+
+	public void setSeal(String seal) {
+		this.seal = seal;
 	}
 
 }
