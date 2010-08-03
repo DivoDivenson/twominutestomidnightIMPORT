@@ -53,7 +53,8 @@ public class Document {
 		writeAddress(invoice.getFrom(), "B");
 		sheet.getCellAt("H18").setValue(invoice.getWeight());
 		sheet.getCellAt("D18").setValue(invoice.getSize());
-		sheet.getCellAt("B29").setValue(invoice.getDescript());
+		//sheet.getCellAt("B29").setValue(invoice.getDescript());
+		writeDes();
 		if (invoice instanceof InvoiceHaz) {
 			// System.out.println("Haz");
 			InvoiceHaz invoice = (InvoiceHaz) this.invoice;
@@ -82,5 +83,23 @@ public class Document {
 						new String(" " + address[i]));
 			}
 		}
+	}
+	
+	private void writeDes(){
+		String temp = invoice.getDescript();
+		int i;
+		if(temp.length() > 75){ //Half assed, but it'll work, mostly
+			for(i = 74; i != 0; i--){
+				if(temp.charAt(i) == ' '){
+					break;
+				}
+			}
+			sheet.getCellAt("B29").setValue(temp.substring(0, i));
+			System.out.println(i);
+			sheet.getCellAt("B30").setValue(temp.substring(i));
+		}else{
+			sheet.getCellAt("B29").setValue(temp);
+		}
+		
 	}
 }
