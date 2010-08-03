@@ -85,15 +85,18 @@ public class NewDocForm extends JFrame {
 	}
 
 	private void initInvoice() {
-		invoice = new Invoice(); //ehhhhhhh
+		
 		if(hazCheckBox.isSelected()){
-			InvoiceHaz invoice = new InvoiceHaz();
-			invoice.setName(name.getText());
-			invoice.setClass1((String) primary.getSelectedItem());
-			invoice.setClass2((String) secondary.getSelectedItem());
-			invoice.setPg((String) packing.getSelectedItem());
-			invoice.setTunnel(tunnel.getText());
-			invoice.setUnNo(un.getText());
+			InvoiceHaz invoicehaz = new InvoiceHaz();
+			invoicehaz.setName(name.getText());
+			invoicehaz.setClass1((String) primary.getSelectedItem());
+			invoicehaz.setClass2((String) secondary.getSelectedItem());
+			invoicehaz.setPg((String) packing.getSelectedItem());
+			invoicehaz.setTunnel(tunnel.getText());
+			invoicehaz.setUnNo(un.getText());
+			invoice = invoicehaz;
+		}else{
+			invoice = new Invoice();
 		}
 		invoice.setBerth(berth.getText());
 		invoice.setCustomerRefer(customer.getText());
