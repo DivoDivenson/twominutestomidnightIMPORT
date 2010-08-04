@@ -2,6 +2,8 @@ package docketSystem;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.swing.JFrame;
 
@@ -17,10 +19,13 @@ public class Document {
 	Sheet sheet;
 	OpenDocument doc;
 	Invoice invoice; // Get data from this
+	Date date;
 
 	public Document(Invoice invoice) {
 		this.invoice = invoice;
+		date = new Date();
 		open();
+		
 
 	}
 
@@ -40,20 +45,19 @@ public class Document {
 		}
 	}
 
+	/**
+	 * Write the Invoice out to an .ods file
+	 */
 	private void write() {
-		sheet.getCellAt("B14").setValue(invoice.getEqupNo());
-		sheet.getCellAt("E14").setValue(invoice.getCustomerRefer());
-		sheet.getCellAt("B18").setValue(invoice.getBerth());
-		// sheet.getCellAt("H14").setValue DATE HERE
-		// sheet.getCellAt("B43").setValue DOCKET NUMBER
+		writeDate();
+		sheet.getCellAt("B14").setValue(formatCell(invoice.getEqupNo()));
+		sheet.getCellAt("E14").setValue(formatCell(invoice.getCustomerRefer()));
+		sheet.getCellAt("B18").setValue(formatCell(invoice.getBerth()));
 		sheet.getCellAt("F18").setValue(invoice.getSeal());
-		//sheet.getCellAt("B22").setValue(invoice.getFrom());
-		// sheet.getCellAt("F22").setValue(invoice.getTo());
 		writeAddress(invoice.getTo(), "F");
 		writeAddress(invoice.getFrom(), "B");
 		sheet.getCellAt("H18").setValue(invoice.getWeight());
 		sheet.getCellAt("D18").setValue(invoice.getSize());
-		//sheet.getCellAt("B29").setValue(invoice.getDescript());
 		writeDes();
 		if (invoice instanceof InvoiceHaz) {
 			// System.out.println("Haz");
@@ -63,10 +67,17 @@ public class Document {
 							+ invoice.getName() + "," + invoice.getClass1()
 							+ " " + invoice.getClass2() + ",PG"
 							+ invoice.getPg() + "," + invoice.getTunnel()));
+		}else{
+			sheet.getCellAt("D34").setValue("No");
 		}
 
 	}
 
+	/*
+	 * Write to the address boxes. Since the ODS libs have trouble with multiple lines the text is broken up
+	 * (based on the \n chars) and placed in cells underneath eachother. If there are two many lines
+	 * the extra ones are shoved into the last cell because I'm lazy
+	 */
 	private void writeAddress(String input, String col) {
 		String[] address = input.split("\\n");
 		if (address.length > 4) {
@@ -84,7 +95,7 @@ public class Document {
 			}
 		}
 	}
-	
+	//Write to the description line. Cuts the string up based on an arbitray number of characters....
 	private void writeDes(){
 		String temp = invoice.getDescript();
 		int i;
@@ -101,5 +112,15 @@ public class Document {
 			sheet.getCellAt("B29").setValue(temp);
 		}
 		
+	}
+	
+	private void writeDate(){
+		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+		sheet.getCellAt("H14").setValue(format.format(date));
+	}
+	
+	//Pads out the input with a space at the start. Make the text look prettier :3
+	private String formatCell(String input){
+		return new String(" " + input);
 	}
 }

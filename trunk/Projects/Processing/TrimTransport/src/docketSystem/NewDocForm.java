@@ -72,13 +72,13 @@ public class NewDocForm extends JFrame {
 			for (JComponent n : haz) {
 				n.setVisible(false);
 
-				setSize(new java.awt.Dimension(545, 525));
+				setSize(new java.awt.Dimension(545, 550));
 
 			}
 		} else {
 			for (JComponent n : haz) {
 				n.setVisible(true);
-				setSize(new java.awt.Dimension(545, 590));
+				setSize(new java.awt.Dimension(545, 625));
 
 			}
 		}
@@ -227,7 +227,7 @@ public class NewDocForm extends JFrame {
 	        jScrollPane4.setViewportView(jList2);
 
 	        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-	        setSize(new java.awt.Dimension(545, 525));
+	        setSize(new java.awt.Dimension(545, 550));
 	        setResizable(false);
 
 	        standardPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
@@ -500,5 +500,6 @@ public class NewDocForm extends JFrame {
 	                    .addComponent(cancelButton, javax.swing.GroupLayout.DEFAULT_SIZE, 77, Short.MAX_VALUE))
 	                .addContainerGap())
 	        );
+	        //pack();
 	}
 }
