@@ -13,9 +13,9 @@ CREATE TABLE docket(
 	sealNo varchar (20) NULL,
 	description varchar (200) NULL,
 	berth varchar (10) NULL,
+	returnEmpty boolean NOT NULL,
 	weight varchar (10) NULL,
 	sizex varchar (10) NULL,
-	return boolean,
 	deliver INT NULL,
 	collectFrom INT NULL,
 	haz INT NULL,
@@ -24,27 +24,27 @@ CREATE TABLE docket(
 ;
 
 CREATE TABLE addresses(
-	ID NOT NULL AUTO_INCRMENT,
-	address varchar(200),
+	ID INT NOT NULL AUTO_INCREMENT,
+	address varchar(200) NULL,
 	PRIMARY KEY (ID)
 ) TYPE=INNODB
 ;
 
 CREATE TABLE haz(
 	ID INT NOT NULL AUTO_INCREMENT,
-	name varchar (30),
-	unNumber varchar (6),
-	pg varchar(3),
-	primeClass varchar (5),
-	secClass varchar (5),
-	tunnel varchar (7),
+	name varchar (30) NULL,
+	unNumber varchar (6) NULL,
+	pg varchar(3) NULL,
+	primeClass varchar (5) NULL,
+	secClass varchar (5) NULL,
+	tunnel varchar (7) NULL,
 	PRIMARY KEY (ID)
 ) TYPE=INNODB
 ;
 
-insert into docket (equip, customerRef, sealNo, description, berth, weight, sizex, return, deliver, collectFrom, haz) values ('123d', 'Trim', '11bd4', 'Copper sulphate', '44d', '1000kg', '45ft', FALSE, '1', '2', '1');
+insert into docket (equip, customerRef, sealNo, description, berth, weight, sizex, returnEmpty, deliver, collectFrom, haz) values ('123d', 'Trim', '11bd4', 'Copper sulphate', '44d', '1000kg', '45ft', 'f', 1, 2, 1);
 
-insert into docket (equip, customerRef, sealNo, description, berth, weight, sizex, return, deliver, collectFrom) values ('ryjhrys', 'Sharp', '11wgd4', 'Copper sulphate', '44d', '1000kg', '45ft', FALSE, '2', '1');
+insert into docket (equip, customerRef, sealNo, description, berth, weight, sizex, returnEmpty, deliver, collectFrom) values ('ryjhrys', 'Sharp', '11wgd4', 'Copper sulphate', '44d', '1000kg', '45ft', FALSE, 2, 1);
 
 insert into addresses (address) values ('14 Strand Road\nSutton\nDublin 13');
 

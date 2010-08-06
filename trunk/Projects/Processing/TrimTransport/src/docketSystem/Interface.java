@@ -1,17 +1,39 @@
 package docketSystem;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 
 import org.jopendocument.model.OpenDocument;
 import org.jopendocument.panel.ODSViewerPanel;
 import org.jopendocument.print.DefaultDocumentPrinter;
 
+
+/**
+ * This appears to have become the main class where everything is handled. It's (original) purpose was to draw the main window of the application.
+ * Now it
+ * ~Stores and manages the connection to the mySQL database
+ * ~Launches the NewDocForm window
+ * ~Passes the newly created Invoice from NewDocForm. It then opens the finished document in a print window
+ * ~Writes the newly created Invoice to the database
+ * @author divo
+ *
+ */
 public class Interface extends JFrame {
+	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
+	static final String DATABASE_URL = "jdbc:mysql://localhost/trimtransport";
+	static final String USERNAME = "trim";
+	static final String PASSWORD = "truck";
+    static final String DEFAULT_QUERY = "SELECT * FROM docket ORDER BY docketNo";
 
 	private JPanel main;
 
@@ -25,17 +47,23 @@ public class Interface extends JFrame {
 	private Document document;
 	private JComponent stuff[];
 
-
 	private javax.swing.JButton closeButton;
 	private javax.swing.JMenu file;
 	private javax.swing.JMenu edit;
 	private javax.swing.JMenuBar jMenuBar1;
+
+	private ResultSetTableModel tableModel;
+	private JScrollPane tableScroll;
+	
+	private Connection connection;
 
 	private javax.swing.JButton searchButton;
 
 	public Interface() {
 		initComponents();
 	}
+	
+	
 
 	private void initComponents() {
 
@@ -47,7 +75,27 @@ public class Interface extends JFrame {
 		jMenuBar1 = new javax.swing.JMenuBar();
 		file = new javax.swing.JMenu();
 		edit = new javax.swing.JMenu();
+		tableScroll = new JScrollPane();
 
+		
+		
+		//JTable for database of doc
+		try {
+			Class.forName(JDBC_DRIVER);
+			connection = DriverManager.getConnection(DATABASE_URL, USERNAME, PASSWORD);
+			tableModel = new ResultSetTableModel( JDBC_DRIVER, connection, DEFAULT_QUERY );
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		JTable resultTable = new JTable(tableModel);
+		tableScroll.setViewportView(resultTable);
+		//End jtable
+		
+		
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
 		newDoc.setText("New");
@@ -74,62 +122,31 @@ public class Interface extends JFrame {
 		javax.swing.GroupLayout mainLayout = new javax.swing.GroupLayout(main);
 		main.setLayout(mainLayout);
 		mainLayout
-				.setHorizontalGroup(mainLayout
-						.createParallelGroup(
-								javax.swing.GroupLayout.Alignment.LEADING)
-						.addGroup(
-								mainLayout
-										.createSequentialGroup()
-										.addContainerGap()
-										.addGroup(
-												mainLayout
-														.createParallelGroup(
-																javax.swing.GroupLayout.Alignment.LEADING)
-														.addComponent(
-																newDoc,
-																javax.swing.GroupLayout.PREFERRED_SIZE,
-																66,
-																javax.swing.GroupLayout.PREFERRED_SIZE)
-														.addComponent(
-																searchButton,
-																javax.swing.GroupLayout.PREFERRED_SIZE,
-																66,
-																javax.swing.GroupLayout.PREFERRED_SIZE)
-														.addComponent(
-																closeButton,
-																javax.swing.GroupLayout.PREFERRED_SIZE,
-																66,
-																javax.swing.GroupLayout.PREFERRED_SIZE))
-										.addContainerGap(426, Short.MAX_VALUE)));
-		mainLayout
-				.setVerticalGroup(mainLayout
-						.createParallelGroup(
-								javax.swing.GroupLayout.Alignment.LEADING)
-						.addGroup(
-								mainLayout
-										.createSequentialGroup()
-										.addContainerGap()
-										.addComponent(
-												newDoc,
-												javax.swing.GroupLayout.PREFERRED_SIZE,
-												68,
-												javax.swing.GroupLayout.PREFERRED_SIZE)
-										.addPreferredGap(
-												javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-										.addComponent(
-												searchButton,
-												javax.swing.GroupLayout.PREFERRED_SIZE,
-												68,
-												javax.swing.GroupLayout.PREFERRED_SIZE)
-										.addPreferredGap(
-												javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-										.addComponent(
-												closeButton,
-												javax.swing.GroupLayout.PREFERRED_SIZE,
-												68,
-												javax.swing.GroupLayout.PREFERRED_SIZE)
-										.addContainerGap(33, Short.MAX_VALUE)));
-
+		.setHorizontalGroup(
+	            mainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+	            .addGroup(mainLayout.createSequentialGroup()
+	                .addContainerGap()
+	                .addGroup(mainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+	                    .addComponent(newDoc, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+	                    .addComponent(searchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+	                    .addComponent(closeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE))
+	                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+	                .addComponent(tableScroll, javax.swing.GroupLayout.DEFAULT_SIZE, 402, Short.MAX_VALUE)
+	                .addContainerGap())
+	        );
+		mainLayout.setVerticalGroup(
+	            mainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+	            .addGroup(mainLayout.createSequentialGroup()
+	                .addContainerGap()
+	                .addGroup(mainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+	                    .addComponent(tableScroll, javax.swing.GroupLayout.DEFAULT_SIZE, 249, Short.MAX_VALUE)
+	                    .addGroup(mainLayout.createSequentialGroup()
+	                        .addComponent(newDoc, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
+	                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+	                        .addComponent(searchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
+	                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+	                        .addComponent(closeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)))
+	                .addContainerGap()));
 		file.setText("File");
 		jMenuBar1.add(file);
 
@@ -160,10 +177,11 @@ public class Interface extends JFrame {
 	public void saveActionPreformed() {
 		;
 	}
-	
-	public void setFonts(){
-		stuff = new JComponent[]{newDoc, searchButton, closeButton, file, edit};
-		for(JComponent n : stuff){
+
+	public void setFonts() {
+		stuff = new JComponent[] { newDoc, searchButton, closeButton, file,
+				edit };
+		for (JComponent n : stuff) {
 			n.setFont(new java.awt.Font("Dialog", 0, 11));
 		}
 	}
@@ -188,30 +206,7 @@ public class Interface extends JFrame {
 		mainFrame.setVisible(true);
 	}
 
-	/*
-	 * private void initPanel() { newDoc = new JButton("new");
-	 * newDoc.addActionListener(new java.awt.event.ActionListener() { public
-	 * void actionPerformed(java.awt.event.ActionEvent evt) {
-	 * newDocActionPerformed(evt); } });
-	 * 
-	 * // I'm using netbeans to create GUI code, so it's gonna be shit....
-	 * javax.swing.GroupLayout mainLayout = new javax.swing.GroupLayout(main);
-	 * main.setLayout(mainLayout);
-	 * mainLayout.setHorizontalGroup(mainLayout.createParallelGroup(
-	 * javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-	 * mainLayout.createSequentialGroup().addContainerGap()
-	 * .addComponent(newDoc, javax.swing.GroupLayout.PREFERRED_SIZE, 66,
-	 * javax.swing.GroupLayout.PREFERRED_SIZE) .addContainerGap(322,
-	 * Short.MAX_VALUE)));
-	 * mainLayout.setVerticalGroup(mainLayout.createParallelGroup(
-	 * javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-	 * mainLayout.createSequentialGroup().addContainerGap()
-	 * .addComponent(newDoc, javax.swing.GroupLayout.PREFERRED_SIZE, 68,
-	 * javax.swing.GroupLayout.PREFERRED_SIZE) .addContainerGap(201,
-	 * Short.MAX_VALUE)));
-	 * 
-	 * }
-	 */
+
 
 	private void newDocActionPerformed(java.awt.event.ActionEvent evt) {
 
@@ -223,12 +218,12 @@ public class Interface extends JFrame {
 		newDocForm.setVisible(true);
 
 	}
-	
-	private void searchButttonActionPerformed(){
+
+	private void searchButttonActionPerformed() {
 		;
 	}
-	
-	private void closeButtonActionPerformed(){
+
+	private void closeButtonActionPerformed() {
 		this.setVisible(false);
 		this.dispose();
 	}
