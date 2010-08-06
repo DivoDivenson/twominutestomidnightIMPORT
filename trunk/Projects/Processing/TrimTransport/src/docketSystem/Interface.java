@@ -202,7 +202,7 @@ public class Interface extends JFrame {
 		mainFrame.setContentPane(viewerPanel);
 		mainFrame.pack();
 		mainFrame.setLocation(screenSize.width / 2, (screenSize.height) / 2);
-		mainFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mainFrame.setVisible(true);
 	}
 
