@@ -14,6 +14,12 @@ import org.jopendocument.model.OpenDocument;
 import org.jopendocument.panel.ODSViewerPanel;
 import org.jopendocument.print.DefaultDocumentPrinter;
 
+
+/**
+ * Takes the information stored in an invoice and writes it to and .ods (Open document spreadsheet).
+ * @author divo
+ *
+ */
 public class Document {
 	final int BUFFER = 2048;
 	Sheet sheet;
@@ -53,11 +59,16 @@ public class Document {
 		sheet.getCellAt("B14").setValue(formatCell(invoice.getEqupNo()));
 		sheet.getCellAt("E14").setValue(formatCell(invoice.getCustomerRefer()));
 		sheet.getCellAt("B18").setValue(formatCell(invoice.getBerth()));
-		sheet.getCellAt("F18").setValue(invoice.getSeal());
+		sheet.getCellAt("F18").setValue(formatCell(invoice.getSeal()));
 		writeAddress(invoice.getTo(), "F");
 		writeAddress(invoice.getFrom(), "B");
-		sheet.getCellAt("H18").setValue(invoice.getWeight());
-		sheet.getCellAt("D18").setValue(invoice.getSize());
+		sheet.getCellAt("H18").setValue(formatCell(invoice.getWeight()));
+		sheet.getCellAt("D18").setValue(formatCell(invoice.getSize()));
+		if(invoice.isReturnEmpty()){
+			sheet.getCellAt("B34").setValue(formatCell("Yes"));
+		}else{
+			sheet.getCellAt("B34").setValue(formatCell("No"));
+		}
 		writeDes();
 		if (invoice instanceof InvoiceHaz) {
 			// System.out.println("Haz");
@@ -68,7 +79,7 @@ public class Document {
 							+ " " + invoice.getClass2() + ",PG"
 							+ invoice.getPg() + "," + invoice.getTunnel()));
 		}else{
-			sheet.getCellAt("D34").setValue("No");
+			sheet.getCellAt("D34").setValue(formatCell("No"));
 		}
 
 	}

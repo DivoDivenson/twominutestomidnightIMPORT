@@ -39,6 +39,7 @@ public class NewDocForm extends JFrame {
 	private javax.swing.JComboBox primary;
 	private javax.swing.JLabel primaryLabel;
 	private javax.swing.JButton printButton;
+    private javax.swing.JCheckBox returnEmpty;
 	private javax.swing.JButton saveButton;
 	private javax.swing.JTextField seal;
 	private javax.swing.JLabel sealLabel;
@@ -107,6 +108,7 @@ public class NewDocForm extends JFrame {
 		invoice.setSize(size.getText());
 		invoice.setTo(deliver.getText());
 		invoice.setWeight(weight.getText());
+		invoice.setReturnEmpty(returnEmpty.isSelected());
 		
 	}
 
@@ -195,6 +197,7 @@ public class NewDocForm extends JFrame {
 		printButton = new javax.swing.JButton();
 		saveButton = new javax.swing.JButton();
 		cancelButton = new javax.swing.JButton();
+		returnEmpty = new javax.swing.JCheckBox();
 
 		stuff = new JComponent[] { equipLabel, equip, berthLabel, berth,
 				customerLabel, customer, weightLabel, weight, sealLabel, seal,
@@ -202,7 +205,7 @@ public class NewDocForm extends JFrame {
 				deliverLabel, deliver, deliverList, hazCheckBox, unLabel, primaryLabel,
 				secondaryLabel, packLabel, tunnelLabel, nameLabel, name, un,
 				primary, packing, tunnel, secondary, printButton, saveButton,
-				cancelButton };
+				cancelButton, returnEmpty};
 
 		java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit()
 		.getScreenSize();
@@ -254,6 +257,8 @@ public class NewDocForm extends JFrame {
 
 	        deliver.setColumns(13);
 	        deliver.setRows(5);
+	        deliver.setWrapStyleWord( true );
+	        deliver.setLineWrap( true );
 	        jScrollPane1.setViewportView(deliver);
 
 	        deliverList.setModel(new javax.swing.AbstractListModel() {
@@ -267,6 +272,8 @@ public class NewDocForm extends JFrame {
 
 	        collect.setColumns(13);
 	        collect.setRows(5);
+	        collect.setWrapStyleWord( true );
+	        collect.setLineWrap( true );
 	        jScrollPane3.setViewportView(collect);
 
 	        collectList.setModel(new javax.swing.AbstractListModel() {
@@ -275,6 +282,11 @@ public class NewDocForm extends JFrame {
 	            public Object getElementAt(int i) { return strings[i]; }
 	        });
 	        jScrollPane5.setViewportView(collectList);
+	        
+	        returnEmpty.setText("Return Empty");
+	        //returnEmpty.setAlignmentY(0.0F);
+	        returnEmpty.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+	        returnEmpty.setMargin(new java.awt.Insets(2, 2, 2, 2));
 
 	        
 
@@ -291,7 +303,8 @@ public class NewDocForm extends JFrame {
 	                        .addComponent(customerLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 	                        .addComponent(equipLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 114, Short.MAX_VALUE))
 	                    .addComponent(deliverLabel)
-	                    .addComponent(collectLabel))
+	                    .addComponent(collectLabel)
+	                    .addComponent(returnEmpty, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
 	                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
 	                .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
 	                    .addGroup(standardPanelLayout.createSequentialGroup()
@@ -345,9 +358,12 @@ public class NewDocForm extends JFrame {
 	                    .addComponent(description, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
 	                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
 	                .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-	                    .addComponent(deliverLabel)
-	                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE)
-	                    .addComponent(jScrollPane1))
+	                		.addGroup(standardPanelLayout.createSequentialGroup()
+	                                .addComponent(deliverLabel)
+	                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+	                                .addComponent(returnEmpty))
+	                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE)
+	                            .addComponent(jScrollPane1))
 	                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 11, Short.MAX_VALUE)
 	                .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
 	                    .addGroup(standardPanelLayout.createSequentialGroup()

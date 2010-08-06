@@ -6,6 +6,7 @@ public class Invoice {
 	private String equpNo, size, berth, from, to, weight, customerRefer,
 			descript, seal;
 	private int docNo;
+	private boolean returnEmpty;
 	Date date;
 
 
@@ -100,6 +101,14 @@ public class Invoice {
 
 	public void setSeal(String seal) {
 		this.seal = seal;
+	}
+
+	public boolean isReturnEmpty() {
+		return returnEmpty;
+	}
+
+	public void setReturnEmpty(boolean returnEmpty) {
+		this.returnEmpty = returnEmpty;
 	}
 
 }
