@@ -33,7 +33,7 @@ public class Interface extends JFrame {
 	static final String DATABASE_URL = "jdbc:mysql://localhost/trimtransport";
 	static final String USERNAME = "trim";
 	static final String PASSWORD = "truck";
-    static final String DEFAULT_QUERY = "SELECT * FROM docket ORDER BY docketNo";
+    static final String DEFAULT_QUERY = "SELECT * FROM docket ORDER BY Docket_Number";
 
 	private JPanel main;
 
@@ -170,7 +170,7 @@ public class Interface extends JFrame {
 		java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit()
 				.getScreenSize();
 		setBounds((screenSize.width - 514) / 2, (screenSize.height - 322) / 2,
-				514, 322);
+				750, 500);
 		setFonts();
 	}
 
