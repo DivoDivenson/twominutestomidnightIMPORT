@@ -19,6 +19,7 @@ CREATE TABLE docket(
 	Deliver_to INT NULL,
 	Collect_from INT NULL,
 	Haz INT NULL,
+	Date_ LONG NOT NULL,
 	PRIMARY KEY (Docket_Number)
 ) TYPE=INNODB
 ;
@@ -42,9 +43,9 @@ CREATE TABLE haz(
 ) TYPE=INNODB
 ;
 
-insert into docket (Equipment, Customer, Seal, Description, Berth, Weight, Size_, Return_Empty, Deliver_to, Collect_from, Haz) values ('123d', 'Trim', '11bd4', 'Copper sulphate', '44d', '1000kg', '45ft', 'f', 1, 2, 1);
+insert into docket (Equipment, Customer, Seal, Description, Berth, Weight, Size_, Return_Empty, Deliver_to, Collect_from, Haz, Date_) values ('123d', 'Trim', '11bd4', 'Copper sulphate', '44d', '1000kg', '45ft', 'f', 1, 2, 1, 222221);
 
-insert into docket (Equipment, Customer, Seal, Description, Berth, Weight, Size_, Return_Empty, Deliver_to, Collect_from) values ('ryjhrys', 'Sharp', '11wgd4', 'Copper sulphate', '44d', '1000kg', '45ft', FALSE, 2, 1);
+insert into docket (Equipment, Customer, Seal, Description, Berth, Weight, Size_, Return_Empty, Deliver_to, Collect_from, Date_) values ('ryjhrys', 'Sharp', '11wgd4', 'Copper sulphate', '44d', '1000kg', '45ft', FALSE, 2, 1, 23322);
 
 insert into addresses (Address) values ('14 Strand Road\nSutton\nDublin 13');
 
