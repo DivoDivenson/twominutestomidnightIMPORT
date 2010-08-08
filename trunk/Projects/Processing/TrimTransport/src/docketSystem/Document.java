@@ -66,6 +66,7 @@ public class Document {
 		sheet.getCellAt("D18").setValue(formatCell(invoice.getSize()));
 		sheet.getCellAt("B37").setValue(formatCell(invoice.getReturnEmpty()));
 		writeDes();
+		sheet.getCellAt("H8").setValue(formatCell(Integer.toString(invoice.getDocNo())));
 		if (invoice instanceof InvoiceHaz) {
 			// System.out.println("Haz");
 			InvoiceHaz invoice = (InvoiceHaz) this.invoice;
