@@ -222,31 +222,156 @@ public class Interface extends JFrame {
 	}
 
 	/**
-	 * Insert an invoice object into the sql database
+	 * Insert an invoice object into the sql database.
 	 */
-	public void saveActionPreformed() {
+	public int saveActionPreformed() {
 		// First check to see if the addresses are already present
 		System.out.println("Saved action");
-		int collectID, deliverID;
-		
+		int collectID, deliverID, hazID = 0;
+
 		collectID = insertAddress(invoice.getFrom());
 		deliverID = insertAddress(invoice.getTo());
-		
+		if (invoice instanceof InvoiceHaz) {
+			hazID = insertHaz();
+		}
+		//System.out.println(invoice.getFrom() +  " " + collectID + " " + deliverID);
+		//return 0;
+		return insertDocket(collectID, deliverID, hazID);
+
 		// String insert = new String("INSERT INTO docket ")
+
 	}
-	
-	public int insertAddress(String address){
+
+	public int insertDocket(int collectID, int deliverID, int hazID) {
+		Statement statement;
+		ResultSet resultSet;
+		try {
+			statement = connection.createStatement();
+			System.out.println("INSERT INTO docket (Equipment, Customer, Seal, Description, Berth, Weight, Size_, Return_Empty, Deliver_to, Collect_from, Haz, Date_) values ('"
+									+ invoice.getEqupNo()
+									+ "', '"
+									+ invoice.getCustomerRefer() 
+									+ "', '"
+									+ invoice.getSeal() 
+									+ "', '"
+									+ invoice.getDescript() 
+									+ "', '"
+									+ invoice.getBerth() 
+									+ "', '"
+									+ invoice.getWeight() 
+									+ "', '"
+									+ invoice.getSize() 
+									+ "', '"
+									+ invoice.getReturnEmpty() 
+									+ "', '"
+									+ deliverID 
+									+ "', '"
+									+ collectID 
+									+ "', '"
+									+ hazID 
+									+ "', '"
+									+ invoice.getTime() 
+									+ "');");
+			statement
+					.executeUpdate(new String(
+							"INSERT INTO docket (Equipment, Customer, Seal, Description, Berth, Weight, Size_, Return_Empty, Deliver_to, Collect_from, Haz, Date_) values ('"
+									+ invoice.getEqupNo()
+									+ "', '"
+									+ invoice.getCustomerRefer() 
+									+ "', '"
+									+ invoice.getSeal() 
+									+ "', '"
+									+ invoice.getDescript() 
+									+ "', '"
+									+ invoice.getBerth() 
+									+ "', '"
+									+ invoice.getWeight() 
+									+ "', '"
+									+ invoice.getSize() 
+									+ "', '"
+									+ invoice.getReturnEmpty() 
+									+ "', '"
+									+ deliverID 
+									+ "', '"
+									+ collectID 
+									+ "', '"
+									+ hazID 
+									+ "', '"
+									+ invoice.getTime() 
+									+ "');"
+									));
+
+			resultSet = statement.executeQuery("SELECT LAST_INSERT_ID()");
+			resultSet.next();
+			return resultSet.getInt(1);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	/**
+	 * The same as insertAddress. Checks if something matching the haz spec is
+	 * in the database. If it is, use that, else write the new one in
+	 * 
+	 * @return SQL ID of haz entry
+	 */
+	public int insertHaz() {
+		int result = 0;
+		ResultSet resultSet;
+		Statement statement;
+		try {
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery(new String(
+					"SELECT * FROM haz WHERE Name = '"
+							+ ((InvoiceHaz) invoice).getName()
+							+ "' AND UN_Number = '"
+							+ ((InvoiceHaz) invoice).getUnNo()
+							+ "' AND Primary_Class = '"
+							+ ((InvoiceHaz) invoice).getClass1() + "'"));
+			if (resultSet.next()) {
+				result = resultSet.getInt(1);
+			} else {
+				statement
+						.executeUpdate(new String(
+								"INSERT INTO haz (Name, UN_Number, Packing_Group, Primary_Class, Secondary_Class, Tunnel_code) values ('"
+										+ ((InvoiceHaz) invoice).getName()
+										+ "', '"
+										+ ((InvoiceHaz) invoice).getUnNo()
+										+ "', '"
+										+ ((InvoiceHaz) invoice).getPg()
+										+ "', '"
+										+ ((InvoiceHaz) invoice).getClass1()
+										+ "', '"
+										+ ((InvoiceHaz) invoice).getClass2()
+										+ "', '"
+										+ ((InvoiceHaz) invoice).getTunnel()
+										+ "');"));
+				resultSet = statement.executeQuery("SELECT LAST_INSERT_ID()");
+				resultSet.next();
+				result = resultSet.getInt(1);
+
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return result;
+		}
+
+		return result;
+	}
+
+	public int insertAddress(String address) {
 		ResultSet resultSet;
 		Statement statement;
 		int result = 0;
-		try{
+		try {
 			statement = connection.createStatement();
 			// Check the collect from address
 			resultSet = statement.executeQuery(new String(
 					"SELECT * FROM addresses WHERE Address = \""
-							+ invoice.getFrom() + "\""));
+							+ address + "\""));
 			ResultSetMetaData metaData = resultSet.getMetaData();
-			int numberOfCols = metaData.getColumnCount();
 			// Presume the first object found is the address, as each is unique
 			if (resultSet.next()) {
 				// If found, store its id
@@ -256,7 +381,7 @@ public class Interface extends JFrame {
 				// Insert into address
 				statement.executeUpdate(new String(
 						"INSERT INTO addresses (Address) values ('"
-								+ invoice.getFrom() + "');"));
+								+ address + "');"));
 				// Getting the number of rows would probably be sufficent to
 				// determine the new ID, but an entry might get
 				// deleted...maybe...prehaps not, anyway, get the ID.
@@ -264,11 +389,11 @@ public class Interface extends JFrame {
 				resultSet.next();
 				result = resultSet.getInt(1);
 			}
-		}catch(SQLException e){
+		} catch (SQLException e) {
 			e.printStackTrace();
 			return result;
 		}
-		
+
 		return result;
 	}
 
@@ -320,10 +445,16 @@ public class Interface extends JFrame {
 		this.dispose();
 	}
 
-	public void setInvoice(Invoice invoice) {
+	/**
+	 * Set the invoice object and return it's ID. (Messy, but needed by
+	 * NewDocForm / Document to render to the invoice)
+	 * 
+	 * @param invoice
+	 * @return ID of invoice in SQL database, also used as the invoice number
+	 */
+	public int setInvoice(Invoice invoice) {
 		this.invoice = invoice;
-		saveActionPreformed();
-		// printActionPreformed(this.invoice);
+		return saveActionPreformed();
 	}
 
 	public Invoice getInvoice() {

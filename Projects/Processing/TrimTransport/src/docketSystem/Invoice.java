@@ -3,16 +3,16 @@ import java.util.Date;
 
 public class Invoice {
 
-	private String equpNo, size, berth, from, to, weight, customerRefer,
+	private String equpNo, size, berth, from, to, weight, customerRefer, returnEmpty,
 			descript, seal;
 	private int docNo;
-	private boolean returnEmpty;
+	
 	Date date;
 
 
 	
 	public Invoice(){
-		;
+		date = new Date();
 	}
 
 	public String getEqupNo() {
@@ -90,6 +90,10 @@ public class Invoice {
 	public Date getDate() {
 		return date;
 	}
+	
+	public long getTime(){
+		return date.getTime();
+	}
 
 	public void setDate(Date date) {
 		this.date = date;
@@ -103,11 +107,11 @@ public class Invoice {
 		this.seal = seal;
 	}
 
-	public boolean isReturnEmpty() {
+	public String getReturnEmpty() {
 		return returnEmpty;
 	}
 
-	public void setReturnEmpty(boolean returnEmpty) {
+	public void setReturnEmpty(String returnEmpty) {
 		this.returnEmpty = returnEmpty;
 	}
 

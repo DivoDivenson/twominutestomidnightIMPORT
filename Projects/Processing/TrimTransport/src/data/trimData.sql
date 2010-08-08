@@ -13,7 +13,7 @@ CREATE TABLE docket(
 	Seal varchar (20) NULL,
 	Description varchar (200) NULL,
 	Berth varchar (10) NULL,
-	Return_Empty boolean NOT NULL,
+	Return_Empty varChar(100) NULL,
 	Weight varchar (10) NULL,
 	Size_ varchar (10) NULL,
 	Deliver_to INT NULL,
@@ -43,14 +43,16 @@ CREATE TABLE haz(
 ) TYPE=INNODB
 ;
 
-insert into docket (Equipment, Customer, Seal, Description, Berth, Weight, Size_, Return_Empty, Deliver_to, Collect_from, Haz, Date_) values ('123d', 'Trim', '11bd4', 'Copper sulphate', '44d', '1000kg', '45ft', 'f', 1, 2, 1, 222221);
+insert into docket (Equipment, Customer, Seal, Description, Berth, Weight, Size_, Return_Empty, Deliver_to, Collect_from, Haz, Date_) values ('123d', 'Trim', '11bd4', 'Copper sulphate', '44d', '1000kg', '45ft', 'to yard', 1, 2, 1, 222221);
 
-insert into docket (Equipment, Customer, Seal, Description, Berth, Weight, Size_, Return_Empty, Deliver_to, Collect_from, Date_) values ('ryjhrys', 'Sharp', '11wgd4', 'Copper sulphate', '44d', '1000kg', '45ft', FALSE, 2, 1, 23322);
+insert into docket (Equipment, Customer, Seal, Description, Berth, Weight, Size_, Return_Empty, Deliver_to, Collect_from, Date_) values ('ryjhrys', 'Sharp', '11wgd4', 'Copper sulphate', '44d', '1000kg', '45ft', 'to heatons', 2, 1, 23322);
 
 insert into addresses (Address) values ('14 Strand Road\nSutton\nDublin 13');
 
 insert into addresses (Address) values ('123 Fakte st.\nNo road\nDublin 111');
 
 insert into haz (Name, UN_Number, Packing_Group, Primary_Class, Tunnel_code) values ('Kero', '1223', 'III', '3', 'C/D');
+INSERT INTO haz (Name, UN_Number, Packing_Group, Primary_Class, Secondary_Class, Tunnel_code) values ('wrvqwe', 'vqve', 'III', '4.1', '(4.3)', 'vea');
+
 
 	
