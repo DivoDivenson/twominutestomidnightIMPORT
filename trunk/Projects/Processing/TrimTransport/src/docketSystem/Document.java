@@ -29,7 +29,7 @@ public class Document {
 
 	public Document(Invoice invoice) {
 		this.invoice = invoice;
-		date = new Date();
+		//date = new Date();
 		open();
 		
 
@@ -64,22 +64,18 @@ public class Document {
 		writeAddress(invoice.getFrom(), "B");
 		sheet.getCellAt("H18").setValue(formatCell(invoice.getWeight()));
 		sheet.getCellAt("D18").setValue(formatCell(invoice.getSize()));
-		if(invoice.isReturnEmpty()){
-			sheet.getCellAt("B34").setValue(formatCell("Yes"));
-		}else{
-			sheet.getCellAt("B34").setValue(formatCell("No"));
-		}
+		sheet.getCellAt("B37").setValue(formatCell(invoice.getReturnEmpty()));
 		writeDes();
 		if (invoice instanceof InvoiceHaz) {
 			// System.out.println("Haz");
 			InvoiceHaz invoice = (InvoiceHaz) this.invoice;
-			sheet.getCellAt("D34").setValue(
+			sheet.getCellAt("B41").setValue(
 					new String("UN " + invoice.getUnNo() + ", "
 							+ invoice.getName() + "," + invoice.getClass1()
 							+ " " + invoice.getClass2() + ",PG"
 							+ invoice.getPg() + "," + invoice.getTunnel()));
 		}else{
-			sheet.getCellAt("D34").setValue(formatCell("No"));
+			sheet.getCellAt("B41").setValue(formatCell("No"));
 		}
 
 	}
@@ -91,11 +87,11 @@ public class Document {
 	 */
 	private void writeAddress(String input, String col) {
 		String[] address = input.split("\\n");
-		if (address.length > 4) {
-			for (int i = 4; i < address.length; i++) {
-				address[3] = new String(address[3] + " " + address[i]);
+		if (address.length > 6) {
+			for (int i = 6; i < address.length; i++) {
+				address[5] = new String(address[5] + " " + address[i]);
 			}
-			for (int i = 0; i < 4; i++) {
+			for (int i = 0; i < 6; i++) {
 				sheet.getCellAt(new String(col + (i + 22))).setValue(
 						new String(" " + address[i]));
 			}
@@ -107,6 +103,9 @@ public class Document {
 		}
 	}
 	//Write to the description line. Cuts the string up based on an arbitray number of characters....
+	/*
+	 * FIX THIS
+	 */
 	private void writeDes(){
 		String temp = invoice.getDescript();
 		int i;
@@ -116,18 +115,18 @@ public class Document {
 					break;
 				}
 			}
-			sheet.getCellAt("B29").setValue(temp.substring(0, i));
+			sheet.getCellAt("B31").setValue(temp.substring(0, i));
 			System.out.println(i);
-			sheet.getCellAt("B30").setValue(temp.substring(i));
+			sheet.getCellAt("B32").setValue(temp.substring(i));
 		}else{
-			sheet.getCellAt("B29").setValue(temp);
+			sheet.getCellAt("B31").setValue(temp);
 		}
 		
 	}
 	
 	private void writeDate(){
 		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-		sheet.getCellAt("H14").setValue(format.format(date));
+		sheet.getCellAt("H14").setValue(format.format(invoice.getDate()));
 	}
 	
 	//Pads out the input with a space at the start. Make the text look prettier :3

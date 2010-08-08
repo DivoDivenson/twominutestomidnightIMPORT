@@ -39,7 +39,8 @@ public class NewDocForm extends JFrame {
 	private javax.swing.JComboBox primary;
 	private javax.swing.JLabel primaryLabel;
 	private javax.swing.JButton printButton;
-    private javax.swing.JCheckBox returnEmpty;
+	private javax.swing.JTextField returnEmpty;
+	private javax.swing.JLabel returnEmptyLabel;
 	private javax.swing.JButton saveButton;
 	private javax.swing.JTextField seal;
 	private javax.swing.JLabel sealLabel;
@@ -63,7 +64,7 @@ public class NewDocForm extends JFrame {
 
 	public NewDocForm(Interface interfaceRef) {
 		initComponents();
-		//invoice = new Invoice();
+		// invoice = new Invoice();
 		this.interfaceRef = interfaceRef;
 		// this.invoice = interfaceRef.getInvoice();
 	}
@@ -72,22 +73,20 @@ public class NewDocForm extends JFrame {
 		if (haz[0].isVisible()) { // Check to see if the haz stuff is on or off
 			for (JComponent n : haz) {
 				n.setVisible(false);
-
-				setSize(new java.awt.Dimension(545, 550));
+				setSize(new java.awt.Dimension(545, 590));
 
 			}
 		} else {
 			for (JComponent n : haz) {
 				n.setVisible(true);
-				setSize(new java.awt.Dimension(545, 625));
-
+				setSize(new java.awt.Dimension(545, 660));
 			}
 		}
 	}
 
 	private void initInvoice() {
-		
-		if(hazCheckBox.isSelected()){
+
+		if (hazCheckBox.isSelected()) {
 			InvoiceHaz invoicehaz = new InvoiceHaz();
 			invoicehaz.setName(name.getText());
 			invoicehaz.setClass1((String) primary.getSelectedItem());
@@ -96,7 +95,7 @@ public class NewDocForm extends JFrame {
 			invoicehaz.setTunnel(tunnel.getText());
 			invoicehaz.setUnNo(un.getText());
 			invoice = invoicehaz;
-		}else{
+		} else {
 			invoice = new Invoice();
 		}
 		invoice.setBerth(berth.getText());
@@ -108,8 +107,8 @@ public class NewDocForm extends JFrame {
 		invoice.setSize(size.getText());
 		invoice.setTo(deliver.getText());
 		invoice.setWeight(weight.getText());
-		invoice.setReturnEmpty(returnEmpty.isSelected());
-		
+		invoice.setReturnEmpty(returnEmpty.getText());
+
 	}
 
 	private void saveButtonActionPerformed() {
@@ -169,7 +168,8 @@ public class NewDocForm extends JFrame {
 		seal = new javax.swing.JTextField();
 		sizeLabel = new javax.swing.JLabel();
 		size = new javax.swing.JTextField();
-		decriptionLabel = new javax.swing.JLabel();  //Yeah yeah, it's misspelled
+		decriptionLabel = new javax.swing.JLabel(); // Yeah yeah, it's
+													// misspelled
 		deliverLabel = new javax.swing.JLabel();
 		jScrollPane1 = new javax.swing.JScrollPane();
 		deliver = new javax.swing.JTextArea();
@@ -198,19 +198,20 @@ public class NewDocForm extends JFrame {
 		printButton = new javax.swing.JButton();
 		saveButton = new javax.swing.JButton();
 		cancelButton = new javax.swing.JButton();
-		returnEmpty = new javax.swing.JCheckBox();
-
+        returnEmpty = new javax.swing.JTextField();
+        returnEmptyLabel = new javax.swing.JLabel();
+        
 		stuff = new JComponent[] { equipLabel, equip, berthLabel, berth,
 				customerLabel, customer, weightLabel, weight, sealLabel, seal,
-				sizeLabel, size, collectLabel, collect, collectList, decriptionLabel,
-				deliverLabel, deliver, deliverList, hazCheckBox, unLabel, primaryLabel,
-				secondaryLabel, packLabel, tunnelLabel, nameLabel, name, un,
-				primary, packing, tunnel, secondary, printButton, saveButton,
-				cancelButton, returnEmpty};
+				sizeLabel, size, collectLabel, collect, collectList,
+				decriptionLabel, deliverLabel, deliver, deliverList,
+				hazCheckBox, unLabel, primaryLabel, secondaryLabel, packLabel,
+				tunnelLabel, nameLabel, name, un, primary, packing, tunnel,
+				secondary, printButton, saveButton, cancelButton, returnEmpty, returnEmptyLabel };
 
 		java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit()
-		.getScreenSize();
-		this.setLocation(screenSize.width /2, (screenSize.height)/2);
+				.getScreenSize();
+		this.setLocation(screenSize.width / 2, (screenSize.height) / 2);
 		haz = new JComponent[] { unLabel, primaryLabel, secondaryLabel,
 				packLabel, tunnelLabel, nameLabel, name, un, primary, packing,
 				tunnel, secondary };
@@ -223,296 +224,509 @@ public class NewDocForm extends JFrame {
 			n.setVisible(false);
 		}
 
-		 jList2.setModel(new javax.swing.AbstractListModel() {
-	            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-	            public int getSize() { return strings.length; }
-	            public Object getElementAt(int i) { return strings[i]; }
-	        });
-	        jScrollPane4.setViewportView(jList2);
+		jList2.setModel(new javax.swing.AbstractListModel() {
+			String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4",
+					"Item 5" };
 
-	        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-	        setSize(new java.awt.Dimension(545, 550));
-	        setResizable(false);
+			public int getSize() {
+				return strings.length;
+			}
 
-	        standardPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+			public Object getElementAt(int i) {
+				return strings[i];
+			}
+		});
+		jScrollPane4.setViewportView(jList2);
 
-	        equipLabel.setText("Equipment No.");
+		setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+		setSize(new java.awt.Dimension(545, 590));
+		setResizable(false);
 
-	        berthLabel.setText("Berth");
+		standardPanel.setBorder(javax.swing.BorderFactory
+				.createTitledBorder(""));
 
-	       
-	           
+		equipLabel.setText("Equipment No.");
 
-	        customerLabel.setText("Customer Ref");
+		berthLabel.setText("Berth");
 
-	        weightLabel.setText("Weight");
+		customerLabel.setText("Customer Ref");
 
-	        sealLabel.setText("Seal No.");
+		weightLabel.setText("Weight");
 
-	        sizeLabel.setFont(new java.awt.Font("Dialog", 0, 12));
-	        sizeLabel.setText("Size");
+		sealLabel.setText("Seal No.");
 
-	        decriptionLabel.setText("Description");
+		sizeLabel.setFont(new java.awt.Font("Dialog", 0, 12));
+		sizeLabel.setText("Size");
 
-	        deliverLabel.setText("Deliver To");
+		decriptionLabel.setText("Description");
 
-	        deliver.setColumns(13);
-	        deliver.setRows(5);
-	        deliver.setWrapStyleWord( true );
-	        deliver.setLineWrap( true );
-	        jScrollPane1.setViewportView(deliver);
+		deliverLabel.setText("Deliver To");
 
-	        deliverList.setModel(new javax.swing.AbstractListModel() {
-	            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-	            public int getSize() { return strings.length; }
-	            public Object getElementAt(int i) { return strings[i]; }
-	        });
-	        jScrollPane2.setViewportView(deliverList);
+		deliver.setColumns(13);
+		deliver.setRows(5);
+		deliver.setWrapStyleWord(true);
+		deliver.setLineWrap(true);
+		jScrollPane1.setViewportView(deliver);
 
-	        collectLabel.setText("Collect From");
+		deliverList.setModel(new javax.swing.AbstractListModel() {
+			String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4",
+					"Item 5" };
 
-	        collect.setColumns(13);
-	        collect.setRows(5);
-	        collect.setWrapStyleWord( true );
-	        collect.setLineWrap( true );
-	        jScrollPane3.setViewportView(collect);
+			public int getSize() {
+				return strings.length;
+			}
 
-	        collectList.setModel(new javax.swing.AbstractListModel() {
-	            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-	            public int getSize() { return strings.length; }
-	            public Object getElementAt(int i) { return strings[i]; }
-	        });
-	        jScrollPane5.setViewportView(collectList);
-	        
-	        returnEmpty.setText("Return Empty");
-	        //returnEmpty.setAlignmentY(0.0F);
-	        returnEmpty.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
-	        returnEmpty.setMargin(new java.awt.Insets(2, 2, 2, 2));
+			public Object getElementAt(int i) {
+				return strings[i];
+			}
+		});
+		jScrollPane2.setViewportView(deliverList);
 
-	        
+		collectLabel.setText("Collect From");
 
-	        javax.swing.GroupLayout standardPanelLayout = new javax.swing.GroupLayout(standardPanel);
-	        standardPanel.setLayout(standardPanelLayout);
-	        standardPanelLayout.setHorizontalGroup(
-	            standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-	            .addGroup(standardPanelLayout.createSequentialGroup()
-	                .addContainerGap()
-	                .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-	                    .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-	                        .addComponent(decriptionLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-	                        .addComponent(sealLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-	                        .addComponent(customerLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-	                        .addComponent(equipLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 114, Short.MAX_VALUE))
-	                    .addComponent(deliverLabel)
-	                    .addComponent(collectLabel)
-	                    .addComponent(returnEmpty, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
-	                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-	                .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-	                    .addGroup(standardPanelLayout.createSequentialGroup()
-	                        .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-	                            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 161, Short.MAX_VALUE)
-	                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 161, Short.MAX_VALUE)
-	                            .addComponent(seal, javax.swing.GroupLayout.DEFAULT_SIZE, 161, Short.MAX_VALUE)
-	                            .addComponent(customer, javax.swing.GroupLayout.DEFAULT_SIZE, 161, Short.MAX_VALUE)
-	                            .addComponent(equip, javax.swing.GroupLayout.DEFAULT_SIZE, 161, Short.MAX_VALUE))
-	                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-	                        .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-	                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, standardPanelLayout.createSequentialGroup()
-	                                .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-	                                    .addComponent(sizeLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-	                                    .addComponent(weightLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-	                                    .addComponent(berthLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE))
-	                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-	                                .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-	                                    .addComponent(size, javax.swing.GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE)
-	                                    .addComponent(weight, javax.swing.GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE)
-	                                    .addComponent(berth, javax.swing.GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE)))
-	                            .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE)
-	                            .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE)))
-	                    .addComponent(description, javax.swing.GroupLayout.DEFAULT_SIZE, 351, Short.MAX_VALUE))
-	                .addContainerGap())
-	        );
-	        standardPanelLayout.setVerticalGroup(
-	            standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-	            .addGroup(standardPanelLayout.createSequentialGroup()
-	                .addContainerGap()
-	                .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-	                    .addComponent(equipLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 15, javax.swing.GroupLayout.PREFERRED_SIZE)
-	                    .addComponent(equip, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-	                    .addComponent(berthLabel)
-	                    .addComponent(berth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-	                .addGap(12, 12, 12)
-	                .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-	                    .addComponent(customerLabel)
-	                    .addComponent(customer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-	                    .addComponent(weightLabel)
-	                    .addComponent(weight, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-	                .addGap(12, 12, 12)
-	                .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-	                    .addComponent(sealLabel)
-	                    .addComponent(seal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-	                    .addComponent(sizeLabel)
-	                    .addComponent(size, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-	                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-	                .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-	                    .addComponent(decriptionLabel)
-	                    .addComponent(description, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-	                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-	                .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-	                		.addGroup(standardPanelLayout.createSequentialGroup()
-	                                .addComponent(deliverLabel)
-	                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-	                                .addComponent(returnEmpty))
-	                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE)
-	                            .addComponent(jScrollPane1))
-	                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 11, Short.MAX_VALUE)
-	                .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-	                    .addGroup(standardPanelLayout.createSequentialGroup()
-	                        .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE)
-	                        .addContainerGap())
-	                    .addGroup(standardPanelLayout.createSequentialGroup()
-	                        .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE)
-	                        .addContainerGap())
-	                    .addGroup(standardPanelLayout.createSequentialGroup()
-	                        .addComponent(collectLabel)
-	                        .addGap(62, 62, 62))))
-	        );
+		collect.setColumns(13);
+		collect.setRows(5);
+		collect.setWrapStyleWord(true);
+		collect.setLineWrap(true);
+		jScrollPane3.setViewportView(collect);
 
-	        hazPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+		collectList.setModel(new javax.swing.AbstractListModel() {
+			String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4",
+					"Item 5" };
 
-	        hazCheckBox.setText("Hazardous");
-	       
-	       
+			public int getSize() {
+				return strings.length;
+			}
 
-	        primaryLabel.setText("Primary Class");
+			public Object getElementAt(int i) {
+				return strings[i];
+			}
+		});
+		jScrollPane5.setViewportView(collectList);
 
-	        packLabel.setText("Packing Group");
+		returnEmptyLabel.setText("Return Empty");
+		// returnEmpty.setAlignmentY(0.0F);
 
-	        nameLabel.setText("Name");
+		javax.swing.GroupLayout standardPanelLayout = new javax.swing.GroupLayout(
+				standardPanel);
+		standardPanel.setLayout(standardPanelLayout);
+		standardPanelLayout
+				.setHorizontalGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+			            .addGroup(standardPanelLayout.createSequentialGroup()
+			                    .addContainerGap()
+			                    .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+			                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, standardPanelLayout.createSequentialGroup()
+			                            .addComponent(deliverLabel)
+			                            .addGap(69, 69, 69)
+			                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
+			                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+			                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE))
+			                        .addGroup(standardPanelLayout.createSequentialGroup()
+			                            .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+			                                .addComponent(returnEmptyLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+			                                .addComponent(decriptionLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+			                                .addComponent(sealLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+			                                .addComponent(customerLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+			                                .addComponent(equipLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 114, Short.MAX_VALUE)
+			                                .addComponent(collectLabel, javax.swing.GroupLayout.Alignment.LEADING))
+			                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+			                            .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+			                                .addGroup(standardPanelLayout.createSequentialGroup()
+			                                    .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+			                                        .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 161, Short.MAX_VALUE)
+			                                        .addComponent(seal, javax.swing.GroupLayout.DEFAULT_SIZE, 161, Short.MAX_VALUE)
+			                                        .addComponent(customer, javax.swing.GroupLayout.DEFAULT_SIZE, 161, Short.MAX_VALUE)
+			                                        .addComponent(equip, javax.swing.GroupLayout.DEFAULT_SIZE, 161, Short.MAX_VALUE))
+			                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+			                                    .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+			                                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, standardPanelLayout.createSequentialGroup()
+			                                            .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+			                                                .addComponent(sizeLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+			                                                .addComponent(weightLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+			                                                .addComponent(berthLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE))
+			                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+			                                            .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+			                                                .addComponent(size, javax.swing.GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE)
+			                                                .addComponent(weight, javax.swing.GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE)
+			                                                .addComponent(berth, javax.swing.GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE)))
+			                                        .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE)))
+			                                .addComponent(description, javax.swing.GroupLayout.DEFAULT_SIZE, 351, Short.MAX_VALUE)
+			                                .addComponent(returnEmpty, javax.swing.GroupLayout.DEFAULT_SIZE, 351, Short.MAX_VALUE))))
+			                    .addContainerGap())
+			            );
+		 standardPanelLayout.setVerticalGroup(
+		            standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+		            .addGroup(standardPanelLayout.createSequentialGroup()
+		                .addContainerGap()
+		                .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+		                    .addComponent(equipLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 15, javax.swing.GroupLayout.PREFERRED_SIZE)
+		                    .addComponent(equip, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+		                    .addComponent(berthLabel)
+		                    .addComponent(berth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+		                .addGap(12, 12, 12)
+		                .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+		                    .addComponent(customerLabel)
+		                    .addComponent(customer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+		                    .addComponent(weightLabel)
+		                    .addComponent(weight, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+		                .addGap(12, 12, 12)
+		                .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+		                    .addComponent(sealLabel)
+		                    .addComponent(seal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+		                    .addComponent(sizeLabel)
+		                    .addComponent(size, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+		                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+		                .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+		                    .addComponent(decriptionLabel)
+		                    .addComponent(description, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+		                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+		                .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+		                    .addComponent(returnEmptyLabel)
+		                    .addComponent(returnEmpty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+		                .addGap(19, 19, 19)
+		                .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+		                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE)
+		                    .addComponent(deliverLabel, javax.swing.GroupLayout.Alignment.LEADING)
+		                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE))
+		                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+		                .addGroup(standardPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+		                    .addGroup(standardPanelLayout.createSequentialGroup()
+		                        .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE)
+		                        .addContainerGap())
+		                    .addGroup(standardPanelLayout.createSequentialGroup()
+		                        .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE)
+		                        .addContainerGap())
+		                    .addGroup(standardPanelLayout.createSequentialGroup()
+		                        .addComponent(collectLabel)
+		                        .addGap(62, 62, 62))))
+		        );
 
-	        primary.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "1", "2", "3", "4.1", "4.2", "4.3", "5.1", "5.2", "6.1", "6.2", "7", "8", "9" }));
+		hazPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-	        packing.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "III", "II", "I" }));
+		hazCheckBox.setText("Hazardous");
+		
+		hazCheckBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				hazCheckBoxActionPerformed();
+			}
+		});
+		primaryLabel.setText("Primary Class");
 
-	        secondary.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "None", "1", "2", "3", "4.1", "4.2", "4.3", "5.1", "5.2", "6.1", "6.2", "7", "8", "9" }));
+		packLabel.setText("Packing Group");
 
-	        unLabel.setText("UN Number");
+		nameLabel.setText("Name");
 
-	        secondaryLabel.setText("Secondary Hazard");
+		primary.setModel(new javax.swing.DefaultComboBoxModel(new String[] {
+				"1", "2", "3", "4.1", "4.2", "4.3", "5.1", "5.2", "6.1", "6.2",
+				"7", "8", "9" }));
 
-	        tunnelLabel.setText("Tunnel Code");
+		packing.setModel(new javax.swing.DefaultComboBoxModel(new String[] {
+				"III", "II", "I" }));
 
-	        javax.swing.GroupLayout hazPanelLayout = new javax.swing.GroupLayout(hazPanel);
-	        hazPanel.setLayout(hazPanelLayout);
-	        hazPanelLayout.setHorizontalGroup(
-	            hazPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-	            .addGroup(hazPanelLayout.createSequentialGroup()
-	                .addContainerGap()
-	                .addComponent(hazCheckBox, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
-	                .addGap(37, 37, 37)
-	                .addGroup(hazPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-	                    .addGroup(hazPanelLayout.createSequentialGroup()
-	                        .addComponent(nameLabel)
-	                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-	                        .addComponent(name))
-	                    .addGroup(hazPanelLayout.createSequentialGroup()
-	                        .addGroup(hazPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-	                            .addComponent(primaryLabel)
-	                            .addComponent(packLabel))
-	                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-	                        .addGroup(hazPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-	                            .addComponent(packing, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-	                            .addComponent(primary, 0, 54, Short.MAX_VALUE))))
-	                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-	                .addGroup(hazPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-	                    .addComponent(tunnelLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-	                    .addComponent(unLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-	                    .addComponent(secondaryLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-	                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-	                .addGroup(hazPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-	                    .addComponent(un, javax.swing.GroupLayout.DEFAULT_SIZE, 54, Short.MAX_VALUE)
-	                    .addComponent(secondary, 0, 54, Short.MAX_VALUE)
-	                    .addComponent(tunnel, javax.swing.GroupLayout.DEFAULT_SIZE, 67, Short.MAX_VALUE))
-	                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-	        );
-	        hazPanelLayout.setVerticalGroup(
-	            hazPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-	            .addGroup(hazPanelLayout.createSequentialGroup()
-	                .addContainerGap()
-	                .addGroup(hazPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-	                    .addComponent(hazCheckBox)
-	                    .addComponent(nameLabel)
-	                    .addComponent(name, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-	                    .addComponent(unLabel)
-	                    .addComponent(un, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-	                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-	                .addGroup(hazPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-	                    .addComponent(primaryLabel)
-	                    .addComponent(primary, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-	                    .addComponent(secondaryLabel)
-	                    .addComponent(secondary, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-	                .addGap(11, 11, 11)
-	                .addGroup(hazPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-	                    .addComponent(packLabel)
-	                    .addComponent(packing, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-	                    .addComponent(tunnel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-	                    .addComponent(tunnelLabel))
-	                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-	        );
+		secondary.setModel(new javax.swing.DefaultComboBoxModel(new String[] {
+				"None", "1", "2", "3", "4.1", "4.2", "4.3", "5.1", "5.2",
+				"6.1", "6.2", "7", "8", "9" }));
 
-	        printButton.setText("Print");
-			printButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent evt) {
-					printButtonActionPerformed();
-				}
-			});
+		unLabel.setText("UN Number");
 
-			saveButton.setText("Save");
-			saveButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent evt) {
-					saveButtonActionPerformed();
-				}
-			});
+		secondaryLabel.setText("Secondary Hazard");
 
-			cancelButton.setText("Cancel");
-			cancelButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
-					cancelButtonActionPerformed();
-				}
-			});
+		tunnelLabel.setText("Tunnel Code");
 
-	        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-	        getContentPane().setLayout(layout);
-	        layout.setHorizontalGroup(
-	            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-	            .addGroup(layout.createSequentialGroup()
-	                .addContainerGap()
-	                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-	                    .addGroup(layout.createSequentialGroup()
-	                        .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
-	                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-	                        .addComponent(saveButton, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
-	                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-	                        .addComponent(printButton, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE))
-	                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-	                        .addComponent(standardPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-	                        .addComponent(hazPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-	                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-	        );
-	        layout.setVerticalGroup(
-	            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-	            .addGroup(layout.createSequentialGroup()
-	                .addContainerGap()
-	                .addComponent(standardPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-	                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-	                .addComponent(hazPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-	                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-	                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-	                    .addComponent(printButton, javax.swing.GroupLayout.DEFAULT_SIZE, 77, Short.MAX_VALUE)
-	                    .addComponent(saveButton, javax.swing.GroupLayout.DEFAULT_SIZE, 77, Short.MAX_VALUE)
-	                    .addComponent(cancelButton, javax.swing.GroupLayout.DEFAULT_SIZE, 77, Short.MAX_VALUE))
-	                .addContainerGap())
-	        );
-	        //pack();
+		javax.swing.GroupLayout hazPanelLayout = new javax.swing.GroupLayout(
+				hazPanel);
+		hazPanel.setLayout(hazPanelLayout);
+		hazPanelLayout
+				.setHorizontalGroup(hazPanelLayout
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(
+								hazPanelLayout
+										.createSequentialGroup()
+										.addContainerGap()
+										.addComponent(
+												hazCheckBox,
+												javax.swing.GroupLayout.PREFERRED_SIZE,
+												96,
+												javax.swing.GroupLayout.PREFERRED_SIZE)
+										.addGap(37, 37, 37)
+										.addGroup(
+												hazPanelLayout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.LEADING,
+																false)
+														.addGroup(
+																hazPanelLayout
+																		.createSequentialGroup()
+																		.addComponent(
+																				nameLabel)
+																		.addPreferredGap(
+																				javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+																		.addComponent(
+																				name))
+														.addGroup(
+																hazPanelLayout
+																		.createSequentialGroup()
+																		.addGroup(
+																				hazPanelLayout
+																						.createParallelGroup(
+																								javax.swing.GroupLayout.Alignment.LEADING)
+																						.addComponent(
+																								primaryLabel)
+																						.addComponent(
+																								packLabel))
+																		.addPreferredGap(
+																				javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+																		.addGroup(
+																				hazPanelLayout
+																						.createParallelGroup(
+																								javax.swing.GroupLayout.Alignment.LEADING,
+																								false)
+																						.addComponent(
+																								packing,
+																								0,
+																								javax.swing.GroupLayout.DEFAULT_SIZE,
+																								Short.MAX_VALUE)
+																						.addComponent(
+																								primary,
+																								0,
+																								54,
+																								Short.MAX_VALUE))))
+										.addPreferredGap(
+												javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+										.addGroup(
+												hazPanelLayout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.LEADING,
+																false)
+														.addComponent(
+																tunnelLabel,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																Short.MAX_VALUE)
+														.addComponent(
+																unLabel,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																Short.MAX_VALUE)
+														.addComponent(
+																secondaryLabel,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																Short.MAX_VALUE))
+										.addPreferredGap(
+												javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+										.addGroup(
+												hazPanelLayout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.LEADING,
+																false)
+														.addComponent(
+																un,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																54,
+																Short.MAX_VALUE)
+														.addComponent(
+																secondary, 0,
+																54,
+																Short.MAX_VALUE)
+														.addComponent(
+																tunnel,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																67,
+																Short.MAX_VALUE))
+										.addContainerGap(
+												javax.swing.GroupLayout.DEFAULT_SIZE,
+												Short.MAX_VALUE)));
+		hazPanelLayout
+				.setVerticalGroup(hazPanelLayout
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(
+								hazPanelLayout
+										.createSequentialGroup()
+										.addContainerGap()
+										.addGroup(
+												hazPanelLayout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.BASELINE)
+														.addComponent(
+																hazCheckBox)
+														.addComponent(nameLabel)
+														.addComponent(
+																name,
+																javax.swing.GroupLayout.PREFERRED_SIZE,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																javax.swing.GroupLayout.PREFERRED_SIZE)
+														.addComponent(unLabel)
+														.addComponent(
+																un,
+																javax.swing.GroupLayout.PREFERRED_SIZE,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																javax.swing.GroupLayout.PREFERRED_SIZE))
+										.addPreferredGap(
+												javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+										.addGroup(
+												hazPanelLayout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.BASELINE)
+														.addComponent(
+																primaryLabel)
+														.addComponent(
+																primary,
+																javax.swing.GroupLayout.PREFERRED_SIZE,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																javax.swing.GroupLayout.PREFERRED_SIZE)
+														.addComponent(
+																secondaryLabel)
+														.addComponent(
+																secondary,
+																javax.swing.GroupLayout.PREFERRED_SIZE,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																javax.swing.GroupLayout.PREFERRED_SIZE))
+										.addGap(11, 11, 11)
+										.addGroup(
+												hazPanelLayout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.BASELINE)
+														.addComponent(packLabel)
+														.addComponent(
+																packing,
+																javax.swing.GroupLayout.PREFERRED_SIZE,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																javax.swing.GroupLayout.PREFERRED_SIZE)
+														.addComponent(
+																tunnel,
+																javax.swing.GroupLayout.PREFERRED_SIZE,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																javax.swing.GroupLayout.PREFERRED_SIZE)
+														.addComponent(
+																tunnelLabel))
+										.addContainerGap(
+												javax.swing.GroupLayout.DEFAULT_SIZE,
+												Short.MAX_VALUE)));
+
+		printButton.setText("Print");
+		printButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				printButtonActionPerformed();
+			}
+		});
+
+		saveButton.setText("Save");
+		saveButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				saveButtonActionPerformed();
+			}
+		});
+
+		cancelButton.setText("Cancel");
+		cancelButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				cancelButtonActionPerformed();
+			}
+		});
+
+		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(
+				getContentPane());
+		getContentPane().setLayout(layout);
+		layout
+				.setHorizontalGroup(layout
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(
+								layout
+										.createSequentialGroup()
+										.addContainerGap()
+										.addGroup(
+												layout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.TRAILING)
+														.addGroup(
+																layout
+																		.createSequentialGroup()
+																		.addComponent(
+																				cancelButton,
+																				javax.swing.GroupLayout.PREFERRED_SIZE,
+																				77,
+																				javax.swing.GroupLayout.PREFERRED_SIZE)
+																		.addPreferredGap(
+																				javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+																		.addComponent(
+																				saveButton,
+																				javax.swing.GroupLayout.PREFERRED_SIZE,
+																				77,
+																				javax.swing.GroupLayout.PREFERRED_SIZE)
+																		.addPreferredGap(
+																				javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+																		.addComponent(
+																				printButton,
+																				javax.swing.GroupLayout.PREFERRED_SIZE,
+																				77,
+																				javax.swing.GroupLayout.PREFERRED_SIZE))
+														.addGroup(
+																javax.swing.GroupLayout.Alignment.LEADING,
+																layout
+																		.createParallelGroup(
+																				javax.swing.GroupLayout.Alignment.TRAILING,
+																				false)
+																		.addComponent(
+																				standardPanel,
+																				javax.swing.GroupLayout.Alignment.LEADING,
+																				javax.swing.GroupLayout.DEFAULT_SIZE,
+																				javax.swing.GroupLayout.DEFAULT_SIZE,
+																				Short.MAX_VALUE)
+																		.addComponent(
+																				hazPanel,
+																				javax.swing.GroupLayout.Alignment.LEADING,
+																				javax.swing.GroupLayout.DEFAULT_SIZE,
+																				javax.swing.GroupLayout.DEFAULT_SIZE,
+																				Short.MAX_VALUE)))
+										.addContainerGap(
+												javax.swing.GroupLayout.DEFAULT_SIZE,
+												Short.MAX_VALUE)));
+		layout
+				.setVerticalGroup(layout
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(
+								layout
+										.createSequentialGroup()
+										.addContainerGap()
+										.addComponent(
+												standardPanel,
+												javax.swing.GroupLayout.PREFERRED_SIZE,
+												javax.swing.GroupLayout.DEFAULT_SIZE,
+												javax.swing.GroupLayout.PREFERRED_SIZE)
+										.addPreferredGap(
+												javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+										.addComponent(
+												hazPanel,
+												javax.swing.GroupLayout.PREFERRED_SIZE,
+												javax.swing.GroupLayout.DEFAULT_SIZE,
+												javax.swing.GroupLayout.PREFERRED_SIZE)
+										.addPreferredGap(
+												javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+										.addGroup(
+												layout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.BASELINE)
+														.addComponent(
+																printButton,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																77,
+																Short.MAX_VALUE)
+														.addComponent(
+																saveButton,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																77,
+																Short.MAX_VALUE)
+														.addComponent(
+																cancelButton,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																77,
+																Short.MAX_VALUE))
+										.addContainerGap()));
+		// pack();
 	}
 }
