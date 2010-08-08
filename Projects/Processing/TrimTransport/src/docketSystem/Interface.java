@@ -2,7 +2,10 @@ package docketSystem;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -17,23 +20,23 @@ import org.jopendocument.model.OpenDocument;
 import org.jopendocument.panel.ODSViewerPanel;
 import org.jopendocument.print.DefaultDocumentPrinter;
 
-
 /**
- * This appears to have become the main class where everything is handled. It's (original) purpose was to draw the main window of the application.
- * Now it
- * ~Stores and manages the connection to the mySQL database
- * ~Launches the NewDocForm window
- * ~Passes the newly created Invoice from NewDocForm. It then opens the finished document in a print window
- * ~Writes the newly created Invoice to the database
+ * This appears to have become the main class where everything is handled. It's
+ * (original) purpose was to draw the main window of the application. Now it
+ * ~Stores and manages the connection to the mySQL database ~Launches the
+ * NewDocForm window ~Passes the newly created Invoice from NewDocForm. It then
+ * opens the finished document in a print window ~Writes the newly created
+ * Invoice to the database
+ * 
  * @author divo
- *
+ * 
  */
 public class Interface extends JFrame {
 	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
 	static final String DATABASE_URL = "jdbc:mysql://localhost/trimtransport";
 	static final String USERNAME = "trim";
 	static final String PASSWORD = "truck";
-    static final String DEFAULT_QUERY = "SELECT * FROM docket ORDER BY Docket_Number";
+	static final String DEFAULT_QUERY = "SELECT * FROM docket ORDER BY Docket_Number";
 
 	private JPanel main;
 
@@ -54,7 +57,7 @@ public class Interface extends JFrame {
 
 	private ResultSetTableModel tableModel;
 	private JScrollPane tableScroll;
-	
+
 	private Connection connection;
 
 	private javax.swing.JButton searchButton;
@@ -62,12 +65,9 @@ public class Interface extends JFrame {
 	public Interface() {
 		initComponents();
 	}
-	
-	
 
 	private void initComponents() {
 
-		
 		main = new javax.swing.JPanel();
 		newDoc = new javax.swing.JButton();
 		searchButton = new javax.swing.JButton();
@@ -77,13 +77,13 @@ public class Interface extends JFrame {
 		edit = new javax.swing.JMenu();
 		tableScroll = new JScrollPane();
 
-		
-		
-		//JTable for database of doc
+		// JTable for database of doc
 		try {
 			Class.forName(JDBC_DRIVER);
-			connection = DriverManager.getConnection(DATABASE_URL, USERNAME, PASSWORD);
-			tableModel = new ResultSetTableModel( JDBC_DRIVER, connection, DEFAULT_QUERY );
+			connection = DriverManager.getConnection(DATABASE_URL, USERNAME,
+					PASSWORD);
+			tableModel = new ResultSetTableModel(JDBC_DRIVER, connection,
+					DEFAULT_QUERY);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -93,9 +93,8 @@ public class Interface extends JFrame {
 		}
 		JTable resultTable = new JTable(tableModel);
 		tableScroll.setViewportView(resultTable);
-		//End jtable
-		
-		
+		// End jtable
+
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
 		newDoc.setText("New");
@@ -122,31 +121,79 @@ public class Interface extends JFrame {
 		javax.swing.GroupLayout mainLayout = new javax.swing.GroupLayout(main);
 		main.setLayout(mainLayout);
 		mainLayout
-		.setHorizontalGroup(
-	            mainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-	            .addGroup(mainLayout.createSequentialGroup()
-	                .addContainerGap()
-	                .addGroup(mainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-	                    .addComponent(newDoc, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
-	                    .addComponent(searchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
-	                    .addComponent(closeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE))
-	                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-	                .addComponent(tableScroll, javax.swing.GroupLayout.DEFAULT_SIZE, 402, Short.MAX_VALUE)
-	                .addContainerGap())
-	        );
-		mainLayout.setVerticalGroup(
-	            mainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-	            .addGroup(mainLayout.createSequentialGroup()
-	                .addContainerGap()
-	                .addGroup(mainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-	                    .addComponent(tableScroll, javax.swing.GroupLayout.DEFAULT_SIZE, 249, Short.MAX_VALUE)
-	                    .addGroup(mainLayout.createSequentialGroup()
-	                        .addComponent(newDoc, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-	                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-	                        .addComponent(searchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-	                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-	                        .addComponent(closeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)))
-	                .addContainerGap()));
+				.setHorizontalGroup(mainLayout
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(
+								mainLayout
+										.createSequentialGroup()
+										.addContainerGap()
+										.addGroup(
+												mainLayout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.LEADING)
+														.addComponent(
+																newDoc,
+																javax.swing.GroupLayout.PREFERRED_SIZE,
+																66,
+																javax.swing.GroupLayout.PREFERRED_SIZE)
+														.addComponent(
+																searchButton,
+																javax.swing.GroupLayout.PREFERRED_SIZE,
+																66,
+																javax.swing.GroupLayout.PREFERRED_SIZE)
+														.addComponent(
+																closeButton,
+																javax.swing.GroupLayout.PREFERRED_SIZE,
+																66,
+																javax.swing.GroupLayout.PREFERRED_SIZE))
+										.addPreferredGap(
+												javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+										.addComponent(
+												tableScroll,
+												javax.swing.GroupLayout.DEFAULT_SIZE,
+												402, Short.MAX_VALUE)
+										.addContainerGap()));
+		mainLayout
+				.setVerticalGroup(mainLayout
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(
+								mainLayout
+										.createSequentialGroup()
+										.addContainerGap()
+										.addGroup(
+												mainLayout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.LEADING)
+														.addComponent(
+																tableScroll,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																249,
+																Short.MAX_VALUE)
+														.addGroup(
+																mainLayout
+																		.createSequentialGroup()
+																		.addComponent(
+																				newDoc,
+																				javax.swing.GroupLayout.PREFERRED_SIZE,
+																				68,
+																				javax.swing.GroupLayout.PREFERRED_SIZE)
+																		.addPreferredGap(
+																				javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+																		.addComponent(
+																				searchButton,
+																				javax.swing.GroupLayout.PREFERRED_SIZE,
+																				68,
+																				javax.swing.GroupLayout.PREFERRED_SIZE)
+																		.addPreferredGap(
+																				javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+																		.addComponent(
+																				closeButton,
+																				javax.swing.GroupLayout.PREFERRED_SIZE,
+																				68,
+																				javax.swing.GroupLayout.PREFERRED_SIZE)))
+										.addContainerGap()));
 		file.setText("File");
 		jMenuBar1.add(file);
 
@@ -174,8 +221,55 @@ public class Interface extends JFrame {
 		setFonts();
 	}
 
+	/**
+	 * Insert an invoice object into the sql database
+	 */
 	public void saveActionPreformed() {
-		;
+		// First check to see if the addresses are already present
+		System.out.println("Saved action");
+		int collectID, deliverID;
+		
+		collectID = insertAddress(invoice.getFrom());
+		deliverID = insertAddress(invoice.getTo());
+		
+		// String insert = new String("INSERT INTO docket ")
+	}
+	
+	public int insertAddress(String address){
+		ResultSet resultSet;
+		Statement statement;
+		int result = 0;
+		try{
+			statement = connection.createStatement();
+			// Check the collect from address
+			resultSet = statement.executeQuery(new String(
+					"SELECT * FROM addresses WHERE Address = \""
+							+ invoice.getFrom() + "\""));
+			ResultSetMetaData metaData = resultSet.getMetaData();
+			int numberOfCols = metaData.getColumnCount();
+			// Presume the first object found is the address, as each is unique
+			if (resultSet.next()) {
+				// If found, store its id
+				result = resultSet.getInt(1);
+			}// Else insert the new address into addresses
+			else {
+				// Insert into address
+				statement.executeUpdate(new String(
+						"INSERT INTO addresses (Address) values ('"
+								+ invoice.getFrom() + "');"));
+				// Getting the number of rows would probably be sufficent to
+				// determine the new ID, but an entry might get
+				// deleted...maybe...prehaps not, anyway, get the ID.
+				resultSet = statement.executeQuery("SELECT LAST_INSERT_ID()");
+				resultSet.next();
+				result = resultSet.getInt(1);
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			return result;
+		}
+		
+		return result;
 	}
 
 	public void setFonts() {
@@ -202,11 +296,9 @@ public class Interface extends JFrame {
 		mainFrame.setContentPane(viewerPanel);
 		mainFrame.pack();
 		mainFrame.setLocation(screenSize.width / 2, (screenSize.height) / 2);
-		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		mainFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		mainFrame.setVisible(true);
 	}
-
-
 
 	private void newDocActionPerformed(java.awt.event.ActionEvent evt) {
 

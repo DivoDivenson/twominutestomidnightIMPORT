@@ -113,7 +113,8 @@ public class NewDocForm extends JFrame {
 	}
 
 	private void saveButtonActionPerformed() {
-
+		initInvoice();
+		interfaceRef.setInvoice(invoice);
 	}
 
 	private void printButtonActionPerformed() {
@@ -381,11 +382,7 @@ public class NewDocForm extends JFrame {
 
 	        hazCheckBox.setText("Hazardous");
 	       
-	        hazCheckBox.addActionListener(new java.awt.event.ActionListener() {
-	            public void actionPerformed(java.awt.event.ActionEvent evt) {
-	                hazCheckBoxActionPerformed();
-	            }
-	        });
+	       
 
 	        primaryLabel.setText("Primary Class");
 
