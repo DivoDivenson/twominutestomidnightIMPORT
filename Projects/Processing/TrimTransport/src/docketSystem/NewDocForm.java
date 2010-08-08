@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Date;
 
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
@@ -607,6 +608,9 @@ public class NewDocForm extends JFrame {
 												Short.MAX_VALUE)));
 
 		printButton.setText("Print");
+		printButton.setIcon(new ImageIcon("src/data/resources/print.png"));
+		printButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        printButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 		printButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				printButtonActionPerformed();
@@ -614,6 +618,9 @@ public class NewDocForm extends JFrame {
 		});
 
 		saveButton.setText("Save");
+		saveButton.setIcon(new ImageIcon("src/data/resources/save.png"));
+		saveButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        saveButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 		saveButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				saveButtonActionPerformed();
@@ -621,6 +628,9 @@ public class NewDocForm extends JFrame {
 		});
 
 		cancelButton.setText("Cancel");
+		cancelButton.setIcon(new ImageIcon("src/data/resources/close.png"));
+		cancelButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        cancelButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 		cancelButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				cancelButtonActionPerformed();
