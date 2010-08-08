@@ -1,5 +1,11 @@
 package docketSystem;
 
+/*
+ * 
+ * ****************************
+ * INVOICE = DOCKET in my own crazy mind
+ * **************************** 
+ */
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -36,7 +42,12 @@ public class Interface extends JFrame {
 	static final String DATABASE_URL = "jdbc:mysql://localhost/trimtransport";
 	static final String USERNAME = "trim";
 	static final String PASSWORD = "truck";
-	static final String DEFAULT_QUERY = "SELECT * FROM docket ORDER BY Docket_Number";
+	static final String DEFAULT_QUERY = "SELECT docket.Docket_Number, docket.Date_, addresses.address, addresses1.address,"
+			+ " docket.Description, docket.Seal, docket.Customer, docket.Equipment, docket.Return_Empty, haz.Name, haz.UN_Number, docket.Size_, docket.Weight" +
+					" FROM docket LEFT JOIN addresses ON docket.Deliver_to=addresses.ID LEFT" +
+					" JOIN addresses AS addresses1 ON docket.Collect_From=addresses1.ID" +
+					" LEFT JOIN haz ON docket.Haz=haz.ID" +
+					" ORDER BY Docket_Number;";
 
 	private JPanel main;
 
@@ -92,6 +103,7 @@ public class Interface extends JFrame {
 			e.printStackTrace();
 		}
 		JTable resultTable = new JTable(tableModel);
+
 		tableScroll.setViewportView(resultTable);
 		// End jtable
 
@@ -234,8 +246,7 @@ public class Interface extends JFrame {
 		if (invoice instanceof InvoiceHaz) {
 			hazID = insertHaz();
 		}
-		//System.out.println(invoice.getFrom() +  " " + collectID + " " + deliverID);
-		//return 0;
+
 		return insertDocket(collectID, deliverID, hazID);
 
 		// String insert = new String("INSERT INTO docket ")
@@ -247,59 +258,33 @@ public class Interface extends JFrame {
 		ResultSet resultSet;
 		try {
 			statement = connection.createStatement();
-			System.out.println("INSERT INTO docket (Equipment, Customer, Seal, Description, Berth, Weight, Size_, Return_Empty, Deliver_to, Collect_from, Haz, Date_) values ('"
-									+ invoice.getEqupNo()
-									+ "', '"
-									+ invoice.getCustomerRefer() 
-									+ "', '"
-									+ invoice.getSeal() 
-									+ "', '"
-									+ invoice.getDescript() 
-									+ "', '"
-									+ invoice.getBerth() 
-									+ "', '"
-									+ invoice.getWeight() 
-									+ "', '"
-									+ invoice.getSize() 
-									+ "', '"
-									+ invoice.getReturnEmpty() 
-									+ "', '"
-									+ deliverID 
-									+ "', '"
-									+ collectID 
-									+ "', '"
-									+ hazID 
-									+ "', '"
-									+ invoice.getTime() 
-									+ "');");
 			statement
 					.executeUpdate(new String(
 							"INSERT INTO docket (Equipment, Customer, Seal, Description, Berth, Weight, Size_, Return_Empty, Deliver_to, Collect_from, Haz, Date_) values ('"
 									+ invoice.getEqupNo()
 									+ "', '"
-									+ invoice.getCustomerRefer() 
+									+ invoice.getCustomerRefer()
 									+ "', '"
-									+ invoice.getSeal() 
+									+ invoice.getSeal()
 									+ "', '"
-									+ invoice.getDescript() 
+									+ invoice.getDescript()
 									+ "', '"
-									+ invoice.getBerth() 
+									+ invoice.getBerth()
 									+ "', '"
-									+ invoice.getWeight() 
+									+ invoice.getWeight()
 									+ "', '"
-									+ invoice.getSize() 
+									+ invoice.getSize()
 									+ "', '"
-									+ invoice.getReturnEmpty() 
+									+ invoice.getReturnEmpty()
 									+ "', '"
-									+ deliverID 
+									+ deliverID
 									+ "', '"
-									+ collectID 
+									+ collectID
 									+ "', '"
-									+ hazID 
+									+ hazID
 									+ "', '"
-									+ invoice.getTime() 
-									+ "');"
-									));
+									+ invoice.getTime()
+									+ "');"));
 
 			resultSet = statement.executeQuery("SELECT LAST_INSERT_ID()");
 			resultSet.next();
@@ -369,9 +354,8 @@ public class Interface extends JFrame {
 			statement = connection.createStatement();
 			// Check the collect from address
 			resultSet = statement.executeQuery(new String(
-					"SELECT * FROM addresses WHERE Address = \""
-							+ address + "\""));
-			ResultSetMetaData metaData = resultSet.getMetaData();
+					"SELECT * FROM addresses WHERE Address = \"" + address
+							+ "\""));
 			// Presume the first object found is the address, as each is unique
 			if (resultSet.next()) {
 				// If found, store its id
@@ -380,8 +364,8 @@ public class Interface extends JFrame {
 			else {
 				// Insert into address
 				statement.executeUpdate(new String(
-						"INSERT INTO addresses (Address) values ('"
-								+ address + "');"));
+						"INSERT INTO addresses (Address) values ('" + address
+								+ "');"));
 				// Getting the number of rows would probably be sufficent to
 				// determine the new ID, but an entry might get
 				// deleted...maybe...prehaps not, anyway, get the ID.
@@ -403,6 +387,23 @@ public class Interface extends JFrame {
 		for (JComponent n : stuff) {
 			n.setFont(new java.awt.Font("Dialog", 0, 11));
 		}
+	}
+
+	private int getMaxID() {
+		ResultSet resultSet;
+		Statement statement;
+		int result = 0;
+		try {
+			statement = connection.createStatement();
+			resultSet = statement
+					.executeQuery("SELECT max(Docket_Number) FROM docket");
+			if (resultSet.next()) {
+				result = resultSet.getInt(1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return result;
 	}
 
 	public void printActionPreformed(Invoice invoice) {
@@ -454,6 +455,8 @@ public class Interface extends JFrame {
 	 */
 	public int setInvoice(Invoice invoice) {
 		this.invoice = invoice;
+		invoice.setDocNo(getMaxID() + 1); // Set the docket number as the
+		// previous most recent invoice
 		return saveActionPreformed();
 	}
 
