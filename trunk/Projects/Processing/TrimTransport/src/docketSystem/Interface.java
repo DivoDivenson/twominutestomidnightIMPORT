@@ -13,6 +13,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -43,11 +44,11 @@ public class Interface extends JFrame {
 	static final String USERNAME = "trim";
 	static final String PASSWORD = "truck";
 	static final String DEFAULT_QUERY = "SELECT docket.Docket_Number, docket.Date_, addresses.address, addresses1.address,"
-			+ " docket.Description, docket.Seal, docket.Customer, docket.Equipment, docket.Return_Empty, haz.Name, haz.UN_Number, docket.Size_, docket.Weight" +
-					" FROM docket LEFT JOIN addresses ON docket.Deliver_to=addresses.ID LEFT" +
-					" JOIN addresses AS addresses1 ON docket.Collect_From=addresses1.ID" +
-					" LEFT JOIN haz ON docket.Haz=haz.ID" +
-					" ORDER BY Docket_Number;";
+			+ " docket.Description, docket.Seal, docket.Customer, docket.Equipment, docket.Return_Empty, haz.Name, haz.UN_Number, docket.Size_, docket.Weight"
+			+ " FROM docket LEFT JOIN addresses ON docket.Deliver_to=addresses.ID LEFT"
+			+ " JOIN addresses AS addresses1 ON docket.Collect_From=addresses1.ID"
+			+ " LEFT JOIN haz ON docket.Haz=haz.ID"
+			+ " ORDER BY Docket_Number;";
 
 	private JPanel main;
 
@@ -72,6 +73,7 @@ public class Interface extends JFrame {
 	private Connection connection;
 
 	private javax.swing.JButton searchButton;
+	JTable resultTable;
 
 	public Interface() {
 		initComponents();
@@ -102,7 +104,7 @@ public class Interface extends JFrame {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		JTable resultTable = new JTable(tableModel);
+		resultTable = new JTable(tableModel);
 
 		tableScroll.setViewportView(resultTable);
 		// End jtable
@@ -110,6 +112,9 @@ public class Interface extends JFrame {
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
 		newDoc.setText("New");
+		newDoc.setIcon(new ImageIcon("src/data/resources/new.png"));
+		newDoc.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+		newDoc.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 		newDoc.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				newDocActionPerformed(evt);
@@ -117,6 +122,10 @@ public class Interface extends JFrame {
 		});
 
 		searchButton.setText("Find");
+		searchButton.setIcon(new ImageIcon("src/data/resources/search.png"));
+		searchButton
+				.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+		searchButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 		searchButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				searchButttonActionPerformed();
@@ -124,6 +133,10 @@ public class Interface extends JFrame {
 		});
 
 		closeButton.setText("Close");
+		closeButton.setIcon(new ImageIcon("src/data/resources/close.png"));
+		closeButton
+				.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+		closeButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 		closeButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				closeButtonActionPerformed();
@@ -288,6 +301,9 @@ public class Interface extends JFrame {
 
 			resultSet = statement.executeQuery("SELECT LAST_INSERT_ID()");
 			resultSet.next();
+
+			tableModel.setQuery(DEFAULT_QUERY);
+
 			return resultSet.getInt(1);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -438,7 +454,8 @@ public class Interface extends JFrame {
 	}
 
 	private void searchButttonActionPerformed() {
-		;
+		SearchForm search = new SearchForm();
+		search.setVisible(true);
 	}
 
 	private void closeButtonActionPerformed() {
