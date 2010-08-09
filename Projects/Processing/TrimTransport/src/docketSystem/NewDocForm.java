@@ -15,19 +15,21 @@ public class NewDocForm extends JFrame {
 	private javax.swing.JButton cancelButton;
 	private javax.swing.JTextArea collect;
 	private javax.swing.JLabel collectLabel;
-	private javax.swing.JList collectList;
+//	private javax.swing.JList collectList;
+	private AddressList collectList;
 	private javax.swing.JTextField customer;
 	private javax.swing.JLabel customerLabel;
 	private javax.swing.JLabel decriptionLabel;
 	private javax.swing.JTextArea deliver;
 	private javax.swing.JLabel deliverLabel;
-	private javax.swing.JList deliverList;
+//	private javax.swing.JList deliverList;
+	private AddressList deliverList;
 	private javax.swing.JTextField description;
 	private javax.swing.JTextField equip;
 	private javax.swing.JLabel equipLabel;
 	private javax.swing.JCheckBox hazCheckBox;
 	private javax.swing.JPanel hazPanel;
-	private javax.swing.JList jList2;
+	//private javax.swing.JList jList2;
 	private javax.swing.JScrollPane jScrollPane1;
 	private javax.swing.JScrollPane jScrollPane2;
 	private javax.swing.JScrollPane jScrollPane3;
@@ -56,6 +58,7 @@ public class NewDocForm extends JFrame {
 	private javax.swing.JLabel unLabel;
 	private javax.swing.JTextField weight;
 	private javax.swing.JLabel weightLabel;
+	
 
 	JComponent stuff[];
 	JComponent haz[];
@@ -64,9 +67,10 @@ public class NewDocForm extends JFrame {
 	private Interface interfaceRef; // Reference to the main interface
 
 	public NewDocForm(Interface interfaceRef) {
+		this.interfaceRef = interfaceRef;
+
 		initComponents();
 		// invoice = new Invoice();
-		this.interfaceRef = interfaceRef;
 		// this.invoice = interfaceRef.getInvoice();
 	}
 
@@ -113,14 +117,18 @@ public class NewDocForm extends JFrame {
 	}
 
 	private void saveButtonActionPerformed() {
-		initInvoice();
+		initInvoice();		
 		interfaceRef.setInvoice(invoice);
+		deliverList.initList();
+		collectList.initList();
 	}
 
 	private void printButtonActionPerformed() {
 		initInvoice();
 		interfaceRef.setInvoice(invoice);
 		interfaceRef.printActionPreformed(invoice);
+		deliverList.initList();
+		collectList.initList();
 	}
 
 	private void cancelButtonActionPerformed() {
@@ -155,7 +163,7 @@ public class NewDocForm extends JFrame {
 	private void initComponents() {
 
 		jScrollPane4 = new javax.swing.JScrollPane();
-		jList2 = new javax.swing.JList();
+		//jList2 = new javax.swing.JList();
 		standardPanel = new javax.swing.JPanel();
 		equipLabel = new javax.swing.JLabel();
 		equip = new javax.swing.JTextField();
@@ -175,12 +183,12 @@ public class NewDocForm extends JFrame {
 		jScrollPane1 = new javax.swing.JScrollPane();
 		deliver = new javax.swing.JTextArea();
 		jScrollPane2 = new javax.swing.JScrollPane();
-		deliverList = new javax.swing.JList();
+		deliverList = new AddressList(interfaceRef.getConnection() );
 		collectLabel = new javax.swing.JLabel();
 		jScrollPane3 = new javax.swing.JScrollPane();
 		collect = new javax.swing.JTextArea();
 		jScrollPane5 = new javax.swing.JScrollPane();
-		collectList = new javax.swing.JList();
+		collectList = new AddressList(interfaceRef.getConnection());
 		description = new javax.swing.JTextField();
 		hazPanel = new javax.swing.JPanel();
 		hazCheckBox = new javax.swing.JCheckBox();
@@ -225,7 +233,7 @@ public class NewDocForm extends JFrame {
 			n.setVisible(false);
 		}
 
-		jList2.setModel(new javax.swing.AbstractListModel() {
+		/*jList2.setModel(new javax.swing.AbstractListModel() {
 			String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4",
 					"Item 5" };
 
@@ -237,7 +245,7 @@ public class NewDocForm extends JFrame {
 				return strings[i];
 			}
 		});
-		jScrollPane4.setViewportView(jList2);
+		//jScrollPane4.setViewportView(jList2);*/
 
 		setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 		setSize(new java.awt.Dimension(545, 590));
@@ -268,8 +276,19 @@ public class NewDocForm extends JFrame {
 		deliver.setWrapStyleWord(true);
 		deliver.setLineWrap(true);
 		jScrollPane1.setViewportView(deliver);
+		
+		deliverList.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                deliver.setText(deliverList.getSelectedValue(deliverList.getSelectedIndex()).fullString()); //Ugh. It sets the text, look away.
+            }
+        });
+		collectList.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+            	collect.setText(collectList.getSelectedValue(collectList.getSelectedIndex()).fullString()); //Ugh. It sets the text, look away.
+            }
+        });
 
-		deliverList.setModel(new javax.swing.AbstractListModel() {
+		/*deliverList.setModel(new javax.swing.AbstractListModel() {
 			String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4",
 					"Item 5" };
 
@@ -280,7 +299,7 @@ public class NewDocForm extends JFrame {
 			public Object getElementAt(int i) {
 				return strings[i];
 			}
-		});
+		});*/
 		jScrollPane2.setViewportView(deliverList);
 
 		collectLabel.setText("Collect From");
@@ -291,7 +310,7 @@ public class NewDocForm extends JFrame {
 		collect.setLineWrap(true);
 		jScrollPane3.setViewportView(collect);
 
-		collectList.setModel(new javax.swing.AbstractListModel() {
+		/*collectList.setModel(new javax.swing.AbstractListModel() {
 			String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4",
 					"Item 5" };
 
@@ -302,7 +321,7 @@ public class NewDocForm extends JFrame {
 			public Object getElementAt(int i) {
 				return strings[i];
 			}
-		});
+		});*/
 		jScrollPane5.setViewportView(collectList);
 
 		returnEmptyLabel.setText("Return Empty");

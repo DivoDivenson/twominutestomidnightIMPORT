@@ -44,9 +44,13 @@ CREATE TABLE haz(
 ) TYPE=INNODB
 ;
 
-insert into docket (Equipment, Customer, Seal, Description, Berth, Weight, Size_, Return_Empty, Deliver_to, Collect_from, Haz, Date_) values ('123d', 'Trim', '11bd4', 'Copper sulphate', '44d', '1000kg', '45ft', 'to yard', 1, 2, 1, 222221);
+/*insert into docket (Date_) values ('1');*/
 
-insert into docket (Equipment, Customer, Seal, Description, Berth, Weight, Size_, Return_Empty, Deliver_to, Collect_from, Date_) values ('ryjhrys', 'Sharp', '11wgd4', 'Copper sulphate', '44d', '1000kg', '45ft', 'to heatons', 2, 1, 23322);
+insert into docket (Equipment, Customer, Seal, Description, Berth, Weight, Size_, Return_Empty, Deliver_to, Collect_from, Haz, Date_) values ('123d', 'Trim', '11bd4', 'Copper sulphate', '44d', '1000kg', '45ft', 'to yard', 2, 3, 1, 222221);
+
+insert into docket (Equipment, Customer, Seal, Description, Berth, Weight, Size_, Return_Empty, Deliver_to, Collect_from, Date_) values ('ryjhrys', 'Sharp', '11wgd4', 'Copper sulphate', '44d', '1000kg', '45ft', 'to heatons', 3, 2, 23322);
+
+insert into addresses (address,weight) values ('', '1');
 
 insert into addresses (Address,weight) values ('14 Strand Road\nSutton\nDublin 13' , '1');
 
