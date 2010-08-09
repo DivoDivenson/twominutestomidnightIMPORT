@@ -27,6 +27,7 @@ CREATE TABLE docket(
 CREATE TABLE addresses(
 	ID INT NOT NULL AUTO_INCREMENT,
 	Address varchar(200) NULL,
+	weight INT NOT NULL,
 	PRIMARY KEY (ID)
 ) TYPE=INNODB
 ;
@@ -47,9 +48,9 @@ insert into docket (Equipment, Customer, Seal, Description, Berth, Weight, Size_
 
 insert into docket (Equipment, Customer, Seal, Description, Berth, Weight, Size_, Return_Empty, Deliver_to, Collect_from, Date_) values ('ryjhrys', 'Sharp', '11wgd4', 'Copper sulphate', '44d', '1000kg', '45ft', 'to heatons', 2, 1, 23322);
 
-insert into addresses (Address) values ('14 Strand Road\nSutton\nDublin 13');
+insert into addresses (Address,weight) values ('14 Strand Road\nSutton\nDublin 13' , '1');
 
-insert into addresses (Address) values ('123 Fakte st.\nNo road\nDublin 111');
+insert into addresses (Address,weight) values ('123 Fakte st.\nNo road\nDublin 111' , '1');
 
 insert into haz (Name, UN_Number, Packing_Group, Primary_Class, Tunnel_code) values ('Kero', '1223', 'III', '3', 'C/D');
 INSERT INTO haz (Name, UN_Number, Packing_Group, Primary_Class, Secondary_Class, Tunnel_code) values ('wrvqwe', 'vqve', 'III', '4.1', '(4.3)', 'vea');
