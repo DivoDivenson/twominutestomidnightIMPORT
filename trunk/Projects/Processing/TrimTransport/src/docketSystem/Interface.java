@@ -374,14 +374,17 @@ public class Interface extends JFrame {
 							+ "\""));
 			// Presume the first object found is the address, as each is unique
 			if (resultSet.next()) {
-				// If found, store its id
+				// If found, store its id and add 1 to its weight
 				result = resultSet.getInt(1);
+				statement.executeUpdate(new String(
+						"UPDATE addresses SET weight=" + ((resultSet.getInt(3)) + 1)
+						+ " WHERE ID='" + result + "';"));
 			}// Else insert the new address into addresses
 			else {
 				// Insert into address
 				statement.executeUpdate(new String(
-						"INSERT INTO addresses (Address) values ('" + address
-								+ "');"));
+						"INSERT INTO addresses (Address, weight) values ('"
+								+ address + "', '1');"));
 				// Getting the number of rows would probably be sufficent to
 				// determine the new ID, but an entry might get
 				// deleted...maybe...prehaps not, anyway, get the ID.
