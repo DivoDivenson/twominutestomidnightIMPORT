@@ -47,8 +47,9 @@ public class Interface extends JFrame {
 			+ " docket.Description, docket.Seal, docket.Customer, docket.Equipment, docket.Return_Empty, haz.Name, haz.UN_Number, docket.Size_, docket.Weight"
 			+ " FROM docket LEFT JOIN addresses ON docket.Deliver_to=addresses.ID LEFT"
 			+ " JOIN addresses AS addresses1 ON docket.Collect_From=addresses1.ID"
-			+ " LEFT JOIN haz ON docket.Haz=haz.ID"
-			+ " ORDER BY Docket_Number;";
+			+ " LEFT JOIN haz ON docket.Haz=haz.ID";
+	
+	static final String TERM = ";";
 
 	private JPanel main;
 
@@ -96,7 +97,7 @@ public class Interface extends JFrame {
 			connection = DriverManager.getConnection(DATABASE_URL, USERNAME,
 					PASSWORD);
 			tableModel = new ResultSetTableModel(JDBC_DRIVER, connection,
-					DEFAULT_QUERY);
+					DEFAULT_QUERY + TERM);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -302,7 +303,7 @@ public class Interface extends JFrame {
 			resultSet = statement.executeQuery("SELECT LAST_INSERT_ID()");
 			resultSet.next();
 
-			tableModel.setQuery(DEFAULT_QUERY);
+			tableModel.setQuery(DEFAULT_QUERY + TERM);
 
 			return resultSet.getInt(1);
 		} catch (SQLException e) {
@@ -457,7 +458,7 @@ public class Interface extends JFrame {
 	}
 
 	private void searchButttonActionPerformed() {
-		SearchForm search = new SearchForm();
+		SearchForm search = new SearchForm(this);
 		search.setVisible(true);
 	}
 
@@ -482,6 +483,40 @@ public class Interface extends JFrame {
 
 	public Invoice getInvoice() {
 		return invoice;
+	}
+
+	public Connection getConnection() {
+		
+		return connection;
+	}
+
+	public void setConnection(Connection connection) {
+		this.connection = connection;
+	}
+	
+	public void setQuery(String where){
+		try {
+			System.out.println(DEFAULT_QUERY + where + TERM);
+			tableModel.setQuery(DEFAULT_QUERY + where + TERM);
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void setDefaultQuery(){
+		try {
+			tableModel.setQuery(DEFAULT_QUERY + TERM);
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/*
