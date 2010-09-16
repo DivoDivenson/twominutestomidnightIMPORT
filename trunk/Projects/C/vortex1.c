@@ -13,7 +13,8 @@
 int main(int argc, char *argv[])
 {
     struct addrinfo hints, *res, *p;
-    int status;
+    int status,a,b,c,d,x;
+    char answer[1024];
     char ipstr[INET6_ADDRSTRLEN];
 
     if (argc != 2) {
@@ -64,11 +65,23 @@ int main(int argc, char *argv[])
     printf("sockfd: %d\nConnecting...\n", sockfd);
 
     printf("Connection: %d\n",connect(sockfd, res->ai_addr, res->ai_addrlen));
-    printf(" %d\n", buffer);
-    if(recv(sockfd, inBuf, sizeof(inBuf), 0) == -1){
-      perror("Failed to get anything\n");
+    
+    status = 0;
+    if(status = (recv(sockfd, &a, sizeof(int), 0)) == -1){
+       fprintf(stderr, "recv data failed: %d\nMaybe somethings up?", status);
     }
-    printf("Got:\n%d\n",buffer);
+    recv(sockfd, &b, sizeof(int), 0);
+    recv(sockfd, &c, sizeof(int), 0);
+    recv(sockfd, &d, sizeof(int), 0);
+    x = a + b + c + d;
+
+    printf("Data received, total is: %d\n", x);
+
+    send(sockfd, &x, sizeof(int), 0);
+
+    recv(sockfd, &answer, sizeof(answer), 0);
+
+    printf("%s\n",answer);
 
     printf("Connection closed?: %d\n",close(sockfd));
     freeaddrinfo(res); // free the linked list
