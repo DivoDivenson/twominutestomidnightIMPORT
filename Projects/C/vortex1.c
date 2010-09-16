@@ -3,6 +3,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -64,16 +65,12 @@ int main(int argc, char *argv[])
 
     printf("Connection: %d\n",connect(sockfd, res->ai_addr, res->ai_addrlen));
     printf(" %d\n", buffer);
-    recv(sockfd, inBuf, sizeof(inBuf), 0);
+    if(recv(sockfd, inBuf, sizeof(inBuf), 0) == -1){
+      perror("Failed to get anything\n");
+    }
     printf("Got:\n%d\n",buffer);
 
     printf("Connection closed?: %d\n",close(sockfd));
-
-   
-    
-    
-
-
     freeaddrinfo(res); // free the linked list
 
     return 0;
