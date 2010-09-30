@@ -14,7 +14,7 @@ class Main{
      //They are deleted :)
      file.deleteRecord(433521);
      System.out.println(file);
-     file.deleteRecord("FN","cormac");
+     file.deleteRecord("POS","Programmer");
      System.out.println("printRecord will not return a deleted file");
      System.out.println(file.printRecord(999800));
      System.out.println("But the toString method will show a deleted file");

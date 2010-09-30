@@ -39,7 +39,6 @@ class Huffman{
   public:
     Huffman();
     void print(); //Debug method
-    //open_file(); To hell with it, open it in constructor
     //int * genEncoding();
 
 };
@@ -108,10 +107,10 @@ Huffman::Huffman(){
       table[(int) c]->freq++;
    }
    file.close();
-   //print();
+   print();
    //Generate the tree here
    genTree();
-   //cout << ((compound_node*) table[0])->freq;
+   cout << ((compound_node*) table[0])->freq;
    //genEncoding();
 }
 /* Sort the array,
