@@ -1,5 +1,39 @@
+
+/*#include "node.h"
+#include "sort.c"
+//Putting node code here, might put it in its own file later
+
+struct node * insert_Node(const point cities[], int depth){
+   struct node * new;
+   new = malloc(sizeof(struct node));
+   new->parent = NULL;
+   printf("%d\n",depth);
+   new->cord = cities[depth];
+   //new->less = insert_Node(cities,depth+1);
+   return new;
+}
+
+
+struct node * newTree(const point cities[], int ncities){
+   struct node * result;
+   result = malloc(sizeof(struct node));
+   result->parent = insert_Node(cities,0);
+   return result;
+}
+
+
+void my_tour(const point cities[], int tour[], int ncities){
+   struct node * new;
+   new = newTree(cities, ncities); 
+   printf("%f\t%f\n",cities[0].x,cities[0].y);
+   swap(&cities[0], &cities[1]);
+   printf("%f\t%f\n",cities[0].x,cities[0].y);
+}*/
+
+
 //Remove the sqrt as the actual distance is not important, just the relative
 //distance between cities.
+
 double distSqr(const point cities[], int i, int j) {
   return sqr(cities[i].x-cities[j].x)+
 	      sqr(cities[i].y-cities[j].y);
