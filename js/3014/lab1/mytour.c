@@ -66,7 +66,7 @@ void my_tour(const point cities[], int tour[], int ncities)
   ThisPt = ncities-1;
 //  visited[ncities-1] = 1;
   visited[ThisPt] = 1; //Yes I am clutching at straws now. Compiler probably does this anyway
-  tour[endtour++] = ThisPt;
+  tour[0] = ThisPt; //Removed endtour, shaves of a bit of time.
 
   printf("Starting tour\n");
   // Goes through array linearly. Prehaps sort array or come up with some crazy way to step through it.
@@ -84,7 +84,7 @@ void my_tour(const point cities[], int tour[], int ncities)
 	      }
       }
     }
-    tour[endtour++] = ClosePt;
+    tour[i] = ClosePt; //I has the same value as endtour
     //pPoint(&cities[ClosePt]);
     visited[ClosePt] = 1;
     ThisPt = ClosePt;
