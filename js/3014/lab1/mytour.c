@@ -1,33 +1,39 @@
 
-/*#include "node.h"
-#include "sort.c"
+#include "node.h"
+/*#include "sort.c"
+ *
+ *Was going to make an attempt at KD trees here but gave up
+ *
 //Putting node code here, might put it in its own file later
 
-struct node * insert_Node(const point cities[], int depth){
-   struct node * new;
+struct node * insert_Node(const point cities[], int depth, int city){
+ struct node * new;
+  if(city != 0){
    new = malloc(sizeof(struct node));
-   new->parent = NULL;
-   printf("%d\n",depth);
-   new->cord = cities[depth];
-   //new->less = insert_Node(cities,depth+1);
+   new->parent = NULL; //Remove or use this
+   printf("Depth: %d\tCity: %d\n",depth,city);
+   //WRONGnew->cord = cities[city / 2];
+   new->less = insert_Node(cities,depth+1,city / 4);
+   new->greater = insert_Node(cities,depth+1,(city / 4) * 3);
    return new;
+  }else{
+    return NULL;
+  }
 }
 
 
 struct node * newTree(const point cities[], int ncities){
    struct node * result;
    result = malloc(sizeof(struct node));
-   result->parent = insert_Node(cities,0);
+   printf("%d\n",ncities);
+   result->parent = insert_Node(cities,0,ncities);
    return result;
 }
 
 
 void my_tour(const point cities[], int tour[], int ncities){
    struct node * new;
-   new = newTree(cities, ncities); 
-   printf("%f\t%f\n",cities[0].x,cities[0].y);
-   swap(&cities[0], &cities[1]);
-   printf("%f\t%f\n",cities[0].x,cities[0].y);
+   new = newTree(cities, ncities);
 }*/
 
 
