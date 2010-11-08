@@ -1,0 +1,26 @@
+//Includes
+
+COMPILER Calc
+
+//Global fields and methods
+
+/*-------------Scanner Specification---------------*/
+
+CHARACTERS
+   letter = "A".."Z" + "a".."z".
+   digit = "1234567890".
+   //hexDigit = digit + "ABCDEF".
+   cr = '\r'.
+   lf = '\n'. //Needed?
+
+TOKENS
+   ident = letter {letter | digit}.
+   number = digit {digit}.
+   //number = digit {digit} | "0x" hexDigit {hexDigit}.
+
+//No need for comments
+
+//IGNORE cr + lf.
+
+//PARSER
+   Calc 

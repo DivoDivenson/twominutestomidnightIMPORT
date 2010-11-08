@@ -1,0 +1,17 @@
+COMPILER CalcEx
+
+CHARACTERS
+   digit = '0'..'9'.
+
+
+TOKENS
+   number = digit {digit}.
+
+IGNORE '\r' + '\n'
+
+PRODUCTIONS
+   CalcEx = {"calc" Expr}.
+   Expr = Term {('+' Term | '-' Term)}.
+   Term = number.
+
+END CalcEx.
