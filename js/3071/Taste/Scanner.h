@@ -56,7 +56,6 @@ char* coco_string_create_char(const wchar_t *value);
 void  coco_string_delete(char* &data);
 
 
-namespace Taste {
 
 
 class Token  
@@ -254,7 +253,6 @@ public:
 
 }; // end Scanner
 
-} // namespace
 
 
 #endif // !defined(COCO_SCANNER_H__)

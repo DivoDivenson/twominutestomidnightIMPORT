@@ -10,7 +10,6 @@
 
 #include "Scanner.h"
 
-namespace Taste {
 
 
 class Errors {
@@ -114,7 +113,6 @@ int // operators
 
 }; // end Parser
 
-} // namespace
 
 
 #endif // !defined(COCO_PARSER_H__)

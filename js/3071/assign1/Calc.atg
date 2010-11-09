@@ -1,26 +1,41 @@
-//Includes
-
+#include<stdio.h>
 COMPILER Calc
 
-//Global fields and methods
+   int // operators
+      plus, minus, times, slash, pwr, mod, assign;
 
-/*-------------Scanner Specification---------------*/
+   int //opcodes
+      ADD, SUB, MUL, DIV, STO, LOAD, MOD;
+
+
 
 CHARACTERS
-   letter = "A".."Z" + "a".."z".
-   digit = "1234567890".
-   //hexDigit = digit + "ABCDEF".
-   cr = '\r'.
-   lf = '\n'. //Needed?
+	digit = '0' .. '9'.
+   letter = 'A'..'B' + 'a'..'b'.
+   hexDigit = digit + "ABCDEF".
 
 TOKENS
    ident = letter {letter | digit}.
-   number = digit {digit}.
-   //number = digit {digit} | "0x" hexDigit {hexDigit}.
+	number = digit{digit} | "0x" hexDigit {hexDigit}.
 
-//No need for comments
+IGNORE '\r' + '\n'
 
-//IGNORE cr + lf.
-
-//PARSER
-   Calc 
+PRODUCTIONS
+	Calc			(. int n; .)
+	= "display" {  Expr<n> 		(. printf("%d\n", n); .)
+   }
+   |
+   { Expr<n>      (. printf("%d\n", n); .)
+   }.
+	/*-------------------------------------------------------*/	
+   //I'm pretty sure this is the wrong way to do this
+	Expr<int &n>		(. int n1; .)
+	= Term<n>
+	{  '+' Term<n1>		(. n = n + n1; .)
+      | '*' Term<n1>      (. n = n * n1; .)
+	}.
+   /*-------------------------------------------------------*/
+	Term<int &n>	
+	= number		(. swscanf(t->val, L"%d",&n); .) //Where did rich find this?
+	.
+END Calc.
