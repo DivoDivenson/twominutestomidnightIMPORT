@@ -177,7 +177,6 @@ void coco_string_delete(char* &data) {
 }
 
 
-namespace Taste {
 
 
 Token::Token() {
@@ -707,6 +706,5 @@ void Scanner::ResetPeek() {
 	pt = tokens;
 }
 
-} // namespace
 
 

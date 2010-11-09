@@ -5,7 +5,6 @@
 #include "Scanner.h"
 
 
-namespace Taste {
 
 
 void Parser::SynErr(int n) {
@@ -440,6 +439,5 @@ void Errors::Exception(const wchar_t* s) {
 	exit(1);
 }
 
-} // namespace
 
 
