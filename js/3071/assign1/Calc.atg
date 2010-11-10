@@ -1,32 +1,53 @@
 #include<stdio.h>
+#include<map>
+#include<string>
+using namespace std;
 COMPILER Calc
 
-   int // operators
-      plus, minus, times, slash, pwr, mod, assign;
-
-   int //opcodes
-      ADD, SUB, MUL, DIV, STO, LOAD, MOD;
-
-
+  map<string, int> * tab;
 
 CHARACTERS
 	digit = '0' .. '9'.
-   letter = 'A'..'B' + 'a'..'b'.
+   letter = 'A'..'Z' + 'a'..'z'.
    hexDigit = digit + "ABCDEF".
 
 TOKENS
-   ident = letter {letter | digit}.
+  ident = letter {letter | digit}.
 	number = digit{digit} | "0x" hexDigit {hexDigit}.
+
+COMMENTS FROM "//" TO '\r' '\n'
 
 IGNORE '\r' + '\n'
 
 PRODUCTIONS
-	Calc			(. int n; .)
-	= "display" {  Expr<n> 		(. printf("%d\n", n); .)
+	Calc			(. int r; char *name; .)
+	=  {
+    Ident<name> 
+      ":="  
+    Expr<r>     (. printf("%s is assigned %d\n", name, r);
+                    tab->insert(pair<string, int>(name, r));
+                    .)
+                    //printf("%d", (tab->find(string(name))->second));.) second makes it work. Shut up. Thanks google 
+    }
+    /*|
+    "display" { Expr<r>
+      [
+        ":hex"  (. printf("0x%x\n", r); .)
+      |
+        ":oct   (. printf("0%o\n", r); .)
+      ]
+      (. printf("%d\n", n); .) */
+    .
+
+  Ident<char* &name> //& used to specify output, and returning a string, hence the mad * &.
+  =
+  ident     (. name = coco_string_create_char(t->val); .)
+  .
+  /*"display" {  Expr<n> 		(. printf("%d\n", n); .)
    }
    |
    { Expr<n>      (. printf("%d\n", n); .)
-   }.
+   }.*/
 	/*-------------------------------------------------------*/	
    //I'm pretty sure this is the wrong way to do this
 	Expr<int &n>		(. int n1; .)
@@ -36,6 +57,6 @@ PRODUCTIONS
 	}.
    /*-------------------------------------------------------*/
 	Term<int &n>	
-	= number		(. swscanf(t->val, L"%d",&n); .) //Where did rich find this?
+	= number		(. swscanf(t->val, L"%d",&n); .) //Where did Rich find this?
 	.
 END Calc.
