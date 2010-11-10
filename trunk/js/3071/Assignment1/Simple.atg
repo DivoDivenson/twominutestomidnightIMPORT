@@ -1,0 +1,65 @@
+#include<stdio.h>
+#include<map>
+#include<string>
+using namespace std;
+COMPILER Simple
+  
+  map<string, int> * tab;
+  
+CHARACTERS
+  letter = 'A'..'Z' + 'a'..'z'.
+	digit = '0' .. '9'.
+
+TOKENS
+  ident = letter{letter | digit}.
+	number = digit{digit}.
+
+IGNORE '\r' + '\n'
+
+PRODUCTIONS
+	/*------------------------------------------------------*/
+	Simple			(. int n;int used=0; .)
+	= /*{ "display"
+		Expr<n> 		
+	    [	
+	    ":hex"		(. printf("0x%x\n", n); .)	
+	    |
+	    ":oct"		(. printf("0%o\n", n); .)
+      ]
+      (. printf("%d\n", n); .)
+	}
+  |*/
+  Stat
+  .
+
+  Stat      (. int n; string name; .)
+  =
+  ident ":=" Expr<n> (. printf("%s is assigned %n\n", name, n); .)
+  .
+
+  
+	/*-------------------------------------------------------*/	
+	Expr<int &n>		(. int n1; .)
+	= Term<n>
+	{ "+"
+	 Term<n1>		(. n = n + n1; .)
+	 | '-'
+	 Term<n1>		(. n = n - n1; .)
+	}.
+	/*-------------------------------------------------------*/	
+	Term<int &n>		(. int n2; .)
+	=
+	Factor<n>		
+	{ "*"
+	  Factor<n2>		(. n = n + n2; .)
+	  |
+	  "mod"
+	  Factor<n2>		(. n = n % n2; .)
+	}
+	.
+	/*-------------------------------------------------------*/	
+	Factor<int &n>		(. n=0; .)		
+	= number		(. swscanf(t->val, L"%d", &n); .)
+	| "(" Expr<n> ")"
+	.
+END Simple.
