@@ -10,11 +10,11 @@ COMPILER Calc
 CHARACTERS
 	digit = '0' .. '9'.
    letter = 'A'..'Z' + 'a'..'z'.
-   hexDigit = digit + "ABCDEF".
+   //hexDigit = digit + "ABCDEF".
 
 TOKENS
-  ident = letter {letter | digit}.
-	number = digit{digit} | "0x" hexDigit {hexDigit}.
+   ident = letter {letter | digit}.
+	number = digit{digit} .//| "0x" hexDigit {hexDigit}.
 
 COMMENTS FROM "//" TO '\r' '\n'
 
@@ -26,21 +26,19 @@ PRODUCTIONS
    {
     Ident<name> 
       ":="  
-    Expr<r>     (. 
-                    printf("%s is assigned %d\n", name, r);
+    Expr<r>";"     (. 
+                    //printf("%s is assigned %d\n", name, r); //For debugging
                     tab->insert(pair<string, int>(name, r));
                  .)
                     //printf("%d", (tab->find(string(name))->second));.) second points to mapped value 
     }
-    |
-      
-    "display" { Expr<r>
+    { "display"  Expr<r>
       [
-        ":hex"  (. printf("0x%x\n", r); .)
+        ":hex;"  (. printf("0x%x\n", r); .)
       |
-        ":oct"  (. printf("0%o\n", r); .)
-      
-                (. printf("%d\n", r); .)
+        ":oct;"  (. printf("0o%o\n", r); .)
+      |
+        ";"        (. printf("%d\n", r); .)
       ]
     }
     .
@@ -54,17 +52,32 @@ PRODUCTIONS
 	Expr<int &n>		(. int n1; .)
 	= Term<n>
 	{  '+' Term<n1>		(. n = n + n1; .)
-      | '-' Term<n1>      (. n = n * n1; .)
+      | '-' Term<n1>      (. n = n - n1; .)
 	}.
 
    /*-------------------------------------------------------*/
-	Term<int &n>  (. int n2; .) //Simple way to build in precedence	
+	Term<int &n>  (. int n1; .) //Simple way to build in precedence	
    =
    Factor<n>
-   {  '*' Factor<n2> (. n =n * n2; .)
+   {  '*' Factor<n1> (. n =n * n1; .)
+      |
+      '/' Factor<n1> (. n = n / n1; .)
+      |
+      '%' Factor<n1> (. n = n % n1; .)
    }.
 
-   Factor<int &n>    (. char *name; .)
+   Factor<int &n>    (. int n1; .)
+   =
+   Expon<n>
+   { '^' Expon<n1>  (.  int origN = n;
+                        while(n1 != 1){
+                        n = n*origN;
+                        n1--;
+                       }
+                       .)
+   }.
+   
+   Expon<int &n>    (. char *name; .)
    = number       (. swscanf(t->val, L"%d",&n);  .)
    | ident (.  //Look for the value in the map. If it's not there print an error
                map<string, int>::iterator it = tab->find(coco_string_create_char(t->val));
@@ -73,10 +86,10 @@ PRODUCTIONS
                }else{
                   n = 0;
                   printf("Unknowen var\n");
-               }
+                }
                .)
          
-// | "(" Expr<n> ")" //Check if this works later
+   | "(" Expr<n> ")" 
    .
 	
    
