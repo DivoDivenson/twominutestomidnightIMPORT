@@ -411,8 +411,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
 	EOL    = '\n';
 	eofSym = 0;
-	maxT = 16;
-	noSym = 16;
+	maxT = 17;
+	noSym = 17;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
@@ -429,6 +429,7 @@ void Scanner::Init() {
 	start.set(41, 20);
 		start.set(Buffer::EoF, -1);
 	keywords.set(L"display", 5);
+	keywords.set(L"halt", 8);
 
 
 	tvalLength = 128;
@@ -631,21 +632,21 @@ Token* Scanner::NextToken() {
 			case_12:
 			{t->kind = 7; break;}
 		case 13:
-			{t->kind = 8; break;}
-		case 14:
 			{t->kind = 9; break;}
-		case 15:
+		case 14:
 			{t->kind = 10; break;}
-		case 16:
+		case 15:
 			{t->kind = 11; break;}
-		case 17:
+		case 16:
 			{t->kind = 12; break;}
-		case 18:
+		case 17:
 			{t->kind = 13; break;}
-		case 19:
+		case 18:
 			{t->kind = 14; break;}
-		case 20:
+		case 19:
 			{t->kind = 15; break;}
+		case 20:
+			{t->kind = 16; break;}
 		case 21:
 			if (ch == L'=') {AddCh(); goto case_3;}
 			else if (ch == L'h') {AddCh(); goto case_5;}
