@@ -30,15 +30,15 @@ PRODUCTIONS
                     //printf("%s is assigned %d\n", name, r); //For debugging
                     tab->insert(pair<string, int>(name, r));
                  .)
-                    //printf("%d", (tab->find(string(name))->second));.) second points to mapped value 
     }
     { "display"  Expr<r>
+       Ident<name> //Watch out for this one
       [
         ":hex;"  (. printf("0x%x\n", r); .)
       |
         ":oct;"  (. printf("0o%o\n", r); .)
       |
-        ";"        (. printf("%d\n", r); .)
+        ";"        (. printf("%s = %d\n",name, r); .)
       ]
     }
     .

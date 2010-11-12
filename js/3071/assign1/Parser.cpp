@@ -74,7 +74,8 @@ void Parser::Calc() {
 		while (la->kind == 5) {
 			Get();
 			Expr(r);
-			while (la->kind == 4 || la->kind == 6 || la->kind == 7) {
+			Ident(name);
+			if (la->kind == 4 || la->kind == 6 || la->kind == 7) {
 				if (la->kind == 6) {
 					Get();
 					printf("0x%x\n", r); 
@@ -83,7 +84,7 @@ void Parser::Calc() {
 					printf("0o%o\n", r); 
 				} else {
 					Get();
-					printf("%d\n", r); 
+					printf("%s = %d\n",name, r); 
 				}
 			}
 		}
