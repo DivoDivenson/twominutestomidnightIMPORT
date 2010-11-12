@@ -68,7 +68,13 @@ void Parser::Calc() {
 			Expect(3);
 			Expr(r);
 			Expect(4);
-			tab->insert(pair<string, int>(name, r));
+			map<string, int>::iterator it = tab->find(string(name));
+			if(it == tab->end()){
+			    tab->insert(pair<string, int>(name, r));
+			}else{
+			    tab->erase(string(name));
+			    tab->insert(pair<string, int>(name, r));
+			}
 			
 		}
 		while (la->kind == 5) {
@@ -78,15 +84,19 @@ void Parser::Calc() {
 			if (la->kind == 4 || la->kind == 6 || la->kind == 7) {
 				if (la->kind == 6) {
 					Get();
-					printf("0x%x\n", r); 
+					printf("%s = 0x%x\n",name, r); 
 				} else if (la->kind == 7) {
 					Get();
-					printf("0o%o\n", r); 
+					printf("%s = 0o%o\n",name, r); 
 				} else {
 					Get();
 					printf("%s = %d\n",name, r); 
 				}
 			}
+		}
+		if (la->kind == 8) {
+			Get();
+			exit(0); 
 		}
 }
 
@@ -98,8 +108,8 @@ void Parser::Ident(char* &name) {
 void Parser::Expr(int &n) {
 		int n1; 
 		Term(n);
-		while (la->kind == 8 || la->kind == 9) {
-			if (la->kind == 8) {
+		while (la->kind == 9 || la->kind == 10) {
+			if (la->kind == 9) {
 				Get();
 				Term(n1);
 				n = n + n1; 
@@ -114,12 +124,12 @@ void Parser::Expr(int &n) {
 void Parser::Term(int &n) {
 		int n1; 
 		Factor(n);
-		while (la->kind == 10 || la->kind == 11 || la->kind == 12) {
-			if (la->kind == 10) {
+		while (la->kind == 11 || la->kind == 12 || la->kind == 13) {
+			if (la->kind == 11) {
 				Get();
 				Factor(n1);
 				n =n * n1; 
-			} else if (la->kind == 11) {
+			} else if (la->kind == 12) {
 				Get();
 				Factor(n1);
 				n = n / n1; 
@@ -134,7 +144,7 @@ void Parser::Term(int &n) {
 void Parser::Factor(int &n) {
 		int n1; 
 		Expon(n);
-		while (la->kind == 13) {
+		while (la->kind == 14) {
 			Get();
 			Expon(n1);
 			int origN = n;
@@ -161,11 +171,11 @@ void Parser::Expon(int &n) {
 			   printf("Unknowen var\n");
 			 }
 			
-		} else if (la->kind == 14) {
+		} else if (la->kind == 15) {
 			Get();
 			Expr(n);
-			Expect(15);
-		} else SynErr(17);
+			Expect(16);
+		} else SynErr(18);
 }
 
 
@@ -181,7 +191,7 @@ void Parser::Parse() {
 }
 
 Parser::Parser(Scanner *scanner) {
-	maxT = 16;
+	maxT = 17;
 
 	dummyToken = NULL;
 	t = la = NULL;
@@ -195,8 +205,8 @@ bool Parser::StartOf(int s) {
 	const bool T = true;
 	const bool x = false;
 
-	static bool set[1][18] = {
-		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
+	static bool set[1][19] = {
+		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x}
 	};
 
 
@@ -224,16 +234,17 @@ void Errors::SynErr(int line, int col, int n) {
 			case 5: s = coco_string_create(L"\"display\" expected"); break;
 			case 6: s = coco_string_create(L"\":hex;\" expected"); break;
 			case 7: s = coco_string_create(L"\":oct;\" expected"); break;
-			case 8: s = coco_string_create(L"\"+\" expected"); break;
-			case 9: s = coco_string_create(L"\"-\" expected"); break;
-			case 10: s = coco_string_create(L"\"*\" expected"); break;
-			case 11: s = coco_string_create(L"\"/\" expected"); break;
-			case 12: s = coco_string_create(L"\"%\" expected"); break;
-			case 13: s = coco_string_create(L"\"^\" expected"); break;
-			case 14: s = coco_string_create(L"\"(\" expected"); break;
-			case 15: s = coco_string_create(L"\")\" expected"); break;
-			case 16: s = coco_string_create(L"??? expected"); break;
-			case 17: s = coco_string_create(L"invalid Expon"); break;
+			case 8: s = coco_string_create(L"\"halt\" expected"); break;
+			case 9: s = coco_string_create(L"\"+\" expected"); break;
+			case 10: s = coco_string_create(L"\"-\" expected"); break;
+			case 11: s = coco_string_create(L"\"*\" expected"); break;
+			case 12: s = coco_string_create(L"\"/\" expected"); break;
+			case 13: s = coco_string_create(L"\"%\" expected"); break;
+			case 14: s = coco_string_create(L"\"^\" expected"); break;
+			case 15: s = coco_string_create(L"\"(\" expected"); break;
+			case 16: s = coco_string_create(L"\")\" expected"); break;
+			case 17: s = coco_string_create(L"??? expected"); break;
+			case 18: s = coco_string_create(L"invalid Expon"); break;
 
 		default:
 		{
