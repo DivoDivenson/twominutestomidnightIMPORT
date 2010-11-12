@@ -63,41 +63,45 @@ bool Parser::WeakSeparator(int n, int syFol, int repFol) {
 
 void Parser::Calc() {
 		int r; char *name; 
-		while (la->kind == 1) {
-			Ident(name);
-			Expect(3);
-			Expr(r);
-			Expect(4);
-			map<string, int>::iterator it = tab->find(string(name));
-			if(it == tab->end()){
-			    tab->insert(pair<string, int>(name, r));
-			}else{
-			    tab->erase(string(name));
-			    tab->insert(pair<string, int>(name, r));
+		if (la->kind == 0 || la->kind == 1) {
+			while (la->kind == 1) {
+				Ident(name);
+				Expect(3);
+				Expr(r);
+				Expect(4);
+				map<string, int>::iterator it = tab->find(string(name));
+				if(it == tab->end()){
+				    tab->insert(pair<string, int>(name, r));
+				}else{
+				    tab->erase(string(name)); //Bit clunky, but does the job
+				    tab->insert(pair<string, int>(name, r));
+				}
+				
 			}
-			
-		}
-		while (la->kind == 5) {
+		} else if (la->kind == 5) {
 			Get();
-			Expr(r);
-			Ident(name);
-			if (la->kind == 4 || la->kind == 6 || la->kind == 7) {
-				if (la->kind == 6) {
-					Get();
-					printf("%s = 0x%x\n",name, r); 
-				} else if (la->kind == 7) {
-					Get();
-					printf("%s = 0o%o\n",name, r); 
-				} else {
-					Get();
-					printf("%s = %d\n",name, r); 
+			while (la->kind == 1 || la->kind == 2 || la->kind == 15) {
+				Expr(r);
+				Ident(name);
+				if (la->kind == 4 || la->kind == 6 || la->kind == 7) {
+					if (la->kind == 6) {
+						Get();
+						printf("%s = 0x%x\n",name, r); 
+					} else if (la->kind == 7) {
+						Get();
+						printf("%s = 0o%o\n",name, r); 
+					} else {
+						Get();
+						printf("%s = %d\n",name, r); 
+					}
 				}
 			}
-		}
-		if (la->kind == 8) {
-			Get();
-			exit(0); 
-		}
+		} else if (la->kind == 0 || la->kind == 8) {
+			if (la->kind == 8) {
+				Get();
+				exit(0); 
+			}
+		} else SynErr(18);
 }
 
 void Parser::Ident(char* &name) {
@@ -175,7 +179,7 @@ void Parser::Expon(int &n) {
 			Get();
 			Expr(n);
 			Expect(16);
-		} else SynErr(18);
+		} else SynErr(19);
 }
 
 
@@ -244,7 +248,8 @@ void Errors::SynErr(int line, int col, int n) {
 			case 15: s = coco_string_create(L"\"(\" expected"); break;
 			case 16: s = coco_string_create(L"\")\" expected"); break;
 			case 17: s = coco_string_create(L"??? expected"); break;
-			case 18: s = coco_string_create(L"invalid Expon"); break;
+			case 18: s = coco_string_create(L"invalid Calc"); break;
+			case 19: s = coco_string_create(L"invalid Expon"); break;
 
 		default:
 		{
