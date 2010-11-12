@@ -38,7 +38,7 @@ PRODUCTIONS
                     }
                  .)
     }
-      | //Or works because only one line need be parsed at a time. If the program was applied to a full file they would need to be removed
+//      | //Or works because only one line need be parsed at a time. If the program was applied to a full file they would need to be removed
     { "display"  Expr<r>
        Ident<name> //Watch out for this one
       [
@@ -49,7 +49,7 @@ PRODUCTIONS
         ";"        (. printf("%s = %d\n",name, r); .)
       ]
     }
-      |
+  //    |
     [ "halt"   (. exit(0); .) ]
     .
 
