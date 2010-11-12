@@ -1,0 +1,6 @@
+a := 3; b := 7; c := 2;
+display a;
+display b;
+display c;
+d := b ^ 2 - 4 * a * c;
+display d:hex;
