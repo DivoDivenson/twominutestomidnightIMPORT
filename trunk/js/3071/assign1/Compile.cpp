@@ -4,12 +4,11 @@
 #include <iostream>
 
 int main(int argc, char *argv[]){
-   string input;
    
-   cout << "Enter values and stuff:";
-   getline(cin, input);
-//   wchar_t *fileName = coco_string_create(argv[1]);
-   Scanner *scanner = new Scanner((unsigned char*)input.c_str(), input.length());
+   cout << "Enter values and stuff:\n";
+   wchar_t *fileName = coco_string_create(argv[1]);
+   Scanner *scanner = new Scanner(fileName);
+   //Scanner *scanner = new Scanner(stdin);
    Parser *parser = new Parser(scanner);
    parser->tab = new map<string, int>;
    parser->Parse();
