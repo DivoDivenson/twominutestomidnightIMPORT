@@ -54,7 +54,7 @@ public:
 	Token *t;			// last recognized token
 	Token *la;			// lookahead token
 
-map<string, int> * tab;
+map<string, int> * tab; //Using a simple map as the symbol table
 
 
 
@@ -64,10 +64,10 @@ map<string, int> * tab;
 
 	void Calc();
 	void Ident(char* &name);
-	void Expr(int &n);
-	void Term(int &n);
-	void Factor(int &n);
-	void Expon(int &n);
+	void Expr(int &q);
+	void Term(int &q);
+	void Factor(int &q);
+	void Expon(int &p);
 
 	void Parse();
 

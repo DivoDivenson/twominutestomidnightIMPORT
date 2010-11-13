@@ -62,35 +62,35 @@ bool Parser::WeakSeparator(int n, int syFol, int repFol) {
 }
 
 void Parser::Calc() {
-		int r; char *name; 
+		int p; char *name; 
 		while (la->kind == 1) {
 			Ident(name);
 			Expect(3);
-			Expr(r);
+			Expr(p);
 			Expect(4);
 			map<string, int>::iterator it = tab->find(string(name));
 			if(it == tab->end()){
-			    tab->insert(pair<string, int>(name, r));
+			    tab->insert(pair<string, int>(name, p));
 			}else{
 			    tab->erase(string(name)); //Bit clunky, but does the job
-			    tab->insert(pair<string, int>(name, r));
+			    tab->insert(pair<string, int>(name, p));
 			}
 			
 		}
 		while (la->kind == 5) {
 			Get();
-			Expr(r);
+			Expr(p);
 			Ident(name);
 			if (la->kind == 4 || la->kind == 6 || la->kind == 7) {
 				if (la->kind == 6) {
 					Get();
-					printf("%s = 0x%x\n",name, r); 
+					printf("%s = 0x%x\n",name, p); 
 				} else if (la->kind == 7) {
 					Get();
-					printf("%s = 0o%o\n",name, r); 
+					printf("%s = 0o%o\n",name, p); 
 				} else {
 					Get();
-					printf("%s = %d\n",name, r); 
+					printf("%s = %d\n",name, p); 
 				}
 			}
 		}
@@ -105,75 +105,75 @@ void Parser::Ident(char* &name) {
 		name = coco_string_create_char(t->val); 
 }
 
-void Parser::Expr(int &n) {
-		int n1; 
-		Term(n);
+void Parser::Expr(int &q) {
+		int r; 
+		Term(q);
 		while (la->kind == 9 || la->kind == 10) {
 			if (la->kind == 9) {
 				Get();
-				Term(n1);
-				n = n + n1; 
+				Term(r);
+				q = q + r; 
 			} else {
 				Get();
-				Term(n1);
-				n = n - n1; 
+				Term(r);
+				q = q - r; 
 			}
 		}
 }
 
-void Parser::Term(int &n) {
-		int n1; 
-		Factor(n);
+void Parser::Term(int &q) {
+		int r; 
+		Factor(q);
 		while (la->kind == 11 || la->kind == 12 || la->kind == 13) {
 			if (la->kind == 11) {
 				Get();
-				Factor(n1);
-				n =n * n1; 
+				Factor(r);
+				q = q * r; 
 			} else if (la->kind == 12) {
 				Get();
-				Factor(n1);
-				n = n / n1; 
+				Factor(r);
+				q = q / r; 
 			} else {
 				Get();
-				Factor(n1);
-				n = n % n1; 
+				Factor(r);
+				q = q % r; 
 			}
 		}
 }
 
-void Parser::Factor(int &n) {
-		int n1; 
-		Expon(n);
+void Parser::Factor(int &q) {
+		int r; 
+		Expon(q);
 		while (la->kind == 14) {
 			Get();
-			Expon(n1);
-			int origN = n;
-			while(n1 != 1){
-			n = n*origN;
-			n1--;
+			Expon(r);
+			int origQ = q;
+			while(r != 1){
+			q = q*origQ;
+			r--;
 			}
 			
 		}
 }
 
-void Parser::Expon(int &n) {
+void Parser::Expon(int &p) {
 		char *name; 
 		if (la->kind == 2) {
 			Get();
-			swscanf(t->val, L"%d",&n);  
+			swscanf(t->val, L"%d",&p);  
 		} else if (la->kind == 1) {
 			Get();
 			map<string, int>::iterator it = tab->find(coco_string_create_char(t->val));
 			if(it != tab->end()){
-			   n = it->second;
+			   p = it->second;
 			}else{
-			   n = 0;
+			   p = 0;
 			   printf("Unknowen var\n");
 			 }
 			
 		} else if (la->kind == 15) {
 			Get();
-			Expr(n);
+			Expr(p);
 			Expect(16);
 		} else SynErr(18);
 }
