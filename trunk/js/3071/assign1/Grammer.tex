@@ -1,0 +1,59 @@
+\documentclass[a4paper,12pt]{article}
+\begin{document}
+
+\begin{center}
+Steven Diviney \\*
+08462267 \\*
+CS3071 \\*
+
+\end{center}
+\clearpage
+
+\section{Attributed Translation Grammer}
+Using \{\} to denote iteration and (..) to denote semantic actions as per Coco R
+\vspace{2 mm}
+\[ <Calc> \Rightarrow \{Ident_{p} := <Expr>_{q};\} (. Assign\hspace{1 mm} s,t .) \]
+\[s \Leftarrow q \hspace{2 pc}  t \Leftarrow p \]
+\vspace{2 mm}
+\[ <Calc> \Rightarrow \{display := <Expr>_{p};[:hex | :oct; | ;]_{q}\} (. Display\hspace{1 mm} s,t .) \]
+\[s \Leftarrow q \hspace{2 pc}  t \Leftarrow p \]
+\vspace{2 mm}
+\[ <Calc> \Rightarrow halt (. Halt .) \]
+\vspace{2 mm}
+\[ <Ident>_{p} \Rightarrow <ident>_{q} \]
+\[p \Leftarrow q \]
+\vspace{2 mm}
+\[ <Expr>_{p} \Rightarrow <Term>_{q} + <Term>_{r} (.Add\hspace{1 mm} s,t,u .) \]
+\[s \Leftarrow q \hspace{2 pc}  t \Leftarrow r \hspace{2 pc} newt(p,u) \]
+\vspace{2 mm}
+\[ <Expr>_{p} \Rightarrow <Term>_{q} - <Term>_{r} (.Sub\hspace{1 mm} s,t,u .) \]
+\[s \Leftarrow q \hspace{2 pc}  t \Leftarrow r \hspace{2 pc} newt(p,u) \]
+\vspace{2 mm}
+\[ <Expr>_{p} \Rightarrow <Term>_{q} \]
+\[p \Leftarrow q  \]
+\vspace{2 mm}
+\[ <Term>_{p} \Rightarrow <Factor>_{q} * <Factor>_{r} (.Mulu\hspace{1 mm} s,t,u .) \]
+\[s \Leftarrow q \hspace{2 pc}  t \Leftarrow r \hspace{2 pc} newt(p,u) \]
+\vspace{2 mm}
+\[ <Term>_{p} \Rightarrow <Factor>_{q} / <Factor>_{r} (.Div\hspace{1 mm} s,t,u .) \]
+\[s \Leftarrow q \hspace{2 pc}  t \Leftarrow r \hspace{2 pc} newt(p,u) \]
+\vspace{2 mm}
+\[ <Term>_{p} \Rightarrow <Factor>_{q} \% <Factor>_{r} (.Mod\hspace{1 mm} s,t,u .) \]
+\[s \Leftarrow q \hspace{2 pc}  t \Leftarrow r \hspace{2 pc} newt(p,u) \]
+\vspace{2 mm}
+\[ <Term>_{p} \Rightarrow <Factor>_{q} \]
+\[p \Leftarrow q \]
+\vspace{2 mm}
+\[ <Factor>_{p} \Rightarrow <Expon>_{q} \verb ^ <Expon>_{r} (.Power\hspace{1 mm} s,t,u .) \]
+\[s \Leftarrow q \hspace{2 pc}  t \Leftarrow r \hspace{2 pc} newt(p,u) \]
+\vspace{2 mm}
+\[ <Factor>_{p} \Rightarrow <Expon>_{q} \]
+\[p \Leftarrow q \]
+\vspace{2 mm}
+\[ <Expon>_{p} \Rightarrow ident_{q} \]
+\[ p \Leftarrow q \]
+\vspace{2 mm}
+\[ <Expon>_{p} \Rightarrow ( Expr_{q} ) \]
+\[ p \Leftarrow q \]
+
+\end{document}
