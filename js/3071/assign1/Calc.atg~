@@ -1,26 +1,106 @@
-//Includes
-
+#include<stdio.h>
+#include<map>
+#include<string>
+#include<iterator>
+using namespace std;
 COMPILER Calc
 
-//Global fields and methods
-
-/*-------------Scanner Specification---------------*/
+  map<string, int> * tab;
 
 CHARACTERS
-   letter = "A".."Z" + "a".."z".
-   digit = "1234567890".
+	digit = '0' .. '9'.
+   letter = 'A'..'Z' + 'a'..'z'.
    //hexDigit = digit + "ABCDEF".
-   cr = '\r'.
-   lf = '\n'. //Needed?
 
 TOKENS
    ident = letter {letter | digit}.
-   number = digit {digit}.
-   //number = digit {digit} | "0x" hexDigit {hexDigit}.
+	number = digit{digit} .//| "0x" hexDigit {hexDigit}.
 
-//No need for comments
+COMMENTS FROM "//" TO '\r' '\n'
 
-//IGNORE cr + lf.
+IGNORE '\r' + '\n'
 
-//PARSER
-   Calc 
+PRODUCTIONS
+	Calc			(. int r; char *name; .)
+	=
+   {
+    Ident<name> 
+      ":="  
+    Expr<r>";"     (. 
+                   // printf("%s is assigned %d\n", name, r); //For debugging
+                    //Have to check the value has not already been assigned
+                    map<string, int>::iterator it = tab->find(string(name));
+                    if(it == tab->end()){
+                        tab->insert(pair<string, int>(name, r));
+                    }else{
+                        tab->erase(string(name)); //Bit clunky, but does the job
+                        tab->insert(pair<string, int>(name, r));
+                    }
+                 .)
+    }
+//      | //Or works because only one line need be parsed at a time. If the program was applied to a full file they would need to be removed
+    { "display"  Expr<r>
+       Ident<name> //Watch out for this one
+      [
+        ":hex;"  (. printf("%s = 0x%x\n",name, r); .)
+      |
+        ":oct;"  (. printf("%s = 0o%o\n",name, r); .)
+      |
+        ";"        (. printf("%s = %d\n",name, r); .)
+      ]
+    }
+  //    |
+    [ "halt"   (. exit(0); .) ]
+    .
+
+  Ident<char* &name> //& used to specify output, and returning a string, hence the mad * &.
+  =
+  ident     (. name = coco_string_create_char(t->val); .)
+  .
+	/*-------------------------------------------------------*/	
+   //I'm pretty sure this is the wrong way to do this
+	Expr<int &n>		(. int n1; .)
+	= Term<n>
+	{  '+' Term<n1>		(. n = n + n1; .)
+      | '-' Term<n1>      (. n = n - n1; .)
+	}.
+
+   /*-------------------------------------------------------*/
+	Term<int &n>  (. int n1; .) //Simple way to build in precedence	
+   =
+   Factor<n>
+   {  '*' Factor<n1> (. n =n * n1; .)
+      |
+      '/' Factor<n1> (. n = n / n1; .)
+      |
+      '%' Factor<n1> (. n = n % n1; .)
+   }.
+
+   Factor<int &n>    (. int n1; .)
+   =
+   Expon<n>
+   { '^' Expon<n1>  (.  int origN = n;
+                        while(n1 != 1){
+                        n = n*origN;
+                        n1--;
+                       }
+                       .)
+   }.
+   
+   Expon<int &n>    (. char *name; .)
+   = number       (. swscanf(t->val, L"%d",&n);  .)
+   | ident (.  //Look for the value in the map. If it's not there print an error
+               map<string, int>::iterator it = tab->find(coco_string_create_char(t->val));
+               if(it != tab->end()){
+                  n = it->second;
+               }else{
+                  n = 0;
+                  printf("Unknowen var\n");
+                }
+               .)
+         
+   | "(" Expr<n> ")" 
+   .
+	
+   
+END Calc.

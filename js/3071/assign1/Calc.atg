@@ -5,7 +5,7 @@
 using namespace std;
 COMPILER Calc
 
-  map<string, int> * tab;
+  map<string, int> * tab; //Using a simple map as the symbol table
 
 CHARACTERS
 	digit = '0' .. '9'.
@@ -21,35 +21,33 @@ COMMENTS FROM "//" TO '\r' '\n'
 IGNORE '\r' + '\n'
 
 PRODUCTIONS
-	Calc			(. int r; char *name; .)
+	Calc			(. int p; char *name; .)
 	=
    {
     Ident<name> 
       ":="  
-    Expr<r>";"     (. 
-                   // printf("%s is assigned %d\n", name, r); //For debugging
+    Expr<p>";"     (. 
+                   // printf("%s is assigned %d\n", name, p); //For debugging
                     //Have to check the value has not already been assigned
                     map<string, int>::iterator it = tab->find(string(name));
                     if(it == tab->end()){
-                        tab->insert(pair<string, int>(name, r));
+                        tab->insert(pair<string, int>(name, p));
                     }else{
                         tab->erase(string(name)); //Bit clunky, but does the job
-                        tab->insert(pair<string, int>(name, r));
+                        tab->insert(pair<string, int>(name, p));
                     }
                  .)
     }
-//      | //Or works because only one line need be parsed at a time. If the program was applied to a full file they would need to be removed
-    { "display"  Expr<r>
-       Ident<name> //Watch out for this one
+    { "display"  Expr<p>
+       Ident<name> 
       [
-        ":hex;"  (. printf("%s = 0x%x\n",name, r); .)
+        ":hex;"  (. printf("%s = 0x%x\n",name, p); .)
       |
-        ":oct;"  (. printf("%s = 0o%o\n",name, r); .)
+        ":oct;"  (. printf("%s = 0o%o\n",name, p); .)
       |
-        ";"        (. printf("%s = %d\n",name, r); .)
+        ";"        (. printf("%s = %d\n",name, p); .)
       ]
     }
-  //    |
     [ "halt"   (. exit(0); .) ]
     .
 
@@ -58,48 +56,47 @@ PRODUCTIONS
   ident     (. name = coco_string_create_char(t->val); .)
   .
 	/*-------------------------------------------------------*/	
-   //I'm pretty sure this is the wrong way to do this
-	Expr<int &n>		(. int n1; .)
-	= Term<n>
-	{  '+' Term<n1>		(. n = n + n1; .)
-      | '-' Term<n1>      (. n = n - n1; .)
+	Expr<int &q>		(. int r; .)
+	= Term<q>
+	{  '+' Term<r>		(. q = q + r; .)
+      | '-' Term<r>      (. q = q - r; .)
 	}.
 
    /*-------------------------------------------------------*/
-	Term<int &n>  (. int n1; .) //Simple way to build in precedence	
+	Term<int &q>  (. int r; .) //Simple way to build in precedence	
    =
-   Factor<n>
-   {  '*' Factor<n1> (. n =n * n1; .)
+   Factor<q>
+   {  '*' Factor<r> (. q = q * r; .)
       |
-      '/' Factor<n1> (. n = n / n1; .)
+      '/' Factor<r> (. q = q / r; .)
       |
-      '%' Factor<n1> (. n = n % n1; .)
+      '%' Factor<r> (. q = q % r; .)
    }.
 
-   Factor<int &n>    (. int n1; .)
+   Factor<int &q>    (. int r; .)
    =
-   Expon<n>
-   { '^' Expon<n1>  (.  int origN = n;
-                        while(n1 != 1){
-                        n = n*origN;
-                        n1--;
+   Expon<q>
+   { '^' Expon<r>  (.  int origQ = q;
+                        while(r != 1){
+                        q = q*origQ;
+                        r--;
                        }
                        .)
    }.
    
-   Expon<int &n>    (. char *name; .)
-   = number       (. swscanf(t->val, L"%d",&n);  .)
+   Expon<int &p>    (. char *name; .)
+   = number       (. swscanf(t->val, L"%d",&p);  .)
    | ident (.  //Look for the value in the map. If it's not there print an error
                map<string, int>::iterator it = tab->find(coco_string_create_char(t->val));
                if(it != tab->end()){
-                  n = it->second;
+                  p = it->second;
                }else{
-                  n = 0;
+                  p = 0;
                   printf("Unknowen var\n");
                 }
                .)
          
-   | "(" Expr<n> ")" 
+   | "(" Expr<p> ")" 
    .
 	
    
