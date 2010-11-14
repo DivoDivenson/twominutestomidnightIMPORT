@@ -69,11 +69,12 @@ void Parser::Calc() {
 			Expr(p);
 			Expect(4);
 			map<string, int>::iterator it = tab->find(string(name));
-			if(it != tab->end()){
-			    tab->erase(string(name));
+			if(it == tab->end()){
+			    tab->insert(pair<string, int>(name, p));
+			}else{
+			    tab->erase(string(name)); //Bit clunky, but does the job. Prehaps a map was not the best choice in some respects
+			    tab->insert(pair<string, int>(name, p));
 			}
-			tab->insert(pair<string, int>(name, p));
-			
 			
 		}
 		while (la->kind == 5) {
