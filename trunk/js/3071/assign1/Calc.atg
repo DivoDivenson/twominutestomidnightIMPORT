@@ -21,6 +21,7 @@ COMMENTS FROM "//" TO '\r' '\n'
 IGNORE '\r' + '\n'
 
 PRODUCTIONS
+//Not much to say here, it all follows from the provided ATG
 	Calc			(. int p; char *name; .)
 	=
    {
@@ -33,7 +34,7 @@ PRODUCTIONS
                     if(it == tab->end()){
                         tab->insert(pair<string, int>(name, p));
                     }else{
-                        tab->erase(string(name)); //Bit clunky, but does the job
+                        tab->erase(string(name)); //Bit clunky, but does the job. Prehaps a map was not the best choice in some respects
                         tab->insert(pair<string, int>(name, p));
                     }
                  .)
