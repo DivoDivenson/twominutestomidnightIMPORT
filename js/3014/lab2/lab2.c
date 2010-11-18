@@ -9,6 +9,7 @@
 float	*vals;		//initial values
 float	*res1, *res2; 	//results
 float	a, b;
+struct timeval start;
 
 void cleanup()
 {
@@ -47,7 +48,12 @@ void sisd()
 
 void simd()
 {
+  int i;
 
+  for(i = 0; i < SIZE; i+= 4){
+    __m128 v = _mm_load_ps(&vals[i]);
+
+  }
 }
 
 /* This is a special instruction that measure a time stamp
@@ -55,7 +61,8 @@ void simd()
     This only works on x86 */
 static inline unsigned long long ticks()
 {
-  return _rdtsc();
+  gettimeofday(&start, NULL); //_rdtsc();
+  return start.tv_usec;
 }
 
 int main()
