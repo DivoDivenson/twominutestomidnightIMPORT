@@ -1,4 +1,4 @@
-numeral(0).
+numera(0).
 numeral(s(X)) :- numeral(X).
 numeral(X + Y) :- numeral(X), numeral(Y).
 numeral(p(X)) :- numeral(X).
