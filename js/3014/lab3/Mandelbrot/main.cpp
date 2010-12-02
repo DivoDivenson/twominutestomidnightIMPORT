@@ -120,12 +120,52 @@ bool member(float cx, float cy, int& iterations)
 	return (iterations == MAX_ITS);
 }
 
+void out_m128(__m128 x){
+   float * temp = (float *)malloc(sizeof(float) * 4);
+   _mm_storeu_ps(temp, x);
+   int i;
+   for(i = 0; i < 4; i++){
+      std::cout << temp[i] << " ";
+   }
+   std::cout << std::endl;
+}
 
+
+
+__m128 member128(__m128 cx, __m128 cy)
+{
+   __m128 x = _mm_set1_ps(0.0);
+   __m128 y = _mm_set1_ps(0.0); //y = x?
+   __m128 iterations = _mm_set1_ps(0.0);
+   __m128 iterations_temp = _mm_set1_ps(0.0);
+   __m128 four = _mm_set1_ps(4.0);
+   __m128 two = _mm_set1_ps(2.0);
+   __m128 temp;
+   int iteration_cheat = 0;
+   //This is gonna look nasty, maybe try operator overloading later
+   //While at least one value is < 4
+   //Quicker to have an int keeping track of loop iterations or keep using SSE???
+   while( _mm_movemask_ps( 
+            (_mm_cmplt_ps( _mm_add_ps( _mm_mul_ps(x,x),_mm_mul_ps(y,y)), four ))) == 0xF
+         && iteration_cheat < MAX_ITS){
+
+      temp = _mm_add_ps( _mm_sub_ps( _mm_mul_ps(x,x), _mm_mul_ps(y,y)), cx);
+      y = _mm_add_ps( _mm_mul_ps( _mm_mul_ps(x,y), two), cy);
+
+      iteration_cheat++; 
+   }
+
+        
+   
+   std::cout << "Done" << std::endl;
+   return iterations;
+}
 
 int main()
 {	
 	int hx, hy;
    struct timeval start_time, stop_time;
+   
    long long compute_time;
 
 	float m=1.0; /* initial  magnification		*/
@@ -156,10 +196,12 @@ int main()
             mx = _mm_mul_ps(mx, _mm_set1_ps(zoom));
             float * temp = (float *)malloc(sizeof(float) * 4);
             _mm_storeu_ps(temp, mx);
-				float cx = ((((float)hx/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
-            std::cout << "cx: " << cx << " mx[1]: " << temp[0] << std::endl;
-            sleep(1);
 
+				float cx = ((((float)hx/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
+            //std::cout << "cx: " << cx << " mx[1]: " << temp[0] << std::endl;
+            //sleep(1);
+
+            member128(mx, my);
 				if (!member(cx, cy, iterations)) {
 					/* Point is not a member, colour based on number of iterations before escape */
 					int i=(iterations%40) - 1;
