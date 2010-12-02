@@ -29,7 +29,7 @@
 #include <iostream>
 #include <cmath>
 #include <sys/time.h>
-
+#include <xmmintrin.h>
 
 
 #include "Screen.h"
@@ -41,7 +41,7 @@
 const int 	MAX_ITS = 1000;			//Max Iterations before we assume the point will not escape
 const int 	HXRES = 700; 			// horizontal resolution	
 const int 	HYRES = 700;			// vertical resolution
-const int 	MAX_DEPTH = 480;		// max depth of zoom
+const int 	MAX_DEPTH = 25;		// max depth of zoom    SET BACK TO 480
 const float ZOOM_FACTOR = 1.02;		// zoom between each frame
 
 /* Change these to zoom into different parts of the image */
@@ -140,15 +140,25 @@ int main()
       //Count how long it takes for one "screens" worth.
       gettimeofday(&start_time,NULL);
 		for (hy=0; hy<HYRES; hy++) {
-			for (hx=0; hx<HXRES; hx++) {
+         float cy = ((((float)hy/(float)HYRES) -0.5 + (PY/(4.0/m)))*(4.0f/m));
+         __m128 my = _mm_set1_ps(cy);
+    		for (hx=0; hx<HXRES; hx++) {
 				int iterations;
 
 				/* 
 				 * Translate pixel coordinates to complex plane coordinates centred
 				 * on PX, PY
 				 */
-				float cx = ((((float)hx/(float)HXRES) -0.5 + (PX/(4.0/m)))*(4.0f/m));
-				float cy = ((((float)hy/(float)HYRES) -0.5 + (PY/(4.0/m)))*(4.0f/m));
+            float zoom = (4.0f/m);
+            __m128 mx = _mm_setr_ps((float)hx, (float)(hx + 1), (float)(hx + 2), (float)(hx + 3));
+            mx = _mm_div_ps(mx, _mm_set1_ps(HXRES));
+            mx = _mm_add_ps(mx, _mm_set1_ps(-0.5 + (PX/zoom)));
+            mx = _mm_mul_ps(mx, _mm_set1_ps(zoom));
+            float * temp = (float *)malloc(sizeof(float) * 4);
+            _mm_storeu_ps(temp, mx);
+				float cx = ((((float)hx/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
+            std::cout << "cx: " << cx << " mx[1]: " << temp[0] << std::endl;
+            sleep(1);
 
 				if (!member(cx, cy, iterations)) {
 					/* Point is not a member, colour based on number of iterations before escape */
@@ -179,7 +189,7 @@ int main()
 		m *= ZOOM_FACTOR;
 	}
 	
-	sleep(10);
+	//sleep(10);
 	std::cout << "Clean Exit"<< std::endl;
 
 }

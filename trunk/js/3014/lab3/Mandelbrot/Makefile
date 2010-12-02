@@ -1,6 +1,6 @@
 CC=g++
 CFLAGS=-c -Wall -ansi
-LDFLAGS=
+LDFLAGS= -O3 -msse
 SOURCES=main.cpp Screen.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=mandelbrot
@@ -15,7 +15,9 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(CFLAGS) $< -o $@
 
 screen:
-	$(CC) $(SOURCES) -DSCREEN $(LIBS) -o mandelbrot
+	$(CC) $(LDFLAGS) $(SOURCES) -DSCREEN $(LIBS) -o mandelbrot
+
+
 
 clean:
 	rm -f *.o $(EXECUTABLE)
