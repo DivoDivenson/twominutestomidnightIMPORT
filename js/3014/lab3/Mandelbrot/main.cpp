@@ -118,6 +118,7 @@ bool member(float cx, float cy, int& iterations)
 	}
 
 	return (iterations == MAX_ITS);
+
 }
 
 void out_m128(__m128 x){
@@ -131,7 +132,9 @@ void out_m128(__m128 x){
 }
 
 
-
+//Determine membership of the set.
+/*IMPORTANT, because SSE has different precision characteristics to plain ol' floats (supposidly)
+  the number of iterations returned may be out by 1 */
 __m128 member128(__m128 cx, __m128 cy)
 {
    __m128 x = _mm_set1_ps(0.0);
@@ -148,52 +151,92 @@ __m128 member128(__m128 cx, __m128 cy)
    //Quicker to have an int keeping track of loop iterations or keep using SSE???
    //std::cout << _mm_movemask_ps( 
      //       (_mm_cmplt_ps( _mm_add_ps( _mm_mul_ps(x,x),_mm_mul_ps(y,y)), four )));
-   while( _mm_movemask_ps(iterations_temp = 
-            (_mm_cmplt_ps( _mm_add_ps( _mm_mul_ps(x,x),_mm_mul_ps(y,y)), four ))) != 0
+   while( (_mm_movemask_ps(iterations_temp = 
+            (_mm_cmplt_ps( _mm_add_ps( _mm_mul_ps(x,x),_mm_mul_ps(y,y)), four )))) != 0
          && iteration_cheat < MAX_ITS){
-      out_m128(_mm_or_ps(iterations_temp,mask));
-      //out_m128(_mm_and_ps(iterations_temp, mask));
-      //iterations = _mm_add_ps(iterations, _mm_and_ps(iterations_temp, mask));
+      //out_m128(_mm_or_ps(iterations_temp,mask));
+         //out_m128(iterations_temp);
+      iterations = _mm_add_ps(iterations, _mm_and_ps(iterations_temp, mask));
+      //out_m128(iterations);
+      /*std::cout << "Iter :" << std::endl;
+      out_m128(iterations);
+      out_m128(_mm_add_ps( _mm_mul_ps(x,x),_mm_mul_ps(y,y)));*/
+
       temp = _mm_add_ps( _mm_sub_ps( _mm_mul_ps(x,x), _mm_mul_ps(y,y)), cx);
       y = _mm_add_ps( _mm_mul_ps( _mm_mul_ps(x,y), two), cy);
+      x = temp;
 
-      iteration_cheat++; 
+      float * tempF = (float *) malloc(sizeof(float)*4);
+      _mm_storeu_ps(tempF,iterations);
+      if(tempF[0] > 110.0f){
+         std::cout << "ITS " << std::endl;
+         out_m128(iterations);
+         out_m128(iterations_temp);
+      }
+
+     /*out_m128(_mm_add_ps( _mm_mul_ps(x,x),_mm_mul_ps(y,y)));
+      std::cout << "CX Followed by X:" << std::endl;
+      out_m128(cx);
+      out_m128(x);
+      std::cout << "CY Followed by Y:" << std::endl;
+
+      out_m128(cy);
+      out_m128(y);*/
+
+      iteration_cheat++;
+      
    }
-   out_m128(iterations);
+   //out_m128(iterations);
+   //std::cout << "Mask " << _mm_movemask_ps(iterations_temp) << std::endl; 
 
         
    
-   std::cout << "Done" << std::endl;
    return iterations;
 }
 
 void test(__m128 a, __m128 b){
-  out_m128(_mm_cmpge_ps(a, b));
+   __m128 temp;
+   __m128 mask = _mm_set1_ps(1.0);
+   std::cout << _mm_movemask_ps(_mm_cmpge_ps(a, b)) << std::endl;
+   out_m128((temp = _mm_cmpge_ps(a, b)) );
+   out_m128(_mm_and_ps(temp, mask));
+
 }
 
 int main()
-{	
-	int hx, hy;
-   struct timeval start_time, stop_time;
-   
-   long long compute_time;
-
-	float m=1.0; /* initial  magnification		*/
-   test(_mm_setr_ps(1.0, 2.0, 3.0, 4.0), _mm_setr_ps(1.0, 3.0, 2.0, 0.0));
-   exit(0);
+{
+	float m=1.0; /* initial  magnification Shared		*/
 
 	/* Create a screen to render to */
 #ifdef SCREEN
-	Screen *screen;
-	screen = new Screen(HXRES, HYRES);
+	Screen *screen; //Shared
+	screen = new Screen(HXRES, HYRES); //Shared
 #endif
    int depth=0;
-	while (depth < MAX_DEPTH) {
+   while(depth < MAX_DEPTH){
+//#pragma omp parallel
+	int hx, hy;  //Unique
+   struct timeval start_time, stop_time; //unique
+   
+   long long compute_time; //unique
+
+
+ //  int depth=0; //Shared
+   //__m128 my;
+#pragma omp parallel
+	//while (depth < MAX_DEPTH) { //Have threads in here
       //Count how long it takes for one "screens" worth.
       gettimeofday(&start_time,NULL);
+#pragma omp for
 		for (hy=0; hy<HYRES; hy++) {
-         float cy = ((((float)hy/(float)HYRES) -0.5 + (PY/(4.0/m)))*(4.0f/m));
-         __m128 my = _mm_set1_ps(cy);
+        
+
+       /*float zoom = (4.0f/m);
+         my = _mm_set1_ps(hy);
+         my = _mm_div_ps(my, _mm_set1_ps(HYRES));
+         my = _mm_add_ps(my, _mm_set1_ps(-0.5 + (PY/zoom)));
+         my = _mm_mul_ps(my, _mm_set1_ps(zoom));*/
+         float cy = (((float)hy/(float)HYRES) -0.5 + (PY/(4.0f/m)))*(4.0f/m);
     		for (hx=0; hx<HXRES; hx++) {
 				int iterations;
 
@@ -201,32 +244,35 @@ int main()
 				 * Translate pixel coordinates to complex plane coordinates centred
 				 * on PX, PY
 				 */
-            float zoom = (4.0f/m);
+           /* float zoom = (4.0f/m);
             __m128 mx = _mm_setr_ps((float)hx, (float)(hx + 1), (float)(hx + 2), (float)(hx + 3));
             mx = _mm_div_ps(mx, _mm_set1_ps(HXRES));
             mx = _mm_add_ps(mx, _mm_set1_ps(-0.5 + (PX/zoom)));
             mx = _mm_mul_ps(mx, _mm_set1_ps(zoom));
             float * temp = (float *)malloc(sizeof(float) * 4);
-            _mm_storeu_ps(temp, mx);
+            _mm_storeu_ps(temp, mx);*/
 
 				float cx = ((((float)hx/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
-            //std::cout << "cx: " << cx << " mx[1]: " << temp[0] << std::endl;
-            //sleep(1);
-
-            member128(mx, my);
 				if (!member(cx, cy, iterations)) {
-					/* Point is not a member, colour based on number of iterations before escape */
+					// Point is not a member, colour based on number of iterations before escape 
 					int i=(iterations%40) - 1;
 					int b = i*3;
                #ifdef SCREEN 
 					   screen->putpixel(hx, hy, pal[b], pal[b+1], pal[b+2]);
                #endif
 				} else {
-					/* Point is a member, colour it black */  
+					// Point is a member, colour it black 
                   #ifdef SCREEN
 					   screen->putpixel(hx, hy, 0, 0, 0);
                   #endif
 				}
+            /*if(temp[0] != iterations){
+               std::cout << "X: " << hx << " Y: " << hy << " 128: " << temp[0];
+              std::cout  << " Itr: " << iterations << std::endl;
+               if(temp[0] - iterations >= 2 || temp[0] - iterations <= -2){
+                  exit(1);
+               }
+            }*/
 			}
 		}
 

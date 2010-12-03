@@ -1,18 +1,19 @@
 CC=g++
-CFLAGS=-c -Wall -ansi
-LDFLAGS= -O3 -msse
+CFLAGS=-c -Wall -ansi -fopenmp
+LDFLAGS= -O3 -msse -fopenmp
 SOURCES=main.cpp Screen.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=mandelbrot
 LIBS=-lSDL
 
-all: $(SOURCES) $(EXECUTABLE)
+all: 
+	$(CC) $(LDFLAGS) $(SOURCES) $(LIBS) -o mandelbrot
 	
 $(EXECUTABLE): $(OBJECTS) 
 	$(CC) $(LDFLAGS) $(OBJECTS) $(LIBS)  -o $@
 
 .cpp.o:
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS)  $< -o $@
 
 screen:
 	$(CC) $(LDFLAGS) $(SOURCES) -DSCREEN $(LIBS) -o mandelbrot
