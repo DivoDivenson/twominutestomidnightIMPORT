@@ -168,7 +168,7 @@ __m128 member128(__m128 cx, __m128 cy)
 }
 
 void test(__m128 a, __m128 b){
-  out_m128(_mm_cmplt_ps(a, b));
+  out_m128(_mm_cmpge_ps(a, b));
 }
 
 int main()
@@ -179,6 +179,8 @@ int main()
    long long compute_time;
 
 	float m=1.0; /* initial  magnification		*/
+   test(_mm_setr_ps(1.0, 2.0, 3.0, 4.0), _mm_setr_ps(1.0, 3.0, 2.0, 0.0));
+   exit(0);
 
 	/* Create a screen to render to */
 #ifdef SCREEN
