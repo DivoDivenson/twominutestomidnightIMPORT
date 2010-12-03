@@ -213,21 +213,23 @@ int main()
 	screen = new Screen(HXRES, HYRES); //Shared
 #endif
    int depth=0;
-   while(depth < MAX_DEPTH){
-//#pragma omp parallel
-	int hx, hy;  //Unique
+   int hx,hy;
    struct timeval start_time, stop_time; //unique
    
    long long compute_time; //unique
 
 
+   while(depth < MAX_DEPTH){
+      gettimeofday(&start_time,NULL); /*Computes the time of the longest 
+                                        thread including thread startup time*/
+      #pragma omp parallel private(hx, hy)//, start_time, stop_time, compute_time)
+      {
  //  int depth=0; //Shared
    //__m128 my;
-#pragma omp parallel
+//#pragma omp parallel
 	//while (depth < MAX_DEPTH) { //Have threads in here
       //Count how long it takes for one "screens" worth.
-      gettimeofday(&start_time,NULL);
-#pragma omp for
+      #pragma omp for
 		for (hy=0; hy<HYRES; hy++) {
         
 
@@ -275,8 +277,9 @@ int main()
             }*/
 			}
 		}
-
+      }
 		/* Show the rendered image on the screen */
+      //Stop parallel here
       #ifdef SCREEN
 		   screen->flip();
       #endif
