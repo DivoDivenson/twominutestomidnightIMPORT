@@ -140,25 +140,35 @@ __m128 member128(__m128 cx, __m128 cy)
    __m128 iterations_temp = _mm_set1_ps(0.0);
    __m128 four = _mm_set1_ps(4.0);
    __m128 two = _mm_set1_ps(2.0);
+   __m128 mask = _mm_set1_ps(1.0);
    __m128 temp;
    int iteration_cheat = 0;
    //This is gonna look nasty, maybe try operator overloading later
    //While at least one value is < 4
    //Quicker to have an int keeping track of loop iterations or keep using SSE???
-   while( _mm_movemask_ps( 
-            (_mm_cmplt_ps( _mm_add_ps( _mm_mul_ps(x,x),_mm_mul_ps(y,y)), four ))) == 0xF
+   //std::cout << _mm_movemask_ps( 
+     //       (_mm_cmplt_ps( _mm_add_ps( _mm_mul_ps(x,x),_mm_mul_ps(y,y)), four )));
+   while( _mm_movemask_ps(iterations_temp = 
+            (_mm_cmplt_ps( _mm_add_ps( _mm_mul_ps(x,x),_mm_mul_ps(y,y)), four ))) != 0
          && iteration_cheat < MAX_ITS){
-
+      out_m128(_mm_or_ps(iterations_temp,mask));
+      //out_m128(_mm_and_ps(iterations_temp, mask));
+      //iterations = _mm_add_ps(iterations, _mm_and_ps(iterations_temp, mask));
       temp = _mm_add_ps( _mm_sub_ps( _mm_mul_ps(x,x), _mm_mul_ps(y,y)), cx);
       y = _mm_add_ps( _mm_mul_ps( _mm_mul_ps(x,y), two), cy);
 
       iteration_cheat++; 
    }
+   out_m128(iterations);
 
         
    
    std::cout << "Done" << std::endl;
    return iterations;
+}
+
+void test(__m128 a, __m128 b){
+  out_m128(_mm_cmplt_ps(a, b));
 }
 
 int main()
