@@ -30,6 +30,7 @@
 #include <cmath>
 #include <sys/time.h>
 #include <xmmintrin.h>
+#include <string>
 
 
 #include "Screen.h"
@@ -278,9 +279,9 @@ int main()
 				if (!member(cx, cy, iterations)) {
 					// Point is not a member, colour based on number of iterations before escape 
 					int i=(iterations%40) - 1; //adjust number of iterations for pallet size
-					//int b = i*3;
-               int b = (int)map_range(iterations, 0, (MAX_ITS-1) , 0, ((PAL_SIZE) -1));
-               b = b *3;
+					int b = i*3;
+  //             int b = (int)map_range(iterations, 0, (MAX_ITS-1) , 0, ((PAL_SIZE) -1));
+    //           b = b *3;
                #ifdef SCREEN 
 					   screen->putpixel(hx, hy, pal[b], pal[b+1], pal[b+2]);
                #endif
@@ -310,6 +311,10 @@ int main()
          (stop_time.tv_usec - start_time.tv_usec);
 		std::cout << "Render done " << depth++ << " " << m << " in " << compute_time << " microseconds" << std::endl;
 		/* Zoom in */
+      char filename[100];
+      sprintf(filename, "Render%din%d.bmp\0",depth,compute_time);
+      std::cout << filename << std::endl;
+      screen->Save_Screen(filename);
 		m *= ZOOM_FACTOR;
 	}
 	
