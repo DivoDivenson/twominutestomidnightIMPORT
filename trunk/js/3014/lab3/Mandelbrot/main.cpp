@@ -43,7 +43,7 @@ const int 	MAX_ITS = 1000;			//Max Iterations before we assume the point will no
 const int 	HXRES = 700; 			// horizontal resolution	
 const int 	HYRES = 700;			// vertical resolution
 const int 	MAX_DEPTH = 15;		// max depth of zoom    SET BACK TO 480
-const float ZOOM_FACTOR = 1.02;		// zoom between each frame
+const float ZOOM_FACTOR = 2.02;		// zoom between each frame
 
 /* Change these to zoom into different parts of the image */
 const float PX = -0.702295281061;	// Centre point we'll zoom on - Real component
@@ -266,10 +266,11 @@ int main()
       //Count how long it takes for one "screens" worth.
       #pragma omp for
 		for (hy=0; hy<HYRES; hy++) {
-         
-         float cx = ((((float)hx/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
          float cy = (((float)hy/(float)HYRES) -0.5 + (PY/(4.0f/m)))*(4.0f/m);
-         int iterations;
+         for(hx=0; hx<HXRES;hx++){
+   
+         float cx = ((((float)hx/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
+                  int iterations;
 
        /*float zoom = (4.0f/m);
          my = _mm_set1_ps(hy);
@@ -323,6 +324,7 @@ int main()
 				}
             //what++;
 			}
+      }
 		}
       
 		/* Show the rendered image on the screen */
