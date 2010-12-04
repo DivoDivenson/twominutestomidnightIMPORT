@@ -31,6 +31,7 @@ class Screen
 		void putpixel(int x, int y, Uint8 r, Uint8 g, Uint8 b);
 
 		void flip();
+      int Save_Screen(const char *file); 
 
 	private:
 

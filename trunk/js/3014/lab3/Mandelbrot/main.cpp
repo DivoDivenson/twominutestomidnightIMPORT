@@ -41,8 +41,8 @@
 const int 	MAX_ITS = 1000;			//Max Iterations before we assume the point will not escape
 const int 	HXRES = 700; 			// horizontal resolution	
 const int 	HYRES = 700;			// vertical resolution
-const int 	MAX_DEPTH = 25;		// max depth of zoom    SET BACK TO 480
-const float ZOOM_FACTOR = 1.02;		// zoom between each frame
+const int 	MAX_DEPTH = 15;		// max depth of zoom    SET BACK TO 480
+const float ZOOM_FACTOR = 2.02;		// zoom between each frame
 
 /* Change these to zoom into different parts of the image */
 const float PX = -0.702295281061;	// Centre point we'll zoom on - Real component
@@ -202,6 +202,24 @@ void test(__m128 a, __m128 b){
    out_m128(_mm_and_ps(temp, mask));
 
 }
+//Modify the pallet to produce boring but clear results
+void modPal(){
+   int i;
+   int colour =6;
+   for(i =0; i < 40*3; i++){ //remove *3 for magic
+      pal[i++] = colour; //Red
+      //std::cout << "R: " << (int)pal[i-1];
+      pal[i++] = 0; //Green
+      //std::cout << " G: " << (int)pal[i-1];
+      pal[i] = 0; //Blue
+      //std::cout << " B: " << (int)pal[i] << std::endl;
+      colour += 6;
+   }
+}
+//Map an into from one range to another
+float map_range(float value, float in_start, float in_stop, float out_start, float out_stop){
+   return (out_start + (out_stop - out_start) * ((value - in_start)/(in_stop - in_start)));
+}
 
 int main()
 {
@@ -209,8 +227,10 @@ int main()
 
 	/* Create a screen to render to */
 #ifdef SCREEN
+   modPal();
 	Screen *screen; //Shared
 	screen = new Screen(HXRES, HYRES); //Shared
+   sleep(2); //Give time to init screen. This confuses me
 #endif
    int depth=0;
    int hx,hy;
@@ -257,8 +277,10 @@ int main()
 				float cx = ((((float)hx/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
 				if (!member(cx, cy, iterations)) {
 					// Point is not a member, colour based on number of iterations before escape 
-					int i=(iterations%40) - 1;
-					int b = i*3;
+					int i=(iterations%40) - 1; //adjust number of iterations for pallet size
+					//int b = i*3;
+               int b = (int)map_range(iterations, 0, (MAX_ITS-1) , 0, ((PAL_SIZE) -1));
+               b = b *3;
                #ifdef SCREEN 
 					   screen->putpixel(hx, hy, pal[b], pal[b+1], pal[b+2]);
                #endif
@@ -287,7 +309,6 @@ int main()
       compute_time = (stop_time.tv_sec - start_time.tv_sec) * 1000000L + 
          (stop_time.tv_usec - start_time.tv_usec);
 		std::cout << "Render done " << depth++ << " " << m << " in " << compute_time << " microseconds" << std::endl;
-
 		/* Zoom in */
 		m *= ZOOM_FACTOR;
 	}
