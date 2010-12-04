@@ -314,7 +314,7 @@ int main()
       char filename[100];
       sprintf(filename, "Render%din%d.bmp\0",depth,compute_time);
       std::cout << filename << std::endl;
-      screen->Save_Screen(filename);
+  //    screen->Save_Screen(filename);
 		m *= ZOOM_FACTOR;
 	}
 	
