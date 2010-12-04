@@ -204,17 +204,34 @@ void test(__m128 a, __m128 b){
 
 }
 //Modify the pallet to produce boring but clear results
-void modPal(){
+void modPal(int mod){
    int i;
    int colour =6;
-   for(i =0; i < 40*3; i++){ //remove *3 for magic
-      pal[i++] = colour; //Red
-      //std::cout << "R: " << (int)pal[i-1];
-      pal[i++] = 0; //Green
-      //std::cout << " G: " << (int)pal[i-1];
-      pal[i] = 0; //Blue
-      //std::cout << " B: " << (int)pal[i] << std::endl;
-      colour += 6;
+   switch(mod){
+      case 1:
+         for(i =0; i < 40*3; i++){ //remove *3 for magic
+            pal[i++] = colour; //Red
+            pal[i++] = 0; //Green
+            pal[i] = 0; //Blue
+            colour += 6;
+         }
+         break;
+      case 2:
+         for(i =0; i < 40*3; i++){ //remove *3 for magic
+            pal[i++] = 0; //Red
+            pal[i++] = colour; //Green
+            pal[i] = 0; //Blue
+            colour += 6;
+         }
+         break;
+     case 3:
+         for(i =0; i < 40*3; i++){ //remove *3 for magic
+            pal[i++] = 0; //Red
+            pal[i++] = 0; //Green
+            pal[i] = colour; //Blue
+            colour += 6;
+         }
+         break;
    }
 }
 //Map an into from one range to another
@@ -224,14 +241,14 @@ float map_range(float value, float in_start, float in_stop, float out_start, flo
 
 int main()
 {
+   std::cout << "Hello"; 
 	float m=1.0; /* initial  magnification Shared		*/
 
 	/* Create a screen to render to */
 #ifdef SCREEN
-   modPal();
+   modPal(1);
 	Screen *screen; //Shared
 	screen = new Screen(HXRES, HYRES); //Shared
-   sleep(2); //Give time to init screen. This confuses me
 #endif
    int depth=0;
    int hx,hy;
@@ -239,16 +256,14 @@ int main()
    
    long long compute_time; //unique
 
-
    while(depth < MAX_DEPTH){
       gettimeofday(&start_time,NULL); /*Computes the time of the longest 
                                         thread including thread startup time*/
       #pragma omp parallel private(hx, hy)//, start_time, stop_time, compute_time)
       {
- //  int depth=0; //Shared
    //__m128 my;
 //#pragma omp parallel
-	//while (depth < MAX_DEPTH) { //Have threads in here
+	while (depth < MAX_DEPTH) { //Have threads in here
       //Count how long it takes for one "screens" worth.
       #pragma omp for
 		for (hy=0; hy<HYRES; hy++) {
@@ -260,9 +275,28 @@ int main()
          my = _mm_add_ps(my, _mm_set1_ps(-0.5 + (PY/zoom)));
          my = _mm_mul_ps(my, _mm_set1_ps(zoom));*/
          float cy = (((float)hy/(float)HYRES) -0.5 + (PY/(4.0f/m)))*(4.0f/m);
-    		for (hx=0; hx<HXRES; hx++) {
-				int iterations;
 
+         /* Quick hack to switch the colour every 4 iterations. IGNORE
+         int count = 0;
+         int what = 0; //REMOVE
+            for (hx=0; hx<HXRES; hx++) {
+               if(what == 4){
+                  what=0;
+                  if(count == 0){
+                     modPal(count+1);
+                     count++;
+                  }else if(count == 1){
+                     modPal(count+1);
+                     count++;
+                  }else{
+                     modPal(count+1);
+                     count = 0;
+                  }
+               }
+            }*/
+
+				int iterations;
+            
 				/* 
 				 * Translate pixel coordinates to complex plane coordinates centred
 				 * on PX, PY
@@ -279,9 +313,10 @@ int main()
 				if (!member(cx, cy, iterations)) {
 					// Point is not a member, colour based on number of iterations before escape 
 					int i=(iterations%40) - 1; //adjust number of iterations for pallet size
-					int b = i*3;
-  //             int b = (int)map_range(iterations, 0, (MAX_ITS-1) , 0, ((PAL_SIZE) -1));
-    //           b = b *3;
+	//				int b = i*3;
+               int b = (int)map_range(iterations, 0, (MAX_ITS-1) , 0, ((PAL_SIZE) -1)); //Map the number of iterations 
+                                                                                        //to a position in pal[]
+               b = b *3;
                #ifdef SCREEN 
 					   screen->putpixel(hx, hy, pal[b], pal[b+1], pal[b+2]);
                #endif
@@ -298,6 +333,7 @@ int main()
                   exit(1);
                }
             }*/
+            //what++;
 			}
 		}
       }
@@ -309,16 +345,15 @@ int main()
       gettimeofday(&stop_time,NULL);
       compute_time = (stop_time.tv_sec - start_time.tv_sec) * 1000000L + 
          (stop_time.tv_usec - start_time.tv_usec);
-		std::cout << "Render done " << depth++ << " " << m << " in " << compute_time << " microseconds" << std::endl;
+		std::cout << "Render done " << depth++ << " Zoom: " << m << " in " << compute_time << " microseconds" << std::endl;
 		/* Zoom in */
       char filename[100];
-      sprintf(filename, "Render%din%d.bmp\0",depth,compute_time);
-      std::cout << filename << std::endl;
-  //    screen->Save_Screen(filename);
+      sprintf(filename, "Render%din%lld.bmp\0",m,compute_time);
+     //screen->Save_Screen(filename);
 		m *= ZOOM_FACTOR;
 	}
 	
 	//sleep(10);
-	std::cout << "Clean Exit"<< std::endl;
+	std::cout << "Clean Exit" << std::endl;
 
 }
