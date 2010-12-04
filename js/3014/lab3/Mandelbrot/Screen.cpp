@@ -59,3 +59,8 @@ void Screen::flip()
 {
 	SDL_Flip(surface);
 }
+
+
+int Screen::Save_Screen(const char * file){
+   SDL_SaveBMP(surface, file);
+}
