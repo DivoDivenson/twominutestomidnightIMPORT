@@ -18,8 +18,11 @@ $(EXECUTABLE): $(OBJECTS)
 screen:
 	$(CC) $(LDFLAGS) $(SOURCES) -DSCREEN $(LIBS) -o mandelbrot
 
+debug:
+	$(CC) -disable-openmp -g $(SOURCES) $(LIBS) -o mandelbrot
+
 noomp:
-	$(CC) -O3 -msse -disable-openmp $(SOURCES) -DSCREEN $(LIBS) -o mandelbrot
+	$(CC) -O3 -msse --disable-openmp $(SOURCES) -DSCREEN $(LIBS) -o mandelbrot
 
 clean:
 	rm -f *.o $(EXECUTABLE)
