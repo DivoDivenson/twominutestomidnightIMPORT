@@ -43,7 +43,7 @@ const int 	MAX_ITS = 1000;			//Max Iterations before we assume the point will no
 const int 	HXRES = 700; 			// horizontal resolution	
 const int 	HYRES = 700;			// vertical resolution
 const int 	MAX_DEPTH = 15;		// max depth of zoom    SET BACK TO 480
-const float ZOOM_FACTOR = 2.02;		// zoom between each frame
+const float ZOOM_FACTOR = 1.02;		// zoom between each frame
 
 /* Change these to zoom into different parts of the image */
 const float PX = -0.702295281061;	// Centre point we'll zoom on - Real component
@@ -235,13 +235,12 @@ void modPal(int mod){
    }
 }
 //Map an into from one range to another
-float map_range(float value, float in_start, float in_stop, float out_start, float out_stop){
+/*float map_range(float value, float in_start, float in_stop, float out_start, float out_stop){
    return (out_start + (out_stop - out_start) * ((value - in_start)/(in_stop - in_start)));
-}
+}*/
 
 int main()
 {
-   std::cout << "Hello"; 
 	float m=1.0; /* initial  magnification Shared		*/
 
 	/* Create a screen to render to */
@@ -263,19 +262,21 @@ int main()
       {
    //__m128 my;
 //#pragma omp parallel
-	while (depth < MAX_DEPTH) { //Have threads in here
+	//while (depth < MAX_DEPTH) { //Have threads in here
       //Count how long it takes for one "screens" worth.
       #pragma omp for
 		for (hy=0; hy<HYRES; hy++) {
-        
+         
+         float cx = ((((float)hx/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
+         float cy = (((float)hy/(float)HYRES) -0.5 + (PY/(4.0f/m)))*(4.0f/m);
+         int iterations;
 
        /*float zoom = (4.0f/m);
          my = _mm_set1_ps(hy);
          my = _mm_div_ps(my, _mm_set1_ps(HYRES));
          my = _mm_add_ps(my, _mm_set1_ps(-0.5 + (PY/zoom)));
          my = _mm_mul_ps(my, _mm_set1_ps(zoom));*/
-         float cy = (((float)hy/(float)HYRES) -0.5 + (PY/(4.0f/m)))*(4.0f/m);
-
+         
          /* Quick hack to switch the colour every 4 iterations. IGNORE
          int count = 0;
          int what = 0; //REMOVE
@@ -293,15 +294,10 @@ int main()
                      count = 0;
                   }
                }
-            }*/
+            }
 
-				int iterations;
-            
-				/* 
-				 * Translate pixel coordinates to complex plane coordinates centred
-				 * on PX, PY
-				 */
-           /* float zoom = (4.0f/m);
+				            
+            float zoom = (4.0f/m);
             __m128 mx = _mm_setr_ps((float)hx, (float)(hx + 1), (float)(hx + 2), (float)(hx + 3));
             mx = _mm_div_ps(mx, _mm_set1_ps(HXRES));
             mx = _mm_add_ps(mx, _mm_set1_ps(-0.5 + (PX/zoom)));
@@ -309,14 +305,13 @@ int main()
             float * temp = (float *)malloc(sizeof(float) * 4);
             _mm_storeu_ps(temp, mx);*/
 
-				float cx = ((((float)hx/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
 				if (!member(cx, cy, iterations)) {
 					// Point is not a member, colour based on number of iterations before escape 
 					int i=(iterations%40) - 1; //adjust number of iterations for pallet size
-	//				int b = i*3;
-               int b = (int)map_range(iterations, 0, (MAX_ITS-1) , 0, ((PAL_SIZE) -1)); //Map the number of iterations 
-                                                                                        //to a position in pal[]
-               b = b *3;
+					int b = i*3;
+   /*          int b = (int)map_range(iterations, 0, (MAX_ITS-1) , 0, ((PAL_SIZE) -1)); //Map the number of iterations 
+               b = b * 3;                                                               //to a position in pal[] */
+               
                #ifdef SCREEN 
 					   screen->putpixel(hx, hy, pal[b], pal[b+1], pal[b+2]);
                #endif
@@ -326,17 +321,10 @@ int main()
 					   screen->putpixel(hx, hy, 0, 0, 0);
                   #endif
 				}
-            /*if(temp[0] != iterations){
-               std::cout << "X: " << hx << " Y: " << hy << " 128: " << temp[0];
-              std::cout  << " Itr: " << iterations << std::endl;
-               if(temp[0] - iterations >= 2 || temp[0] - iterations <= -2){
-                  exit(1);
-               }
-            }*/
             //what++;
 			}
 		}
-      }
+      
 		/* Show the rendered image on the screen */
       //Stop parallel here
       #ifdef SCREEN
@@ -347,8 +335,8 @@ int main()
          (stop_time.tv_usec - start_time.tv_usec);
 		std::cout << "Render done " << depth++ << " Zoom: " << m << " in " << compute_time << " microseconds" << std::endl;
 		/* Zoom in */
-      char filename[100];
-      sprintf(filename, "Render%din%lld.bmp\0",m,compute_time);
+      //char filename[100];
+      //sprintf(filename, "Render%din%lld.bmp\0",m,compute_time);
      //screen->Save_Screen(filename);
 		m *= ZOOM_FACTOR;
 	}
