@@ -43,7 +43,7 @@ const int 	MAX_ITS = 1000;			//Max Iterations before we assume the point will no
 const int 	HXRES = 700; 			// horizontal resolution	
 const int 	HYRES = 700;			// vertical resolution
 const int 	MAX_DEPTH = 15;		// max depth of zoom    SET BACK TO 480
-const float ZOOM_FACTOR = 2.02;		// zoom between each frame
+const float ZOOM_FACTOR = 1.02;		// zoom between each frame
 
 /* Change these to zoom into different parts of the image */
 const float PX = -0.702295281061;	// Centre point we'll zoom on - Real component
@@ -100,7 +100,37 @@ unsigned char pal[]={
 	4,2,4};
 const int PAL_SIZE = 40;  //Number of entries in the palette 
 
-
+//Modify the pallet to produce boring but clear results
+void modPal(int mod){
+   int i;
+   int colour =6;
+   switch(mod){
+      case 1:
+         for(i =0; i < 40*3; i++){ //remove *3 for magic
+            pal[i++] = colour; //Red
+            pal[i++] = 0; //Green
+            pal[i] = 0; //Blue
+            colour += 6;
+         }
+         break;
+      case 2:
+         for(i =0; i < 40*3; i++){ //remove *3 for magic
+            pal[i++] = 0; //Red
+            pal[i++] = colour; //Green
+            pal[i] = 0; //Blue
+            colour += 6;
+         }
+         break;
+     case 3:
+         for(i =0; i < 40*3; i++){ //remove *3 for magic
+            pal[i++] = 0; //Red
+            pal[i++] = 0; //Green
+            pal[i] = colour; //Blue
+            colour += 6;
+         }
+         break;
+   }
+}
 
 /* 
  * Return true if the point cx,cy is a member of set M.
@@ -169,11 +199,11 @@ __m128 member128(__m128 cx, __m128 cy)
 
       float * tempF = (float *) malloc(sizeof(float)*4);
       _mm_storeu_ps(tempF,iterations);
-      if(tempF[0] > 110.0f){
+      /*if(tempF[0] > 110.0f){
          std::cout << "ITS " << std::endl;
          out_m128(iterations);
          out_m128(iterations_temp);
-      }
+      }*/
 
      /*out_m128(_mm_add_ps( _mm_mul_ps(x,x),_mm_mul_ps(y,y)));
       std::cout << "CX Followed by X:" << std::endl;
@@ -203,41 +233,11 @@ void test(__m128 a, __m128 b){
    out_m128(_mm_and_ps(temp, mask));
 
 }
-//Modify the pallet to produce boring but clear results
-void modPal(int mod){
-   int i;
-   int colour =6;
-   switch(mod){
-      case 1:
-         for(i =0; i < 40*3; i++){ //remove *3 for magic
-            pal[i++] = colour; //Red
-            pal[i++] = 0; //Green
-            pal[i] = 0; //Blue
-            colour += 6;
-         }
-         break;
-      case 2:
-         for(i =0; i < 40*3; i++){ //remove *3 for magic
-            pal[i++] = 0; //Red
-            pal[i++] = colour; //Green
-            pal[i] = 0; //Blue
-            colour += 6;
-         }
-         break;
-     case 3:
-         for(i =0; i < 40*3; i++){ //remove *3 for magic
-            pal[i++] = 0; //Red
-            pal[i++] = 0; //Green
-            pal[i] = colour; //Blue
-            colour += 6;
-         }
-         break;
-   }
-}
+
 //Map an into from one range to another
-/*float map_range(float value, float in_start, float in_stop, float out_start, float out_stop){
+float map_range(float value, float in_start, float in_stop, float out_start, float out_stop){
    return (out_start + (out_stop - out_start) * ((value - in_start)/(in_stop - in_start)));
-}*/
+}
 
 int main()
 {
@@ -245,7 +245,7 @@ int main()
 
 	/* Create a screen to render to */
 #ifdef SCREEN
-   modPal(1);
+   //modPal(1);
 	Screen *screen; //Shared
 	screen = new Screen(HXRES, HYRES); //Shared
 #endif
@@ -256,29 +256,31 @@ int main()
    long long compute_time; //unique
 
    while(depth < MAX_DEPTH){
+   
       gettimeofday(&start_time,NULL); /*Computes the time of the longest 
                                         thread including thread startup time*/
       #pragma omp parallel private(hx, hy)//, start_time, stop_time, compute_time)
       {
-   //__m128 my;
-//#pragma omp parallel
-	//while (depth < MAX_DEPTH) { //Have threads in here
-      //Count how long it takes for one "screens" worth.
-      #pragma omp for
-		for (hy=0; hy<HYRES; hy++) {
-         float cy = (((float)hy/(float)HYRES) -0.5 + (PY/(4.0f/m)))*(4.0f/m);
-         for(hx=0; hx<HXRES;hx++){
-   
-         float cx = ((((float)hx/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
-                  int iterations;
 
-       /*float zoom = (4.0f/m);
-         my = _mm_set1_ps(hy);
+            #pragma omp for schedule(dynamic) //This schedule shaved another ~2 microseconds (From 3 down to 1) off in testing. Any small chunk size, ( 1 < X < ~40) 
+		for (hy=0; hy<HYRES; hy++) {      //seems to have roughly the same result.
+         float cy = (((float)hy/(float)HYRES) -0.5 + (PY/(4.0f/m)))*(4.0f/m);
+
+         __m128 my = _mm_set1_ps(cy);
+         /*float zoom = (4.0f/m);
+         __m128 my = _mm_set1_ps(hy);
          my = _mm_div_ps(my, _mm_set1_ps(HYRES));
          my = _mm_add_ps(my, _mm_set1_ps(-0.5 + (PY/zoom)));
          my = _mm_mul_ps(my, _mm_set1_ps(zoom));*/
-         
-         /* Quick hack to switch the colour every 4 iterations. IGNORE
+
+
+         for(hx=0; hx<HXRES;hx++){ 
+   
+         float cx = ((((float)hx/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
+         int iterations;
+
+                
+         /* Quick hack to switch the colour every 4 iterations. IGNORE. For debugging
          int count = 0;
          int what = 0; //REMOVE
             for (hx=0; hx<HXRES; hx++) {
@@ -295,16 +297,19 @@ int main()
                      count = 0;
                   }
                }
-            }
-
-				            
-            float zoom = (4.0f/m);
+            }*/
+            __m128 mx = _mm_set1_ps(cx);
+		      /*zoom =(4.0f/m);		            
             __m128 mx = _mm_setr_ps((float)hx, (float)(hx + 1), (float)(hx + 2), (float)(hx + 3));
             mx = _mm_div_ps(mx, _mm_set1_ps(HXRES));
             mx = _mm_add_ps(mx, _mm_set1_ps(-0.5 + (PX/zoom)));
-            mx = _mm_mul_ps(mx, _mm_set1_ps(zoom));
+            mx = _mm_mul_ps(mx, _mm_set1_ps(zoom));*/
             float * temp = (float *)malloc(sizeof(float) * 4);
-            _mm_storeu_ps(temp, mx);*/
+            __m128 result = member128(mx, my);
+            _mm_store_ps(temp, mx);
+            if(temp[0] != cx){
+            std::cout << "SEE: " << temp[0] << " IT: " << cx << std::endl;
+            }
 
 				if (!member(cx, cy, iterations)) {
 					// Point is not a member, colour based on number of iterations before escape 
@@ -323,6 +328,9 @@ int main()
                   #endif
 				}
             //what++;
+     /*       if(temp[0] != iterations){
+               std::cout << "SSE: " << temp[0] << " IT: " << iterations <<std::endl;
+            }*/
 			}
       }
 		}
