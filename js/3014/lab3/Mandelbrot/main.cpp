@@ -226,6 +226,7 @@ int main()
    //modPal(1);
 	Screen *screen; //Shared
 	screen = new Screen(HXRES, HYRES); //Shared
+   sleep(2);
 #endif
    int depth=0;
    int hx,hy;
@@ -257,6 +258,12 @@ int main()
          for(hx=0; hx<HXRES;hx+=4){ 
    
          float cx = ((((float)hx/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
+         float cx1 = ((((float)(hx+1)/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
+         float cx2 = ((((float)(hx+2)/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
+         float cx3 = ((((float)(hx+3)/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
+
+
+
          int iterations;
 
                 
@@ -278,7 +285,7 @@ int main()
                   }
                }
             }*/
-            __m128 mx = _mm_set1_ps(cx);
+            __m128 mx = _mm_setr_ps(cx,cx1,cx2,cx3);
 		      /*zoom =(4.0f/m);		            
             __m128 mx = _mm_setr_ps((float)hx, (float)(hx + 1), (float)(hx + 2), (float)(hx + 3));
             mx = _mm_div_ps(mx, _mm_set1_ps(HXRES));
@@ -291,12 +298,12 @@ int main()
             _mm_store_ps(temp, result);
             int i;
 #ifdef SCREEN
-            for(i = 0; i < 3; i++){
-               if(temp[i] == MAX_ITS){
+            for(i = 0; i < 4; i++){
+              if(temp[i] == MAX_ITS){
                   screen->putpixel(hx+i, hy, 0, 0, 0);
                }else{
-                  int i = temp[i]%40 - 1;
-                  int b = i*3;
+                  int x = (((int)temp[i])%40) - 1;
+                  int b = x*3;
                   screen->putpixel(hx+i, hy, pal[b], pal[b+1], pal[b+2]);
                }
             }
