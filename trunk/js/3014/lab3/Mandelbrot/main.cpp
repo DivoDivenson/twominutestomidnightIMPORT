@@ -180,59 +180,37 @@ __m128 member128(__m128 cx, __m128 cy)
    //This is gonna look nasty, maybe try operator overloading later
    //While at least one value is < 4
    //Quicker to have an int keeping track of loop iterations or keep using SSE???
-   //std::cout << _mm_movemask_ps( 
-     //       (_mm_cmplt_ps( _mm_add_ps( _mm_mul_ps(x,x),_mm_mul_ps(y,y)), four )));
    while( (_mm_movemask_ps(iterations_temp = 
             (_mm_cmplt_ps( _mm_add_ps( _mm_mul_ps(x,x),_mm_mul_ps(y,y)), four )))) != 0
          && iteration_cheat < MAX_ITS){
-      //out_m128(_mm_or_ps(iterations_temp,mask));
-         //out_m128(iterations_temp);
       iterations = _mm_add_ps(iterations, _mm_and_ps(iterations_temp, mask));
-      //out_m128(iterations);
-      /*std::cout << "Iter :" << std::endl;
-      out_m128(iterations);
-      out_m128(_mm_add_ps( _mm_mul_ps(x,x),_mm_mul_ps(y,y)));*/
 
       temp = _mm_add_ps( _mm_sub_ps( _mm_mul_ps(x,x), _mm_mul_ps(y,y)), cx);
       y = _mm_add_ps( _mm_mul_ps( _mm_mul_ps(x,y), two), cy);
       x = temp;
 
-      float * tempF = (float *) malloc(sizeof(float)*4);
-      _mm_storeu_ps(tempF,iterations);
-      /*if(tempF[0] > 110.0f){
-         std::cout << "ITS " << std::endl;
-         out_m128(iterations);
-         out_m128(iterations_temp);
-      }*/
-
-     /*out_m128(_mm_add_ps( _mm_mul_ps(x,x),_mm_mul_ps(y,y)));
-      std::cout << "CX Followed by X:" << std::endl;
-      out_m128(cx);
-      out_m128(x);
-      std::cout << "CY Followed by Y:" << std::endl;
-
-      out_m128(cy);
-      out_m128(y);*/
+      /****IMPORTANT NOTE TO SELF*******
+        Don't EVER call malloc in a loop like this, especially with threads!
+      *************/  
+      //float * tempF = (float *) malloc(sizeof(float)*4);
 
       iteration_cheat++;
       
    }
-   //out_m128(iterations);
-   //std::cout << "Mask " << _mm_movemask_ps(iterations_temp) << std::endl; 
 
         
    
    return iterations;
 }
 
-void test(__m128 a, __m128 b){
+/*void test(__m128 a, __m128 b){
    __m128 temp;
    __m128 mask = _mm_set1_ps(1.0);
    std::cout << _mm_movemask_ps(_mm_cmpge_ps(a, b)) << std::endl;
    out_m128((temp = _mm_cmpge_ps(a, b)) );
    out_m128(_mm_and_ps(temp, mask));
 
-}
+}*/
 
 //Map an into from one range to another
 float map_range(float value, float in_start, float in_stop, float out_start, float out_stop){
@@ -262,6 +240,8 @@ int main()
       #pragma omp parallel private(hx, hy)//, start_time, stop_time, compute_time)
       {
 
+            float * temp = (float *)malloc(sizeof(float) * 4);
+
             #pragma omp for schedule(dynamic) //This schedule shaved another ~2 microseconds (From 3 down to 1) off in testing. Any small chunk size, ( 1 < X < ~40) 
 		for (hy=0; hy<HYRES; hy++) {      //seems to have roughly the same result.
          float cy = (((float)hy/(float)HYRES) -0.5 + (PY/(4.0f/m)))*(4.0f/m);
@@ -274,7 +254,7 @@ int main()
          my = _mm_mul_ps(my, _mm_set1_ps(zoom));*/
 
 
-         for(hx=0; hx<HXRES;hx++){ 
+         for(hx=0; hx<HXRES;hx+=4){ 
    
          float cx = ((((float)hx/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
          int iterations;
@@ -304,19 +284,30 @@ int main()
             mx = _mm_div_ps(mx, _mm_set1_ps(HXRES));
             mx = _mm_add_ps(mx, _mm_set1_ps(-0.5 + (PX/zoom)));
             mx = _mm_mul_ps(mx, _mm_set1_ps(zoom));*/
-            float * temp = (float *)malloc(sizeof(float) * 4);
-            __m128 result = member128(mx, my);
-            _mm_store_ps(temp, mx);
-            if(temp[0] != cx){
-            std::cout << "SEE: " << temp[0] << " IT: " << cx << std::endl;
-            }
 
-				if (!member(cx, cy, iterations)) {
+
+            //Quick way to pull out the 4 values
+            __m128 result = member128(mx, my);
+            _mm_store_ps(temp, result);
+            int i;
+#ifdef SCREEN
+            for(i = 0; i < 3; i++){
+               if(temp[i] == MAX_ITS){
+                  screen->putpixel(hx+i, hy, 0, 0, 0);
+               }else{
+                  int i = temp[i]%40 - 1;
+                  int b = i*3;
+                  screen->putpixel(hx+i, hy, pal[b], pal[b+1], pal[b+2]);
+               }
+            }
+#endif
+
+				/*if (!member(cx, cy, iterations)) {
 					// Point is not a member, colour based on number of iterations before escape 
 					int i=(iterations%40) - 1; //adjust number of iterations for pallet size
 					int b = i*3;
-   /*          int b = (int)map_range(iterations, 0, (MAX_ITS-1) , 0, ((PAL_SIZE) -1)); //Map the number of iterations 
-               b = b * 3;                                                               //to a position in pal[] */
+   //          int b = (int)map_range(iterations, 0, (MAX_ITS-1) , 0, ((PAL_SIZE) -1)); //Map the number of iterations 
+              // b = b * 3;                                                               //to a position in pal[]
                
                #ifdef SCREEN 
 					   screen->putpixel(hx, hy, pal[b], pal[b+1], pal[b+2]);
@@ -328,7 +319,7 @@ int main()
                   #endif
 				}
             //what++;
-     /*       if(temp[0] != iterations){
+            if(temp[0] != iterations){
                std::cout << "SSE: " << temp[0] << " IT: " << iterations <<std::endl;
             }*/
 			}
