@@ -43,7 +43,7 @@ const int 	MAX_ITS = 1000;			//Max Iterations before we assume the point will no
 const int 	HXRES = 700; 			// horizontal resolution	
 const int 	HYRES = 700;			// vertical resolution
 const int 	MAX_DEPTH = 15;		// max depth of zoom    SET BACK TO 480
-const float ZOOM_FACTOR = 1.02;		// zoom between each frame
+const float ZOOM_FACTOR = 2.02;		// zoom between each frame
 
 /* Change these to zoom into different parts of the image */
 const float PX = -0.702295281061;	// Centre point we'll zoom on - Real component
@@ -256,81 +256,80 @@ int main()
 
 
          for(hx=0; hx<HXRES;hx+=4){ 
-   
-         float cx = ((((float)hx/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
-         float cx1 = ((((float)(hx+1)/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
-         float cx2 = ((((float)(hx+2)/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
-         float cx3 = ((((float)(hx+3)/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
+         
+            int iterations;
+ 
+            float cx = ((((float)hx/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
+            float cx1 = ((((float)(hx+1)/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
+            float cx2 = ((((float)(hx+2)/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
+            float cx3 = ((((float)(hx+3)/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
 
 
 
-         int iterations;
-
+         
                 
-         /* Quick hack to switch the colour every 4 iterations. IGNORE. For debugging
-         int count = 0;
-         int what = 0; //REMOVE
-            for (hx=0; hx<HXRES; hx++) {
-               if(what == 4){
-                  what=0;
-                  if(count == 0){
-                     modPal(count+1);
-                     count++;
-                  }else if(count == 1){
-                     modPal(count+1);
-                     count++;
-                  }else{
-                     modPal(count+1);
-                     count = 0;
+            /* Quick hack to switch the colour every 4 iterations. IGNORE. For debugging
+            int count = 0;
+            int what = 0; //REMOVE
+               for (hx=0; hx<HXRES; hx++) {
+                  if(what == 4){
+                     what=0;
+                     if(count == 0){
+                        modPal(count+1);
+                        count++;
+                     }else if(count == 1){
+                        modPal(count+1);
+                        count++;
+                     }else{
+                        modPal(count+1);
+                        count = 0;
+                     }
                   }
-               }
-            }*/
-            __m128 mx = _mm_setr_ps(cx,cx1,cx2,cx3);
-		      /*zoom =(4.0f/m);		            
-            __m128 mx = _mm_setr_ps((float)hx, (float)(hx + 1), (float)(hx + 2), (float)(hx + 3));
-            mx = _mm_div_ps(mx, _mm_set1_ps(HXRES));
-            mx = _mm_add_ps(mx, _mm_set1_ps(-0.5 + (PX/zoom)));
-            mx = _mm_mul_ps(mx, _mm_set1_ps(zoom));*/
+               }*/
+               __m128 mx = _mm_setr_ps(cx,cx1,cx2,cx3);
+		         /*zoom =(4.0f/m);		            
+               __m128 mx = _mm_setr_ps((float)hx, (float)(hx + 1), (float)(hx + 2), (float)(hx + 3));
+               mx = _mm_div_ps(mx, _mm_set1_ps(HXRES));
+               mx = _mm_add_ps(mx, _mm_set1_ps(-0.5 + (PX/zoom)));
+               mx = _mm_mul_ps(mx, _mm_set1_ps(zoom));*/
 
 
-            //Quick way to pull out the 4 values
-            __m128 result = member128(mx, my);
-            _mm_store_ps(temp, result);
-            int i;
+               //Quick way to pull out the 4 values
+               __m128 result = member128(mx, my);
+               _mm_store_ps(temp, result);
+               int i;
 #ifdef SCREEN
-            for(i = 0; i < 4; i++){
-              if(temp[i] == MAX_ITS){
-                  screen->putpixel(hx+i, hy, 0, 0, 0);
-               }else{
-                  int x = (((int)temp[i])%40) - 1;
-                  int b = x*3;
-                  screen->putpixel(hx+i, hy, pal[b], pal[b+1], pal[b+2]);
+               for(i = 0; i < 4; i++){
+                  if(temp[i] == MAX_ITS){
+                     screen->putpixel(hx+i, hy, 0, 0, 0);
+                  }else{
+                     int x = (((int)temp[i])%40) - 1;
+                     int b = x*3;
+                     screen->putpixel(hx+i, hy, pal[b], pal[b+1], pal[b+2]);
+                  }  
                }
-            }
 #endif
 
-				/*if (!member(cx, cy, iterations)) {
-					// Point is not a member, colour based on number of iterations before escape 
-					int i=(iterations%40) - 1; //adjust number of iterations for pallet size
-					int b = i*3;
-   //          int b = (int)map_range(iterations, 0, (MAX_ITS-1) , 0, ((PAL_SIZE) -1)); //Map the number of iterations 
+/*
+				   if (!member(cx, cy, iterations)) {
+					   // Point is not a member, colour based on number of iterations before escape 
+					   int i=(iterations%40) - 1; //adjust number of iterations for pallet size
+					   int b = i*3;
+   //             int b = (int)map_range(iterations, 0, (MAX_ITS-1) , 0, ((PAL_SIZE) -1)); //Map the number of iterations 
               // b = b * 3;                                                               //to a position in pal[]
                
-               #ifdef SCREEN 
-					   screen->putpixel(hx, hy, pal[b], pal[b+1], pal[b+2]);
-               #endif
-				} else {
-					// Point is a member, colour it black 
-                  #ifdef SCREEN
-					   screen->putpixel(hx, hy, 0, 0, 0);
+                  #ifdef SCREEN 
+					      screen->putpixel(hx, hy, pal[b], pal[b+1], pal[b+2]);
                   #endif
-				}
-            //what++;
-            if(temp[0] != iterations){
-               std::cout << "SSE: " << temp[0] << " IT: " << iterations <<std::endl;
-            }*/
-			}
-      }
+				   } else {
+					   // Point is a member, colour it black 
+                     #ifdef SCREEN
+					      screen->putpixel(hx, hy, 0, 0, 0);
+                     #endif
+				   }*/
+               //what++;
+			   }
+         }
 		}
       
 		/* Show the rendered image on the screen */
