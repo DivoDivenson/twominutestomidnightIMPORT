@@ -101,37 +101,6 @@ unsigned char pal[]={
 const int PAL_SIZE = 40;  //Number of entries in the palette 
 
 //Modify the pallet to produce boring but clear results
-void modPal(int mod){
-   int i;
-   int colour =6;
-   switch(mod){
-      case 1:
-         for(i =0; i < 40*3; i++){ //remove *3 for magic
-            pal[i++] = colour; //Red
-            pal[i++] = 0; //Green
-            pal[i] = 0; //Blue
-            colour += 6;
-         }
-         break;
-      case 2:
-         for(i =0; i < 40*3; i++){ //remove *3 for magic
-            pal[i++] = 0; //Red
-            pal[i++] = colour; //Green
-            pal[i] = 0; //Blue
-            colour += 6;
-         }
-         break;
-     case 3:
-         for(i =0; i < 40*3; i++){ //remove *3 for magic
-            pal[i++] = 0; //Red
-            pal[i++] = 0; //Green
-            pal[i] = colour; //Blue
-            colour += 6;
-         }
-         break;
-   }
-}
-
 /* 
  * Return true if the point cx,cy is a member of set M.
  * iterations is set to the number of iterations until escape.
@@ -182,8 +151,10 @@ __m128 member128(__m128 cx, __m128 cy)
    //Quicker to have an int keeping track of loop iterations or keep using SSE???
    while( (_mm_movemask_ps(iterations_temp = 
             (_mm_cmplt_ps( _mm_add_ps( _mm_mul_ps(x,x),_mm_mul_ps(y,y)), four )))) != 0
-         && iteration_cheat < MAX_ITS){
-      iterations = _mm_add_ps(iterations, _mm_and_ps(iterations_temp, mask));
+           && iteration_cheat < MAX_ITS){
+      iterations = _mm_add_ps(iterations, _mm_and_ps(iterations_temp, mask)); //Introducing extra instruction
+      //The cmp returns 0 if false and NaN if true (not -1). Don't know what NaN is so AND it with
+      //1 and add that to the count.
 
       temp = _mm_add_ps( _mm_sub_ps( _mm_mul_ps(x,x), _mm_mul_ps(y,y)), cx);
       y = _mm_add_ps( _mm_mul_ps( _mm_mul_ps(x,y), two), cy);
@@ -223,7 +194,6 @@ int main()
 
 	/* Create a screen to render to */
 #ifdef SCREEN
-   //modPal(1);
 	Screen *screen; //Shared
 	screen = new Screen(HXRES, HYRES); //Shared
    sleep(2);
@@ -248,88 +218,61 @@ int main()
          float cy = (((float)hy/(float)HYRES) -0.5 + (PY/(4.0f/m)))*(4.0f/m);
 
          __m128 my = _mm_set1_ps(cy);
-         /*float zoom = (4.0f/m);
-         __m128 my = _mm_set1_ps(hy);
+         float zoom = (4.0f/m);
+         /*__m128 my = _mm_set1_ps(hy);
          my = _mm_div_ps(my, _mm_set1_ps(HYRES));
          my = _mm_add_ps(my, _mm_set1_ps(-0.5 + (PY/zoom)));
          my = _mm_mul_ps(my, _mm_set1_ps(zoom));*/
+         int iterations;
 
-
+#ifdef SSE
          for(hx=0; hx<HXRES;hx+=4){ 
          
-            int iterations;
- 
-            float cx = ((((float)hx/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
-            float cx1 = ((((float)(hx+1)/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
-            float cx2 = ((((float)(hx+2)/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
-            float cx3 = ((((float)(hx+3)/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
+                        __m128 mx = _mm_setr_ps((float)hx, (float)(hx + 1), (float)(hx + 2), (float)(hx + 3));
+            mx = _mm_div_ps(mx, _mm_set1_ps(HXRES));
+            mx = _mm_add_ps(mx, _mm_set1_ps(-0.5 + (PX/zoom)));
+            mx = _mm_mul_ps(mx, _mm_set1_ps(zoom));
 
 
-
-         
-                
-            /* Quick hack to switch the colour every 4 iterations. IGNORE. For debugging
-            int count = 0;
-            int what = 0; //REMOVE
-               for (hx=0; hx<HXRES; hx++) {
-                  if(what == 4){
-                     what=0;
-                     if(count == 0){
-                        modPal(count+1);
-                        count++;
-                     }else if(count == 1){
-                        modPal(count+1);
-                        count++;
-                     }else{
-                        modPal(count+1);
-                        count = 0;
-                     }
-                  }
-               }*/
-               __m128 mx = _mm_setr_ps(cx,cx1,cx2,cx3);
-		         /*zoom =(4.0f/m);		            
-               __m128 mx = _mm_setr_ps((float)hx, (float)(hx + 1), (float)(hx + 2), (float)(hx + 3));
-               mx = _mm_div_ps(mx, _mm_set1_ps(HXRES));
-               mx = _mm_add_ps(mx, _mm_set1_ps(-0.5 + (PX/zoom)));
-               mx = _mm_mul_ps(mx, _mm_set1_ps(zoom));*/
-
-
-               //Quick way to pull out the 4 values
-               __m128 result = member128(mx, my);
-               _mm_store_ps(temp, result);
-               int i;
-#ifdef SCREEN
-               for(i = 0; i < 4; i++){
-                  if(temp[i] == MAX_ITS){
-                     screen->putpixel(hx+i, hy, 0, 0, 0);
-                  }else{
-                     int x = (((int)temp[i])%40) - 1;
-                     int b = x*3;
-                     screen->putpixel(hx+i, hy, pal[b], pal[b+1], pal[b+2]);
-                  }  
-               }
-#endif
-
-/*
-				   if (!member(cx, cy, iterations)) {
-					   // Point is not a member, colour based on number of iterations before escape 
-					   int i=(iterations%40) - 1; //adjust number of iterations for pallet size
-					   int b = i*3;
-   //             int b = (int)map_range(iterations, 0, (MAX_ITS-1) , 0, ((PAL_SIZE) -1)); //Map the number of iterations 
-              // b = b * 3;                                                               //to a position in pal[]
-               
-                  #ifdef SCREEN 
-					      screen->putpixel(hx, hy, pal[b], pal[b+1], pal[b+2]);
-                  #endif
-				   } else {
-					   // Point is a member, colour it black 
-                     #ifdef SCREEN
-					      screen->putpixel(hx, hy, 0, 0, 0);
-                     #endif
-				   }*/
-               //what++;
-			   }
+            //Quick way to pull out the 4 values
+            __m128 result = member128(mx, my);
+            _mm_store_ps(temp, result);
+            int i;
+            #ifdef SCREEN
+            for(i = 0; i < 4; i++){
+               if(temp[i] == MAX_ITS){
+                  screen->putpixel(hx+i, hy, 0, 0, 0);
+               }else{
+                  int x = (((int)temp[i])%40) - 1;
+                  int b = x*3;
+                  screen->putpixel(hx+i, hy, pal[b], pal[b+1], pal[b+2]);
+               }  
+             }
+            #endif
          }
+#else
+         for(hx=0; hx<HXRES; hx++){
+            float cx = ((((float)hx/(float)HXRES) -0.5 + (PX/(4.0f/m)))*(4.0f/m));
+
+		      if (!member(cx, cy, iterations)) {
+		      // Point is not a member, colour based on number of iterations before escape 
+		         int i=(iterations%40) - 1; //adjust number of iterations for pallet size
+		         int b = i*3;
+   //           int b = (int)map_range(iterations, 0, (MAX_ITS-1) , 0, 254); //Map the number of iterations 
+               //b = b * 3;                                                               //to a position in pal[]
+		      #ifdef SCREEN 
+			      screen->putpixel(hx, hy, pal[b], pal[b+1], pal[b+2]);
+            #endif
+		      } else {
+		      // Point is a member, colour it black 
+            #ifdef SCREEN
+			      screen->putpixel(hx, hy, 0, 0, 0);
+        	   #endif
+		      }
+      
+	      }
+#endif
+     	}
 		}
       
 		/* Show the rendered image on the screen */
