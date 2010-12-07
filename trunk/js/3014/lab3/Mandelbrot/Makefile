@@ -1,6 +1,6 @@
 CC=g++
 CFLAGS=-c -Wall -ansi -fopenmp
-LDFLAGS= -O3 -msse -fopenmp
+LDFLAGS= -O3 -msse -fopenmp -DSSE   
 SOURCES=main.cpp Screen.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=mandelbrot
@@ -19,7 +19,7 @@ screen:
 	$(CC) $(LDFLAGS) $(SOURCES) -DSCREEN $(LIBS) -o mandelbrot
 
 debug:
-	$(CC) -disable-openmp -msse -DSCREEN -g $(SOURCES) $(LIBS) -o mandelbrot
+	$(CC) -disable-openmp -msse -DSCREEN  $(SOURCES) $(LIBS) -o mandelbrot
 
 noomp:
 	$(CC) -O3 -msse $(SOURCES) -DSCREEN $(LIBS) -o mandelbrot
