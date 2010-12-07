@@ -42,8 +42,8 @@
 const int 	MAX_ITS = 1000;			//Max Iterations before we assume the point will not escape
 const int 	HXRES = 700; 			// horizontal resolution	
 const int 	HYRES = 700;			// vertical resolution
-const int 	MAX_DEPTH = 15;		// max depth of zoom    SET BACK TO 480
-const float ZOOM_FACTOR = 2.02;		// zoom between each frame
+const int 	MAX_DEPTH = 5;		// max depth of zoom    SET BACK TO 480
+const float ZOOM_FACTOR = 1.02;		// zoom between each frame
 
 /* Change these to zoom into different parts of the image */
 const float PX = -0.702295281061;	// Centre point we'll zoom on - Real component
@@ -100,7 +100,62 @@ unsigned char pal[]={
 	4,2,4};
 const int PAL_SIZE = 40;  //Number of entries in the palette 
 
-//Modify the pallet to produce boring but clear results
+//Print out an __m128, for debugging
+/*
+void out_m128(__m128 x){
+   float * temp = (float *)malloc(sizeof(float) * 4);
+   _mm_storeu_ps(temp, x);
+   int i;
+   for(i = 0; i < 4; i++){
+      std::cout << temp[i] << " ";
+   }
+   std::cout << std::endl;
+}*/
+
+#ifdef SSE
+//Determine membership of the set.
+//Returns an __m128 containing the number of iterations for each corisponding input point.
+__m128 member128(__m128 cx, __m128 cy)
+{
+   __m128 x = _mm_set1_ps(0.0);
+   __m128 y = _mm_set1_ps(0.0);
+   __m128 iterations = _mm_set1_ps(0.0);
+   __m128 iterations_temp;// = _mm_set1_ps(0.0);
+   __m128 four = _mm_set1_ps(4.0);
+   __m128 two = _mm_set1_ps(2.0);
+   __m128 mask = _mm_set1_ps(1.0);
+   __m128 temp;
+   int iteration_cheat = 0;
+   //This is gonna look nasty, maybe try operator overloading later
+   //While at least one value is < 4
+   //Quicker to have an int keeping track of loop iterations.
+   while( (_mm_movemask_ps(iterations_temp = 
+            (_mm_cmplt_ps( _mm_add_ps( _mm_mul_ps(x,x),_mm_mul_ps(y,y)), four )))) != 0
+           && iteration_cheat < MAX_ITS){
+
+      //The cmp returns 0 if false and NaN if true (not -1). Don't know what NaN is (All bits set to one?)
+      //so AND it with 1 and add that to the count.
+      iterations = _mm_add_ps(iterations, _mm_and_ps(iterations_temp, mask)); //Introducing extra instruction
+
+      temp = _mm_add_ps( _mm_sub_ps( _mm_mul_ps(x,x), _mm_mul_ps(y,y)), cx);
+      y = _mm_add_ps( _mm_mul_ps( _mm_mul_ps(x,y), two), cy);
+      x = temp;
+
+      /****IMPORTANT NOTE TO SELF*******
+        Don't EVER call malloc in a loop like this, especially with threads!
+      *************/  
+      //float * tempF = (float *) malloc(sizeof(float)*4);
+
+      iteration_cheat++;
+      
+   }
+
+        
+   
+   return iterations;
+}
+#else
+
 /* 
  * Return true if the point cx,cy is a member of set M.
  * iterations is set to the number of iterations until escape.
@@ -120,59 +175,7 @@ bool member(float cx, float cy, int& iterations)
 	return (iterations == MAX_ITS);
 
 }
-
-void out_m128(__m128 x){
-   float * temp = (float *)malloc(sizeof(float) * 4);
-   _mm_storeu_ps(temp, x);
-   int i;
-   for(i = 0; i < 4; i++){
-      std::cout << temp[i] << " ";
-   }
-   std::cout << std::endl;
-}
-
-
-//Determine membership of the set.
-/*IMPORTANT, because SSE has different precision characteristics to plain ol' floats (supposidly)
-  the number of iterations returned may be out by 1 */
-__m128 member128(__m128 cx, __m128 cy)
-{
-   __m128 x = _mm_set1_ps(0.0);
-   __m128 y = _mm_set1_ps(0.0); //y = x?
-   __m128 iterations = _mm_set1_ps(0.0);
-   __m128 iterations_temp = _mm_set1_ps(0.0);
-   __m128 four = _mm_set1_ps(4.0);
-   __m128 two = _mm_set1_ps(2.0);
-   __m128 mask = _mm_set1_ps(1.0);
-   __m128 temp;
-   int iteration_cheat = 0;
-   //This is gonna look nasty, maybe try operator overloading later
-   //While at least one value is < 4
-   //Quicker to have an int keeping track of loop iterations or keep using SSE???
-   while( (_mm_movemask_ps(iterations_temp = 
-            (_mm_cmplt_ps( _mm_add_ps( _mm_mul_ps(x,x),_mm_mul_ps(y,y)), four )))) != 0
-           && iteration_cheat < MAX_ITS){
-      iterations = _mm_add_ps(iterations, _mm_and_ps(iterations_temp, mask)); //Introducing extra instruction
-      //The cmp returns 0 if false and NaN if true (not -1). Don't know what NaN is so AND it with
-      //1 and add that to the count.
-
-      temp = _mm_add_ps( _mm_sub_ps( _mm_mul_ps(x,x), _mm_mul_ps(y,y)), cx);
-      y = _mm_add_ps( _mm_mul_ps( _mm_mul_ps(x,y), two), cy);
-      x = temp;
-
-      /****IMPORTANT NOTE TO SELF*******
-        Don't EVER call malloc in a loop like this, especially with threads!
-      *************/  
-      //float * tempF = (float *) malloc(sizeof(float)*4);
-
-      iteration_cheat++;
-      
-   }
-
-        
-   
-   return iterations;
-}
+#endif
 
 /*void test(__m128 a, __m128 b){
    __m128 temp;
@@ -188,64 +191,78 @@ float map_range(float value, float in_start, float in_stop, float out_start, flo
    return (out_start + (out_stop - out_start) * ((value - in_start)/(in_stop - in_start)));
 }
 
+//Change the colour pal. Everything is red in this case.
+void modpal(){
+  int i;
+  int colour = 0;
+  for(i =0; i <40*3; i++){
+    pal[i++] = colour;
+    pal[i++] = 0;
+    pal[i] = 0;
+    colour += 6;
+  }
+}
+
 int main()
 {
-	float m=1.0; /* initial  magnification Shared		*/
-
+	float m=1.0; // initial  magnification Shared by threads
+  modpal();
 	/* Create a screen to render to */
-#ifdef SCREEN
-	Screen *screen; //Shared
-	screen = new Screen(HXRES, HYRES); //Shared
-   sleep(2);
+#ifdef SCREEN //Disable the screen, for debugging / testing
+	Screen *screen; //Shared by the threads
+	screen = new Screen(HXRES, HYRES);
+  sleep(2);
 #endif
    int depth=0;
-   int hx,hy;
-   struct timeval start_time, stop_time; //unique
+   int hx,hy; //Unique
+   struct timeval start_time, stop_time; 
    
-   long long compute_time; //unique
-
+   long long compute_time; 
+   long long total_time = 0;
    while(depth < MAX_DEPTH){
-   
+      float zoom = (4.0f/m); //Moving this outside of the loops gave a bigger speedup than all the work done with SSE :)
+
       gettimeofday(&start_time,NULL); /*Computes the time of the longest 
                                         thread including thread startup time*/
-      #pragma omp parallel private(hx, hy)//, start_time, stop_time, compute_time)
+      //Cannot think of a way to move thread declaration outside of the main while loop.
+     #pragma omp parallel private(hx, hy)//hx, hy could be declared below, not sure if it matters really
       {
-
             float * temp = (float *)malloc(sizeof(float) * 4);
+            int i;
 
+            
             #pragma omp for schedule(dynamic) //This schedule shaved another ~2 microseconds (From 3 down to 1) off in testing. Any small chunk size, ( 1 < X < ~40) 
 		for (hy=0; hy<HYRES; hy++) {      //seems to have roughly the same result.
-         float cy = (((float)hy/(float)HYRES) -0.5 + (PY/(4.0f/m)))*(4.0f/m);
+         float cy = (((float)hy/(float)HYRES) -0.5 + (PY/(zoom)))*(zoom);
 
          __m128 my = _mm_set1_ps(cy);
-         float zoom = (4.0f/m);
          /*__m128 my = _mm_set1_ps(hy);
          my = _mm_div_ps(my, _mm_set1_ps(HYRES));
          my = _mm_add_ps(my, _mm_set1_ps(-0.5 + (PY/zoom)));
          my = _mm_mul_ps(my, _mm_set1_ps(zoom));*/
          int iterations;
 
-#ifdef SSE
+#ifdef SSE  //Disable SSE for debugging / testing
          for(hx=0; hx<HXRES;hx+=4){ 
          
-                        __m128 mx = _mm_setr_ps((float)hx, (float)(hx + 1), (float)(hx + 2), (float)(hx + 3));
+            __m128 mx = _mm_setr_ps((float)hx, (float)(hx + 1), (float)(hx + 2), (float)(hx + 3));
             mx = _mm_div_ps(mx, _mm_set1_ps(HXRES));
             mx = _mm_add_ps(mx, _mm_set1_ps(-0.5 + (PX/zoom)));
             mx = _mm_mul_ps(mx, _mm_set1_ps(zoom));
 
 
-            //Quick way to pull out the 4 values
-            __m128 result = member128(mx, my);
-            _mm_store_ps(temp, result);
-            int i;
-            #ifdef SCREEN
+            //Quick way to pull out the 4 values 
+            _mm_storeu_ps(temp, member128(mx,my));
+            #ifdef SCREEN 
+            //Pull the mm128 apart and display each points iterations
             for(i = 0; i < 4; i++){
                if(temp[i] == MAX_ITS){
                   screen->putpixel(hx+i, hy, 0, 0, 0);
                }else{
                   int x = (((int)temp[i])%40) - 1;
-                  int b = x*3;
-                  screen->putpixel(hx+i, hy, pal[b], pal[b+1], pal[b+2]);
+                  x = x*3;
+                  screen->putpixel(hx+i, hy, pal[x], pal[x+1], pal[x+2]);
+  
                }  
              }
             #endif
@@ -258,16 +275,16 @@ int main()
 		      // Point is not a member, colour based on number of iterations before escape 
 		         int i=(iterations%40) - 1; //adjust number of iterations for pallet size
 		         int b = i*3;
-   //           int b = (int)map_range(iterations, 0, (MAX_ITS-1) , 0, 254); //Map the number of iterations 
-               //b = b * 3;                                                               //to a position in pal[]
+           //int b = (int)map_range(iterations, 0, (MAX_ITS-1) , 0, 254); //Map the number of iterations 
+           //b = b * 3;                                                   //to a position in pal[]
 		      #ifdef SCREEN 
 			      screen->putpixel(hx, hy, pal[b], pal[b+1], pal[b+2]);
             #endif
 		      } else {
 		      // Point is a member, colour it black 
             #ifdef SCREEN
-			      screen->putpixel(hx, hy, 0, 0, 0);
-        	   #endif
+			        screen->putpixel(hx, hy, 0, 0, 0);
+        	  #endif
 		      }
       
 	      }
@@ -284,14 +301,16 @@ int main()
       compute_time = (stop_time.tv_sec - start_time.tv_sec) * 1000000L + 
          (stop_time.tv_usec - start_time.tv_usec);
 		std::cout << "Render done " << depth++ << " Zoom: " << m << " in " << compute_time << " microseconds" << std::endl;
-		/* Zoom in */
+      total_time += compute_time;
+      //Save the renders to a windows bitmap file.
       //char filename[100];
       //sprintf(filename, "Render%din%lld.bmp\0",m,compute_time);
-     //screen->Save_Screen(filename);
-		m *= ZOOM_FACTOR;
+      //screen->Save_Screen(filename);
+      //Zoom in
+		  m *= ZOOM_FACTOR;
 	}
 	
-	//sleep(10);
-	std::cout << "Clean Exit" << std::endl;
+	sleep(1);
+	std::cout << "Clean Exit in: " << total_time << std::endl;
 
 }
