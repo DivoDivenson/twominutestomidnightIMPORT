@@ -9,10 +9,17 @@ DROP TABLE driver;
 DROP TABLE cargo;
 DROP TABLE truck;
 
+DROP sequence address_increment;
+DROP trigger address_incr_trigger;
 
+drop sequence haz_increment;
+drop trigger haz_inc_trigger;
+
+drop sequence driver_increment;
+drop trigger driver_incr_trigger;
 
 CREATE TABLE address(
-	ID INT INCREMENT,
+	ID INT,
 	Street varchar(100) NULL,
   	City varchar(30) NULL,
   	County varchar(20) NULL,
@@ -22,23 +29,42 @@ CREATE TABLE address(
 )
 ;
 
+create sequence address_increment start with 1;
+
+create trigger address_inrc_trigger
+before insert on address
+for each row
+begin
+select address_increment.nextval into :new.ID from dual;
+end;
+/
 
 CREATE TABLE haz(
 	ID INT,
-	Name varchar (30) NULL,
-	UN_Number varchar (6) NULL,
+	Name varchar (50) NULL,
+	UN_Number INT NULL,
 	Packing_Group varchar(3) NULL,
-	Primary_Class varchar (5) NULL,
-	Secondary_Class varchar (5) NULL,
+	Primary_Class number NULL,
+	Secondary_Class number NULL,
 	Tunnel_code varchar (7) NULL,
 	PRIMARY KEY (ID)
 )
 ;
 
+create sequence haz_increment start with 1;
+
+create trigger haz_inc_trigger
+before insert on haz
+for each row
+begin
+select haz_increment.nextval into :new.ID from dual;
+end;
+/
+
 CREATE TABLE driver(
 	ID INT,
 	FName varchar (15) ,
-	SNname varchar (15) ,
+	SName varchar (15) ,
 	Residence INT ,
 	ADR char(1) ,
 	SafePass char(1) ,
@@ -47,6 +73,16 @@ CREATE TABLE driver(
 	FOREIGN KEY(Residence) References address
 )
 ;
+
+create sequence driver_increment start with 1;
+
+create trigger driver_incr_trigger
+before insert on driver
+for each row
+begin
+select driver_increment.nextval into :new.ID from dual;
+end;
+/
 
 CREATE TABLE cargo(
 	Seal varchar(10),
@@ -96,6 +132,37 @@ CREATE TABLE docket(
 insert into truck (Reg, Crane, ADR, Road, Last_test) values('00D3452', 'N', 'N', 'Y', '21-feb-09');
 insert into truck (Reg, Crane, ADR, Road, Last_test) values('05D312', 'N', 'Y', 'Y', '21-feb-09');
 insert into truck (Reg, Crane, ADR, Road, Last_test) values('07K4738', 'Y', 'N', 'Y', '21-feb-09');
-insert into truck (Reg, Crane, ADR, Road, Last_test) values('03D34590', 'Y', 'Y', 'Y', '21-feb-09');
+insert into truck (Reg, Crane, ADR, Road, Last_test) values('03D3459', 'Y', 'Y', 'Y', '21-feb-09');
+insert into truck (Reg, Crane, ADR, Road, Last_test) values('03D534', 'Y', 'Y', 'N', '11-nov-08');
 
-insert into address (Street, City, County, Site, weight) values('23 Cove Drive', 'Bayside', 'Dublin', 'N', 0);
+
+insert into address (Street, City, County, Site, weight) values('23 Cove Drive', 'Howth', 'Dublin 13', 'N', 0);
+insert into address (Street, City, County, Site, weight) values('56 Balkhill Park', 'Howth', 'Dublin 13', 'N', 0);
+insert into address (Street, City, County, Site, weight) values('154 Bettyglen', 'Raheny', 'Dublin 5', 'N', 0);
+insert into address (Street, City, County, Site, weight) values('67 Oak Avenue', 'Bray', 'Dublin, South', 'N', 0);
+
+insert into address (Street, City, County, Site, weight) values('Maxol', 'Tolka Quay', 'Dublin 1', 'N', 0);
+insert into address (Street, City, County, Site, weight) values('Indaver Ltd', 'Tolka Quay', 'Dublin 1', 'N', 0);
+insert into address (Street, City, County, Site, weight) values('Unit 23 Rosemount Business Park', 'Tyrellstown', 'Dublin 11', 'Y', 0);
+insert into address (Street, City, County, Site, weight) values('Heatons', 'East Wall Road', 'Dublin 1', 'N', 0);
+insert into address (Street, City, County, Site, weight) values('P and O', 'Littlerath', 'Dublin 1', 'N', 0);
+
+insert into haz (Name, UN_Number, Packing_Group, Primary_class, Tunnel_code) values('Petrol', 1203, 2, 3, 'D/E');
+insert into haz (Name, UN_Number, Packing_Group, Primary_class, Secondary_class, Tunnel_code) values('Sodium Methylate', 1431, 2, 4.2, 8, 'D/E');
+insert into haz (Name, UN_Number, Packing_Group, Primary_class, Tunnel_code) values('Triisopropyl Borate', 2616, 3, 3, 'D/E');
+insert into haz (Name, UN_Number, Packing_Group, Primary_class, Tunnel_code) values('Organophosphorus Pesticide, Solid, Toxic', 2783, 3, 6.1, 'E');
+insert into haz (Name, UN_Number, Packing_Group, Primary_class, Tunnel_code) values('Toxic Liquid, Organic, N.O.S', 2810, 2, 6.1, 'D/E');
+
+insert into driver(FName, SName, Residence, ADR, SafePass) values('Eoin', 'McCarthy', 1, 'Y', 'Y');
+insert into driver(FName, SName, Residence, ADR, SafePass) values('Paul', 'Murphy', 1, 'Y', 'N');
+insert into driver(FName, SName, Residence, ADR, SafePass) values('Richard', 'Delaney', 2, 'N', 'Y');
+insert into driver(FName, SName, Residence, ADR, SafePass) values('Conor', 'McEvoy', 3, 'N', 'N');
+insert into driver(FName, SName, Residence, ADR, SafePass) values('Steven', 'Diviney', 4, 'Y', 'Y');
+
+insert into cargo(Seal, Description, Return_Empty, Weight, Size_, Haz, Crane) values('u45bfg', '30 Drums of waste from Repo.', 'N', 15000, '45ft', 5, 'Y');
+insert into cargo(Seal, Description, Return_Empty, Weight, Size_, Crane) values('35hgjk', 'Bags of cement', 'Y', 20000, '45ft', 'Y');
+insert into cargo(Seal, Description, Return_Empty, Weight, Size_, Crane) values('hea454', 'Timber', 'N', 5000, '45ft Tautliner', 'N');
+insert into cargo(Seal, Description, Return_Empty, Weight, Size_, Haz, Crane) values('4jkde3', 'Borate for China', 'N', 2000, '20ft', 3, 'N');
+insert into cargo(Seal, Description, Return_Empty, Weight, Size_, Haz, Crane) values('435jn4', '30 Pallets', 'Y', 15000, '45ft', 2, 'Y');
+
+
