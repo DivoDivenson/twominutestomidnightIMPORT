@@ -18,6 +18,9 @@ drop trigger haz_inc_trigger;
 drop sequence driver_increment;
 drop trigger driver_incr_trigger;
 
+drop sequence docket_increment;
+drop trigger docket_incr_inrement;
+
 CREATE TABLE address(
 	ID INT,
 	Street varchar(100) NULL,
@@ -110,7 +113,7 @@ CREATE TABLE truck(
 
 CREATE TABLE docket(
 	Docket_Number INT,
-	Equipment varchar (30) NULL,
+	Equipment_No varchar (30) NULL,
 	Customer varchar(30) NULL,
 	Seal varchar (20) NULL,
 	Deliver_to INT NULL,
@@ -129,11 +132,23 @@ CREATE TABLE docket(
 	FOREIGN KEY(Seal) References cargo
 ) 
 ;
+
+create sequence docket_increment start with 1;
+
+create trigger docker_incr_trigger
+before insert on docket
+for each row
+begin
+select docket_increment.nextval into :new.Docket_Number from dual;
+end;
+/
+
+
 insert into truck (Reg, Crane, ADR, Road, Last_test) values('00D3452', 'N', 'N', 'Y', '21-feb-09');
 insert into truck (Reg, Crane, ADR, Road, Last_test) values('05D312', 'N', 'Y', 'Y', '21-feb-09');
-insert into truck (Reg, Crane, ADR, Road, Last_test) values('07K4738', 'Y', 'N', 'Y', '21-feb-09');
-insert into truck (Reg, Crane, ADR, Road, Last_test) values('03D3459', 'Y', 'Y', 'Y', '21-feb-09');
-insert into truck (Reg, Crane, ADR, Road, Last_test) values('03D534', 'Y', 'Y', 'N', '11-nov-08');
+insert into truck (Reg, Crane, ADR, Road, Last_test) values('07KE4738', 'Y', 'N', 'Y', '21-feb-09');
+insert into truck (Reg, Crane, ADR, Road, Last_test) values('03D3119', 'Y', 'Y', 'Y', '21-feb-09');
+insert into truck (Reg, Crane, ADR, Road, Last_test) values('03D5341', 'Y', 'Y', 'N', '11-nov-08');
 
 
 insert into address (Street, City, County, Site, weight) values('23 Cove Drive', 'Howth', 'Dublin 13', 'N', 0);
@@ -146,6 +161,7 @@ insert into address (Street, City, County, Site, weight) values('Indaver Ltd', '
 insert into address (Street, City, County, Site, weight) values('Unit 23 Rosemount Business Park', 'Tyrellstown', 'Dublin 11', 'Y', 0);
 insert into address (Street, City, County, Site, weight) values('Heatons', 'East Wall Road', 'Dublin 1', 'N', 0);
 insert into address (Street, City, County, Site, weight) values('P and O', 'Littlerath', 'Dublin 1', 'N', 0);
+insert into address (Street, City, County, Site, weight) values('Trim Transport Ltd', 'Tolka Quay', 'Dublin 1', 'N', 0);
 
 insert into haz (Name, UN_Number, Packing_Group, Primary_class, Tunnel_code) values('Petrol', 1203, 2, 3, 'D/E');
 insert into haz (Name, UN_Number, Packing_Group, Primary_class, Secondary_class, Tunnel_code) values('Sodium Methylate', 1431, 2, 4.2, 8, 'D/E');
@@ -165,4 +181,8 @@ insert into cargo(Seal, Description, Return_Empty, Weight, Size_, Crane) values(
 insert into cargo(Seal, Description, Return_Empty, Weight, Size_, Haz, Crane) values('4jkde3', 'Borate for China', 'N', 2000, '20ft', 3, 'N');
 insert into cargo(Seal, Description, Return_Empty, Weight, Size_, Haz, Crane) values('435jn4', '30 Pallets', 'Y', 15000, '45ft', 2, 'Y');
 
-
+insert into docket(Equipment_No, Customer, Date_, Seal, Deliver_to, Collect_from, Driver_, Truck) values('TRIM1', 'Heatons', '13-feb-10', 'hea454', 8, 10, 1, '00D3452'); 
+insert into docket(Equipment_No, Customer, Date_, Seal, Deliver_to, Collect_from, Driver_, Truck) values('3562', 'Irish Concrete', '14-may-10', '35hgjk', 7, 9, 3, '07KE4738');
+insert into docket(Equipment_No, Customer, Date_, Seal, Deliver_to, Collect_from, Driver_, Truck) values('2231', 'Indaver', '26-jul-10', 'u45bfg', 6, 10, 5, '03D3119'); 
+insert into docket(Equipment_No, Customer, Date_, Seal, Deliver_to, Collect_from, Driver_, Truck) values('3321', 'Sas Cem.', '27-oct-10', '435jn4', 10, 5, 1, '03D3119'); 
+insert into docket(Equipment_No, Customer, Date_, Seal, Deliver_to, Collect_from, Driver_, Truck) values('1224', 'P and O', '18-sep-10', '4jkde3', 9, 10, 2, '05D312'); 
