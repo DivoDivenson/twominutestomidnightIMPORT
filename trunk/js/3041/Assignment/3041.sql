@@ -184,3 +184,19 @@ insert into docket(Equipment_No, Customer, Date_, Seal, Deliver_to, Collect_from
 insert into docket(Equipment_No, Customer, Date_, Seal, Deliver_to, Collect_from, Driver_, Truck) values('2231', 'Indaver', '26-jul-10', 'u45bfg', 6, 10, 5, '03D3119'); 
 insert into docket(Equipment_No, Customer, Date_, Seal, Deliver_to, Collect_from, Driver_, Truck) values('3321', 'Sas Cem.', '27-oct-10', '435jn4', 10, 5, 1, '03D3119'); 
 insert into docket(Equipment_No, Customer, Date_, Seal, Deliver_to, Collect_from, Driver_, Truck) values('1224', 'P and O', '18-sep-10', '4jkde3', 9, 10, 2, '05D312'); 
+
+column Site format a4
+column Return_Empty format a6
+column Crane format a5
+
+
+select doc.Docket_Number, doc.Date_, a.Street, a.City, a.County, a.Site, doc.Customer, a2.Street, a2.City, a2.County, a2.Site , doc.Equipment_No, doc.Seal,
+       c.Description, c.Return_Empty, c.Weight, c.Size_, c.Crane,
+       from docket doc, address a, address a2, cargo c, haz h
+       where doc.Deliver_to = a.ID AND doc.Collect_from = a2.ID AND doc.Seal = c.Seal
+       order by doc.Docket_Number;
+
+
+
+
+
