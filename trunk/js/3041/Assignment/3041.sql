@@ -118,7 +118,6 @@ CREATE TABLE docket(
 	Seal varchar (20) NULL,
 	Deliver_to INT NULL,
 	Collect_from INT NULL,
-	Haz INT NULL,
 	Date_ DATE NOT NULL,
    	Driver_ INT NULL,
    	Truck varchar(10) NULL,
@@ -126,7 +125,6 @@ CREATE TABLE docket(
 	Constraint fk_column
 	FOREIGN KEY(Deliver_to) References address,
 	FOREIGN KEY(Collect_from) References address,
-	FOREIGN KEY(Haz) References haz,
 	FOREIGN KEY(Driver_) References driver,
 	FOREIGN KEY(Truck) References truck,
 	FOREIGN KEY(Seal) References cargo
