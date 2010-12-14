@@ -10,16 +10,12 @@ DROP TABLE cargo;
 DROP TABLE truck;
 
 DROP sequence address_increment;
-DROP trigger address_incr_trigger;
 
 drop sequence haz_increment;
-drop trigger haz_inc_trigger;
 
 drop sequence driver_increment;
-drop trigger driver_incr_trigger;
 
 drop sequence docket_increment;
-drop trigger docket_incr_inrement;
 
 CREATE TABLE address(
 	ID INT,
@@ -34,13 +30,32 @@ CREATE TABLE address(
 
 create sequence address_increment start with 1;
 
+ 
 create trigger address_inrc_trigger
 before insert on address
 for each row
 begin
 select address_increment.nextval into :new.ID from dual;
 end;
+/ 
+
+/*create or replace  trigger address_weight
+before insert on address
+declare
+  tempID INT;
+begin
+select count(ID) into tempID from address where Street = :new.Street;
+if tempID = 0 then
+  select address_increment.nextval into :new.ID from dual;
+  insert into address(ID, Street, City, County, Site) values(:new.ID, :new.Street, :new.City, :new.County, :new.Site);
+else
+  select ID into tempID from address where Street = :new.Street;
+  update address SET weight = weight+1 where ID = tempID;
+end if;
+end;
 /
+*/
+
 
 CREATE TABLE haz(
 	ID INT,
@@ -185,40 +200,35 @@ insert into docket(Equipment_No, Customer, Date_, Seal, Deliver_to, Collect_from
 insert into docket(Equipment_No, Customer, Date_, Seal, Deliver_to, Collect_from, Driver_, Truck) values('3321', 'Sas Cem.', '27-oct-10', '435jn4', 10, 5, 1, '03D3119'); 
 insert into docket(Equipment_No, Customer, Date_, Seal, Deliver_to, Collect_from, Driver_, Truck) values('1224', 'P and O', '18-sep-10', '4jkde3', 9, 10, 2, '05D312'); 
 
-column Site format a4
-column Return_Empty format a6
-column Crane format a5
-column Street format a10
-column Description format a15
-column Name format a10
 
 drop view docketNoHaz;
 drop view docketHaz;
 drop view docketNoHazTest;
 drop view docketHazTest;
+drop view Docket_Summary;
+
+create view Docket_Summary(Docket_Number, Date_, Customer, Del_Street, Col_Street, Equipment, Seal, Size_, DriverS, Truck) AS
+       select doc.Docket_Number, doc.date_, doc.Customer, a.Street, a2.Street, doc.Equipment_No, doc.Seal, c.Size_, driver.SName, doc.Truck
+       from docket doc, address a, address a2, cargo c, driver
+       where doc.Deliver_to = a.ID AND doc.Collect_from = a2.ID AND doc.Seal = c.Seal AND doc.Driver_ = driver.ID
+       order by doc.Docket_Number;
 
 create view docketNoHaz (Docket_Number, Date_, Del_Street, Del_City, Del_County, Del_Site, Customer, Col_Street, Col_City, Col_Count, Col_Site, Equipment,
-       Seal, Description, Return_Empty, Weight, Size_, Crane) AS
+       Seal, Description, Return_Empty, Weight, Size_, Crane, DriverS, DriverF, Truck) AS
 select doc.Docket_Number, doc.Date_, a.Street, a.City, a.County, a.Site, doc.Customer, a2.Street, a2.City, a2.County, a2.Site , doc.Equipment_No, doc.Seal,
-       c.Description, c.Return_Empty, c.Weight, c.Size_, c.Crane
-       from docket doc, address a, address a2, cargo c
-       where doc.Deliver_to = a.ID AND doc.Collect_from = a2.ID AND doc.Seal = c.Seal AND c.Haz IS NULL
+       c.Description, c.Return_Empty, c.Weight, c.Size_, c.Crane, dr.SName, dr.FName, truck.Reg
+       from docket doc, address a, address a2, cargo c, driver dr, truck
+       where doc.Deliver_to = a.ID AND doc.Collect_from = a2.ID AND doc.Seal = c.Seal AND c.Haz IS NULL AND doc.Driver_ = dr.ID AND doc.Truck = truck.Reg
        order by doc.Docket_Number;
 
 create view docketHaz (Docket_Number, Date_, Del_Street, Del_City, Del_County, Del_Site, Customer, Col_Street, Col_City, Col_Count, Col_Site, Equipment,
-       Seal, Description, Return_Empty, Weight, Size_, Crane, Haz_Name, UN_No, PG, Primary, Secondary, Tunnel) AS
+       Seal, Description, Return_Empty, Weight, Size_, Crane, DriverS, DriverF, Truck, Haz_Name, UN_No, PG, Primary, Secondary, Tunnel) AS
 select doc.Docket_Number, doc.Date_, a.Street, a.City, a.County, a.Site, doc.Customer, a2.Street, a2.City, a2.County, a2.Site , doc.Equipment_No, doc.Seal,
-       c.Description, c.Return_Empty, c.Weight, c.Size_, c.Crane, h.Name, h.UN_Number, h.Packing_Group, h.Primary_Class, h.Secondary_Class, h.Tunnel_Code
-       from docket doc, address a, address a2, cargo c, haz h
-       where doc.Deliver_to = a.ID AND doc.Collect_from = a2.ID AND doc.Seal = c.Seal AND c.Haz = h.ID
+       c.Description, c.Return_Empty, c.Weight, c.Size_, c.Crane,  dr.SName, dr.FName, truck.Reg, h.Name, h.UN_Number, h.Packing_Group, 
+       h.Primary_Class, h.Secondary_Class, h.Tunnel_Code
+       from docket doc, address a, address a2, cargo c, haz h, driver dr, truck
+       where doc.Deliver_to = a.ID AND doc.Collect_from = a2.ID AND doc.Seal = c.Seal AND c.Haz = h.ID AND doc.Driver_ = dr.ID AND doc.Truck = truck.Reg
        order by doc.Docket_Number;
-
-
-select doc.Docket_Number,  a.Street, c.Description
-       from docket doc, address a,  cargo c
-       where doc.Deliver_to = a.ID AND  doc.Seal = c.Seal
-       order by doc.Docket_Number;
-
 
 create view docketNoHazTest (Docket_Number, Del_Street, Description) AS
 select doc.Docket_Number, a.Street,  c.Description
@@ -232,9 +242,3 @@ select doc.Docket_Number, a.Street, c.Description, h.Name
        where doc.Deliver_to = a.ID AND  doc.Seal = c.Seal AND c.Haz = h.ID
        order by doc.Docket_Number;
 
-column Del_Street format a10;
-column Description format a10;
-column Haz_Name format a10;
-column Docket_Number format a10;
-
-(select * from docketNoHazTest) UNION (select * from docketHazTest);
