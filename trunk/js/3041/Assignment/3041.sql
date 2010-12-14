@@ -225,4 +225,11 @@ select doc.Docket_Number, doc.Date_, a.Street, a.City, a.County, a.Site, doc.Cus
        where doc.Deliver_to = a.ID AND doc.Collect_from = a2.ID AND doc.Seal = c.Seal AND c.Haz = h.ID AND doc.Driver_ = dr.ID AND doc.Truck = truck.Reg
        order by doc.Docket_Number;
 
+-- Update the trucks after passing an NCT
+update truck set LAST_TEST = '13-NOV-10' where LAST_TEST = '21-feb-09';
 
+-- Paul has moved out of Eoins house to live in Richards house
+update driver set Residence = 2 where SName = 'Murphy';
+
+-- Paul was ment to deliver a load but Eoin had to instead
+update docket set Driver_ = 1 where Driver_ = 2 AND Date_ = '18-sep-10';
