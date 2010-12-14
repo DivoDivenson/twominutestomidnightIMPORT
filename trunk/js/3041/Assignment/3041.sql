@@ -188,15 +188,53 @@ insert into docket(Equipment_No, Customer, Date_, Seal, Deliver_to, Collect_from
 column Site format a4
 column Return_Empty format a6
 column Crane format a5
+column Street format a10
+column Description format a15
+column Name format a10
 
+drop view docketNoHaz;
+drop view docketHaz;
+drop view docketNoHazTest;
+drop view docketHazTest;
 
+create view docketNoHaz (Docket_Number, Date_, Del_Street, Del_City, Del_County, Del_Site, Customer, Col_Street, Col_City, Col_Count, Col_Site, Equipment,
+       Seal, Description, Return_Empty, Weight, Size_, Crane) AS
 select doc.Docket_Number, doc.Date_, a.Street, a.City, a.County, a.Site, doc.Customer, a2.Street, a2.City, a2.County, a2.Site , doc.Equipment_No, doc.Seal,
-       c.Description, c.Return_Empty, c.Weight, c.Size_, c.Crane,
+       c.Description, c.Return_Empty, c.Weight, c.Size_, c.Crane
+       from docket doc, address a, address a2, cargo c
+       where doc.Deliver_to = a.ID AND doc.Collect_from = a2.ID AND doc.Seal = c.Seal AND c.Haz IS NULL
+       order by doc.Docket_Number;
+
+create view docketHaz (Docket_Number, Date_, Del_Street, Del_City, Del_County, Del_Site, Customer, Col_Street, Col_City, Col_Count, Col_Site, Equipment,
+       Seal, Description, Return_Empty, Weight, Size_, Crane, Haz_Name, UN_No, PG, Primary, Secondary, Tunnel) AS
+select doc.Docket_Number, doc.Date_, a.Street, a.City, a.County, a.Site, doc.Customer, a2.Street, a2.City, a2.County, a2.Site , doc.Equipment_No, doc.Seal,
+       c.Description, c.Return_Empty, c.Weight, c.Size_, c.Crane, h.Name, h.UN_Number, h.Packing_Group, h.Primary_Class, h.Secondary_Class, h.Tunnel_Code
        from docket doc, address a, address a2, cargo c, haz h
-       where doc.Deliver_to = a.ID AND doc.Collect_from = a2.ID AND doc.Seal = c.Seal
+       where doc.Deliver_to = a.ID AND doc.Collect_from = a2.ID AND doc.Seal = c.Seal AND c.Haz = h.ID
        order by doc.Docket_Number;
 
 
+select doc.Docket_Number,  a.Street, c.Description
+       from docket doc, address a,  cargo c
+       where doc.Deliver_to = a.ID AND  doc.Seal = c.Seal
+       order by doc.Docket_Number;
 
 
+create view docketNoHazTest (Docket_Number, Del_Street, Description) AS
+select doc.Docket_Number, a.Street,  c.Description
+       from docket doc, address a, cargo c
+       where doc.Deliver_to = a.ID AND doc.Seal = c.Seal AND c.Haz IS NULL
+       order by doc.Docket_Number;
 
+create view docketHazTest (Docket_Number, Del_Street, Description, Haz_Name) AS
+select doc.Docket_Number, a.Street, c.Description, h.Name
+       from docket doc, address a, cargo c, haz h
+       where doc.Deliver_to = a.ID AND  doc.Seal = c.Seal AND c.Haz = h.ID
+       order by doc.Docket_Number;
+
+column Del_Street format a10;
+column Description format a10;
+column Haz_Name format a10;
+column Docket_Number format a10;
+
+(select * from docketNoHazTest) UNION (select * from docketHazTest);
