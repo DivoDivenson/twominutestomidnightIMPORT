@@ -22,7 +22,7 @@ CREATE TABLE address(
 	Street varchar(100) NULL,
   	City varchar(30) NULL,
   	County varchar(20) NULL,
-  	Site char(1) NULL,
+  	Site char(1) default 'N',
 	weight INT NOT NULL,
 	PRIMARY KEY (ID)
 )
@@ -31,7 +31,7 @@ CREATE TABLE address(
 create sequence address_increment start with 1;
 
  
-create trigger address_inrc_trigger
+create or replace trigger address_inrc_trigger
 before insert on address
 for each row
 begin
@@ -54,6 +54,7 @@ else
 end if;
 end;
 /
+Spent ~1 hour trying to get this to work. Come back to later
 */
 
 
@@ -81,11 +82,11 @@ end;
 
 CREATE TABLE driver(
 	ID INT,
-	FName varchar (15) ,
-	SName varchar (15) ,
+	FName varchar (15) NOT NULL ,
+	SName varchar (15) NOT NULL,
 	Residence INT ,
-	ADR char(1) ,
-	SafePass char(1) ,
+	ADR char(1) default 'Y',
+	SafePass char(1) default 'N',
 	PRIMARY KEY (ID),
 	Constraint fk_coloumn_address
 	FOREIGN KEY(Residence) References address
@@ -105,7 +106,7 @@ end;
 CREATE TABLE cargo(
 	Seal varchar(10),
 	Description varchar(200) NULL,
-	Return_Empty char(1) NULL,
+	Return_Empty char(1) default 'Y',
 	Weight INT NULL,
 	Size_ varchar(20) NULL,
 	Haz INT NULL, 
@@ -118,10 +119,10 @@ CREATE TABLE cargo(
 
 CREATE TABLE truck(
    Reg varchar(10),
-   Crane char(1) ,  /* Is the truck equipped to control the special trailer with a crane attatched to it */
-   ADR char(1) ,    /* Is the truck certified to haul hazardous goods */
-   Road char(1) ,   /* Is the truck road legal or not (ie, just used for shunting around the yard */
-   Last_test Date ,
+   Crane char(1) NOT NULL,  /* Is the truck equipped to control the special trailer with a crane attatched to it */
+   ADR char(1) NOT NULL,    /* Is the truck certified to haul hazardous goods */
+   Road char(1) NOT NULL,   /* Is the truck road legal or not (ie, just used for shunting around the yard */
+   Last_test Date NOT NULL,
    PRIMARY KEY (Reg)
 )
 ;
@@ -142,8 +143,8 @@ CREATE TABLE docket(
 	FOREIGN KEY(Collect_from) References address,
 	FOREIGN KEY(Driver_) References driver,
 	FOREIGN KEY(Truck) References truck,
-	FOREIGN KEY(Seal) References cargo
-) 
+	FOREIGN KEY(Seal) References cargo 
+)
 ;
 
 create sequence docket_increment start with 1;
@@ -201,19 +202,13 @@ insert into docket(Equipment_No, Customer, Date_, Seal, Deliver_to, Collect_from
 insert into docket(Equipment_No, Customer, Date_, Seal, Deliver_to, Collect_from, Driver_, Truck) values('1224', 'P and O', '18-sep-10', '4jkde3', 9, 10, 2, '05D312'); 
 
 
-drop view docketNoHaz;
-drop view docketHaz;
-drop view docketNoHazTest;
-drop view docketHazTest;
-drop view Docket_Summary;
-
-create view Docket_Summary(Docket_Number, Date_, Customer, Del_Street, Col_Street, Equipment, Seal, Size_, DriverS, Truck) AS
+create or replace view Docket_Summary(Docket_Number, Date_, Customer, Del_Street, Col_Street, Equipment, Seal, Size_, DriverS, Truck) AS
        select doc.Docket_Number, doc.date_, doc.Customer, a.Street, a2.Street, doc.Equipment_No, doc.Seal, c.Size_, driver.SName, doc.Truck
        from docket doc, address a, address a2, cargo c, driver
        where doc.Deliver_to = a.ID AND doc.Collect_from = a2.ID AND doc.Seal = c.Seal AND doc.Driver_ = driver.ID
        order by doc.Docket_Number;
 
-create view docketNoHaz (Docket_Number, Date_, Del_Street, Del_City, Del_County, Del_Site, Customer, Col_Street, Col_City, Col_Count, Col_Site, Equipment,
+create or replace view docketNoHaz (Docket_Number, Date_, Del_Street, Del_City, Del_County, Del_Site, Customer, Col_Street, Col_City, Col_Count, Col_Site, Equipment,
        Seal, Description, Return_Empty, Weight, Size_, Crane, DriverS, DriverF, Truck) AS
 select doc.Docket_Number, doc.Date_, a.Street, a.City, a.County, a.Site, doc.Customer, a2.Street, a2.City, a2.County, a2.Site , doc.Equipment_No, doc.Seal,
        c.Description, c.Return_Empty, c.Weight, c.Size_, c.Crane, dr.SName, dr.FName, truck.Reg
@@ -221,7 +216,7 @@ select doc.Docket_Number, doc.Date_, a.Street, a.City, a.County, a.Site, doc.Cus
        where doc.Deliver_to = a.ID AND doc.Collect_from = a2.ID AND doc.Seal = c.Seal AND c.Haz IS NULL AND doc.Driver_ = dr.ID AND doc.Truck = truck.Reg
        order by doc.Docket_Number;
 
-create view docketHaz (Docket_Number, Date_, Del_Street, Del_City, Del_County, Del_Site, Customer, Col_Street, Col_City, Col_Count, Col_Site, Equipment,
+create or replace view docketHaz (Docket_Number, Date_, Del_Street, Del_City, Del_County, Del_Site, Customer, Col_Street, Col_City, Col_Count, Col_Site, Equipment,
        Seal, Description, Return_Empty, Weight, Size_, Crane, DriverS, DriverF, Truck, Haz_Name, UN_No, PG, Primary, Secondary, Tunnel) AS
 select doc.Docket_Number, doc.Date_, a.Street, a.City, a.County, a.Site, doc.Customer, a2.Street, a2.City, a2.County, a2.Site , doc.Equipment_No, doc.Seal,
        c.Description, c.Return_Empty, c.Weight, c.Size_, c.Crane,  dr.SName, dr.FName, truck.Reg, h.Name, h.UN_Number, h.Packing_Group, 
@@ -230,15 +225,4 @@ select doc.Docket_Number, doc.Date_, a.Street, a.City, a.County, a.Site, doc.Cus
        where doc.Deliver_to = a.ID AND doc.Collect_from = a2.ID AND doc.Seal = c.Seal AND c.Haz = h.ID AND doc.Driver_ = dr.ID AND doc.Truck = truck.Reg
        order by doc.Docket_Number;
 
-create view docketNoHazTest (Docket_Number, Del_Street, Description) AS
-select doc.Docket_Number, a.Street,  c.Description
-       from docket doc, address a, cargo c
-       where doc.Deliver_to = a.ID AND doc.Seal = c.Seal AND c.Haz IS NULL
-       order by doc.Docket_Number;
-
-create view docketHazTest (Docket_Number, Del_Street, Description, Haz_Name) AS
-select doc.Docket_Number, a.Street, c.Description, h.Name
-       from docket doc, address a, cargo c, haz h
-       where doc.Deliver_to = a.ID AND  doc.Seal = c.Seal AND c.Haz = h.ID
-       order by doc.Docket_Number;
 
