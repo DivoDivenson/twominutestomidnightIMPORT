@@ -20,9 +20,9 @@ drop sequence docket_increment;
 CREATE TABLE address(
 	ID INT,
 	Street varchar(100) NULL,
-  	City varchar(30) NULL,
-  	County varchar(20) NULL,
-  	Site char(1) default 'N',
+ 	City varchar(30) NULL,
+ 	County varchar(20) NULL,
+ 	Site char(1) default 'N',
 	weight INT NOT NULL,
 	PRIMARY KEY (ID)
 )
@@ -38,13 +38,16 @@ begin
 select address_increment.nextval into :new.ID from dual;
 end;
 / 
-
-/*create or replace  trigger address_weight
+/*
+set serveroutput on;
+create or replace  trigger address_weight
 before insert on address
+for each row
 declare
   tempID INT;
 begin
 select count(ID) into tempID from address where Street = :new.Street;
+dbms_output.put_line(tempID);
 if tempID = 0 then
   select address_increment.nextval into :new.ID from dual;
   insert into address(ID, Street, City, County, Site) values(:new.ID, :new.Street, :new.City, :new.County, :new.Site);
@@ -54,8 +57,8 @@ else
 end if;
 end;
 /
-Spent ~1 hour trying to get this to work. Come back to later
-*/
+/*Spent ~1 hour trying to get this to work. Come back to later*/
+
 
 
 CREATE TABLE haz(
@@ -93,6 +96,10 @@ CREATE TABLE driver(
 )
 ;
 
+alter table driver add constraint adr_bool CHECK(ADR IN ('Y','N'));
+alter table driver add constraint safe_bool check (SafePass IN ('Y','N'));
+
+
 create sequence driver_increment start with 1;
 
 create trigger driver_incr_trigger
@@ -117,6 +124,9 @@ CREATE TABLE cargo(
 )
 ;
 
+alter table cargo add constraint return_bool check (Return_Empty in('Y','N'));
+alter table cargo add constraint crane_bool check (Crane in('Y','N'));
+
 CREATE TABLE truck(
    Reg varchar(10),
    Crane char(1) NOT NULL,  /* Is the truck equipped to control the special trailer with a crane attatched to it */
@@ -126,6 +136,11 @@ CREATE TABLE truck(
    PRIMARY KEY (Reg)
 )
 ;
+
+alter table cargo add constraint crane_truck_bool check (Crane in ('Y','N'));
+alter table cargo add constraint ADR_truck_bool check (ADR in ('Y','N'));
+alter table cargo add constraint road_truck_bool check (Crane in ('Y','N'));
+
 
 CREATE TABLE docket(
 	Docket_Number INT,
@@ -233,3 +248,12 @@ update driver set Residence = 2 where SName = 'Murphy';
 
 -- Paul was ment to deliver a load but Eoin had to instead
 update docket set Driver_ = 1 where Driver_ = 2 AND Date_ = '18-sep-10';
+
+
+declare
+temp number;
+begin
+select count(ID) into temp from address;
+dbms_output.put_line(temp);
+end;
+.
