@@ -1,0 +1,19 @@
+program Test{
+int i;
+
+	void Foo(){
+		int temp;
+		if( 4 > 5 ) temp =4; else temp=5;
+		write temp;
+		temp = 4 < 5?4:5;
+		write temp;
+		
+	}
+	void Main(){
+		read i;
+		Foo();	
+	}
+
+
+
+}

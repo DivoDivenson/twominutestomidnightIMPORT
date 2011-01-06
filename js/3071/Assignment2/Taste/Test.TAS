@@ -5,13 +5,6 @@
 
 program Test {
 	int i;
-	
-	void Foo() {
-		int a, b, max;
-		read a; read b;
-		if (a > b) max = a; else max = b;
-		write max;
-	}
 
 	void SumUp() {
 		int sum;
@@ -20,12 +13,23 @@ program Test {
 		write sum;
 	}
 
+
+	void Foo() {
+		int a, b, max;
+		read a; read b;
+		max = a < b ? a : b;
+		SumUp();
+		//if (a < b) max = a; else max = b;
+		write max;
+	}
+
 	void Main() {
 		read i;
-		while (i > 0) {
+		/*while (i > 0) {
 			SumUp();
 			read i;
-		}
+		}*/
+		Foo();
 	}
 }
 
