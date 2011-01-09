@@ -4,3 +4,6 @@ all:
 	
 run:
 	mono ./Taste.exe ./Test.TAS
+
+mod:
+	gmcs Taste.cs Scanner.cs Parser.cs SymTab.cs CodeGen.cs
