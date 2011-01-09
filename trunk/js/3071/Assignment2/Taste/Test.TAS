@@ -5,7 +5,7 @@
 
 program Test {
 	int i;
-
+/*
 	void SumUp() {
 		int sum;
 		sum = 0;
@@ -16,12 +16,30 @@ program Test {
 
 	void Foo() {
 		int a, b, max;
+//      int g = 5;
 		read a; read b;
 		max = a < b ? a : b;
 		SumUp();
 		//if (a < b) max = a; else max = b;
 		write max;
-	}
+	}*/
+ 
+   void Test(){
+      int x;
+      for(x = 2; x < 10; x = x + 1){
+         write x;
+//         x = x +1;
+      }
+   }
+
+   void Test2(){
+      int x;
+      x = 2;
+      while (x < 10){
+         write x;
+         x = x + 1;
+      }
+   }
 
 	void Main() {
 		read i;
@@ -29,7 +47,8 @@ program Test {
 			SumUp();
 			read i;
 		}*/
-		Foo();
+//		Foo();
+      Test();
 	}
 }
 
