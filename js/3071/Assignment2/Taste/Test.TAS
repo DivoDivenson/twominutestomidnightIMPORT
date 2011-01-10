@@ -4,7 +4,7 @@
 // up to these numbers.
 
 program Test {
-	int i;
+	//int i;
 /*
 	void SumUp() {
 		int sum;
@@ -25,13 +25,10 @@ program Test {
 	}*/
  
    void Test(){
-      int x;
-      for(x = 2; x < 10; x = x + 1){
-         write x;
-//         x = x +1;
-      }
+     int x[10];
+     
    }
-
+/*
    void Test2(){
       int x;
       x = 2;
@@ -40,9 +37,9 @@ program Test {
          x = x + 1;
       }
    }
-
+*/
 	void Main() {
-		read i;
+	//	read i;
 		/*while (i > 0) {
 			SumUp();
 			read i;
