@@ -4,7 +4,7 @@ COMPILER Taste
 	  undef = 0, integer = 1, boolean = 2;
 
 	const int // object kinds
-	  var = 0, proc = 1, constant =3;
+	  var = 0, proc = 1, constant =3, array = 4;
 
 	public SymbolTable   tab;
 	public CodeGenerator gen;
@@ -192,12 +192,14 @@ Type<out int type>
  | "const"               (. type = constant; .)
  ).
 /*------------------------------------------------------------------------*/
-VarDecl                  (. string name; int type; .)
+VarDecl                  (. string name; int type; int kind = var; int size =1;/*Size is a bad solution, fix later*/ .)
 = Type<out type>
-  Ident<out name>        (. if(type == constant)  tab.NewObj(name, var, type);
-                            else tab.NewObj(name, var, type); .)
-  { ',' Ident<out name>  (. if(type == constant) tab.NewObj(name, constant, type);
-                            else tab.NewObj(name, var, type); .)
+  Ident<out name>        
+  ['['number (. size = Convert.ToInt32(t.val); .)
+      ']'                 (. kind = array; .)
+  ]                       (. tab.NewObj(name, kind, type, size); .)
+  { ',' Ident<out name>  (. 
+                             tab.NewObj(name, var, type); .)
   } ';'.
 
 END Taste.
