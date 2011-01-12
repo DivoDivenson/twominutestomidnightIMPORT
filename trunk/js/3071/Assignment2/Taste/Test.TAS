@@ -4,48 +4,44 @@
 // up to these numbers.
 
 program Test {
-	//int i;
-/*
-	void SumUp() {
-		int sum;
-		sum = 0;
-		while (i > 0) { sum = sum + i; i = i - 1; }
-		write sum;
+
+ 
+ /*  void TestMethod(){
+     int b;
+	b = 19;
+	int r;
+   	int x[10];
+	x[9] = 30;
+	int c, d, e;
+	c = 22;
+d = 60; 
+	
+     
+   }*/
+	void null(){
+		int x;
+		x = 5;
+		switch ( x ){
+			case 5: x = 20;
+			//case 6: x = 30;
+			
+		}
+		write x;
+		
 	}
 
+/*void null(){ 
+	int x;
+	x = 0;
+	do{
+	 x = x + 2;
+	 write x;
+	}while(x < 10)
+}*/
 
-	void Foo() {
-		int a, b, max;
-//      int g = 5;
-		read a; read b;
-		max = a < b ? a : b;
-		SumUp();
-		//if (a < b) max = a; else max = b;
-		write max;
-	}*/
- 
-   void Test(){
-     int x[10];
-     
-   }
-/*
-   void Test2(){
-      int x;
-      x = 2;
-      while (x < 10){
-         write x;
-         x = x + 1;
-      }
-   }
-*/
-	void Main() {
-	//	read i;
-		/*while (i > 0) {
-			SumUp();
-			read i;
-		}*/
-//		Foo();
-      Test();
+	void Main() {
+//      TestMethod();
+		null();
 	}
 }
 
