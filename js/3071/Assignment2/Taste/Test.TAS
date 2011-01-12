@@ -6,31 +6,34 @@
 program Test {
 
  
- /*  void TestMethod(){
-     int b;
-	b = 19;
-	int r;
-   	int x[10];
-	x[9] = 30;
-	int c, d, e;
-	c = 22;
-d = 60; 
+ /* void TestMethod(){
+     int x[19];
+int b;
+b =4;
+int d;
+d = 30;
+x[4] = 50;
+//x[4] = x;
+write x[3];
 	
      
    }*/
 	void null(){
 		int x;
 		x = 5;
+		int y;
+		y = 10;
 		switch ( x ){
-			case 5: x = 20;
-			//case 6: x = 30;
+			case 5: y = 20; break;
+			case 5: y = 30;
 			
 		}
 		write x;
+		write y;
 		
 	}
-
-/*void null(){ 
+/*
+void null(){ 
 	int x;
 	x = 0;
 	do{
@@ -40,8 +43,8 @@ d = 60;
 }*/
 
 	void Main() {
-//      TestMethod();
-		null();
+     null();
+
 	}
 }
 
