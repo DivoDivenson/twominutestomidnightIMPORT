@@ -129,8 +129,25 @@ Stat                     (. int type,type1,type2; string name; Obj obj;
                   )
 	| '(' ')' ';'          (. if (obj.kind != proc) SemErr("object is not a procedure");
 												  	gen.Emit(Op.CALL, obj.adr); .)
+   | //Array reference
+     '[' Expr<out type>  (. if(type != integer) SemErr("integer expected"); //Pop here to get index
+                            //Dont forget globals
+                            //gen.Emit(Op.LOAD, obj.adr>>8);
+                            //gen.Emit(Op.ADD);
+                            .)
+     ']'
+     '=' Expr<out type1>';' (. if(type1 != obj.type) SemErr("incompatible types"); 
+                                gen.Emit(Op.STO, obj.adr);
+                                .)
 	)
-
+   
+ | "switch"
+      '(' Expr<out type> ')''{'  (. if(type != integer) SemErr("boolean type expected"); .)
+      "case" Factor<out type2> ':'  (. gen.Emit(Op.EQU); 
+                                       gen.Emit(Op.FJMP, 0); adr = gen.pc -2;.)
+         Stat //do break later
+                                    (. gen.Emit(Op.LOAD); .)
+      '}'                        (. gen.Patch(adr, gen.pc); .)
 | "if" 
 	'(' Expr<out type> ')' 										(. if (type != boolean) SemErr("boolean type expected");
 													  gen.Emit(Op.FJMP, 0); adr = gen.pc - 2; .) //Emit(Op.FJMP, 0) The address, 0, is written in later when patch is called
@@ -145,6 +162,14 @@ Stat                     (. int type,type1,type2; string name; Obj obj;
 	'(' Expr<out type> ')' (. if (type != boolean) SemErr("boolean type expected");
 													  gen.Emit(Op.FJMP, 0); adr = gen.pc - 2; .)
 	Stat                   (. gen.Emit(Op.JMP, loopstart); gen.Patch(adr, gen.pc); .)
+
+| "do"                  (. loopstart = gen.pc; .)
+   Stat                 
+   "while" '(' Expr<out type> ')' (. if(type != boolean) SemErr("Boolean type expected");
+                                     gen.Emit(Op.FJMP, 0); adr = gen.pc -2;
+                                     gen.Emit(Op.JMP, loopstart);
+                                     gen.Patch(adr, gen.pc); .)
+                                     
 
 | "read"
 	Ident<out name> ';'    (. obj = tab.Find(name);
@@ -166,6 +191,7 @@ Stat                     (. int type,type1,type2; string name; Obj obj;
       Stat               (. gen.Emit(Op.JMP, loopstart); .)             //Jump to start after update
    ')'                   (. gen.Patch(adr2, gen.pc); .)
    Stat                  (. gen.Emit(Op.JMP, loopUpdate); gen.Patch(adr, gen.pc); .) //Jump to update after body
+  
 | '{' { Stat | VarDecl } '}' .
 /*------------------------------------------------------------------------*/
 Taste                    (. string name; .)
@@ -197,7 +223,8 @@ VarDecl                  (. string name; int type; int kind = var; int size =1;/
   Ident<out name>        
   ['['number (. size = Convert.ToInt32(t.val); .)
       ']'                 (. kind = array; .)
-  ]                       (. tab.NewObj(name, kind, type, size); .)
+  ]                       (. tab.NewObj(name, kind, type, size);//Need  to make space on stack here
+        .)
   { ',' Ident<out name>  (. 
                              tab.NewObj(name, var, type); .)
   } ';'.

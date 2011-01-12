@@ -35,7 +35,7 @@ public class Parser {
 	public const int _EOF = 0;
 	public const int _ident = 1;
 	public const int _number = 2;
-	public const int maxT = 37;
+	public const int maxT = 40;
 
 	const bool T = true;
 	const bool x = false;
@@ -124,7 +124,7 @@ const int // types
 		} else if (la.kind == 4) {
 			Get();
 			op = Op.SUB; 
-		} else SynErr(38);
+		} else SynErr(41);
 	}
 
 	void Expr(out int type) {
@@ -182,7 +182,7 @@ const int // types
 			op = Op.GTREQ; 
 			break;
 		}
-		default: SynErr(39); break;
+		default: SynErr(42); break;
 		}
 	}
 
@@ -213,7 +213,7 @@ const int // types
 		} else if (la.kind == 6) {
 			Get();
 			gen.Emit(Op.CONST, 0); type = boolean; 
-		} else SynErr(40);
+		} else SynErr(43);
 	}
 
 	void Ident(out string name) {
@@ -228,7 +228,7 @@ const int // types
 		} else if (la.kind == 8) {
 			Get();
 			op = Op.DIV; 
-		} else SynErr(41);
+		} else SynErr(44);
 	}
 
 	void ProcDecl() {
@@ -243,7 +243,7 @@ const int // types
 		Expect(12);
 		gen.Emit(Op.ENTER, 0); adr = gen.pc - 2; 
 		while (StartOf(2)) {
-			if (la.kind == 31 || la.kind == 32 || la.kind == 33) {
+			if (la.kind == 36 || la.kind == 37 || la.kind == 38) {
 				VarDecl();
 			} else {
 				Stat();
@@ -259,15 +259,16 @@ const int // types
 		string name; int type; int kind = var; int size =1;/*Size is a bad solution, fix later*/ 
 		Type(out type);
 		Ident(out name);
-		if (la.kind == 34) {
+		if (la.kind == 24) {
 			Get();
 			Expect(2);
 			size = Convert.ToInt32(t.val); 
-			Expect(35);
+			Expect(25);
 			kind = array; 
 		}
-		tab.NewObj(name, kind, type, size); 
-		while (la.kind == 36) {
+		tab.NewObj(name, kind, type, size);//Need  to make space on stack here
+		
+		while (la.kind == 39) {
 			Get();
 			Ident(out name);
 			tab.NewObj(name, var, type); 
@@ -310,17 +311,50 @@ const int // types
 					Expr(out type2);
 					Expect(21);
 					gen.Patch(adr, gen.pc); 
-				} else SynErr(42);
+				} else SynErr(45);
 			} else if (la.kind == 10) {
 				Get();
 				Expect(11);
 				Expect(21);
 				if (obj.kind != proc) SemErr("object is not a procedure");
 				gen.Emit(Op.CALL, obj.adr); 
-			} else SynErr(43);
+			} else if (la.kind == 24) {
+				Get();
+				Expr(out type);
+				if(type != integer) SemErr("integer expected"); //Pop here to get index
+				//Dont forget globals
+				//gen.Emit(Op.LOAD, obj.adr>>8);
+				//gen.Emit(Op.ADD);
+				
+				Expect(25);
+				Expect(20);
+				Expr(out type1);
+				Expect(21);
+				if(type1 != obj.type) SemErr("incompatible types"); 
+				gen.Emit(Op.STO, obj.adr);
+				
+			} else SynErr(46);
 			break;
 		}
-		case 24: {
+		case 26: {
+			Get();
+			Expect(10);
+			Expr(out type);
+			Expect(11);
+			Expect(12);
+			if(type != integer) SemErr("boolean type expected"); 
+			Expect(27);
+			Factor(out type2);
+			Expect(23);
+			gen.Emit(Op.EQU); 
+			gen.Emit(Op.FJMP, 0); adr = gen.pc -2;
+			Stat();
+			gen.Emit(Op.DEBUG); 
+			Expect(13);
+			gen.Patch(adr, gen.pc); 
+			break;
+		}
+		case 28: {
 			Get();
 			Expect(10);
 			Expr(out type);
@@ -328,7 +362,7 @@ const int // types
 			if (type != boolean) SemErr("boolean type expected");
 			gen.Emit(Op.FJMP, 0); adr = gen.pc - 2; 
 			Stat();
-			if (la.kind == 25) {
+			if (la.kind == 29) {
 				Get();
 				gen.Emit(Op.JMP, 0); adr2 = gen.pc - 2;
 				gen.Patch(adr, gen.pc);  //Patch the address to branch to should the boolean check fail
@@ -338,7 +372,7 @@ const int // types
 			gen.Patch(adr, gen.pc); 
 			break;
 		}
-		case 26: {
+		case 30: {
 			Get();
 			loopstart = gen.pc; 
 			Expect(10);
@@ -350,7 +384,21 @@ const int // types
 			gen.Emit(Op.JMP, loopstart); gen.Patch(adr, gen.pc); 
 			break;
 		}
-		case 27: {
+		case 31: {
+			Get();
+			loopstart = gen.pc; 
+			Stat();
+			Expect(30);
+			Expect(10);
+			Expr(out type);
+			Expect(11);
+			if(type != boolean) SemErr("Boolean type expected");
+			gen.Emit(Op.FJMP, 0); adr = gen.pc -2;
+			gen.Emit(Op.JMP, loopstart);
+			gen.Patch(adr, gen.pc); 
+			break;
+		}
+		case 32: {
 			Get();
 			Ident(out name);
 			Expect(21);
@@ -361,7 +409,7 @@ const int // types
 			else gen.Emit(Op.STO, obj.adr); 
 			break;
 		}
-		case 28: {
+		case 33: {
 			Get();
 			Expr(out type);
 			Expect(21);
@@ -369,7 +417,7 @@ const int // types
 			gen.Emit(Op.WRITE); 
 			break;
 		}
-		case 29: {
+		case 34: {
 			Get();
 			Expect(10);
 			Stat();
@@ -400,7 +448,7 @@ const int // types
 			Expect(13);
 			break;
 		}
-		default: SynErr(44); break;
+		default: SynErr(47); break;
 		}
 	}
 
@@ -418,12 +466,12 @@ const int // types
 
 	void Taste() {
 		string name; 
-		Expect(30);
+		Expect(35);
 		Ident(out name);
 		tab.OpenScope(); 
 		Expect(12);
 		while (StartOf(5)) {
-			if (la.kind == 31 || la.kind == 32 || la.kind == 33) {
+			if (la.kind == 36 || la.kind == 37 || la.kind == 38) {
 				VarDecl();
 			} else {
 				ProcDecl();
@@ -437,16 +485,16 @@ const int // types
 
 	void Type(out int type) {
 		type = undef; 
-		if (la.kind == 31) {
+		if (la.kind == 36) {
 			Get();
 			type = integer; 
-		} else if (la.kind == 32) {
+		} else if (la.kind == 37) {
 			Get();
 			type = boolean; 
-		} else if (la.kind == 33) {
+		} else if (la.kind == 38) {
 			Get();
 			type = constant; 
-		} else SynErr(45);
+		} else SynErr(48);
 	}
 
 
@@ -461,12 +509,12 @@ const int // types
 	}
 	
 	static readonly bool[,] set = {
-		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,T,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, T,x,T,T, T,T,x,T, T,T,x,x, x,x,x},
-		{x,T,T,x, T,T,T,x, x,x,x,T, T,T,x,x, x,x,x,x, x,T,x,x, T,T,T,T, T,T,x,T, T,T,x,x, x,x,x},
-		{x,T,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, T,x,T,T, T,T,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,x,x, x,x,x}
+		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,x, T,T,T,x, x,x},
+		{x,T,T,x, T,T,T,x, x,x,x,T, T,T,x,x, x,x,x,x, x,T,x,x, x,x,T,x, T,T,T,T, T,T,T,x, T,T,T,x, x,x},
+		{x,T,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,T,T, T,T,T,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,T,x, x,x}
 
 	};
 } // end Parser
@@ -504,28 +552,31 @@ public class Errors {
 			case 21: s = "\";\" expected"; break;
 			case 22: s = "\"?\" expected"; break;
 			case 23: s = "\":\" expected"; break;
-			case 24: s = "\"if\" expected"; break;
-			case 25: s = "\"else\" expected"; break;
-			case 26: s = "\"while\" expected"; break;
-			case 27: s = "\"read\" expected"; break;
-			case 28: s = "\"write\" expected"; break;
-			case 29: s = "\"for\" expected"; break;
-			case 30: s = "\"program\" expected"; break;
-			case 31: s = "\"int\" expected"; break;
-			case 32: s = "\"bool\" expected"; break;
-			case 33: s = "\"const\" expected"; break;
-			case 34: s = "\"[\" expected"; break;
-			case 35: s = "\"]\" expected"; break;
-			case 36: s = "\",\" expected"; break;
-			case 37: s = "??? expected"; break;
-			case 38: s = "invalid AddOp"; break;
-			case 39: s = "invalid RelOp"; break;
-			case 40: s = "invalid Factor"; break;
-			case 41: s = "invalid MulOp"; break;
-			case 42: s = "invalid Stat"; break;
-			case 43: s = "invalid Stat"; break;
-			case 44: s = "invalid Stat"; break;
-			case 45: s = "invalid Type"; break;
+			case 24: s = "\"[\" expected"; break;
+			case 25: s = "\"]\" expected"; break;
+			case 26: s = "\"switch\" expected"; break;
+			case 27: s = "\"case\" expected"; break;
+			case 28: s = "\"if\" expected"; break;
+			case 29: s = "\"else\" expected"; break;
+			case 30: s = "\"while\" expected"; break;
+			case 31: s = "\"do\" expected"; break;
+			case 32: s = "\"read\" expected"; break;
+			case 33: s = "\"write\" expected"; break;
+			case 34: s = "\"for\" expected"; break;
+			case 35: s = "\"program\" expected"; break;
+			case 36: s = "\"int\" expected"; break;
+			case 37: s = "\"bool\" expected"; break;
+			case 38: s = "\"const\" expected"; break;
+			case 39: s = "\",\" expected"; break;
+			case 40: s = "??? expected"; break;
+			case 41: s = "invalid AddOp"; break;
+			case 42: s = "invalid RelOp"; break;
+			case 43: s = "invalid Factor"; break;
+			case 44: s = "invalid MulOp"; break;
+			case 45: s = "invalid Stat"; break;
+			case 46: s = "invalid Stat"; break;
+			case 47: s = "invalid Stat"; break;
+			case 48: s = "invalid Type"; break;
 
 			default: s = "error " + n; break;
 		}
