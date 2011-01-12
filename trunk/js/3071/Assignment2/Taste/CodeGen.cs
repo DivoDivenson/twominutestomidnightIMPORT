@@ -25,7 +25,7 @@ using System;using System.IO;namespace Taste {	public enum Op { // opcodes
 					case Op.LSSEQ: Push(Int(Pop()>=Pop())); break;
 					case Op.GTREQ: Push(Int(Pop()<=Pop())); break;
 					case Op.JMP:   pc = Next2(); break;					case Op.FJMP:  val = Next2(); if (Pop()==0) pc = val; break;					case Op.READ:  val = ReadInt(s); Push(val); break;					case Op.WRITE: Console.WriteLine(Pop()); break;					case Op.CALL:  Push(pc+2); pc = Next2(); break;					case Op.RET:   pc = Pop(); if (pc == 0) {
-					printStack();
+					//printStack();
 					// printCode(); 
 					return;} break;					case Op.ENTER: Push(bp); bp = top; top = top + Next2(); break;					case Op.LEAVE: top = bp; bp = Pop(); break;
 					case Op.DEBUG: Console.WriteLine("Hello " + top +"."); break;					default:    throw new Exception("illegal opcode");				}			}
