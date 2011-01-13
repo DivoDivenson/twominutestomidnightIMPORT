@@ -49,7 +49,7 @@ Factor<out int type>     (. int n; Obj obj; string name; .)
                           .)
     [ '[' number           (. n = Convert.ToInt32(t.val); .)
     ']' ]
-                            (.if (obj.kind == var) {			      if (obj.level == 0) gen.Emit(Op.LOADG, obj.adr + n);
+                            (.if (obj.kind == var || obj.kind == constant) {			      if (obj.level == 0) gen.Emit(Op.LOADG, obj.adr + n);
 			      else gen.Emit(Op.LOAD, obj.adr + n);
                             } else SemErr("variable expected");
                             .)
@@ -81,7 +81,7 @@ ProcDecl                 (. string name; Obj obj; int adr; .)
                             tab.OpenScope(); .)
   '(' ')'
   '{'                    (. gen.Emit(Op.ENTER, 0); adr = gen.pc - 2; .)
-  { VarDecl | Stat }
+  { VarDecl | Stat | ConstDecl }
   '}'                    (. gen.Emit(Op.LEAVE); gen.Emit(Op.RET);
                             gen.Patch(adr, tab.topScope.nextAdr);
                             tab.CloseScope(); .).
@@ -110,7 +110,7 @@ Stat                     (. int type,type1,type2; string name; Obj obj;
                             int adr, adr2, loopstart; 
                             int loopUpdate; .)
 = Ident<out name>        (. obj = tab.Find(name); .)
-  ( '='                  (. if (obj.kind != var) SemErr("cannot assign to procedure"); .)
+  ( '='                  (. if (obj.kind != var) SemErr("cannot assign to procedure or constant"); .)
 		Expr<out type> ([';']   //Make this optional to accomidate for loop syntax (the 3rd or update expression"). ; is now optional at the end of a line
 				(. if (type != obj.type) SemErr("incompatible types");
 				   if (obj.level == 0) gen.Emit(Op.STOG, obj.adr);
@@ -242,13 +242,13 @@ Stat                     (. int type,type1,type2; string name; Obj obj;
    ')'                   (. gen.Patch(adr2, gen.pc); .)
    Stat                  (. gen.Emit(Op.JMP, loopUpdate); gen.Patch(adr, gen.pc); .) //Jump to update after body
   
-| '{' { Stat | VarDecl } '}' .
+| '{' { Stat | VarDecl | ConstDecl } '}' .
 /*------------------------------------------------------------------------*/
 Taste                    (. string name; .)
 = "program"
   Ident<out name>        (. tab.OpenScope(); .)
   '{'
-  { VarDecl | ProcDecl }
+  { VarDecl |ConstDecl | ProcDecl }
   '}'                    (. tab.CloseScope();
                             if (gen.progStart == -1) SemErr("main function never defined");
                             .).
@@ -265,7 +265,6 @@ Type<out int type>
 =                        (. type = undef; .)
  ( "int"                 (. type = integer; .)
  | "bool"                (. type = boolean; .)
- | "const"               (. type = constant; .)
  ).
 /*------------------------------------------------------------------------*/
 VarDecl                  (. string name; int type; int kind = var; int size =1;/*Size is a bad solution, fix later*/ .)
@@ -273,13 +272,26 @@ VarDecl                  (. string name; int type; int kind = var; int size =1;/
   Ident<out name>        
   ['['number (. size = Convert.ToInt32(t.val); .)
       ']'                 
-  ]                       (. tab.NewObj(name, kind, type, size);//Need  to make space on stack here
-        .)
+  ]                       (. tab.NewObj(name, kind, type, size);.) //Get rid of kind, but test it
+
   { ',' Ident<out name>  (. 
                              tab.NewObj(name, var, type); .)
   } ';'.
 /*------------------------------------------------------------------------*/
-ConstDecl
-= "const" Type<out type>
-   Ident<out name>
+ConstDecl		(. string name; int type; int n; .)
+=  "const"
+   Type<out type>
+
+   Ident<out name>	(. tab.NewObj(name, constant, type); .)
+   '=' (
+	number               (. n = Convert.ToInt32(t.val); 
+                            gen.Emit(Op.CONST, n); type = integer; .)
+  | '-'
+    number     		(.  n = Convert.ToInt32(t.val); 
+                            n = n * -1; //Use negitive flag
+			    gen.Emit(Op.CONST, n); type = integer; .)
+  | "true"               (. gen.Emit(Op.CONST, 1); type = boolean; .)
+  | "false"              (. gen.Emit(Op.CONST, 0); type = boolean; .)
+)
+	';'.
 END Taste.
