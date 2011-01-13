@@ -404,7 +404,7 @@ public class Scanner {
 			case "program": t.kind = 37; break;
 			case "int": t.kind = 38; break;
 			case "bool": t.kind = 39; break;
-			case "const": t.kind = 40; break;
+			case "const": t.kind = 41; break;
 			default: break;
 		}
 	}
@@ -482,7 +482,7 @@ public class Scanner {
 			case 22:
 				{t.kind = 29; break;}
 			case 23:
-				{t.kind = 41; break;}
+				{t.kind = 40; break;}
 			case 24:
 				recEnd = pos; recKind = 22;
 				if (ch == '=') {AddCh(); goto case 13;}

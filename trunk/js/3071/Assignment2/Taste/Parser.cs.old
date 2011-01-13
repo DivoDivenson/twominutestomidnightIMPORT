@@ -28,7 +28,7 @@ Coco/R itself) does not fall under the GNU General Public License.
 using System;
 using System.Collections;
 
-namespace Taste {
+namespace taste {
 
 
 
@@ -200,11 +200,11 @@ const int // types
 				n = Convert.ToInt32(t.val); 
 				Expect(6);
 			}
-			if (obj.kind == var) {
+			if (obj.kind == var || obj.kind == constant) {
 			if (obj.level == 0) gen.Emit(Op.LOADG, obj.adr + n);
 			else gen.Emit(Op.LOAD, obj.adr + n);
-			             } else SemErr("variable expected");
-			             
+			                   } else SemErr("variable expected");
+			                   
 		} else if (la.kind == 2) {
 			Get();
 			n = Convert.ToInt32(t.val); 
@@ -252,10 +252,12 @@ const int // types
 		Expect(14);
 		gen.Emit(Op.ENTER, 0); adr = gen.pc - 2; 
 		while (StartOf(2)) {
-			if (la.kind == 38 || la.kind == 39 || la.kind == 40) {
+			if (la.kind == 38 || la.kind == 39) {
 				VarDecl();
-			} else {
+			} else if (StartOf(3)) {
 				Stat();
+			} else {
+				ConstDecl();
 			}
 		}
 		Expect(15);
@@ -274,9 +276,8 @@ const int // types
 			size = Convert.ToInt32(t.val); 
 			Expect(6);
 		}
-		tab.NewObj(name, kind, type, size);//Need  to make space on stack here
-		
-		while (la.kind == 41) {
+		tab.NewObj(name, kind, type, size);
+		while (la.kind == 40) {
 			Get();
 			Ident(out name);
 			tab.NewObj(name, var, type); 
@@ -295,9 +296,9 @@ const int // types
 			obj = tab.Find(name); 
 			if (la.kind == 22) {
 				Get();
-				if (obj.kind != var) SemErr("cannot assign to procedure"); 
+				if (obj.kind != var) SemErr("cannot assign to procedure or constant"); 
 				Expr(out type);
-				if (StartOf(3)) {
+				if (StartOf(4)) {
 					if (la.kind == 23) {
 						Get();
 					}
@@ -313,10 +314,10 @@ const int // types
 					Expr(out type1);
 					Expect(25);
 					gen.Emit(Op.JMP,0); adr2 = gen.pc -2;
-					gen.Patch(adr,gen.pc); adr = adr2;
+							   gen.Patch(adr,gen.pc); adr = adr2;
 					if (obj.level == 0) gen.Emit(Op.STOG, obj.adr);
 					else gen.Emit(Op.STO, obj.adr); 
-					
+						 
 					Expr(out type2);
 					Expect(23);
 					gen.Patch(adr, gen.pc); 
@@ -359,7 +360,8 @@ const int // types
 			Get();
 			Expect(12);
 			Ident(out name);
-			obj = tab.Find(name);  adr2 = 0; ArrayList jumps = new ArrayList(); 
+			obj = tab.Find(name);  adr2 = 0; 
+			ArrayList jumps = new ArrayList(); //Arraylist is used to store the address of the jmp instructions after a "break;"
 			if(obj.type != integer) SemErr("Integer type expected");
 			if(obj.level == 0) gen.Emit(Op.LOADG, obj.adr);
 			else gen.Emit(Op.LOAD, obj.adr);
@@ -499,10 +501,12 @@ const int // types
 		case 14: {
 			Get();
 			while (StartOf(2)) {
-				if (StartOf(4)) {
+				if (StartOf(3)) {
 					Stat();
-				} else {
+				} else if (la.kind == 38 || la.kind == 39) {
 					VarDecl();
+				} else {
+					ConstDecl();
 				}
 			}
 			Expect(15);
@@ -510,6 +514,33 @@ const int // types
 		}
 		default: SynErr(50); break;
 		}
+	}
+
+	void ConstDecl() {
+		string name; int type; int n; 
+		Expect(41);
+		Type(out type);
+		Ident(out name);
+		tab.NewObj(name, constant, type); 
+		Expect(22);
+		if (la.kind == 2) {
+			Get();
+			n = Convert.ToInt32(t.val); 
+			  gen.Emit(Op.CONST, n); type = integer; 
+		} else if (la.kind == 4) {
+			Get();
+			Expect(2);
+			n = Convert.ToInt32(t.val); 
+			      n = n * -1; //Use negitive flag
+			gen.Emit(Op.CONST, n); type = integer; 
+		} else if (la.kind == 7) {
+			Get();
+			gen.Emit(Op.CONST, 1); type = boolean; 
+		} else if (la.kind == 8) {
+			Get();
+			gen.Emit(Op.CONST, 0); type = boolean; 
+		} else SynErr(51);
+		Expect(23);
 	}
 
 	void Term(out int type) {
@@ -531,8 +562,10 @@ const int // types
 		tab.OpenScope(); 
 		Expect(14);
 		while (StartOf(5)) {
-			if (la.kind == 38 || la.kind == 39 || la.kind == 40) {
+			if (la.kind == 38 || la.kind == 39) {
 				VarDecl();
+			} else if (la.kind == 41) {
+				ConstDecl();
 			} else {
 				ProcDecl();
 			}
@@ -551,10 +584,7 @@ const int // types
 		} else if (la.kind == 39) {
 			Get();
 			type = boolean; 
-		} else if (la.kind == 40) {
-			Get();
-			type = constant; 
-		} else SynErr(51);
+		} else SynErr(52);
 	}
 
 
@@ -571,10 +601,10 @@ const int // types
 	static readonly bool[,] set = {
 		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
-		{x,T,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,T,x, T,T,T,T, T,x,T,T, T,x,x,x},
-		{x,T,T,x, T,x,x,T, T,x,x,x, x,T,T,T, x,x,x,x, x,x,x,T, x,x,T,T, T,T,T,T, T,T,T,T, T,x,T,T, T,x,x,x},
+		{x,T,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,T,x, T,T,T,T, T,x,T,T, x,T,x,x},
 		{x,T,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,T,x, T,T,T,T, T,x,x,x, x,x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,x,x,x}
+		{x,T,T,x, T,x,x,T, T,x,x,x, x,T,T,T, x,x,x,x, x,x,x,T, x,x,T,T, T,T,T,T, T,T,T,T, T,x,T,T, x,T,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,T,x,x}
 
 	};
 } // end Parser
@@ -628,8 +658,8 @@ public class Errors {
 			case 37: s = "\"program\" expected"; break;
 			case 38: s = "\"int\" expected"; break;
 			case 39: s = "\"bool\" expected"; break;
-			case 40: s = "\"const\" expected"; break;
-			case 41: s = "\",\" expected"; break;
+			case 40: s = "\",\" expected"; break;
+			case 41: s = "\"const\" expected"; break;
 			case 42: s = "??? expected"; break;
 			case 43: s = "invalid AddOp"; break;
 			case 44: s = "invalid RelOp"; break;
@@ -639,7 +669,8 @@ public class Errors {
 			case 48: s = "invalid Stat"; break;
 			case 49: s = "invalid Stat"; break;
 			case 50: s = "invalid Stat"; break;
-			case 51: s = "invalid Type"; break;
+			case 51: s = "invalid ConstDecl"; break;
+			case 52: s = "invalid Type"; break;
 
 			default: s = "error " + n; break;
 		}

@@ -18,7 +18,7 @@ write x[3];
 	
      
    }*/
-	void null(){
+/*	void null(){
 		int x;
 		x = 5;
 		int y;
@@ -33,15 +33,19 @@ write x[3];
 		write y;
 		
 	}
-/*
+*/
+
 void null(){ 
-	int x;
-	x = 0;
-	do{
-	 x = x + 2;
-	 write x;
-	}while(x < 10)
-}*/
+	int b;
+int c;
+	 const int  x = 10;
+	int y;
+	y = 20;
+	y = x + y;
+	write y;
+
+
+}
 
 	void Main() {
      null();
