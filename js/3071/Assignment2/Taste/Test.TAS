@@ -24,8 +24,9 @@ write x[3];
 		int y;
 		y = 10;
 		switch ( x ){
-			case 5: y = 20; break;
-			case 5: y = 30;
+			case 5: y = 20; 
+			case 5: y = 30; break;
+			case 5: y = 40; break;
 			
 		}
 		write x;

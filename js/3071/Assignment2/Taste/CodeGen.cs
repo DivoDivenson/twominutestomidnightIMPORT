@@ -1,4 +1,6 @@
-using System;using System.IO;namespace Taste {	public enum Op { // opcodes	ADD, SUB, MUL, DIV, EQU, LSS, GTR, NEG,	LOAD, LOADG, STO, STOG, CONST,	CALL, RET, ENTER, LEAVE, JMP, FJMP, READ, WRITE,
+using System;using System.IO;
+
+namespace Taste {	public enum Op { // opcodes	ADD, SUB, MUL, DIV, EQU, LSS, GTR, NEG,	LOAD, LOADG, STO, STOG, CONST,	CALL, RET, ENTER, LEAVE, JMP, FJMP, READ, WRITE,
 	NEQU, LSSEQ, GTREQ, DEBUG //Additional relational operators}public class CodeGenerator {		string[] opcode =	  {"ADD  ", "SUB  ", "MUL  ", "DIV  ", "EQU  ", "LSS  ", "GTR  ", "NEG  ",	   "LOAD ", "LOADG", "STO  ", "STOG ", "CONST", "CALL ", "RET  ", "ENTER",	   "LEAVE", "JMP  ", "FJMP ", "READ ", "WRITE", "NEQU", "LSSEQ", "GTREQ" , "DEBUG"};	public int progStart;	// address of first instruction of main program	public int pc;				// program counter	byte[] code = new byte[3000];	// data for Interpret	int[] globals = new int[100];	int[] stack = new int[100];	int top;	// top of stack	int bp;		// base pointer	public CodeGenerator() {		pc = 1; progStart = -1;	}
 
 	public void printStack(){
