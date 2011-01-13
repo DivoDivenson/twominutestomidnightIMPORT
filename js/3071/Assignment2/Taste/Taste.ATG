@@ -49,9 +49,8 @@ Factor<out int type>     (. int n; Obj obj; string name; .)
                           .)
     [ '[' number           (. n = Convert.ToInt32(t.val); .)
     ']' ]
-                            (.if (obj.kind == var) {
-															if (obj.level == 0) gen.Emit(Op.LOADG, obj.adr + n);
-															else gen.Emit(Op.LOAD, obj.adr + n);
+                            (.if (obj.kind == var) {			      if (obj.level == 0) gen.Emit(Op.LOADG, obj.adr + n);
+			      else gen.Emit(Op.LOAD, obj.adr + n);
                             } else SemErr("variable expected");
                             .)
     
@@ -113,28 +112,27 @@ Stat                     (. int type,type1,type2; string name; Obj obj;
 = Ident<out name>        (. obj = tab.Find(name); .)
   ( '='                  (. if (obj.kind != var) SemErr("cannot assign to procedure"); .)
 		Expr<out type> ([';']   //Make this optional to accomidate for loop syntax (the 3rd or update expression"). ; is now optional at the end of a line
-											   (. if (type != obj.type) SemErr("incompatible types");
-													  if (obj.level == 0) gen.Emit(Op.STOG, obj.adr);
-													  else gen.Emit(Op.STO, obj.adr); .)
-
-				| 							/*Code for conditional assignment here. The same as the If statement below
-											  except for the store instructions after the jump instructions */
-											(. if(type != boolean) SemErr("Boolean expression expected");
-												gen.Emit(Op.FJMP, 0); adr = gen.pc -2; 
-												if (obj.level == 0) gen.Emit(Op.STOG, obj.adr);
-												else gen.Emit(Op.STO, obj.adr); .)
+				(. if (type != obj.type) SemErr("incompatible types");
+				   if (obj.level == 0) gen.Emit(Op.STOG, obj.adr);
+				   else gen.Emit(Op.STO, obj.adr); .)
+				|  /*Code for conditional assignment here. The same as the If statement below
+				   except for the store instructions after the jump instructions */
+			        (. if(type != boolean) SemErr("Boolean expression expected");
+				   gen.Emit(Op.FJMP, 0); adr = gen.pc -2; 
+				   if (obj.level == 0) gen.Emit(Op.STOG, obj.adr);
+				  else gen.Emit(Op.STO, obj.adr); .)
 					'?'Expr<out type1> ':'				
-											(. gen.Emit(Op.JMP,0); adr2 = gen.pc -2;
-											   gen.Patch(adr,gen.pc); adr = adr2;
-											   if (obj.level == 0) gen.Emit(Op.STOG, obj.adr);
-											   else gen.Emit(Op.STO, obj.adr); 
-											 .)
+				(. gen.Emit(Op.JMP,0); adr2 = gen.pc -2;
+		      		   gen.Patch(adr,gen.pc); adr = adr2;
+				   if (obj.level == 0) gen.Emit(Op.STOG, obj.adr);
+				   else gen.Emit(Op.STO, obj.adr); 
+								 .)
 					Expr<out type2>';'				
-											(. gen.Patch(adr, gen.pc); .)
+				(. gen.Patch(adr, gen.pc); .)
 				
                   )
 	| '(' ')' ';'          (. if (obj.kind != proc) SemErr("object is not a procedure");
-												  	gen.Emit(Op.CALL, obj.adr); .)
+			  	gen.Emit(Op.CALL, obj.adr); .)
    | //Array reference
      '['( Ident<out name>  (. obj2 = tab.Find(name);
                              if(obj.type != integer) SemErr("Integer expected");
@@ -154,7 +152,8 @@ Stat                     (. int type,type1,type2; string name; Obj obj;
 	)
    
  | "switch"  //Sperate code needed fror number
-      '(' Ident<out name> (. obj = tab.Find(name);  adr2 = 0; ArrayList jumps = new ArrayList(); 
+      '(' Ident<out name> (. obj = tab.Find(name);  adr2 = 0; 
+                              ArrayList jumps = new ArrayList(); //Arraylist is used to store the address of the jmp instructions after a "break;"
                               if(obj.type != integer) SemErr("Integer type expected");
                               if(obj.level == 0) gen.Emit(Op.LOADG, obj.adr);
                               else gen.Emit(Op.LOAD, obj.adr);
@@ -200,21 +199,21 @@ Stat                     (. int type,type1,type2; string name; Obj obj;
                                     }
                                   .)
 | "if" 
-	'(' Expr<out type> ')' 										(. if (type != boolean) SemErr("boolean type expected");
-													  gen.Emit(Op.FJMP, 0); adr = gen.pc - 2; .) //Emit(Op.FJMP, 0) The address, 0, is written in later when patch is called
+	'(' Expr<out type> ')' 	(. if (type != boolean) SemErr("boolean type expected");
+				 gen.Emit(Op.FJMP, 0); adr = gen.pc - 2; .) //Emit(Op.FJMP, 0) The address, 0, is written in later when patch is called
 	Stat
 	[ "else"               (. gen.Emit(Op.JMP, 0); adr2 = gen.pc - 2;
-													  gen.Patch(adr, gen.pc);  //Patch the address to branch to should the boolean check fail
-													  adr = adr2; .)
+				  gen.Patch(adr, gen.pc);  //Patch the address to branch to should the boolean check fail
+				  adr = adr2; .)
 		Stat 
 	]                      (. gen.Patch(adr, gen.pc); .)
 
-| "while"                (. loopstart = gen.pc; .)
+| "while"                	(. loopstart = gen.pc; .)	
 	'(' Expr<out type> ')' (. if (type != boolean) SemErr("boolean type expected");
-													  gen.Emit(Op.FJMP, 0); adr = gen.pc - 2; .)
+				  gen.Emit(Op.FJMP, 0); adr = gen.pc - 2; .)
 	Stat                   (. gen.Emit(Op.JMP, loopstart); gen.Patch(adr, gen.pc); .)
 
-| "do"                  (. loopstart = gen.pc; .)
+| "do"                  	(. loopstart = gen.pc; .)
    Stat                 
    "while" '(' Expr<out type> ')' (. if(type != boolean) SemErr("Boolean type expected");
                                      gen.Emit(Op.FJMP, 0); adr = gen.pc -2;
@@ -224,14 +223,14 @@ Stat                     (. int type,type1,type2; string name; Obj obj;
 
 | "read"
 	Ident<out name> ';'    (. obj = tab.Find(name);
-													  if (obj.type != integer) SemErr("integer type expected");
-													  gen.Emit(Op.READ);
-													  if (obj.level == 0) gen.Emit(Op.STOG, obj.adr);
-													  else gen.Emit(Op.STO, obj.adr); .)
+				  if (obj.type != integer) SemErr("integer type expected");
+				  gen.Emit(Op.READ);
+				  if (obj.level == 0) gen.Emit(Op.STOG, obj.adr);
+				  else gen.Emit(Op.STO, obj.adr); .)
 
 | "write" 
 	Expr<out type> ';'     (. if (type != integer) SemErr("integer type expected");
-												    gen.Emit(Op.WRITE); .)
+				 gen.Emit(Op.WRITE); .)
 
 | "for"                   
    '('Stat                (. loopstart = gen.pc; .)
@@ -279,5 +278,8 @@ VarDecl                  (. string name; int type; int kind = var; int size =1;/
   { ',' Ident<out name>  (. 
                              tab.NewObj(name, var, type); .)
   } ';'.
-
+/*------------------------------------------------------------------------*/
+ConstDecl
+= "const" Type<out type>
+   Ident<out name>
 END Taste.
