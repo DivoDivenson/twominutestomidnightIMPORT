@@ -4,7 +4,7 @@ using System;namespace Taste {public class Obj {  // object describing a dec
 			//Console.WriteLine(topScope.nextAdr);
 			obj.adr = topScope.nextAdr++;
 			//Console.WriteLine("Address of " + obj.name + " is " + obj.adr);
-			topScope.nextAdr += size -1;
+			topScope.nextAdr += size -1; //Reserve space on the stack it an array is being created.
 					
 		}	
 		
