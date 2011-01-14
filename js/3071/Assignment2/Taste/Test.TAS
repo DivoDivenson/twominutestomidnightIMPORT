@@ -38,10 +38,9 @@ write x[3];
 void null(){ 
 	int b;
 int c;
-	 const int  x = 10;
+	 const bool  x = true;
 	int y;
-	y = 20;
-	y = x + y;
+	
 	write y;
 
 
