@@ -1,7 +1,7 @@
 COMPILER Taste
 
 	const int // types
-	  undef = 0, integer = 1, boolean = 2;
+	  undef = 0, integer = 1, boolean = 2, character = 3;
 
 	const int // object kinds
 	  var = 0, proc = 1, constant =3, array = 4;
@@ -12,6 +12,7 @@ COMPILER Taste
 /*--------------------------------------------------------------------------*/
 CHARACTERS
   letter = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".
+  characters = "!$%^&*(){}[]:;'@#~<,>.?/`¬'\"\\|".
   digit = "0123456789".
   cr  = '\r'.
   lf  = '\n'.
@@ -20,6 +21,7 @@ CHARACTERS
 TOKENS
   ident  = letter {letter | digit}.
   number = digit {digit}.
+  character = "'"(letter | digit | characters)"'".
 
 COMMENTS FROM "/*" TO "*/" NESTED
 COMMENTS FROM "//" TO lf
@@ -47,7 +49,8 @@ Factor<out int type>     (. int n; Obj obj; string name; .)
 =                        (. type = undef; .)
   ( Ident<out name>      (. obj = tab.Find(name); type = obj.type; n =0;
                           .)
-    [ '[' number           (. n = Convert.ToInt32(t.val); .)
+    [ '[' number           (. n = Convert.ToInt32(t.val);
+			      if(n < 0 || n > obj.size) SemErr("Array index out of bounds"); .)
     ']' ]
                             (.if (obj.kind == var || obj.kind == constant) {			      if (obj.level == 0) gen.Emit(Op.LOADG, obj.adr + n);
 			      else gen.Emit(Op.LOAD, obj.adr + n);
@@ -56,6 +59,9 @@ Factor<out int type>     (. int n; Obj obj; string name; .)
     
   | number               (. n = Convert.ToInt32(t.val); 
                             gen.Emit(Op.CONST, n); type = integer; .)
+  | character		(.  gen.Emit(Op.CONST, t.val.ToCharArray()[1]); //Pull out the charater from between the ' '
+				 type = character;
+			     .)
   | '-'
     Factor<out type>     (. if (type != integer) {
                               SemErr("integer type expected"); type = integer;
@@ -110,7 +116,9 @@ Stat                     (. int type,type1,type2; string name; Obj obj;
                             int adr, adr2, loopstart; 
                             int loopUpdate; .)
 = Ident<out name>        (. obj = tab.Find(name); .)
-  ( '='                  (. if (obj.kind != var) SemErr("cannot assign to procedure or constant"); .)
+  ( '='                  (. if (obj.kind != var) SemErr("cannot assign to procedure or constant");
+			    if (obj.size != 1) SemErr("Array index expected"); //If this line is removed, array[x] = 10; (array = 5;) is equiv to (array[0] = 5;)
+			     .)
 		Expr<out type> ([';']   //Make this optional to accomidate for loop syntax (the 3rd or update expression"). ; is now optional at the end of a line
 				(. if (type != obj.type) SemErr("incompatible types");
 				   if (obj.level == 0) gen.Emit(Op.STOG, obj.adr);
@@ -134,18 +142,23 @@ Stat                     (. int type,type1,type2; string name; Obj obj;
 	| '(' ')' ';'          (. if (obj.kind != proc) SemErr("object is not a procedure");
 			  	gen.Emit(Op.CALL, obj.adr); .)
    | //Array reference
-     '['( Ident<out name>  (. obj2 = tab.Find(name);
-                             if(obj.type != integer) SemErr("Integer expected");
-                             if(obj.level == 0) gen.Emit(Op.LOADG, obj.adr);
-                             else gen.Emit(Op.LOAD, obj.adr); .)
+     '['( Ident<out name>  (. obj2 = tab.Find(name); //obj2 is index, obj is array start
+                             if(obj.type != integer) SemErr("Integer expected as index");
+			     
+                              .)
 
                             
      ']'
-     '=' Expr<out type1>';' (. if(type1 != obj.type) SemErr("incompatible types");
-                               gen.Emit(Op.ADD);
+     '=' 		  (. if(obj.level == 0) gen.Emit(Op.LOADG, obj2.adr);
+                               else gen.Emit(Op.LOAD, obj2.adr); .)
+	Expr<out type1>';' 
+	(. if(type1 != obj.type) SemErr("incompatible types");
+			       
+                              // gen.Emit(Op.ADD);
                                gen.Emit(Op.STO, obj.adr);
                                 .)
-     |  number          (. adr = Convert.ToInt32(t.val);.)
+     |  number          (. adr = Convert.ToInt32(t.val);
+			   if(adr < 0 || adr > obj.size) SemErr("Array index out of bounds");.)
        ']'
        '=' Expr<out type1> ';' (. gen.Emit(Op.STO, obj.adr + adr); .)
      )
@@ -229,8 +242,10 @@ Stat                     (. int type,type1,type2; string name; Obj obj;
 				  else gen.Emit(Op.STO, obj.adr); .)
 
 | "write" 
-	Expr<out type> ';'     (. if (type != integer) SemErr("integer type expected");
-				 gen.Emit(Op.WRITE); .)
+	Expr<out type> ';'     (.if (type == integer) gen.Emit(Op.WRITE);
+				 else if(type == character) gen.Emit(Op.WRITEC);
+				 else SemErr("integer or character type expected");
+				 .)
 
 | "for"                   
    '('Stat                (. loopstart = gen.pc; .)
@@ -265,6 +280,7 @@ Type<out int type>
 =                        (. type = undef; .)
  ( "int"                 (. type = integer; .)
  | "bool"                (. type = boolean; .)
+ | "char"		 (. type = character; .)
  ).
 /*------------------------------------------------------------------------*/
 VarDecl                  (. string name; int type; int kind = var; int size =1;/*Size is a bad solution, fix later*/ .)
@@ -296,6 +312,9 @@ ConstDecl		(. string name; int type; int n; Obj obj; .)
 			    gen.Emit(Op.CONST, n); type = integer;
 			    if (obj.level == 0) gen.Emit(Op.STOG, obj.adr);
 			    else gen.Emit(Op.STO, obj.adr); .)
+  | character		(.  gen.Emit(Op.CONST, t.val.ToCharArray()[1]); //Pull out the charater from between the ' '
+				 type = character; 
+			     .)
   | "true"               (. gen.Emit(Op.CONST, 1); type = boolean;
 			    if (obj.level == 0) gen.Emit(Op.STOG, obj.adr);
 			    else gen.Emit(Op.STO, obj.adr);
