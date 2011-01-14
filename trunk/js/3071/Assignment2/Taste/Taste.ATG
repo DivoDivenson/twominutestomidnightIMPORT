@@ -21,7 +21,7 @@ CHARACTERS
 TOKENS
   ident  = letter {letter | digit}.
   number = digit {digit}.
-  character = "'"(letter | digit | characters)"'".
+  character = "'"(letter | digit | characters)"'". //Additional Token for char datatype
 
 COMMENTS FROM "/*" TO "*/" NESTED
 COMMENTS FROM "//" TO lf
@@ -119,7 +119,7 @@ Stat                     (. int type,type1,type2; string name; Obj obj;
   ( '='                  (. if (obj.kind != var) SemErr("cannot assign to procedure or constant");
 			    if (obj.size != 1) SemErr("Array index expected"); //If this line is removed, array[x] = 10; (array = 5;) is equiv to (array[0] = 5;)
 			     .)
-		Expr<out type> ([';']   //Make this optional to accomidate for loop syntax (the 3rd or update expression"). ; is now optional at the end of a line
+		Expr<out type> ([';']   //Make this optional to accomidate for "for" loop syntax (the 3rd or update expression"). ; is now optional at the end of a line
 				(. if (type != obj.type) SemErr("incompatible types");
 				   if (obj.level == 0) gen.Emit(Op.STOG, obj.adr);
 				   else gen.Emit(Op.STO, obj.adr); .)
@@ -142,6 +142,7 @@ Stat                     (. int type,type1,type2; string name; Obj obj;
 	| '(' ')' ';'          (. if (obj.kind != proc) SemErr("object is not a procedure");
 			  	gen.Emit(Op.CALL, obj.adr); .)
    | //Array reference
+		// [ ident ] does not work
      '['( Ident<out name>  (. obj2 = tab.Find(name); //obj2 is index, obj is array start
                              if(obj.type != integer) SemErr("Integer expected as index");
 			     
@@ -197,12 +198,12 @@ Stat                     (. int type,type1,type2; string name; Obj obj;
                                         .)
                         ]
                   }
-                  {
-                     "default:"  (. gen.Patch(adr, gen.pc); .)
+                  [
+                     "default"":"  (. gen.Patch(adr, gen.pc); .)
                         Stat
                         //do break later
                         ["break;" ] //Not needed here really
-                  }
+                  ]
       '}'                        (. 
                                     gen.Patch(adr, gen.pc);
                                     if(adr2 != 0){
@@ -236,7 +237,7 @@ Stat                     (. int type,type1,type2; string name; Obj obj;
 
 | "read"
 	Ident<out name> ';'    (. obj = tab.Find(name);
-				  if (obj.type != integer) SemErr("integer type expected");
+				  if (obj.type != integer && obj.type != character) SemErr("integer type expected");
 				  gen.Emit(Op.READ);
 				  if (obj.level == 0) gen.Emit(Op.STOG, obj.adr);
 				  else gen.Emit(Op.STO, obj.adr); .)
