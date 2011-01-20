@@ -26,3 +26,10 @@ scalerMult(A,[H|T],[X|Y]):-
   X is H * A,
   scalerMult(A,T,Y).
 
+dot([],[],_).
+dot([A|B],[C|D],X):-
+  Y is X,
+  X is A * C,
+  Y is X + Y,
+  dot(B,D,Y).
+
