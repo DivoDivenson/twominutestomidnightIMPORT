@@ -33,7 +33,7 @@
 #include <string>
 
 
-#include "Screen.h"
+//#include "Screen.h"
 
 /*
  * You can't change these values to accelerate the rendering.

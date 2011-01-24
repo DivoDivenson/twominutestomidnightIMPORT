@@ -329,7 +329,7 @@ void Parser::Parse() {
 	la->val = coco_string_create(L"Dummy Token");
 	Get();
 	Taste();
-
+	Expect(0);
 	Expect(0);
 }
 
@@ -441,3 +441,4 @@ void Errors::Exception(const wchar_t* s) {
 
 
 
+$$$

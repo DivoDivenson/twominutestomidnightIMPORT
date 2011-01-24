@@ -495,7 +495,7 @@ void Scanner::AddCh() {
 
 
 bool Scanner::Comment0() {
-	int level = 1, pos0 = pos, line0 = line, col0 = col;
+	int level = 1, pos0 = pos, line0 = line, col0 = col, charPos0 = charPos;
 	NextCh();
 	if (ch == L'/') {
 		NextCh();
@@ -511,7 +511,7 @@ bool Scanner::Comment0() {
 			else NextCh();
 		}
 	} else {
-		buffer->SetPos(pos0); NextCh(); line = line0; col = col0;
+		buffer->SetPos(pos0); NextCh(); line = line0; col = col0; charPos = charPos0;
 	}
 	return false;
 }
@@ -694,3 +694,4 @@ void Scanner::ResetPeek() {
 
 
 
+$$$
