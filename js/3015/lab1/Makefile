@@ -1,2 +1,4 @@
 all:
-	gcc -lpthread -lm ./pi.c
+	gcc ./pi.c
+thread:
+	gcc -DPTHREADS -lpthread ./pi.c
