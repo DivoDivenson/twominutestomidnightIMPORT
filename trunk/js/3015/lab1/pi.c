@@ -4,8 +4,8 @@
 #include <math.h>
 #include <pthread.h>
 
-#define NUM_THREADS 6
-int darts = 60000000;//Darts is only ever read from
+#define NUM_THREADS 60
+int darts = 600000;//Darts is only ever read from
 //HACK. Make darts a multiple of number of threads to avoid errors when divinding up the work
 
 #ifdef PTHREADS
@@ -81,7 +81,7 @@ int main(){
   int rc, i;
   
   for(i=0; i<NUM_THREADS; i++){
-    printf("Creating thread\n");
+    //printf("Creating thread\n");
     rc = pthread_create(&threads[i], NULL, getPi, (void *)i);
   }
   gettimeofday(&start_thread, NULL);
