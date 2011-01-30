@@ -31,7 +31,13 @@ int main(){
    long long compute_time;
 int window[6];   
    int i;
-   for(i =0; i < 400; i++){
+   i = 2;
+   while(1) { 
+      i = i * i; 
+      printf("%d\n", i);
+   }
+   printf("hello\n");
+   for(i =0; i < 400; i++){ //Why does this run??
       window[i] = 0;
    }
    gettimeofday(&start_time,NULL);
