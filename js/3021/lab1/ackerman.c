@@ -1,6 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-int count;
+int count= 0;
 int ackerman(int x, int y){
    count++;
    if(x == 0)
@@ -17,3 +18,4 @@ int main(){
    printf("Called %d times\n", count);
    return 0;
 }
+
