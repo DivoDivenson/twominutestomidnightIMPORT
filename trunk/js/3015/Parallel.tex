@@ -22,4 +22,9 @@ Another problem inherent with parallel programming is the sheer volume of additi
 \\* 
 The interleaving of instructions in parallel streams introduces an element of non-determinism into any program. Successive execution might interleave the instructions in different ways, depending on factors such as how many processors are be used, the initial state of the machine, where the data is stored physically in memory and so forth. All of these extra, seemingly random factors, makes testing of code questionable. Programming is a high level task, built upon several layers of abstraction. It is taken for granted that the various "layers" will work as expected. When an element of random chance, the interleaving of instructions, is introduced it invalidates such abstractions. The solution thus far has been to enforce determinacy. However, this requires significant overhead and additional work by the programmer.
 
+\bibliography{bib}
+\bibitem{The Parallel Brain} \url{http://rebelscience.blogspot.com/2008/03/why-parallel-programming-is-so-hard.html}
+
+\bibitem{Ilya Mirman} \url{http://software.intel.com/en-us/articles/is-parallel-programming-hard-1/}
+
 \end{document}
