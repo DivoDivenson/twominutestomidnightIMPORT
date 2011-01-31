@@ -13,43 +13,43 @@ count:
 	.type	ackerman, @function
 ackerman:
 .LFB2:
-	pushq	%rbp
+	pushq	%rbp  //Save address to return too
 .LCFI0:
 	movq	%rsp, %rbp
 .LCFI1:
 	subq	$16, %rsp
 .LCFI2:
-	movl	%edi, -4(%rbp)
-	movl	%esi, -8(%rbp)
-	movl	count(%rip), %eax
-	addl	$1, %eax
-	movl	%eax, count(%rip) //if
+	movl	%edi, -4(%rbp) //Method params,x
+	movl	%esi, -8(%rbp) //y
+	movl	count(%rip), %eax //load count
+	addl	$1, %eax //increment count
+	movl	%eax, count(%rip) //store count
 	cmpl	$0, -4(%rbp) // if (x == 0)
 	jne	.L2
-	movl	-8(%rbp), %eax
-	addl	$1, %eax
-	movl	%eax, -12(%rbp)
-	jmp	.L4
+	movl	-8(%rbp), %eax //load y
+	addl	$1, %eax //increment y
+	movl	%eax, -12(%rbp) //store y
+	jmp	.L4 //return
 .L2: //else if
 	cmpl	$0, -8(%rbp)//if  (y == 0)
 	jne	.L5
-	movl	-4(%rbp), %edi
-	subl	$1, %edi
-	movl	$1, %esi
-	call	ackerman
+	movl	-4(%rbp), %edi //Setup method params, x
+	subl	$1, %edi //sub 1 from x
+	movl	$1, %esi //second param, 1
+	call	ackerman //recursive call
 	movl	%eax, -12(%rbp)
-	jmp	.L4
+	jmp	.L4 //return
 .L5: //else
-	movl	-8(%rbp), %esi
-	subl	$1, %esi
-	movl	-4(%rbp), %edi
-	call	ackerman
-	movl	%eax, %esi
-	movl	-4(%rbp), %edi
-	subl	$1, %edi
-	call	ackerman
+	movl	-8(%rbp), %esi //Setup method params, load x
+	subl	$1, %esi //sub 1 from x
+	movl	-4(%rbp), %edi //store x-1 as first param
+	call	ackerman //recursive call
+	movl	%eax, %esi //Setup method params for nested call, x
+	movl	-4(%rbp), %edi //load y
+	subl	$1, %edi //syb 1 from y
+	call	ackerman //nested recrusive call
 	movl	%eax, -12(%rbp)
-.L4:
+.L4: //return
 	movl	-12(%rbp), %eax
 	leave
 	ret
