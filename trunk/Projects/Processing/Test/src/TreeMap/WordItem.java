@@ -22,4 +22,14 @@ public class WordItem extends SimpleMapItem {
 	      }
 	    }
 	  }
+	  
+	  public boolean MouseOver(int x, int y){
+		if(x > this.x && x < this.x - this.w){
+			if(y > this.y && y < this.y - this.h){
+				return true;
+			}
+		}
+		return false;
+	  
+	  }
 	}

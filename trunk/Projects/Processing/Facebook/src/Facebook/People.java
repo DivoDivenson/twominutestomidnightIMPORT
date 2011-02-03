@@ -20,6 +20,12 @@ public class People extends SimpleMapModel {
 			items[i] = all[i];
 		}
 	}
+	
+	public void calcImage(){
+		for (int i = 0; i < items.length; i++) {
+			((Person) items[i]).calcImage();;
+		}
+	}
 
 	/*
 	 * public void addPerson(Person person){ people.put(person.getID(), person);

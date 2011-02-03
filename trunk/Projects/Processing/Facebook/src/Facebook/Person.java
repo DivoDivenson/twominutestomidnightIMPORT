@@ -20,6 +20,7 @@ public class Person extends SimpleMapItem {
 	public Person(String name, String id, PApplet p, int order) {
 		first = name.split(" ")[0];
 		last = name.split(" ")[1];
+		//System.out.println(first);
 		this.id = Long.parseLong(id);
 		this.p = p;
 		// this.order = order;
@@ -30,7 +31,7 @@ public class Person extends SimpleMapItem {
 		imageY = y;
 		imageW = w;
 		imageH = h;
-		calcImage();
+		//calcImage();
 	}
 
 	public Person(String name, String id, PApplet p, int order, PImage image) {
@@ -84,19 +85,20 @@ public class Person extends SimpleMapItem {
 		}
 		p.fill(0);
 		p.rect(x - 2, y - 2, w - 2, h - 2);
+		//System.err.println(first + last);
 		p.imageMode(p.CORNER);
-		p.image(image, x - 2, y - 2, w - 2, h - 2);
+		p.image(image, x - 2, y  - 2, w - 2, h - 2);
 		// p.image(image, x - 2, y - 2, calcWidth() - 2, calcHeight() - 2);
 
 		// if (w > p.textWidth(first) + 6) {
 		// if (h > p.textAscent() + 6) {
 		p.noStroke();
 		p.fill(100, 122);
-		p.rect(x - 2, y - 2, p.textWidth(first) + 10, p.textAscent() + 6);
+		p.rect(x - 2, y +h - p.textAscent() - 12, p.textWidth(first) + 10, p.textAscent() + 6);
 		p.textAlign(p.CORNER, p.CORNER);
 		p.fill(210);
 		// String temp = new String(String.format(" %.2f", size));
-		p.text(first, x + 3, y + 12);
+		p.text(first, x + 3, y + h - 9);
 
 		// }
 		// }
@@ -145,8 +147,31 @@ public class Person extends SimpleMapItem {
 	}
 
 	public void calcImage() {
-		calcImage = true;
+		System.out.println("calc");
+		
+		
+		
 		this.image = orgImage;
+		float min,max;
+		//fuck the resize code
+	/*	if(this.image.height > this.image.width){ //crap but fuck it
+			min = this.image.height;
+			max = this.image.width;
+			float loss = min - x;
+			int prct = (int) (loss / (min / 100));
+			max = max - ((max / 100) * prct);
+			p.copy(image, 0, 0, image.width, image.height, 0, 0, (int) min,(int) max);
+			
+		}else{
+			min = this.image.width;
+			max = this.image.height;
+			float loss = min - x;
+			int prct = (int) (loss / (min / 100));
+			max = max - ((max / 100) * prct);
+			p.copy(image, 0, 0, image.width, image.height, 0, 0, (int) max,(int) min);
+		}*/
+		
+		/*
 		if (this.image != null) {
 			System.out.println(image);
 			if (image.width < image.height) {
@@ -157,7 +182,7 @@ public class Person extends SimpleMapItem {
 						(int) ((image.width) - (image.height - h)),
 						image.height);
 			}
-		}
+		}*/
 	}
 
 	/*

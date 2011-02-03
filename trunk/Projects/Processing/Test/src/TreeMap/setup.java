@@ -12,13 +12,13 @@ public class setup extends PApplet {
 
 	Treemap map;
 	public void setup( ) {
-	  size(800, 600);
+	  size(1200, 800);
 	  smooth( );
 	  strokeWeight(0.25f);
 	  PFont font = createFont("Serif", 13);
 	  textFont(font);
 	  WordMap mapData = new WordMap( );
-	  String[] lines = loadStrings("src/data/equator.txt");
+	  String[] lines = loadStrings("src/data/newfile.txt");
 	  String[] freq = loadStrings("src/data/blank.txt");
 	  
 	  MyComparator comp = new MyComparator();
@@ -32,13 +32,13 @@ public class setup extends PApplet {
 	  
 	  for (int i = 0; i < lines.length; i++) {
 		  if(!(temp.contains(lines[i]))){
-			  try{
-				  Integer.parseInt(lines[i]);
-			  }catch(NumberFormatException e){
+			//  try{
+			//	  Integer.parseInt(lines[i]);
+		//	  }catch(NumberFormatException e){ //Holy hell thats shite code
 				  if(!lines[i].contains("$")){
 				  mapData.addWord(lines[i], this);
 				  }
-			  }
+		//	  }
 		  }else{
 			  System.out.println(lines[i]);
 		  }
