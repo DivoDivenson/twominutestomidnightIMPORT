@@ -5,8 +5,12 @@
 Stock code takes ~1700 microseconds
 
    */
+<<<<<<< .mine
+static int count= 0;
+=======
 /*
 int count= 0;
+>>>>>>> .r327
 static int CWP =0;
 static int SWP =0;
 static int overflow = 0;

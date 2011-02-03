@@ -26,10 +26,10 @@ public class setup extends PApplet {
 		strokeWeight(0.25f);
 		PFont font = createFont("DejaVu Sans Condensed Bold", 13);
 		textFont(font);
-		people = loadFriends("src/data/facebook/friends.txt");
+		people = loadFriends("src/data/facebook/friendNew.txt");
 
 		contacts = new People(people);
-		getImages();
+		getImages(false);
 		loadImages();
 		/*
 		 * for(Person n : people){ contacts.addPerson(n); }
@@ -43,7 +43,7 @@ public class setup extends PApplet {
 		 * for(Person n : people){ System.err.println(n); n.calcImage(); }
 		 */
 		System.out.println(people.length);
-		// noLoop();
+
 
 	}
 
@@ -107,7 +107,8 @@ public class setup extends PApplet {
 			people[i].calcImage();
 			System.out.println(people[i] + " : " + i);
 		}
-		
+		contacts.calcImage();
+	
 	}
 
 	/**
@@ -134,9 +135,9 @@ public class setup extends PApplet {
 				//System.out.println("Found " + files[i] + " @ " + index);
 				people[index].setImage(loadImage(files[i].getPath()), files[i]
 						.getName());
-			}// else {
-				//System.out.println(index + " : " + name);
-			//}
+			} else {
+				System.err.println(index + " : " + name);
+			}
 
 		}
 	}
@@ -164,7 +165,8 @@ public class setup extends PApplet {
 	 * Get the profile picture for each Person and store them in
 	 * src/data/facebook/pictures
 	 */
-	public void getImages() {
+	public void getImages(boolean refresh) {
+		System.out.println("getImages()");
 		WebConversation wc = new WebConversation();
 		ClientProperties cltprops = wc.getClientProperties();
 		cltprops.setAutoRedirect(true);
@@ -176,8 +178,9 @@ public class setup extends PApplet {
 			String filename = new String("src/data/facebook/pictures/"
 					+ people[i].getID() + ".jpg");
 			File file = new File(filename);
-			if (!(file.exists())) {
+			if (!(file.exists() || refresh)) {
 				try {
+					System.out.println("Looking for images online");
 					WebRequest req = new GetMethodWebRequest(url);
 					WebResponse res = wc.getResource(req);
 					String complete = res.toString();
@@ -189,7 +192,7 @@ public class setup extends PApplet {
 						// I really REALLY hope they only use 'q' in the image
 						// name
 						newUrl = newUrl.replace('q', 'n');
-						//System.out.println(people[i].getName() + " : " + newUrl);
+						System.out.println(people[i].getName() + " : " + newUrl);
 						// Lazy, if it's not a jpg just use the default image.
 						// Append proper file extension later
 						// Also, if the user has never changed their image, use

@@ -425,8 +425,9 @@ const int // types
 					
 				}
 			}
-			while (la.kind == 30) {
+			if (la.kind == 30) {
 				Get();
+				Expect(26);
 				gen.Patch(adr, gen.pc); 
 				Stat();
 				if (la.kind == 29) {
@@ -492,7 +493,7 @@ const int // types
 			Ident(out name);
 			Expect(24);
 			obj = tab.Find(name);
-			if (obj.type != integer) SemErr("integer type expected");
+			if (obj.type != integer && obj.type != character) SemErr("integer type expected");
 			gen.Emit(Op.READ);
 			if (obj.level == 0) gen.Emit(Op.STOG, obj.adr);
 			else gen.Emit(Op.STO, obj.adr); 
@@ -696,7 +697,7 @@ public class Errors {
 			case 27: s = "\"switch\" expected"; break;
 			case 28: s = "\"case\" expected"; break;
 			case 29: s = "\"break;\" expected"; break;
-			case 30: s = "\"default:\" expected"; break;
+			case 30: s = "\"default\" expected"; break;
 			case 31: s = "\"if\" expected"; break;
 			case 32: s = "\"else\" expected"; break;
 			case 33: s = "\"while\" expected"; break;
