@@ -9,6 +9,9 @@ member(X,[_|T]):-member(X,T).
 double(X):-append(Y,Y,X).
 
 
+flatten([],[]).
+flatten([H|T],[H|T2]) :- flatten(T,T2).
+
 accRev([H|T],A,R):- accRev(T,[H|A],R).
 accRev([],A,A).
 
@@ -25,7 +28,8 @@ equal([H|T],[A|B]) :- H = A, equal(T,B).
 
 set([],_).                      
 set([X|Y],A) :- member(A,X), set(Y,A). %Does not work, problem lies with append but it's fairly close
-set([X|Y],A) :- append([X],[A],B), set(Y,B).
+%set([X|Y],A) :- append([X],[A],B), set(Y,B).
+set([X|Y],A) :- set(Y,A).
 
 final(X,[H|T]):- H = X, T = [].
 final(X,[H|T]):- final(X,T).
