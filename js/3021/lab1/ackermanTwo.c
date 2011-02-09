@@ -8,7 +8,7 @@ Stock code takes ~1700 microseconds
 int count= 0;
 int overflow = 0;
 int underflow= 0;
-int windowSize = 6;
+int windowSize = 16;
 int windowCount = 0;
 
 int ackerman(int x, int y){
@@ -42,7 +42,7 @@ int main(){
    gettimeofday(&end_time, NULL);
    compute_time = (end_time.tv_sec - start_time.tv_sec) * 1000000L +
            (end_time.tv_usec - start_time.tv_usec);
-   printf("Called %d times\n Took %lld microseconds\n overflow: %d underflow: %d \n", count, compute_time, overflow, underflow);
+   printf("With %d register windows, Called %d times\n Took %lld microseconds\n overflow: %d underflow: %d \n", windowSize, count, compute_time, overflow, underflow);
    return 0;
 }
 
