@@ -209,8 +209,9 @@ int main()
   modpal();
 	/* Create a screen to render to */
 #ifdef SCREEN //Disable the screen, for debugging / testing
-	Screen *screen; //Shared by the threads
-	screen = new Screen(HXRES, HYRES);
+	
+  Screen *screen; //Shared by the threads
+  screen = new Screen(HXRES, HYRES);
   sleep(2);
 #endif
    int depth=0;
