@@ -17,14 +17,6 @@ pthread_mutex_t queueTex;
 
 
 void *job(void *arg){
-	//Add it's job to a queue die
-	printf("Job locking\n");
-	pthread_mutex_lock(&queueTex);
-	job_queue.push((long) arg);
-	pthread_cond_broadcast(&print_item);
-  	pthread_mutex_unlock(&queueTex);
-	
-}
 
 void *printer(void *arg){
 	//When a job is put on the queue a printer wakes up and removes it
@@ -38,14 +30,18 @@ void *printer(void *arg){
 
 
 
-
 int main() { 
 	int i;
 	pthread_t threads[NUM_JOBS];
 	pthread_t printers[NUM_PRINTERS];
 	pthread_mutex_init(&queueTex, NULL);
 	pthread_cond_init(&print_item, NULL);
-	
+
+   for(i = 0; i < NUM_PRINTERS; i++){
+		printf("Creating printer %d\n", i);
+		pthread_create(&printers[i], NULL, printer, (void *)i);
+		pthread_join(printers[i], NULL);
+	}
 	for(i = 0; i < NUM_JOBS; i++){
 		printf("New job\n");
 		pthread_create(&threads[i], NULL, job, (void *)i);
@@ -56,11 +52,7 @@ int main() {
 		printf("%d\n", job_queue.front());
 		job_queue.pop();
 	}
-	for(i = 0; i < NUM_PRINTERS; i++){
-		printf("Creating printer %d\n", i);
-		pthread_create(&printers[i], NULL, printer, (void *)i);
-		pthread_join(printers[i], NULL);
-	}
+
 	/*for(i = 0; i < NUM_JOBS; i++){
 		printf("%d\n", job_queue.front());
 		job_queue.pop();
