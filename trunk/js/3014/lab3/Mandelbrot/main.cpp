@@ -33,7 +33,7 @@
 #include <string>
 
 
-//#include "Screen.h"
+#include "Screen.h"
 
 /*
  * You can't change these values to accelerate the rendering.
@@ -42,7 +42,7 @@
 const int 	MAX_ITS = 1000;			//Max Iterations before we assume the point will not escape
 const int 	HXRES = 700; 			// horizontal resolution	
 const int 	HYRES = 700;			// vertical resolution
-const int 	MAX_DEPTH = 5;		// max depth of zoom    SET BACK TO 480
+const int 	MAX_DEPTH = 100;		// max depth of zoom    SET BACK TO 480
 const float ZOOM_FACTOR = 1.02;		// zoom between each frame
 
 /* Change these to zoom into different parts of the image */
