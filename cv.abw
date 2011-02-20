@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE abiword PUBLIC "-//ABISOURCE//DTD AWML 1.0 Strict//EN" "http://www.abisource.com/awml.dtd">
-<abiword template="false" styles="unlocked" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:math="http://www.w3.org/1998/Math/MathML" xid-max="79" xmlns:dc="http://purl.org/dc/elements/1.1/" fileformat="1.1" xmlns:svg="http://www.w3.org/2000/svg" xmlns:awml="http://www.abisource.com/awml.dtd" xmlns="http://www.abisource.com/awml.dtd" xmlns:xlink="http://www.w3.org/1999/xlink" version="2.0.5" xml:space="preserve" props="dom-dir:ltr; document-footnote-restart-section:0; document-endnote-type:numeric; document-endnote-place-enddoc:1; document-endnote-initial:1; lang:en-US; document-endnote-restart-section:0; document-footnote-restart-page:0; document-footnote-type:numeric; document-footnote-initial:1; document-endnote-place-endsection:0">
+<abiword template="false" styles="unlocked" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:math="http://www.w3.org/1998/Math/MathML" xid-max="144" xmlns:dc="http://purl.org/dc/elements/1.1/" fileformat="1.1" xmlns:svg="http://www.w3.org/2000/svg" xmlns:awml="http://www.abisource.com/awml.dtd" xmlns="http://www.abisource.com/awml.dtd" xmlns:xlink="http://www.w3.org/1999/xlink" version="2.0.5" xml:space="preserve" props="dom-dir:ltr; document-footnote-restart-section:0; document-endnote-type:numeric; document-endnote-place-enddoc:1; document-endnote-initial:1; lang:en-US; document-endnote-restart-section:0; document-footnote-restart-page:0; document-footnote-type:numeric; document-footnote-initial:1; document-endnote-place-endsection:0">
 <!-- ======================================================================== -->
 <!-- This file is an AbiWord document.                                        -->
 <!-- AbiWord is a free, Open Source word processor.                           -->
@@ -13,63 +13,78 @@
 <m key="abiword.generator">AbiWord</m>
 <m key="abiword.date_last_changed">Fri Mar 12 22:08:25 2004</m>
 </metadata>
-<history version="1" edit-time="5385" last-saved="1262369612" uid="d55449ac-f6f4-11de-9f94-e0271b684957">
+<history version="10" edit-time="11953" last-saved="1298232866" uid="d55449ac-f6f4-11de-9f94-e0271b684957">
 <version id="1" started="1262369612" uid="5edf5ce6-f701-11de-9f94-e0271b684957" auto="0" top-xid="79"/>
+<version id="2" started="1276601071" uid="91508240-7870-11df-9903-f8f80cda8604" auto="0" top-xid="96"/>
+<version id="3" started="1298227432" uid="5d0ebe36-3d21-11e0-87a4-db5050154573" auto="0" top-xid="128"/>
+<version id="10" started="1298229340" uid="03f62b38-3d2e-11e0-990b-fdac1f3810e8" auto="0" top-xid="140"/>
 </history>
 <styles>
-<s followedby="Current Settings" name="Normal" type="P" props="font-family:Arial; margin-top:0pt; font-variant:normal; margin-left:0pt; text-align:left; lang:en-US; font-style:normal; text-indent:0in; margin-bottom:0pt; line-height:1.0; bgcolor:transparent; margin-right:0pt; text-position:normal; text-decoration:none; font-size:9pt; font-weight:normal; color:000000; widows:2; font-stretch:normal"/>
-<s followedby="Normal" name="Heading 1" basedon="Normal" type="P" props="font-size:20pt; margin-top:22pt; font-weight:bold; margin-bottom:3pt; font-family:Arial; keep-with-next:1"/>
-<s followedby="Normal" name="Heading 2" basedon="Normal" type="P" props="keep-with-next:1; font-size:11pt; margin-bottom:3pt; font-weight:normal; text-align:right; font-family:Arial; margin-top:22pt"/>
-<s followedby="Normal" name="Heading 3" basedon="Normal" type="P" props="font-size:9pt; margin-top:22pt; font-weight:bold; margin-bottom:3pt; font-family:Arial; keep-with-next:1"/>
-<s followedby="Heading 3" name="Brief" basedon="Normal" type="P" props="font-family:Arial; margin-top:0pt; font-variant:normal; margin-left:0.2500in; text-align:left; lang:en-US; font-style:normal; text-indent:0in; margin-bottom:9pt; line-height:1.0; bgcolor:transparent; margin-right:0pt; text-decoration:none; font-size:9pt; font-weight:normal; color:000000; widows:2; font-stretch:normal"/>
+<s followedby="Current Settings" name="Normal" type="P" props="font-weight:normal; font-family:Arial; margin-top:0pt; font-variant:normal; margin-left:0pt; text-position:normal; lang:en-US; font-style:normal; text-indent:0in; margin-bottom:0pt; bgcolor:transparent; margin-right:0pt; font-size:9pt; text-decoration:none; color:000000; line-height:1.0; text-align:left; widows:2; font-stretch:normal"/>
+<s followedby="Normal" name="Heading 1" basedon="Normal" type="P" props="keep-with-next:1; margin-top:22pt; font-weight:bold; margin-bottom:3pt; font-family:Arial; font-size:20pt"/>
+<s followedby="Normal" name="Heading 2" basedon="Normal" type="P" props="margin-top:22pt; font-size:11pt; margin-bottom:3pt; font-weight:normal; text-align:right; keep-with-next:1; font-family:Arial"/>
+<s followedby="Normal" name="Heading 3" basedon="Normal" type="P" props="keep-with-next:1; margin-top:22pt; font-weight:bold; margin-bottom:3pt; font-family:Arial; font-size:9pt"/>
+<s followedby="Heading 3" name="Brief" basedon="Normal" type="P" props="font-weight:normal; font-family:Arial; margin-top:0pt; font-style:normal; margin-left:0.2500in; lang:en-US; text-decoration:none; text-indent:0in; color:000000; margin-bottom:9pt; bgcolor:transparent; margin-right:0pt; font-variant:normal; font-size:9pt; line-height:1.0; text-align:left; widows:2; font-stretch:normal"/>
+<s type="C" name="Reference" props="font-size:10pt"/>
 </styles>
 <pagesize pagetype="Letter" orientation="portrait" width="8.500000" height="11.000000" units="in" page-scale="1.000000"/>
-<section header="0" xid="3" props="page-margin-header:0.4375in; page-margin-footer:0.5in; page-margin-top:1.1736in">
+<section header="0" xid="3" props="page-margin-footer:0.5in; page-margin-header:0.4375in; page-margin-top:1.1736in">
 <p style="Normal" xid="4" props="tabstops:0.0000in/L0"><c></c></p>
-<table xid="5" props="table-column-props:1.5625in/4.9375in/; table-column-leftpos:0.0000in; list-tag:1">
-<cell xid="6" props="bg-style:1; left-color:000000; right-attach:1; right-color:000000; top-color:000000; left-attach:0; left-style:0; right-style:0; top-style:0; bot-attach:1; top-attach:0">
+<table xid="5" props="list-tag:1; table-column-props:1.3750in/5.3750in/">
+<cell xid="6" props="bg-style:1; left-color:000000; right-attach:1; right-color:000000; top-color:000000; left-attach:0; left-style:0; right-style:0; top-attach:0; bot-attach:1; top-style:0">
 <p style="Normal" xid="7" props="tabstops:0.0000in/L0"><c></c></p>
 </cell>
 <cell xid="8" props="bot-attach:1; left-attach:1; right-attach:2; top-attach:0">
 <p style="Heading 1" xid="9" props="tabstops:0.0000in/L0">Steven Diviney</p>
 </cell>
-<cell xid="10" props="bg-style:1; left-color:000000; right-attach:1; right-color:000000; top-color:000000; left-attach:0; left-style:1; right-style:0; top-attach:1; bot-attach:2; top-style:1">
+<cell xid="10" props="bg-style:1; left-color:000000; right-attach:1; right-color:000000; top-color:000000; left-attach:0; left-style:1; right-style:0; top-style:1; bot-attach:2; top-attach:1">
 <p style="Heading 2" xid="11" props="default-tab-interval:0">Objective</p>
 </cell>
-<cell xid="12" props="bg-style:1; left-color:000000; right-attach:2; right-color:000000; top-color:000000; left-attach:1; left-style:1; right-style:0; top-style:1; bot-attach:2; top-attach:1">
-<p style="Normal" xid="13" props="default-tab-interval:0">Currently looking for job placement in the Dublin area in order to gain experience in fields related to computer science.</p>
+<cell xid="12" props="bg-style:1; left-color:000000; right-attach:2; right-color:000000; top-color:000000; left-attach:1; left-style:1; right-style:0; top-attach:1; bot-attach:2; top-style:1">
+<p style="Normal" xid="13" props="default-tab-interval:0"><c props="font-variant:normal; font-weight:normal; color:#111111; font-family:Arial; font-size:9 pt; font-style:normal"></c><c props="font-weight:normal; font-variant:normal; font-size:9 pt; font-family:Arial; color:#111111; font-style:normal">Dependable, energetic and hard working student with studying computer science, looking for internship opportunities in a reputed organization.</c></p>
 </cell>
-<cell xid="14" props="bg-style:1; left-color:000000; right-attach:1; right-color:000000; top-color:000000; left-attach:0; left-style:1; right-style:0; top-attach:2; bot-attach:3; top-style:1">
+<cell xid="14" props="bg-style:1; left-color:000000; right-attach:1; right-color:000000; top-color:000000; left-attach:0; left-style:1; right-style:0; top-style:1; bot-attach:3; top-attach:2">
 <p style="Heading 2" xid="15" props="default-tab-interval:0">Experience</p>
 </cell>
-<cell xid="16" props="bg-style:1; left-color:000000; right-attach:2; right-color:000000; top-color:000000; left-attach:1; left-style:1; right-style:0; top-style:1; bot-attach:3; top-attach:2">
-<p style="Heading 3" xid="17" props="default-tab-interval:0">Freelance Graphic Design</p>
-<p style="Brief" xid="55" props="default-tab-interval:0">Notable aspects include:<br/>Consulting with clients in order to asses their requirements.<br/>Creating of drafts based on clients requirements.<br/>Refining draft into final copy.</p>
+<cell xid="16" props="bg-style:1; left-color:000000; right-attach:2; right-color:000000; top-color:000000; left-attach:1; left-style:1; right-style:0; top-attach:2; bot-attach:3; top-style:1">
+<p style="Heading 3" xid="17" props="default-tab-interval:0"><c props="font-family:Arial; font-size:9pt; color:000000; text-decoration:none; text-position:normal; font-weight:bold; font-style:normal; lang:en-US">GeSCI</c><c props="font-family:Arial; font-size:9pt; color:000000; text-decoration:none; text-position:normal; font-weight:bold; font-style:normal; lang:en-US"></c></p>
+<p style="Brief" xid="88" props="margin-top:0.0000in; margin-left:0.2500in; text-indent:0.0000in; dom-dir:ltr; margin-bottom:0.1250in; line-height:1.000000; text-align:left; margin-right:0.0000in"><c props="font-family:Arial; font-size:9pt; lang:en-US; text-position:normal; font-weight:normal; font-style:normal; text-decoration:none">Co-developed open-source software to assist with the calculation of ICT costs across a country. Software is now deployed in several Ministry's of Education across Africa, distributed freely from GeSCIs website.</c><c props="font-family:Arial; font-size:9pt; lang:en-US; text-position:normal; font-weight:normal; font-style:normal; text-decoration:none"></c>       </p>
+<p style="Heading 3" xid="84" props="default-tab-interval:0"><c></c>Freelance Graphic Design</p>
+<p style="Brief" xid="55" props="default-tab-interval:0">Notable aspects include:<br/>Consulting with clients in order to assess their requirements.<br/>Creating of drafts based on clients requirements.<br/>Refining draft into final copy.</p>
 <p style="Heading 3" xid="68" props="default-tab-interval:0">Secretarial Duties</p>
-<p style="Brief" xid="57" props="default-tab-interval:0">Notable aspects include:<br/><c props="font-style:normal">R</c><c props="font-style:normal; font-weight:normal">e</c><c props="font-style:normal; font-weight:normal"></c>c<c props="font-style:normal; font-weight:normal"></c>e<c props="font-style:normal; font-weight:normal"></c>i<c props="font-style:normal; font-weight:normal"></c>v<c props="font-style:normal; font-weight:normal"></c>a<c props="font-style:normal; font-weight:normal"></c>l<c props="font-style:normal; font-weight:normal"></c> and redirection of messages.<br/>Co-ordinating orders from management to employees.<br/>Taking in invoices and registering them in database applications.<br/></p>
+<p style="Brief" xid="57" props="default-tab-interval:0">Notable aspects include:<br/><c props="font-style:normal">R</c><c props="font-style:normal"></c><c props="font-style:normal; font-weight:normal">e</c>ceival and redirection of messages.<br/>Co-ordinating orders from management to employees.<br/>Taking in invoices and registering them in database applications.</p>
+<p style="Brief" xid="82" props="default-tab-interval:0"><c></c><br/></p>
 </cell>
-<cell xid="27" props="bg-style:1; left-color:000000; right-attach:1; right-color:000000; top-color:000000; left-attach:0; left-style:1; right-style:0; top-attach:3; bot-attach:4; top-style:1">
+<cell xid="27" props="bg-style:1; left-color:000000; right-attach:1; right-color:000000; top-color:000000; left-attach:0; left-style:1; right-style:0; top-style:1; bot-attach:4; top-attach:3">
 <p style="Heading 2" xid="28" props="tabstops:0.0000in/L0">Education</p>
 </cell>
-<cell xid="29" props="bg-style:1; left-color:000000; right-attach:2; right-color:000000; top-color:000000; left-attach:1; left-style:1; right-style:0; top-style:1; bot-attach:4; top-attach:3">
+<cell xid="29" props="bg-style:1; left-color:000000; right-attach:2; right-color:000000; top-color:000000; left-attach:1; left-style:1; right-style:0; top-attach:3; bot-attach:4; top-style:1">
 <p style="Heading 3" xid="30" props="tabstops:0.0000in/L0">Sutton Park: 2002-2008</p>
 <p style="Brief" xid="31" props="tabstops:0.0000in/L0">Attended Sutton Park Secondary School from 2002-2008, obtained Leaving Certificate in August 2008, results available upon request. In addition I obtained a GCSE in ﻿ICT in 2006, also available upon request. </p>
 <p style="Heading 3" xid="32" props="tabstops:0.0000in/L0">Trinity College, Dublin:2008-Present</p>
-<p style="Brief" xid="33" props="tabstops:0.0000in/L0">Currently studying as a Senior Freshman in Computer Science.<br/>Presently perusing B.A. mod in Computer Science.<br/></p>
+<p style="Brief" xid="33" props="tabstops:0.0000in/L0">Currently studying as a Junior Sophister in Computer Science.<br/>Presently perusing B.A. mod in Computer Science. Expected to graduate in summer 2012</p>
+<p style="Brief" xid="142" props="tabstops:0.0000in/L0">Junior Freshman achieved II.I</p>
+<p style="Brief" xid="144" props="tabstops:0.0000in/L0">Senior freshman achieSved II.II<br/></p>
 </cell>
-<cell xid="36" props="bg-style:1; left-color:000000; right-attach:1; right-color:000000; top-color:000000; left-attach:0; left-style:1; right-style:0; top-attach:4; bot-attach:5; top-style:1">
-<p style="Heading 2" xid="37" props="tabstops:0.0000in/L0">Interests</p>
+<cell xid="36" props="bg-style:1; left-color:000000; right-attach:1; right-color:000000; top-color:000000; left-attach:0; left-style:1; right-style:0; top-style:1; bot-attach:5; top-attach:4">
+<p style="Heading 2" xid="37" props="tabstops:0.0000in/L0">Skills</p>
 </cell>
-<cell xid="38" props="bg-style:1; left-color:000000; right-attach:2; right-color:000000; top-color:000000; left-attach:1; left-style:1; right-style:0; top-style:1; bot-attach:5; top-attach:4">
-<p style="Brief" xid="39" props="tabstops:0.0000in/L0">My interests include but are not limited to computer programming, Unix based operating systems, graphic design, and photography. I also have a small amount of experience with web-design. An example of some of my work can be found at netsoc.tcd.ie/~divines.</p>
-<p style="Brief" xid="78" props="tabstops:0.0000in/L0"><c></c></p>
+<cell xid="38" props="bg-style:1; left-color:000000; right-attach:2; right-color:000000; top-color:000000; left-attach:1; left-style:1; right-style:0; top-attach:4; bot-attach:5; top-style:1">
+<p style="Brief" xid="39" props="tabstops:0.0000in/L0"><c props="font-family:Arial; text-decoration:none; color:000000; font-size:9pt; text-position:normal; font-weight:normal; font-style:normal; lang:en-US">GNU/Linux (primary Debian), Windows 7 /  Vista/ XP</c><c props="font-family:Arial; text-decoration:none; color:000000; font-size:9pt; text-position:normal; font-weight:normal; font-style:normal; lang:en-US"></c></p>
+<p style="Brief" xid="110" props="tabstops:0.0000in/L0"><c props="font-family:Arial; text-decoration:none; color:000000; font-size:9pt; text-position:normal; font-weight:normal; font-style:normal; lang:en-US">Good level of experience programming in C/C++, Java and Bash. In addition I have some experience / working knowledge of Python, VHDL, HTML, CSS, PHP, Eiffel and Prolog. </c><c props="font-family:Arial; text-decoration:none; color:000000; font-size:9pt; text-position:normal; font-weight:normal; font-style:normal; lang:en-US"></c></p>
+<p style="Brief" xid="111" props="tabstops:0.0000in/L0"><c props="font-family:Arial; text-decoration:none; color:000000; font-size:9pt; text-position:normal; font-weight:normal; font-style:normal; lang:en-US"></c></p>
 </cell>
-<cell xid="40" props="bg-style:1; left-color:000000; right-attach:1; right-color:000000; top-color:000000; left-attach:0; left-style:1; right-style:0; top-attach:5; bot-attach:6; top-style:1">
-<p style="Heading 2" xid="41" props="tabstops:0.0000in/L0">Other</p>
+<cell xid="40" props="bg-style:1; left-color:000000; right-attach:1; right-color:000000; top-color:000000; left-attach:0; left-style:1; right-style:0; top-style:1; bot-attach:6; top-attach:5">
+<p style="Heading 2" xid="41" props="tabstops:0.0000in/L0">Interests</p>
 </cell>
-<cell xid="42" props="bg-style:1; left-color:000000; right-attach:2; right-color:000000; top-color:000000; left-attach:1; left-style:1; right-style:0; top-style:1; bot-attach:6; top-attach:5">
-<p style="Brief" xid="43" props="tabstops:0.0000in/L0">I have used Debian GNU/Linux as my primary operating system for the past 4 years. As such I have built up a reasonable proficiency in its use, as well as many other distributions. My programming experience consists mainly of C and Java. I have a small amount of experience with several other languages and a good understanding of the core ideas behind computer programming.</p>
-<p style="Brief" xid="79" props="tabstops:0.0000in/L0"><c></c></p>
+<cell xid="42" props="bg-style:1; left-color:000000; right-attach:2; right-color:000000; top-color:000000; left-attach:1; left-style:1; right-style:0; top-attach:5; bot-attach:6; top-style:1">
+<p style="Brief" xid="43" props="text-align:left; tabstops:0.0000in/L0"><c props="font-family:Arial; font-size:9pt; lang:en-US; text-position:normal; font-weight:normal; font-style:normal; text-decoration:none">My interests include but are not limited to computer programming, Unix based operating systems, graphic design, photography and embedded systems . I also have a small amount of experience with web-design. An example of some of my work can be found at netsoc.tcd.ie/~divines</c><c props="font-family:Arial; font-size:9pt; lang:en-US; text-position:normal; font-weight:normal; font-style:normal; text-decoration:none"></c></p>
+</cell>
+<cell xid="113" props="bot-attach:7; left-attach:0; right-attach:1; top-attach:6">
+<p xid="114" props="text-align:right; margin-left:36pt"><c props="font-family:Arial; font-size:11 pt; color:000000; text-decoration:none; text-position:normal; font-weight:normal; font-style:normal; lang:en-US">References</c></p>
+</cell>
+<cell xid="116" props="bot-attach:7; left-attach:1; right-attach:2; top-attach:6">
+<p xid="117">       Can be provided upon request</p>
 </cell>
 </table>
 <p style="Normal" xid="45" props="tabstops:0.0000in/L0"><c></c></p>
