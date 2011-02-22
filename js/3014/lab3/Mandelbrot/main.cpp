@@ -32,9 +32,9 @@
 #include <xmmintrin.h>
 #include <string>
 
-
+#ifdef SCREEN
 #include "Screen.h"
-
+#endif
 /*
  * You can't change these values to accelerate the rendering.
  * Feel free to play with them to render different images though.
