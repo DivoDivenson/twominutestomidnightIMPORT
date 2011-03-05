@@ -77,12 +77,6 @@ class proxy_sender (asynchat.async_chat):
 		self.receiver.push (data + '\n')
 	
 	def handle_close (self):
-		print 'Sender closing (inbuf len %d (%s), ac_in %d, ac_out %d )' % (
-			len( self.buffer ),
-			self.buffer,
-			len( self.ac_in_buffer ),
-			len( self.ac_out_buffer )
-			)
 
 		if len( self.buffer ):
 			self.found_terminator()
@@ -118,12 +112,6 @@ class proxy_receiver (asynchat.async_chat):
 		self.sender.push (data + '\n')
 	
 	def handle_close (self):
-		print 'Receiver closing (inbuf len %d (%s), ac_in %d, ac_out %d )' % (
-			len( self.buffer ),
-			self.buffer,
-			len( self.ac_in_buffer ),
-			len( self.ac_out_buffer )
-			)
 
 		if len( self.buffer ):
 			self.found_terminator()
