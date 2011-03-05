@@ -51,9 +51,10 @@ class ConnectionHandler:
       while 1:
          count += 1
          print 'Reading... ' 
-         print sockets[0] 
-         print sockets[1]
+#print sockets[0] 
+#        print sockets[1]
          (recv, send, error) = select.select(sockets, [], sockets, 30) #Wait on channel
+         print 'Got'
          print recv
          if error:
             break
