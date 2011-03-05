@@ -9,6 +9,7 @@ class ConnectionHandler:
    
    def __init__(self , connection, addr, id):
       self.connection = connection
+      self.id = id
       print 'Thread ', id
       print 'Connected ' , addr
       self.request = self.get_request()
@@ -23,10 +24,10 @@ class ConnectionHandler:
       print 'Response gotten'
       self.connection.close()
       self.destination.close()
-      print 'Sockets closed'
+      print 'Sockets closed ', self.id
 
    def response (self):
-      print 'Awaiting response'
+#     print 'Awaiting response'
       buffer = ''
       while 1:
          data = self.destination.recv(BUF)
@@ -50,7 +51,7 @@ class ConnectionHandler:
          if breakout == 1:
             break
          print 'Waiting on select'
-         (recv, send, error) = select.select(sockets, [], sockets, 30)
+         (recv, send, error) = select.select(sockets, [], sockets)
          if error:
             print 'Error'
             break
@@ -63,9 +64,9 @@ class ConnectionHandler:
             else:
                out = self.connection
             if data:
-#How to stop? Tried looking for a 204, that didn't work
+#How to stop? Try looking for a 204 aswell as a null buffer
                print 'Sending...'
-               print repr(data)
+#              print repr(data)
                out.send(data)
                count = 0
                print 'Sent'
@@ -95,6 +96,7 @@ class ConnectionHandler:
       self.host = self.path[:url]
       self.path = self.path[url:protocal]
       print 'Host ', self.host
+      print 'ID ', self.id
       print 'Path ', self.path
       return header 
 
@@ -122,10 +124,11 @@ class ConnectionHandler:
       else:
          self.port = int(self.host[port_index+1:])
          self.host = self.host[:port_index]
-      print 'Doing DNS lookup'
+#print 'Doing DNS lookup'
       (family, socktype, protocal, name, sockaddr) = socket.getaddrinfo(self.host, self.port)[0]
       print 'Sock', sockaddr
       self.destination = socket.socket(family)
+#self.destination.setblocking(0)
       self.destination.connect(sockaddr)
       
 
