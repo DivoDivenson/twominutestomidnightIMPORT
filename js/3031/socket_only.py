@@ -5,7 +5,7 @@ HOST = ''
 PORT = 8080
 BUF = 4098
 
-class ConnectionHandler:
+class ConnectionHandler:(threading.thread)
    
    def __init__(self , connection, addr, id):
       self.connection = connection
@@ -15,7 +15,10 @@ class ConnectionHandler:
       self.request = self.get_request()
       self.original = self.request
       self.header = self.parse_request(self.request)
-      self.handle_connect()
+      if self.code == 'CONNECT':
+         self.handle_connect()
+      else:
+         self.handle_else()
 #packet = ('%s %s\n'% (self.header, self.request)) #No need to reconstruct pacet
 #     print '\nSending :' , packet
       self.destination.send(self.original)
@@ -25,6 +28,10 @@ class ConnectionHandler:
       self.connection.close()
       self.destination.close()
       print 'Sockets closed ', self.id
+
+   def handle_connect(self):
+      self.handle_else()
+      self.connection.send('HTTPVER/1.1 200 Connection established\n')
 
    def response (self):
 #     print 'Awaiting response'
@@ -91,6 +98,9 @@ class ConnectionHandler:
       temp += 2
       self.path = header[temp:]
       self.code = header[:temp]
+      i = self.code.find(' ')
+      self.code = self.code[:i]
+      print self.code
       url = self.path.find('/')
       protocal = self.path.find(' ')
       self.host = self.path[:url]
@@ -114,7 +124,7 @@ class ConnectionHandler:
       print 'Got request'
       return buffer
 
-   def handle_connect(self):
+   def handle_else(self):
 #Not really sure if its better to pass or just use class vars. Python is so loose it makes no diff
 #Connect first
       print 'Connecting'
