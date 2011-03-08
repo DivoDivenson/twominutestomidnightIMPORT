@@ -1,0 +1,22 @@
+Serving on 8080
+Thread  1
+Connected  ('127.0.0.1', 45686)
+Thread  0
+Connected  ('127.0.0.1', 45685)
+Got request
+Parsing request
+Header:  GET http://otsotm.com/wp-admin/admin-ajax.php?p2ajax=true&action=get_latest_posts&load_time=2011-03-08%2019:41:19&frontpage=0&vp=&vp[]=1756&_=1299619630917 HTTP/1.1
+GET
+Host  otsotm.com
+ID  0
+Path  /wp-admin/admin-ajax.php?p2ajax=true&action=get_latest_posts&load_time=2011-03-08%2019:41:19&frontpage=0&vp=&vp[]=1756&_=1299619630917
+Connecting
+Got request
+Parsing request
+Header:  GET http://otsotm.com/wp-admin/admin-ajax.php?p2ajax=true&action=get_latest_comments&load_time=2011-03-08%2019:41:19&lcwidget=false&vp[]=1756&_=1299619630917 HTTP/1.1
+GET
+Host  otsotm.com
+ID  1
+Path  /wp-admin/admin-ajax.php?p2ajax=true&action=get_latest_comments&load_time=2011-03-08%2019:41:19&lcwidget=false&vp[]=1756&_=1299619630917
+Connecting
+^C Caught

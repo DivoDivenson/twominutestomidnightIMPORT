@@ -30,6 +30,10 @@ class ProxyGUI(wx.Frame):
         self.SetSize((600, 500))
         # end wxGlade
 
+    def MainLoop():
+    	#super(B, self).__init__()
+	print 'hello'
+
     def __do_layout(self):
         # begin wxGlade: ProxyGUI.__do_layout
         sizer_main = wx.BoxSizer(wx.VERTICAL)

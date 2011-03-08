@@ -1,0 +1,14 @@
+(dp1
+S'test'
+p2
+I1
+sS'clients1.google.ie/complete/search?client=chrome&hl=en-US&q=googlr'
+p3
+(lp4
+sS'clients1.google.ie/complete/search?client=chrome&hl=en-US&q=googl'
+p5
+(lp6
+sS'clients1.google.ie/complete/search?client=chrome&hl=en-US&q=googlr.'
+p7
+(lp8
+s.
