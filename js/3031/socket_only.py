@@ -1,11 +1,17 @@
 import sys, string
 import socket, thread, select
-
+import cPickle
+import pickle
+import gtk
 HOST = ''
 PORT = 8080
 BUF = 4098
 
-class ConnectionHandler:(threading.thread)
+dns_cache = {'test' : 1}
+dns_family_cache = {'test' : 1} #Not really need but just in case
+blacklist = ['www.example.com'] 
+web_cache = {'test' : 1}
+class ConnectionHandler:
    
    def __init__(self , connection, addr, id):
       self.connection = connection
@@ -14,25 +20,41 @@ class ConnectionHandler:(threading.thread)
       print 'Connected ' , addr
       self.request = self.get_request()
       self.original = self.request
+   
       self.header = self.parse_request(self.request)
-      if self.code == 'CONNECT':
-         self.handle_connect()
+      if self.host in blacklist:
+      	 self.post_blacklisted()
+      elif self.host + self.path in web_cache:
+         print "Address seen, using cached page", self.host
+	 cache = web_cache[self.host + self.path]
+	 for i in cache:
+	    if i[1] == 'c':
+               self.connection.send(i[0])
+	    else:
+	       self.destination.send(i[0])
       else:
-         self.handle_else()
+         if self.code == 'CONNECT':
+            self.handle_connect()
+         else:
+            self.handle_else()
 #packet = ('%s %s\n'% (self.header, self.request)) #No need to reconstruct pacet
 #     print '\nSending :' , packet
-      self.destination.send(self.original)
+            self.destination.send(self.original)
 #self.destination.send(packet)
-      self.response_select()
-      print 'Response gotten'
-      self.connection.close()
-      self.destination.close()
-      print 'Sockets closed ', self.id
+            self.response_select()
+            print 'Response gotten'
+            self.connection.close()
+            self.destination.close()
+            print 'Sockets closed ', self.id
 
    def handle_connect(self):
       self.handle_else()
       self.connection.send('HTTPVER/1.1 200 Connection established\n')
 
+   def post_blacklisted(self):
+	print "Blaklisted address"
+   
+   
    def response (self):
 #     print 'Awaiting response'
       buffer = ''
@@ -53,6 +75,8 @@ class ConnectionHandler:(threading.thread)
       sockets = [self.connection, self.destination] #Doing this the fancy pants select() way
       breakout = 0
       count = 0
+      cache = []
+      direction = []
       while 1:
          count += 1
          if breakout == 1:
@@ -68,13 +92,16 @@ class ConnectionHandler:(threading.thread)
                data = i.recv(BUF)
             if i is self.connection:
                out = self.destination
-            else:
+               temp = 'd'
+	    else:
                out = self.connection
-            if data:
+               temp = 'c'
+	    if data:
 #How to stop? Try looking for a 204 aswell as a null buffer
                print 'Sending...'
-#              print repr(data)
-               out.send(data)
+               #print repr(data)
+	       cache.append((data, temp))
+	       out.send(data)
                count = 0
                print 'Sent'
                end = '204'
@@ -83,6 +110,12 @@ class ConnectionHandler:(threading.thread)
                   breakout = 1
          if count == 10: #Sort of a timeout
             break
+      web_cache[self.host + self.path] = cache
+      print "Attempting to write ", self.host + self.path
+      output = open('cache.pkl', 'wb')
+      pickle.dump(web_cache, output)
+      output.close()
+      
       print 'Sentall'
 
 
@@ -135,15 +168,39 @@ class ConnectionHandler:(threading.thread)
          self.port = int(self.host[port_index+1:])
          self.host = self.host[:port_index]
 #print 'Doing DNS lookup'
-      (family, socktype, protocal, name, sockaddr) = socket.getaddrinfo(self.host, self.port)[0]
+      if self.host in dns_cache: #If host not seen before
+      	sockaddr = dns_cache[self.host]
+	family = dns_family_cache[self.host]
+      	print("Using cached address")
+      else:
+      	(family, socktype, protocal, name, sockaddr) = socket.getaddrinfo(self.host, self.port)[0]
+     	dns_cache[self.host] = sockaddr
+      	dns_family_cache[self.host] = family
       print 'Sock', sockaddr
       self.destination = socket.socket(family)
 #self.destination.setblocking(0)
       self.destination.connect(sockaddr)
-      
+     
+class gui:
+   def on_window_destroy(self, widget, data=None):
+   	gtk.main_quit()
+
+   def __init__( self ):
+      builder = gtk.Builder()
+      builder.add_from_file("main.xml")
+
+      self.window = builder.get_object("window")
+      builder.connect_signals(self)
 
 def main():
    count = 0
+   pickle_file = open('cache.pkl', 'rb')
+   web_cache = pickle.load(pickle_file)
+   pickle_file.close()
+   print web_cache
+   main_gui = gui()
+   gui.window.show()
+   gtk.main()
    try:
       s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #      s.setsocketopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) #Remove after testing
