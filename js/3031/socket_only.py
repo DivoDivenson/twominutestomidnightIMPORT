@@ -188,18 +188,18 @@ class gui:
    def __init__( self ):
       builder = gtk.Builder()
       builder.add_from_file("main.xml")
-
+      builder.connect_signals({ "on_window_destroy" : gtk.main_quit})
       self.window = builder.get_object("window")
-      builder.connect_signals(self)
+      self.window.show()
+
 
 def main():
    count = 0
    pickle_file = open('cache.pkl', 'rb')
    web_cache = pickle.load(pickle_file)
    pickle_file.close()
-   print web_cache
+   #print web_cache
    main_gui = gui()
-   gui.window.show()
    gtk.main()
    try:
       s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -208,7 +208,8 @@ def main():
       print 'Serving on', sys.argv[1]
       s.listen(3)
       while 1:
-         thread.start_new_thread(ConnectionHandler,s.accept()+(count,))
+   #      gtk.main_iteration_do()
+	 thread.start_new_thread(ConnectionHandler,s.accept()+(count,))
          count += 1
    except KeyboardInterrupt:
       print '^C Caught'
