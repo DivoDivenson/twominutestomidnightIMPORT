@@ -5,6 +5,8 @@ import pickle
 import threading, os
 import time
 import gtk
+import dbus, dbus.service
+from dbus.mainloop.glib import DBusGMainLoop
 HOST = ''
 PORT = 8080
 BUF = 4098 #Recv buffer size
@@ -15,6 +17,10 @@ blacklist = ['www.example.com']
 web_cache = {'test' : 1}
 
 
+#setup dbus
+#bus = dbus.SessionBus()
+#proxyGui = bus.get_object('org.proxy', '/org/proxy')
+#append_to_list = proxyGui.get_dbus_method('append_to_list', 'org.proxy')
 class ConnectionHandler:
    
    def __init__(self , connection, addr, id):
@@ -26,6 +32,7 @@ class ConnectionHandler:
       self.original = self.request
    
       self.header = self.parse_request(self.request) #Extract host and path from request packet
+ #     append_to_list(self.host)
       if self.host in blacklist: 
       	 self.post_blacklisted()
       elif self.host + self.path in web_cache:
@@ -218,7 +225,11 @@ def main():
    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
    s.bind((HOST, PORT))
    s.listen(3)
-      
+
+   listener = Listener(s)
+   listen_thread = threading.Thread(target=listener.run, args=())
+   listen_thread.start()
+   gtk.main()
 
   # listener = Listener(s)
    #listener.start()
