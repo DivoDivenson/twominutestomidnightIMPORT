@@ -8,24 +8,18 @@ K = 0
 #Not really a stack :)
 class Stackish:
 	
-	def __init__(self, size):
+	def __init__(self, size, k):
 		self.size = size
-		self.items = [-1] * (size  +1)
-
-
-#	def push(self, item): #Needed?
-
-	
-	#If item in stack return true, else return false and push it onto the top
+		self.k = k
+		self.items = [[-1] * (k + 1)] * (size  +1)
+		#self.item = [-1] * (size + 1)
 	def contains(self, item, tag):
-		#Modify for k=1
-		#print self.items
-		if self.items[item] == tag:
+		print self.items[item]
+		if tag in self.items[item]:
 			return True
-		else:
-			#Not in stack
-			self.items[item] =tag
-			#self.items[self.size + 1] = -1 #Presuming filo stack, that parts important
+	 	else:
+			self.items[item].insert(0, tag)
+			self.items[item][self.k] = -1
 			return False
 
 
@@ -53,11 +47,11 @@ def parse_ins(file, set_mask, offset, set_size, stackish):
 		set_ = set_ >> offset
 		tag = line >> offset + set_size
 		print "Set: ", set_,
-		if tlb[set_] == tag:
+		if stackish.contains(set_, tag):
 			print "Hit ",
 		else:
 			print "Miss ",
-			tlb[set_] = tag
+		#	tlb[set_] = tag
 		print ""	
 
 def main():
@@ -71,7 +65,7 @@ def main():
 	print "Offset ", offset
 	set_ = int(math.log(N,2))
 	print "Set ", set_
-	stack_kinda = Stackish(set_+offset)
+	stack_kinda = Stackish(set_+offset, K)
 	mask = 1
 	temp = 0
 	while temp < set_ -1:
