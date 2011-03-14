@@ -1,38 +1,59 @@
-# 1 "./tele.pml"
+# 1 "./phone.pml"
 # 1 "<built-in>"
 # 1 "<command-line>"
-# 1 "./tele.pml"
-mtype {MSG, ACK}
+# 1 "./phone.pml"
 
-chan toS = [2] of {mtype, bit};
-chan toR = [2] of {mtype, bit};
 
-proctype Sender(chan in_, out){
+mtype = { offhook, dialtone, number, ringing,
+        busy, connected, hangup, hungup };
 
-  bit sendbit, recvbit;
-  do
-    :: out ! MSG, sendbit ->
-       in_ ? ACK, recvbit;
-       if
-       :: recvbit == sendbit ->
-          sendbit = 1-sendbit
-       :: else
-       fi
-  od
 
- }
+chan line = [0] of { mtype, chan };
 
-proctype Receiver(chan in_, out)
-{
-  bit recvbit;
-  do
-    :: in_ ? MSG, recvbit ->
-       out ! ACK, recvbit;
-       printf("Received %d\n", recvbit);
-  od
+
+
+
+
+
+active proctype central_office()
+{ chan who;
+idle: line?offhook,who;
+        { who!dialtone;
+                who?number;
+                if
+                :: who!busy; goto zombie
+                :: who!ringing ->
+                        who!connected;
+                        if
+                        :: who!hungup; goto zombie
+                        :: skip
+                        fi
+                fi
+         } unless
+         { if
+                :: who?hangup -> goto idle
+                :: timeout -> goto zombie
+                fi
+          }
+zombie: who?hangup; goto idle
 }
 
-init{
-  run Sender(toS, toR);
-  run Receiver(toR, toS);
+active proctype subscriber()
+{ chan me = [0] of { mtype };
+idle: line!offhook,me;
+      me?dialtone;
+      me!number;
+      if
+      :: me?busy
+      :: me?ringing ->
+              if
+              :: me?connected;
+                      if
+                      :: me?hungup
+                      :: timeout
+                      fi
+              :: skip
+              fi
+      fi;
+      me!hangup; goto idle
 }
