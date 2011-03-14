@@ -5,6 +5,30 @@ L = 0
 N = 0
 K = 0
 
+#Not really a stack :)
+class Stackish:
+	
+	def __init__(self, size):
+		self.size = size
+		self.items = [-1] * (size  +1)
+
+
+#	def push(self, item): #Needed?
+
+	
+	#If item in stack return true, else return false and push it onto the top
+	def contains(self, item):
+		#Modify for k=1
+		print self.items
+		if item in self.items:
+			return True
+		else:
+			#Not in stack
+			self.items.insert(0,item)
+			self.items[self.size + 1] = -1 #Presuming filo stack, that parts important
+			return False
+
+
 def open_instructions(file):
 #	file = open('instructions.txt')
 	temp = file.readline()
@@ -18,7 +42,7 @@ def open_instructions(file):
 	global K
 	K = int(m[2])
 
-def parse_ins(file, set_mask, offset, set_size):
+def parse_ins(file, set_mask, offset, set_size, stackish):
 	tlb = [-1] * (set_size + offset +1)
 	for line in file:
 		if line == '\n':
@@ -29,15 +53,16 @@ def parse_ins(file, set_mask, offset, set_size):
 		set_ = set_ >> offset
 		tag = line >> offset + set_size
 		print "Set: ", set_,
-		if tlb[set_] == tag:
+		if stackish.contains(set_):
 			print "Hit ",
 		else:
-			tlb[set_] = tag
 			print "Miss ",
 		print ""	
 
 def main():
 #Open instruction file and read in L, N, K
+
+        	
 	file = open('instructions.txt')
 	open_instructions(file)
 	print "L=", L, " N=" , N, " K=", K
@@ -45,6 +70,7 @@ def main():
 	print "Offset ", offset
 	set_ = int(math.log(N,2))
 	print "Set ", set_
+	stack_kinda = Stackish(set_+offset)
 	mask = 1
 	temp = 0
 	while temp < set_ -1:
@@ -53,7 +79,7 @@ def main():
 		temp = temp + 1
 	mask = mask << offset
 	print "Mask is ", mask
-	parse_ins(file, mask, offset, set_)
+	parse_ins(file, mask, offset, set_, stack_kinda)
 
 
 	file.close()
