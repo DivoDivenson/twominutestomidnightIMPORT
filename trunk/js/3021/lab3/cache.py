@@ -17,15 +17,15 @@ class Stackish:
 
 	
 	#If item in stack return true, else return false and push it onto the top
-	def contains(self, item):
+	def contains(self, item, tag):
 		#Modify for k=1
-		print self.items
-		if item in self.items:
+		#print self.items
+		if self.items[item] == tag:
 			return True
 		else:
 			#Not in stack
-			self.items.insert(0,item)
-			self.items[self.size + 1] = -1 #Presuming filo stack, that parts important
+			self.items[item] =tag
+			#self.items[self.size + 1] = -1 #Presuming filo stack, that parts important
 			return False
 
 
@@ -53,10 +53,11 @@ def parse_ins(file, set_mask, offset, set_size, stackish):
 		set_ = set_ >> offset
 		tag = line >> offset + set_size
 		print "Set: ", set_,
-		if stackish.contains(set_):
+		if tlb[set_] == tag:
 			print "Hit ",
 		else:
 			print "Miss ",
+			tlb[set_] = tag
 		print ""	
 
 def main():
