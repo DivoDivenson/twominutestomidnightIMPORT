@@ -1,59 +1,53 @@
-# 1 "./phone.pml"
+# 1 "./final_final.pml"
 # 1 "<built-in>"
 # 1 "<command-line>"
-# 1 "./phone.pml"
+# 1 "./final_final.pml"
 
 
-mtype = { offhook, dialtone, number, ringing,
-        busy, connected, hangup, hungup };
+mtype = { SYN, ACK, REQUEST, TRYING, BUSY, CON, TERM, END };
 
 
 chan line = [0] of { mtype, chan };
-
-
-
-
-
-
-active proctype central_office()
-{ chan who;
-idle: line?offhook,who;
-        { who!dialtone;
-                who?number;
+# 18 "./final_final.pml"
+active proctype recevier()
+{ chan sub;
+idle: line ? SYN,sub;
+        { sub ! ACK;
+                sub ? REQUEST;
                 if
-                :: who!busy; goto zombie
-                :: who!ringing ->
-                        who!connected;
+                :: sub ! BUSY; goto zombie
+                :: sub ! TRYING ->
+                        sub ! CON;
                         if
-                        :: who!hungup; goto zombie
+                        :: sub ! END; goto zombie
                         :: skip
                         fi
                 fi
          } unless
          { if
-                :: who?hangup -> goto idle
+                :: sub ? TERM -> goto idle
                 :: timeout -> goto zombie
                 fi
           }
-zombie: who?hangup; goto idle
+zombie: sub ? TERM; goto idle
 }
 
-active proctype subscriber()
-{ chan me = [0] of { mtype };
-idle: line!offhook,me;
-      me?dialtone;
-      me!number;
+active [4] proctype sender()
+{ chan connection = [0] of { mtype };
+idle: line ! SYN,connection;
+      connection ? ACK;
+      connection ! REQUEST;
       if
-      :: me?busy
-      :: me?ringing ->
+      :: connection ? BUSY;
+      :: connection ? TRYING ->
               if
-              :: me?connected;
+              :: connection ? CON;
                       if
-                      :: me?hungup
+                      :: connection ? END
                       :: timeout
                       fi
               :: skip
               fi
       fi;
-      me!hangup; goto idle
+      connection ! TERM; goto idle
 }

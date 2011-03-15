@@ -16,44 +16,44 @@ chan line = [0] of { mtype, chan };
 */
 active proctype central_office()
 {       chan who;
-idle:   line?offhook,who; //Get connection from subscriber
-        {       who!dialtone; //Send a dial tone
-                who?number;  //Get requested number
+idle:   line ? offhook,who; //Get connection from subscriber
+        {       who ! dialtone; //Send a dial tone
+                who ? number;  //Get requested number
                 if //Promela only executes one of these statements cous it's mad as a bag of hammers
-                :: who!busy; goto zombie //If number is busy hangup
-                :: who!ringing ->
-                        who!connected;
+                :: who ! busy; goto zombie //If number is busy hangup
+                :: who ! ringing ->
+                        who ! connected;
                         if
-                        :: who!hungup; goto zombie //Hangup when the number client request hangs up
+                        :: who ! hungup; goto zombie //Hangup when the number client request hangs up
                         :: skip //Just so we dont hang up straight away
                         fi
                 fi
          } unless
          {      if
-                :: who?hangup -> goto idle //During the execution of above, if the subscriber hangs up at any moment
+                :: who ? hangup -> goto idle //During the execution of above, if the subscriber hangs up at any moment
                 :: timeout -> goto zombie  //Or if no statement in any active process is executable
                 fi
           }
-zombie: who?hangup; goto idle
+zombie: who ? hangup; goto idle
 }
 
 active proctype subscriber()
 {       chan me = [0] of { mtype };
-idle: line!offhook,me; //Connect to central office ( Simulate user lifting handset )
-      me?dialtone; //"Wait" for dialtone 
-      me!number; //Send number to dial
+idle: line ! offhook,me; //Connect to central office ( Simulate user lifting handset )
+      me ? dialtone; //"Wait" for dialtone 
+      me ! number; //Send number to dial
       if
-      :: me?busy
-      :: me?ringing ->
+      :: me ? busy
+      :: me ? ringing ->
               if
-              :: me?connected;
+              :: me ? connected;
                       if
-                      :: me?hungup
+                      :: me ? hungup
                       :: timeout
                       fi
               :: skip
               fi
       fi;
-      me!hangup; goto idle
+      me ! hangup; goto idle
 }
 
