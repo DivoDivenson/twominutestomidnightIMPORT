@@ -21,21 +21,21 @@ idle:   line ? SYN,sub; //Get connection from subscriber
         {       sub ! ACK; //Send a dial tone
                 sub ? REQUEST;  //Get requested number
                 if //Proconnectionla only executes one of these statements cous it's mad as a bag of hammers
-                :: sub ! BUSY; goto zombie //If REQUEST is busy TERM
+                :: sub ! BUSY; goto wait //If REQUEST is busy TERM
                 :: sub ! TRYING ->
                         sub ! CON;
                         if
-                        :: sub ! END; goto zombie //Hangup when the REQUEST client request hangs up
+                        :: sub ! END; goto wait //Hangup when the REQUEST client request hangs up
                         :: skip //Just so we dont hang up straight away
                         fi
                 fi
          } unless
          {      if
                 :: sub ? TERM -> goto idle //During the execution of above, if the subscriber hangs up at any moconnectionnt
-                :: timeout -> goto zombie  //Or if no statement in any active process is executable
+                :: timeout -> goto wait  //Or if no statement in any active process is executable
                 fi
           }
-zombie: sub ? TERM; goto idle
+wait: sub ? TERM; goto idle
 }
 //Subscribers
 active [4] proctype sender()
