@@ -1,7 +1,10 @@
 mtype {MSG, ACK}
 
-chan toS = [2] of {mtype, bit};
-chan toR = [2] of {mtype, bit};
+chan toS = [0] of {mtype, bit};
+chan toR = [0] of {mtype, bit};
+//! means send over channel
+//? means recv over channel
+
 
 proctype Sender(chan in_, out){
 
