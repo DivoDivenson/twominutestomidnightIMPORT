@@ -168,8 +168,8 @@ public class ResultSetTableModel extends AbstractTableModel {
 		metaData = resultSet.getMetaData();
 
 		// determine number of rows in ResultSet
-		resultSet.last(); // move to last row
-		numberOfRows = resultSet.getRow(); // get row number
+		//resultSet.last(); // move to last row
+		//numberOfRows = resultSet.getRow(); // get row number
 
 		// notify JTable that model has changed
 		fireTableStructureChanged();
