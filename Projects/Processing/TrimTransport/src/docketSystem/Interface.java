@@ -300,7 +300,7 @@ public class Interface extends JFrame {
 									+ invoice.getTime()
 									+ "');"));
 
-			resultSet = statement.executeQuery("SELECT LAST_INSERT_ID()");
+			resultSet = statement.executeQuery("SELECT Docket_Number from docket where ");
 			resultSet.next();
 
 			tableModel.setQuery(DEFAULT_QUERY + TERM);
