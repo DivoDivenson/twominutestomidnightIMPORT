@@ -6,12 +6,7 @@ package docketSystem;
  * INVOICE = DOCKET in my own crazy mind
  * **************************** 
  */
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -40,7 +35,9 @@ import org.jopendocument.print.DefaultDocumentPrinter;
  */
 public class Interface extends JFrame {
 	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
+	static final String LITE_DRIVER = "org.sqlite.JDBC";
 	static final String DATABASE_URL = "jdbc:mysql://localhost/trimtransport";
+	static final String LITEURL = "jdbc:sqlite:trim.db";
 	static final String USERNAME = "trim";
 	static final String PASSWORD = "truck";
 	static final String DEFAULT_QUERY = "SELECT docket.Docket_Number, docket.Date_, addresses.address, addresses1.address,"
@@ -93,11 +90,14 @@ public class Interface extends JFrame {
 
 		// JTable for database of doc
 		try {
-			Class.forName(JDBC_DRIVER);
+			/*Class.forName(JDBC_DRIVER);
 			connection = DriverManager.getConnection(DATABASE_URL, USERNAME,
 					PASSWORD);
 			tableModel = new ResultSetTableModel(JDBC_DRIVER, connection,
-					DEFAULT_QUERY + TERM);
+					DEFAULT_QUERY + TERM);*/
+			Class.forName(LITE_DRIVER);
+			connection = DriverManager.getConnection(LITEURL);
+			tableModel = new ResultSetTableModel(LITE_DRIVER, connection, DEFAULT_QUERY + TERM);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
