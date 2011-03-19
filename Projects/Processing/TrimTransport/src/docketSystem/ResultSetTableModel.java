@@ -42,7 +42,8 @@ public class ResultSetTableModel extends AbstractTableModel {
 
 		// create Statement to query database
 		statement = connection.createStatement(
-				ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+				//ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+				ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
 		// update database connection status
 		connectedToDatabase = true;
