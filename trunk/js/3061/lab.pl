@@ -1,7 +1,6 @@
- Prolog Code:
 
-normalizeRight( left(L),L) : - !.
-normalizeRight ( L, right (L)).
+normalizeRight(left(L),L) : - !.
+normalizeRight(L,right(L)).
 
 % Q4
 
@@ -10,20 +9,20 @@ normalizeLeft( L, left(L)).
 
 
 
-holdPrim ( intState(q0), init ).
-holdPrim ( headPos(0), init ) .
+holdPrim( intState(q0), init ).
+holdPrim( headPos(0), init ) .
 
-poss ( moveRight, Situation ) : -
+poss( moveRight, Situation ):-
 	mr(Q,X,Qnew),
-	holdPrim ( intState(Q), Situation),
-	holds ( derAt(X,Loc), Situation ),
+	holdPrim( intState(Q), Situation),
+	holds( derAt(X,Loc), Situation ),
 	holdPrim( headPos( Loc ), Situation ).
 	
-delL ( moveRight, Situation, intState(Q)) :-
-	holdPrim ( intState(Q), Situation ). 
+delL( moveRight, Situation, intState(Q)) :-
+	holdPrim( intState(Q), Situation ). 
 
 delL(moveRight, Situation, headPos(Loc)) :-
-	holdPrim(Los), Situation).
+	holdPrim((Los), Situation).
 
 addL(moveRight, Situation, intState(Q)) :-
 	mr(Q0, X, Q),
@@ -48,4 +47,4 @@ holds(derAt(X, Loc), Situation) :- holdPrim(at(X, Loc), Situation), !.
 
 holds(derAt(b-k,Loc), Situation).
 
-not(P) :- P, !, fail ; true. % Is this built in?
+%not(P) :- P, !, fail ; true. % Is this built in?
