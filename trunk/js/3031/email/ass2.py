@@ -19,6 +19,7 @@ def mail(to, subject, body):
 	msg.attach(MIMEText(body))
 
 	#Set up client session
+	print("Opening connection...")
 	mailServer = smtplib.SMTP("smtp.gmail.com", 587)
 	#Identify as Extended SMTP server. Makes gmail like us
 	mailServer.ehlo()
@@ -36,7 +37,7 @@ def mail(to, subject, body):
 
 def main():
 
-	mail("divodivenson@gmail.com", "Hello!", "This is a test, I hope it went well");
+	mail("assign2.test@gmail.com", "Hello!", "This is a test, I hope it went well");
 
 if __name__ == '__main__':
 	main()
