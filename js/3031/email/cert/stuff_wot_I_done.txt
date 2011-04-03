@@ -1,0 +1,3 @@
+Copied the config file, openssl.cnf and CA creation script, CA.pl to here
+
+ran CA.pl -newca
