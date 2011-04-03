@@ -1,22 +1,34 @@
+#! /usr/bin/python
+
 import curses
 from os import system
 import os
+import smtplib
+import email.utils
+from email.mime.text import MIMEText
 stdscr = curses.initscr()
 #Not gonna sanatize user input
 
 
 def gen_key(user):
-	keys = "keys/%s" %(user)
+	keys = "./keys/%s" %(user)
 	if not os.path.exists(keys): #Don't regerate the keys
 		os.makedirs(keys)
 		os.popen("openssl genrsa -out %s/private_key.pem 1024" %(keys))
 		os.popen("openssl rsa -in %s/private_key.pem -out %s/public_key.pem -outform PEM -pubout" %(keys, keys))
 	
-#Sign with users private key
-def sign(body, user)
-	keys = "keys/%s" %(user)
+#Sign digest with users private key. Did not know we had to do this
+def sign(body, user):
+	keys = "./keys/%s" %(user)
 	private_key = keys + '/' + "private_key.pem"
-	os.popen(
+	print private_key
+	os.popen("openssl dgst -sha1 -sign %s -out %s %s" %(private_key, "/tmp/digest","/tmp/body"))
+
+
+def encrypt(text, user, password):
+	keys = "./keys/%s" % user
+	private_key = keys + '/' + "private_key.pem"
+	pipe = os.popen("openssl enc -aes-256-cbc -salt -in /tmp/mail -pass pass:%s > encrypted" %password)
 
 
 def get_input(prompt):
@@ -52,14 +64,45 @@ def init_curses():
 			body = ""
 			for line in f:
 				body += line
-	else:
-		#to = get_input("To:")
-		to = "assign2.test@gmail.com"
-		#from_ = get_input("From:")
-		from = "assign2.test@gmail.com"
+				print line
+		else:
+			#to = get_input("To:")
+			to = "assign2.test@gmail.com"
+			#from_ = get_input("From:")
+			from_ = "assign2.test@gmail.com"
+			#And subject / body to do
+			#subject = get_input("Subject:")
+			subject = "Test mail"
+			#body = get_input("Body: ")
+			body = "This is a test\nI do hope it works"
 
-	gen_key(to)
+	#Need to write it out in order to sign it. I guess this is where using a wrapper library would have been better than just throwing the lifting 
+	#out to the terminal
+	f = open("/tmp/body", 'w')
+	f.write(body)
+	f.close
+	#Make the keys
+	gen_key(from_)
+	#Get sha1 repr of body of the mail
+	sign(body, from_)
+	passphrase = get_input("Enter passphrase")
+	encrypt(body, from_, passphrase)
+	f = open("./encrypted") #If something goes wrong it's probably due to writing the thing out to disk
+	encrypted_body = ""
+	for line in f:
+		encrypted_body += line
+	send_mail(encrypted_body, subject, to, from_)	
+	
 	stdscr.clear()
+def send_mail(body, subject, to, from_):
+	msg = MIMEText(body)
+	msg['Subject'] = subject
+	msg['From'] = from_
+	msg['To'] = to
+	
+	s = smtplib.SMTP('127.0.0.1', 1026)
+	s.sendmail(from_, to, msg.as_string())
+	s.quit()
 
 def main():
 	init_curses()	
