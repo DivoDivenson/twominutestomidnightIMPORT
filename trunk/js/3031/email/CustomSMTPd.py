@@ -29,7 +29,7 @@ class MySMTPChannel(smtpd.SMTPChannel):
 	def collect_incomming_data(self, data):
 		self.__line.append(data)
 		print data
-	
+#Extend SMTPChannel and overwrite it's handle read method ( from async_chat). Simple. Not	
 	def handle_read(self):
 		print "Getting data"
 		print repr(self.recv(1024))
