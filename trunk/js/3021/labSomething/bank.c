@@ -18,23 +18,25 @@ int count_var = 0;
 void lock(){
   	
 	__asm__(
+		"mov $1, %edx;"
 		"mov lock_var, %eax;"
 		"jmp start;"
 			"count:;"
-				"addl $1,count_var;"
+			//	"addl $1,count_var;"
 			"start:;"
+				//Check if the lock is free
 				"test %eax, %eax;"
 				"jnz count;"
-
+				//Now try set the lock
 				"lock cmpxchg %edx, lock_var;"
-
 				"test %eax, %eax;"
 				"jnz count"
+			
 			/*	"cmpl $0, lock_var;"
 				"jne count;"
 				"movl $1, lock_var"
 			*///	"lock cmpxchg %edx, lock_var;"
-				//"test %eax, %eax;"
+				//"test %eax, %eax;" This instruction does not work
 			//	"cmpl $0, %eax;"
 			//	"jnz count;"
 		//		"ret;" 
@@ -48,7 +50,8 @@ void unlock(){
 			"xchg %edx, lock_var;"
 			"movl $0, lock_var;"
 			"ret;"
-	*/		"movl $0, lock_var;"
+	*/	
+		"movl $0, lock_var;"
 	);
 
 }
@@ -63,11 +66,14 @@ void* transfare(void * argument){
 	int i;
 	int amount;
 	int one = 1;
-	for(i = 0; i < 100; i++){
+	for(i = 0; i < 1000; i++){
 		amount = rand() % 21;
+		lock();
+		//printf("Lock acquired\n");
+		
 //		printf("%d\n", amount);
 	//	printf("lock\n");
-		lock();
+		//lock();
 		if( *srcB < amount){
 			amount = *srcB;
 		}
@@ -77,7 +83,10 @@ void* transfare(void * argument){
 		}
 	//	printf("Unlock\n");
 		unlock();
+		//printf("Lock released %d\n", i);
 	}
+	printf("Done\n");
+	//pthread_exit(NULL);
 	//unlock();
 }
 
@@ -98,8 +107,11 @@ int main(){
 	pthread_create(&threads[1], NULL, transfare, (void *) &b);
 	pthread_create(&threads[2], NULL, transfare, (void *) &c);
 	for(i=0; i< 3; i++){
+		printf("Joining\n");
 		pthread_join(threads[i], NULL);
+		printf("Killed %d\n", i);
 	}
+	printf("Hello\n");
 	/*transfare(&a);
 	transfare(&b);
 	transfare(&c);
