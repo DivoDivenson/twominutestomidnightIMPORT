@@ -1,5 +1,5 @@
 #! /usr/bin/python
-
+import socket
 import curses
 from os import system
 import os
@@ -28,7 +28,7 @@ def sign(body, user):
 def encrypt(text, user, password):
 	keys = "./keys/%s" % user
 	private_key = keys + '/' + "private_key.pem"
-	pipe = os.popen("openssl enc -aes-256-cbc -salt -in /tmp/mail -pass pass:%s > encrypted" %password)
+	pipe = os.popen("openssl enc -aes-256-cbc -salt -in /tmp/body -pass pass:%s > encrypted" %password)
 
 
 def get_input(prompt):
@@ -40,6 +40,12 @@ def get_input(prompt):
 	input = stdscr.getstr(3,3, 60)
 	return input
 
+def get_bool_input(prompt):
+	stdscr.clear()
+	stdscr.border(0)
+	stdscr.addstr(2,2,prompt)
+	input = stdscr.getch()
+	return input
 
 def init_curses():
 
@@ -48,13 +54,14 @@ def init_curses():
 	stdscr.addstr(0, 25, "Email client")
 	stdscr.addstr(2,2, "Menu:")
 	stdscr.addstr(4,4, "1 - Send mail")
+	stdscr.addstr(5,4, "2 - Get mail")
 #More to come
 	stdscr.refresh()
 
 	key = stdscr.getch()
 	if key == ord('1'):
-		input_type = get_input("Input from file? Y/N")
-		if(input_type == 'Y'):
+		input_type = get_bool_input("Input from file? Y/N")
+		if (input_type == 'Y'):
 			path = get_input("File location:")
 			print path
 			f = open(path)
@@ -76,23 +83,32 @@ def init_curses():
 			#body = get_input("Body: ")
 			body = "This is a test\nI do hope it works"
 
-	#Need to write it out in order to sign it. I guess this is where using a wrapper library would have been better than just throwing the lifting 
-	#out to the terminal
-	f = open("/tmp/body", 'w')
-	f.write(body)
-	f.close
-	#Make the keys
-	gen_key(from_)
-	#Get sha1 repr of body of the mail
-	sign(body, from_)
-	passphrase = get_input("Enter passphrase")
-	encrypt(body, from_, passphrase)
-	f = open("./encrypted") #If something goes wrong it's probably due to writing the thing out to disk
-	encrypted_body = ""
-	for line in f:
-		encrypted_body += line
-	send_mail(encrypted_body, subject, to, from_)	
-	
+		#Need to write it out in order to sign it. I guess this is where using a wrapper library would have been better than just throwing the lifting 
+		#out to the terminal
+		f = open("/tmp/body", 'w')
+		f.write(body)
+		f.close
+		#Make the keys
+		gen_key(from_)
+		#Get sha1 repr of body of the mail
+		sign(body, from_)
+		passphrase = get_input("Enter passphrase")
+		encrypt(body, from_, passphrase)
+		f = open("./encrypted") #If something goes wrong it's probably due to writing the thing out to disk
+		encrypted_body = ""
+		for line in f:
+			encrypted_body += line
+		send_mail(encrypted_body, subject, to, from_)	
+	#Get mail
+	elif  key == ord('2'):	
+		user = get_input("Please enter user name:")
+		s = smtplib.SMTP('127.0.0.1', 1026)
+		#s.helo()
+		s.send(user)
+		#(family, _, _, _, _) =socket.getaddrinfo('127.0.0.1', 1026)[0]
+		#s = socket.socket(family)
+		#s.send("hello")
+		s.close()
 	stdscr.clear()
 def send_mail(body, subject, to, from_):
 	msg = MIMEText(body)
