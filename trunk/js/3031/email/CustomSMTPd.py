@@ -1,5 +1,7 @@
 import smtpd
 import asyncore
+import socket
+from smtpd import SMTPChannel
 
 class CustomServer(smtpd.SMTPServer):
 	def process_message(self, sender, sender_addr, rec, data):
@@ -16,6 +18,21 @@ class CustomServer(smtpd.SMTPServer):
 		f.close
 		return
 
+
+	def handle_accept(self):
+		conn, addr = self.accept()
+		print "Incomming! %s" % repr(addr)
+		mychannel = MySMTPChannel(self, conn, addr)
+
+class MySMTPChannel(smtpd.SMTPChannel):
+
+	def collect_incomming_data(self, data):
+		self.__line.append(data)
+		print data
+	
+	def handle_read(self):
+		print "Getting data"
+		print repr(self.recv(1024))
 try:
 	server = CustomServer(('127.0.0.1', 1026), None)
 
