@@ -11,7 +11,6 @@ from email.MIMEBase import MIMEBase
 from email.MIMEText import MIMEText
 from email.MIMEAudio import MIMEAudio
 from email.MIMEImage import MIMEImage
-
 class CustomServer(smtpd.SMTPServer):
 	def process_message(self, sender, sender_addr, rec, data):
 		print "Saving message addressed to ", rec
@@ -22,13 +21,6 @@ class CustomServer(smtpd.SMTPServer):
 		f = open(mails, 'w')
 		f.write(sender_addr)
 		f.write(rec[0]) #Assume only one receiver for the moment, this also overwrites any previous mails
-		'''
-		msg = email.message_from_string(data)	
-		for part in msg.walk():
-			if part.get_content_type() == "text/plain":
-				e_body = part.get_payload(decode=True)
-		'''		
-		
 		f.write(data)
 		f.close
 		return

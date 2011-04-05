@@ -1,5 +1,5 @@
 assign2.test@gmail.com
-divoapple@gmail.com
+assign2.test@gmail.com
 Hello!
 This is a test email, I hope it works.
 More lines.
