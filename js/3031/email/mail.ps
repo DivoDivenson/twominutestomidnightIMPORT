@@ -1,0 +1,1312 @@
+%!PS-Adobe-3.0
+%%Title: mymail.py
+%%For: Mr.Divenson
+%%Creator: a2ps version 4.14
+%%CreationDate: Tue Apr  5 22:04:22 2011
+%%BoundingBox: 24 24 571 818
+%%DocumentData: Clean7Bit
+%%Orientation: Landscape
+%%Pages: 2
+%%PageOrder: Ascend
+%%DocumentMedia: A4 595 842 0 () ()
+%%DocumentNeededResources: font Courier
+%%+ font Courier-Bold
+%%+ font Courier-BoldOblique
+%%+ font Courier-Oblique
+%%+ font Helvetica
+%%+ font Helvetica-Bold
+%%+ font Symbol
+%%+ font Times-Bold
+%%+ font Times-Roman
+%%DocumentProcessColors: Black 
+%%DocumentSuppliedResources: procset a2ps-a2ps-hdr
+%%+ procset a2ps-black+white-Prolog
+%%+ encoding ISO-8859-1Encoding
+%%EndComments
+/a2psdict 200 dict def
+a2psdict begin
+%%BeginProlog
+%%Copyright: (c) 1988, 89, 90, 91, 92, 93 Miguel Santana
+%%Copyright: (c) 1995, 96, 97, 98 Akim Demaille, Miguel Santana
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+
+% EPSF import as in the Red Book
+/BeginInclude {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack 
+  userdict begin
+    0 setgray 0 setlinecap
+    1 setlinewidth 0 setlinejoin
+    10 setmiterlimit [ ] 0 setdash newpath
+    gs_languagelevel 1 ne {
+      false setstrokeadjust false setoverprint 
+    } if
+} bind def
+
+/EndInclude {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+/BeginEPSF {
+  BeginInclude
+  /showpage { } def
+} bind def
+
+/EndEPSF {
+  EndInclude
+} bind def
+
+% Page prefeed
+/page_prefeed {         % bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} bind def
+
+/deffont {
+  findfont exch scalefont def
+} bind def
+
+/reencode_font {
+  findfont reencode 2 copy definefont pop def
+} bind def
+
+% Function c-show (str => -)
+% centers text only according to x axis.
+/c-show { 
+  dup stringwidth pop
+  2 div neg 0 rmoveto
+  show
+} bind def
+
+% Function l-show (str => -)
+% prints texts so that it ends at currentpoint
+/l-show {
+  dup stringwidth pop neg 
+  0 
+  rmoveto show
+} bind def
+
+% center-fit show (str w => -)
+% show centered, and scale currentfont so that the width is less than w
+/cfshow {
+  exch dup stringwidth pop
+  % If the title is too big, try to make it smaller
+  3 2 roll 2 copy
+  gt
+  { % if, i.e. too big
+    exch div
+    currentfont exch scalefont setfont
+  } { % ifelse
+    pop pop 
+  }
+  ifelse
+  c-show			% center title
+} bind def
+
+% Return the y size of the current font
+% - => fontsize
+/currentfontsize {
+  currentfont /FontType get 0 eq {
+    currentfont /FontMatrix get 3 get
+  }{
+    currentfont /FontMatrix get 3 get 1000 mul
+  } ifelse
+} bind def
+
+% reencode the font
+% <encoding-vector> <fontdict> -> <newfontdict>
+/reencode { %def
+  dup length 5 add dict begin
+    { %forall
+      % <vector> <key> <val>
+      1 index /FID ne 
+      { def }{ pop pop } ifelse
+    } forall
+    /Encoding exch def % -
+
+    % Use the font's bounding box to determine the ascent, descent,
+    % and overall height; don't forget that these values have to be
+    % transformed using the font's matrix.
+    % We use `load' because sometimes BBox is executable, sometimes not.
+    % Since we need 4 numbers an not an array avoid BBox from being executed
+    /FontBBox load aload pop
+    FontMatrix transform /Ascent exch def pop
+    FontMatrix transform /Descent exch def pop
+    /FontHeight Ascent Descent sub def
+
+    % Get the underline position and thickness if they're defined.
+    % Use 1 if they are not defined.
+    currentdict /FontInfo 2 copy known
+    { get
+      /UnderlinePosition 2 copy % <FontInfo> /UP <FontInfo> /UP
+      2 copy known
+      { get }{ pop pop 1 } ifelse
+      0 exch FontMatrix transform exch pop
+      def % <FontInfo>
+
+      /UnderlineThickness 2 copy % <FontInfo> /UT <FontInfo> /UT
+      2 copy known
+      { get }{ pop pop 1 } ifelse
+      0 exch FontMatrix transform exch pop
+      def % <FontInfo>
+      pop % -
+    }{ pop pop
+    } ifelse
+
+    currentdict
+  end 
+} bind def
+
+% composite fonts for ASCII-EUC mixed strings
+% Version 1.2 1/31/1990
+% Original Ken'ichi HANDA (handa@etl.go.jp)
+% Modified Norio Katayama (katayama@rd.nacsis.ac.jp),1998
+% Extend & Fix Koji Nakamaru (maru@on.cs.keio.ac.jp), 1999
+% Anyone can freely copy, modify, distribute this program.
+
+/copyfont {	% font-dic extra-entry-count  copyfont  font-dic
+	1 index maxlength add dict begin
+	{	1 index /FID ne 2 index /UniqueID ne and
+		{def} {pop pop} ifelse
+	} forall
+	currentdict
+	end
+} bind def
+
+/compositefont { % ASCIIFontName EUCFontName RomanScale RomanOffset Rot(T/F) compositefont font
+    /RomanRotation exch def
+    /RomanOffset exch def
+    /RomanScale exch def
+    userdict /fixeucfont_dict known not {
+	userdict begin
+	    /fixeucfont_dict 2 dict begin
+		/UpperByteEncoding [
+		    16#00 1 16#20 { pop 0 } for
+		    16#21 1 16#28 { 16#20 sub } for
+		    16#29 1 16#2F { pop 0 } for
+		    16#30 1 16#74 { 16#27 sub } for
+		    16#75 1 16#FF { pop 0 } for
+		] def
+	        /LowerByteEncoding [
+		    16#00 1 16#A0 { pop /.notdef } for
+		    16#A1 1 16#FE { 16#80 sub 16 2 string cvrs
+				    (cXX) dup 1 4 -1 roll
+				    putinterval cvn } for
+		    /.notdef
+		] def
+		currentdict
+	    end def
+	end
+    } if
+    findfont dup /FontType get 0 eq {
+	14 dict begin
+	    %
+	    % 7+8 bit EUC font
+	    %
+	    12 dict begin
+		/EUCFont exch def
+		/FontInfo (7+8 bit EUC font) readonly def
+		/PaintType 0 def
+		/FontType 0 def
+		/FontMatrix matrix def
+		% /FontName
+		/Encoding fixeucfont_dict /UpperByteEncoding get def
+		/FMapType 2 def
+		EUCFont /WMode known
+		{ EUCFont /WMode get /WMode exch def }
+		{ /WMode 0 def } ifelse
+		/FDepVector [
+		    EUCFont /FDepVector get 0 get
+		    [ 16#21 1 16#28 {} for 16#30 1 16#74 {} for ]
+		    {
+			13 dict begin
+			    /EUCFont EUCFont def
+			    /UpperByte exch 16#80 add def	
+			    % /FontName
+			    /FontInfo (EUC lower byte font) readonly def
+			    /PaintType 0 def
+			    /FontType 3 def
+			    /FontMatrix matrix def
+			    /FontBBox {0 0 0 0} def
+			    /Encoding
+				fixeucfont_dict /LowerByteEncoding get def
+			    % /UniqueID
+			    % /WMode
+			    /BuildChar {
+				gsave
+				exch dup /EUCFont get setfont
+				/UpperByte get
+				2 string
+				dup 0 4 -1 roll put
+				dup 1 4 -1 roll put
+				dup stringwidth setcharwidth
+				0 0 moveto show
+				grestore
+			    } bind def
+			    currentdict
+			end
+			/lowerbytefont exch definefont
+		    } forall
+		] def
+		currentdict
+	    end
+	    /eucfont exch definefont
+	    exch
+	    findfont 1 copyfont dup begin
+		RomanRotation {
+			/FontMatrix FontMatrix
+			[ 0 RomanScale neg RomanScale 0 RomanOffset neg 0 ]
+			matrix concatmatrix def
+		}{
+			/FontMatrix FontMatrix
+			[ RomanScale 0 0 RomanScale 0 RomanOffset ] matrix concatmatrix
+			def
+			/CDevProc
+			    {pop pop pop pop 0 exch -1000 exch 2 div 880} def
+		} ifelse
+	    end
+	    /asciifont exch definefont
+	    exch
+	    /FDepVector [ 4 2 roll ] def
+	    /FontType 0 def
+	    /WMode 0 def
+	    /FMapType 4 def
+	    /FontMatrix matrix def
+	    /Encoding [0 1] def
+	    /FontBBox {0 0 0 0} def
+%	    /FontHeight 1.0 def % XXXX
+	    /FontHeight RomanScale 1.0 ge { RomanScale }{ 1.0 } ifelse def
+	    /Descent -0.3 def   % XXXX
+	    currentdict
+	end
+	/tmpfont exch definefont
+	pop
+	/tmpfont findfont
+    }{
+	pop findfont 0 copyfont
+    } ifelse
+} def	
+
+/slantfont {	% FontName slant-degree  slantfont  font'
+    exch findfont 1 copyfont begin
+    [ 1 0 4 -1 roll 1 0 0 ] FontMatrix exch matrix concatmatrix
+    /FontMatrix exch def
+    currentdict
+    end
+} def
+
+% Function print line number (<string> # -)
+/# {
+  gsave
+    sx cw mul neg 2 div 0 rmoveto
+    f# setfont
+    c-show
+  grestore
+} bind def
+
+% -------- Some routines to enlight plain b/w printings ---------
+
+% Underline
+% width --
+/dounderline {
+  currentpoint
+  gsave
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    0 rlineto
+    stroke
+  grestore
+} bind def
+
+% Underline a string
+% string --
+/dounderlinestring {
+  stringwidth pop
+  dounderline
+} bind def
+
+/UL {
+  /ul exch store
+} bind def
+
+% Draw a box of WIDTH wrt current font
+% width --
+/dobox {
+  currentpoint
+  gsave
+    newpath
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    dup 0 rlineto
+    0 currentfont /FontHeight get currentfontsize mul rlineto
+    neg 0 rlineto
+    closepath
+    stroke
+  grestore
+} bind def
+
+/BX {
+  /bx exch store
+} bind def
+
+% Box a string
+% string --
+/doboxstring {
+  stringwidth pop
+  dobox
+} bind def
+
+%
+% ------------- Color routines ---------------
+%
+/FG /setrgbcolor load def
+
+% Draw the background
+% width --
+/dobackground {
+  currentpoint
+  gsave
+    newpath
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    dup 0 rlineto
+    0 currentfont /FontHeight get currentfontsize mul rlineto
+    neg 0 rlineto
+    closepath
+    bgcolor aload pop setrgbcolor
+    fill
+  grestore
+} bind def
+
+% Draw bg for a string
+% string --
+/dobackgroundstring {
+  stringwidth pop
+  dobackground
+} bind def
+
+
+/BG {
+  dup /bg exch store
+  { mark 4 1 roll ] /bgcolor exch store } if
+} bind def
+
+
+/Show {
+  bg { dup dobackgroundstring } if
+  ul { dup dounderlinestring } if
+  bx { dup doboxstring } if
+  show
+} bind def
+
+% Function T(ab), jumps to the n-th tabulation in the current line
+/T {
+  cw mul x0 add
+  bg { dup currentpoint pop sub dobackground } if
+  ul { dup currentpoint pop sub dounderline } if
+  bx { dup currentpoint pop sub dobox } if
+  y0 moveto
+} bind def
+
+% Function n: move to the next line
+/n {
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+% Function N: show and move to the next line
+/N {
+  Show
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+/S {
+  Show
+} bind def
+
+%%BeginResource: procset a2ps-a2ps-hdr 2.0 2
+%%Copyright: (c) 1988, 89, 90, 91, 92, 93 Miguel Santana
+%%Copyright: (c) 1995, 96, 97, 98 Akim Demaille, Miguel Santana
+% Function title: prints page header.
+% <ct> <rt> <lt> are passed as argument
+/title { 
+  % 1. Draw the background
+  x v get y v get moveto
+  gsave
+    0 th 2 div neg rmoveto 
+    th setlinewidth
+    0.95 setgray
+    pw 0 rlineto stroke
+  grestore
+  % 2. Border it
+  gsave
+    0.7 setlinewidth
+    pw 0 rlineto
+    0 th neg rlineto
+    pw neg 0 rlineto
+    closepath stroke
+  grestore
+  % stk: ct rt lt
+  x v get y v get th sub 1 add moveto
+%%IncludeResource: font Helvetica
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  % 3. The left title
+  gsave
+    dup stringwidth pop fnfs 0.8 mul add exch % leave space took on stack
+    fnfs 0.8 mul hm rmoveto
+    show			% left title
+  grestore
+  exch
+  % stk: ct ltw rt
+  % 4. the right title
+  gsave
+    dup stringwidth pop fnfs 0.8 mul add exch % leave space took on stack
+    dup
+    pw exch stringwidth pop fnfs 0.8 mul add sub
+    hm
+    rmoveto
+    show			% right title
+  grestore
+  % stk: ct ltw rtw
+  % 5. the center title
+  gsave
+    pw 3 1 roll
+    % stk: ct pw ltw rtw
+    3 copy 
+    % Move to the center of the left room
+    sub add 2 div hm rmoveto
+    % What is the available space in here?
+    add sub fnfs 0.8 mul sub fnfs 0.8 mul sub
+    % stk: ct space_left
+%%IncludeResource: font Helvetica-Bold
+  fHelvetica-Bold fnfs scalefont setfont
+    cfshow
+  grestore
+} bind def
+
+% Function border: prints virtual page border
+/border { %def
+  gsave				% print four sides
+    0 setgray
+    x v get y v get moveto
+    0.7 setlinewidth		% of the square
+    pw 0 rlineto
+    0 ph neg rlineto
+    pw neg 0 rlineto
+    closepath stroke
+  grestore
+} bind def
+
+% Function water: prints a water mark in background
+/water { %def
+  gsave
+    scx scy moveto rotate
+%%IncludeResource: font Times-Bold
+  fTimes-Bold 100 scalefont setfont
+    .97 setgray
+    dup stringwidth pop 2 div neg -50 rmoveto
+    show
+  grestore
+} bind def
+
+% Function rhead: prints the right header
+/rhead {  %def
+  lx ly moveto
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  l-show
+} bind def
+
+% Function footer (cf rf lf -> -)
+/footer {
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  dx dy moveto
+  show
+
+  snx sny moveto
+  l-show
+  
+  fnx fny moveto
+  c-show
+} bind def
+%%EndResource
+%%BeginResource: procset a2ps-black+white-Prolog 2.0 1
+
+% Function T(ab), jumps to the n-th tabulation in the current line
+/T { 
+  cw mul x0 add y0 moveto
+} bind def
+
+% Function n: move to the next line
+/n { %def
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+% Function N: show and move to the next line
+/N {
+  Show
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+}  bind def
+
+/S {
+  Show
+} bind def
+
+/p {
+  false UL
+  false BX
+  fCourier bfs scalefont setfont
+  Show
+} bind def
+
+/sy {
+  false UL
+  false BX
+  fSymbol bfs scalefont setfont
+  Show
+} bind def
+
+/k {
+  false UL
+  false BX
+  fCourier-Oblique bfs scalefont setfont
+  Show
+} bind def
+
+/K {
+  false UL
+  false BX
+  fCourier-Bold bfs scalefont setfont
+  Show
+} bind def
+
+/c {
+  false UL
+  false BX
+  fCourier-Oblique bfs scalefont setfont
+  Show
+} bind def
+
+/C {
+  false UL
+  false BX
+  fCourier-BoldOblique bfs scalefont setfont
+  Show 
+} bind def
+
+/l {
+  false UL
+  false BX
+  fHelvetica bfs scalefont setfont
+  Show
+} bind def
+
+/L {
+  false UL
+  false BX
+  fHelvetica-Bold bfs scalefont setfont
+  Show 
+} bind def
+
+/str{
+  false UL
+  false BX
+  fTimes-Roman bfs scalefont setfont
+  Show
+} bind def
+
+/e{
+  false UL
+  true BX
+  fHelvetica-Bold bfs scalefont setfont
+  Show
+} bind def
+
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier
+%%IncludeResource: font Courier-Oblique
+%%IncludeResource: font Courier-Bold
+%%IncludeResource: font Times-Roman
+%%IncludeResource: font Symbol
+%%IncludeResource: font Courier-BoldOblique
+%%BeginResource: encoding ISO-8859-1Encoding
+/ISO-8859-1Encoding [
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quoteright 
+/parenleft /parenright /asterisk /plus /comma /minus /period /slash 
+/zero /one /two /three /four /five /six /seven 
+/eight /nine /colon /semicolon /less /equal /greater /question 
+/at /A /B /C /D /E /F /G 
+/H /I /J /K /L /M /N /O 
+/P /Q /R /S /T /U /V /W 
+/X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore 
+/quoteleft /a /b /c /d /e /f /g 
+/h /i /j /k /l /m /n /o 
+/p /q /r /s /t /u /v /w 
+/x /y /z /braceleft /bar /braceright /asciitilde /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/space /exclamdown /cent /sterling /currency /yen /brokenbar /section 
+/dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron 
+/degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /bullet 
+/cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown 
+/Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla 
+/Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis 
+/Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply 
+/Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls 
+/agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla 
+/egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis 
+/eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide 
+/oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis 
+] def
+%%EndResource
+% Initialize page description variables.
+/sh 595 def
+/sw 842 def
+/llx 24 def
+/urx 818 def
+/ury 571 def
+/lly 24 def
+/#copies 1 def
+/th 15.000000 def
+/fnfs 11 def
+/bfs 8.005733 def
+/cw 4.803440 def
+
+% Dictionary for ISO-8859-1 support
+/iso1dict 8 dict begin
+  /fCourier ISO-8859-1Encoding /Courier reencode_font
+  /fCourier-Bold ISO-8859-1Encoding /Courier-Bold reencode_font
+  /fCourier-BoldOblique ISO-8859-1Encoding /Courier-BoldOblique reencode_font
+  /fCourier-Oblique ISO-8859-1Encoding /Courier-Oblique reencode_font
+  /fHelvetica ISO-8859-1Encoding /Helvetica reencode_font
+  /fHelvetica-Bold ISO-8859-1Encoding /Helvetica-Bold reencode_font
+  /fTimes-Bold ISO-8859-1Encoding /Times-Bold reencode_font
+  /fTimes-Roman ISO-8859-1Encoding /Times-Roman reencode_font
+currentdict end def
+/bgcolor [ 0 0 0 ] def
+/bg false def
+/ul false def
+/bx false def
+% The font for line numbering
+/f# /Helvetica findfont bfs .6 mul scalefont def
+/fSymbol /Symbol findfont def
+/hm fnfs 0.25 mul def
+/pw
+   cw 81.400000 mul
+def
+/ph
+   501.959430 th add
+def
+/pmw urx llx sub pw 2 mul sub 1 div def
+/pmh 0 def
+/v 0 def
+/x [
+  0
+  dup pmw add pw add
+] def
+/y [
+  pmh ph add 0 mul ph add
+  dup
+] def
+/scx sw 2 div def
+/scy sh 2 div def
+/snx urx def
+/sny lly 2 add def
+/dx llx def
+/dy sny def
+/fnx scx def
+/fny dy def
+/lx snx def
+/ly ury fnfs 0.8 mul sub def
+/sx 0 def
+/tab 8 def
+/x0 0 def
+/y0 0 def
+%%EndSetup
+
+%%Page: (1-2) 1
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(#! /usr/bin/python) c n
+(import) K
+( socket) p n
+(import) K
+( curses) p n
+(from) K
+( os ) p
+(import) K
+( system) p n
+(import) K
+( os) p n
+(import) K
+( smtplib) p n
+(import) K
+( email.utils) p n
+(from) K
+( email.mime.text ) p
+(import) K
+( MIMEText) p n
+(from) K
+( email.MIMEMultipart ) p
+(import) K
+( MIMEMultipart) p n
+(from) K
+( email.MIMEBase ) p
+(import) K
+( MIMEBase) p n
+(from) K
+( email.MIMEText ) p
+(import) K
+( MIMEText) p n
+(from) K
+( email.MIMEAudio ) p
+(import) K
+( MIMEAudio) p n
+(from) K
+( email.MIMEImage ) p
+(import) K
+( MIMEImage) p n
+(from) K
+( email ) p
+(import) K
+( encoders) p n
+(stdscr = curses.initscr\(\)) N
+(#Not gonna sanatize user input) c n
+() p n
+(#Check if key pair for user exists, if not then make one) c n
+(def) K
+( gen_key\(user\):) p n
+() S 8 T (keys = ") S
+(./keys/%s) str
+(" %\(user\)) p n
+() S 8 T () S
+(if) K
+( ) p
+(not) K
+( os.path.exists\(keys\): ) p
+(#Don't regerate the keys) c n
+() p 8 T () S 16 T (os.makedirs\(keys\)) N
+() S 8 T () S 16 T (os.popen\(") S
+(openssl genrsa -out %s/private_key.pem 1024) str
+(" %\(keys\)\)) p n
+() S 8 T () S 16 T (os.popen\(") S
+(openssl rsa -in %s/private_key.pem -out %s/public_key.pem -outform PEM -p) str n
+(ubout) S
+(" %\(keys, keys\)\)) p n
+() S 8 T () N
+(#Sign digest of message body with users private key.) c n
+(def) K
+( sign\(body, user\):) p n
+() S 8 T (keys = ") S
+(./keys/%s) str
+(" %\(user\)) p n
+() S 8 T (private_key = keys + ') S
+(/) str
+(' + ") p
+(private_key.pem) str
+(") p n
+() S 8 T () S
+(print) K
+( private_key) p n
+() S 8 T (os.popen\(") S
+(openssl dgst -sha1 -sign %s -out %s %s) str
+(" %\(private_key, ") p
+(/tmp/digest) str
+(",") p
+(/tmp/bo) str n
+(dy) S
+("\)\)) p n
+() N
+() N
+(#Encrypt message text with senders \(user\) private key) c n
+(def) K
+( encrypt\(text, user, password\):) p n
+() S 8 T (keys = ") S
+(./keys/%s) str
+(" % user) p n
+() S 8 T (private_key = keys + ') S
+(/) str
+(' + ") p
+(private_key.pem) str
+(") p n
+() S 8 T (pipe = os.popen\(") S
+(openssl enc -aes-256-cbc -salt -in /tmp/body -pass pass:%s > encrypted) str
+(" %pa) p n
+(ssword\)) N
+() N
+(#Get input from user. Wasting time doing this sure was a good idea) c n
+(def) K
+( get_input\(prompt\):) p n
+() S 8 T (stdscr.clear\(\)) N
+() S 8 T (stdscr.border\(0\)) N
+() S 8 T (stdscr.addstr\(2, 2, prompt\)) N
+() S 8 T (stdscr.refresh\(\)) N
+() S 8 T () S
+(#3rd arg is the length of the string) c n
+() p 8 T (input = stdscr.getstr\(3,3, 60\)) N
+() S 8 T () S
+(return) K
+( input) p n
+() N
+(#Get a single charater from user. Another well spent few minutes) c n
+(def) K
+( get_bool_input\(prompt\):) p n
+() S 8 T (stdscr.clear\(\)) N
+() S 8 T (stdscr.border\(0\)) N
+() S 8 T (stdscr.addstr\(2,2,prompt\)) N
+() S 8 T (input = stdscr.getch\(\)) N
+() S 8 T () S
+(return) K
+( input) p n
+() N
+(#Verify the users cert against the CA cert) c n
+(def) K
+( get_pub_key\(user\):) p n
+(mymail.py) (Page 1/4) (Apr 05, 11 22:01) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p 8 T (user_cert = ") S
+(./cert/%s) str
+(" %user) p n
+() S 8 T () S
+(print) K
+( user_cert) p n
+() S 8 T (pipe = os.popen\(") S
+(openssl verify -CAfile ./cert/demoCA/cacert.pem %s/newcert.pem) str
+(" %user_ce) p n
+(rt\)) N
+() S 8 T (result = pipe.read\(\)) N
+() S 8 T () S
+(if) K
+( result.find\(") p
+(OK) str
+("\) != -1:) p n
+() S 8 T () S 16 T (os.popen\(") S
+(openssl x509 -inform pem -in %s/newcert.pem -pubkey -noout > %s) str
+(" %\(us) p n
+(er_cert, ") S
+(/tmp/user_public.pem) str
+("\)\)) p n
+() S 8 T () S 16 T () S
+(return) K
+( ") p
+(/tmp/user_public.pem) str
+(") p n
+() S 8 T () S
+(else) K
+(:) p n
+() S 8 T () S 16 T () S
+(print) K
+( ") p
+(Did not verify) str
+(") p n
+() S 8 T () S 16 T () S
+(return) K
+( None) p n
+() N
+() N
+(#Encrypt the passphrase the message is encrpyted with so it can be sent along wi) c n
+(th the message) N
+(def) K
+( encrypt_password\(passphrase, user\):) p n
+() S 8 T (pub_key = get_pub_key\(user\)) N
+() S 8 T () S
+(#Encrypt the passphrase with the public key) c n
+() p 8 T (pipe = os.popen\(") S
+(echo %s | openssl rsautl -encrypt -pubin -inkey %s -out /tmp/encrypted_pass) str
+(" ) p n
+(%\(passphrase, pub_key\)\)) N
+() N
+() N
+(def) K
+( init_curses\(\):) p n
+() N
+(#) c 8 T (stdscr = curses.initscr\(\)) N
+() p 8 T (stdscr.border\(0\)) N
+() S 8 T (stdscr.addstr\(0, 25, ") S
+(Email client) str
+("\)) p n
+() S 8 T (stdscr.addstr\(2,2, ") S
+(Menu:) str
+("\)) p n
+() S 8 T (stdscr.addstr\(4,4, ") S
+(1 - Send mail) str
+("\)) p n
+() S 8 T (stdscr.addstr\(5,4, ") S
+(2 - Get mail) str
+("\)) p n
+(#More to come) c n
+() p 8 T (stdscr.refresh\(\)) N
+() N
+(#All this code is horrible and really does nothing) c n
+() p 8 T (key = stdscr.getch\(\)) N
+() S 8 T () S
+(if) K
+( key == ord\(') p
+(1) str
+('\):) p n
+() S 8 T () S 16 T (input_type = get_bool_input\(") S
+(Input from file? Y/N) str
+("\)) p n
+() S 8 T () S 16 T () S
+(if) K
+( \(input_type == ') p
+(Y) str
+('\):) p n
+() S 8 T () S 16 T () S 24 T (path = get_input\(") S
+(File location:) str
+("\)) p n
+() S 8 T () S 16 T () S 24 T () S
+(print) K
+( path) p n
+() S 8 T () S 16 T () S 24 T (f = open\(path\)) N
+() S 8 T () S 16 T () S 24 T (to = f.readline\(\)) N
+() S 8 T () S 16 T () S 24 T (from_ = f.readline\(\)) N
+() S 8 T () S 16 T () S 24 T (subject = f.readline\(\)) N
+() S 8 T () S 16 T () S 24 T (body = "") N
+() S 8 T () S 16 T () S 24 T () S
+(for) K
+( line ) p
+(in) K
+( f:) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (body += line) N
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(print) K
+( line) p n
+() S 8 T () S 16 T () S
+(else) K
+(:) p n
+() S 8 T () S 16 T () S 24 T () S
+(#to = get_input\("To:"\)) c n
+() p 8 T () S 16 T () S 24 T (to = ") S
+(assign2.test@gmail.com) str
+(") p n
+() S 8 T () S 16 T () S 24 T () S
+(#from_ = get_input\("From:"\)) c n
+() p 8 T () S 16 T () S 24 T (from_ = ") S
+(assign2.test@gmail.com) str
+(") p n
+() S 8 T () S 16 T () S 24 T () S
+(#And subject / body to do) c n
+() p 8 T () S 16 T () S 24 T () S
+(#subject = get_input\("Subject:"\)) c n
+() p 8 T () S 16 T () S 24 T (subject = ") S
+(Test mail) str
+(") p n
+() S 8 T () S 16 T () S 24 T () S
+(#body = get_input\("Body: "\)) c n
+() p 8 T () S 16 T () S 24 T (body = ") S
+(This is a test\\nI do hope it works) str
+(") p n
+() N
+() S 8 T () S 16 T () S
+(#Need to write it out in order to sign it. I guess this is where) c n
+( using a wrapper library would have been better than just throwing the lifting ) N
+(mymail.py) (Page 2/4) (Apr 05, 11 22:01) title
+border
+grestore
+(Printed by Mr.Divenson) rhead
+(./mymail.py) (1/2) (Tuesday April 05, 2011) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (3-4) 2
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p 8 T () S 16 T () S
+(#out to the terminal. Needs to be done so our openssl commands c) c n
+(an get to it. Could use echo....) N
+() p 8 T () S 16 T (f = open\(") S
+(/tmp/body) str
+(", ') p
+(w) str
+('\)) p n
+() S 8 T () S 16 T (f.write\(body\)) N
+() S 8 T () S 16 T (f.close) N
+() S 8 T () S 16 T () S
+(#Make the keys) c n
+() p 8 T () S 16 T (gen_key\(from_\)) N
+() S 8 T () S 16 T () S
+(#Get sha1 checksum of body of the mail) c n
+() p 8 T () S 16 T (sign\(body, from_\)) N
+() S 8 T () S 16 T (passphrase = get_input\(") S
+(Enter passphrase) str
+("\)) p n
+() S 8 T () S 16 T (encrypt\(body, from_, passphrase\)) N
+() S 8 T () S 16 T (f = open\(") S
+(./encrypted) str
+("\) ) p
+(#If something goes wrong it's probably due ) c n
+(to writing the thing out to disk) N
+() p 8 T () S 16 T () S
+(#Not really sure why the above line is there but lets not take a) c n
+(ny chances) N
+() p 8 T () S 16 T (encrypted_body = "") N
+() S 8 T () S 16 T () S
+(for) K
+( line ) p
+(in) K
+( f:) p n
+() S 8 T () S 16 T () S 24 T (encrypted_body += line) N
+() S 8 T () S 16 T () S
+(#) c n
+() p 8 T () S 16 T () S
+(#Not nice but it works) c n
+() p 8 T () S 16 T (encrypted_password = encrypt_password\(passphrase, to\)) N
+() S 8 T () S 16 T () N
+() S 8 T () S 16 T (send_mail\(encrypted_body, subject, to, from_\)) S 64 T () N
+() S 8 T () S 16 T () N
+() S 8 T () N
+() S 8 T () N
+() S 8 T () S
+(#Get mail) c n
+() p 8 T () S
+(elif) K
+(  key == ord\(') p
+(2) str
+('\):) p 32 T () N
+() S 8 T () S 16 T () S
+(#user = get_input\("Please enter user name:"\)) c n
+() p 8 T () S 16 T (user = ") S
+(assign2.test@gmail.com) str
+(") p n
+() S 8 T () S 16 T (\(family, _, _, _, sockaddr\) = socket.getaddrinfo\(') S
+(127.0.0.1) str
+(', 8080) p n
+(\)[0]) N
+() S 8 T () S 16 T (s = socket.socket\(family\)) N
+() S 8 T () S 16 T (s.connect\(sockaddr\)) N
+() S 8 T () S 16 T (s.send\(user\)) N
+() S 8 T () S 16 T (data = s.recv\(8196\) ) S
+(#Limiting to really small messages, fix this) c n
+() p 8 T () S 16 T (msg = email.message_from_string\(data\)) N
+() S 8 T () S 16 T () S
+(#Pull the message apart and decrypt it) c n
+() p 8 T () S 16 T (parse_recv\(msg, user\)) N
+() S 8 T () S 16 T () N
+() S 8 T () S 16 T () N
+() S 8 T () S 16 T (s.close\(\)) N
+() N
+() N
+() S 8 T (stdscr.clear\(\)) N
+(#Take in email and decrypt it) c n
+(def) K
+( parse_recv\(msg, user\):) p n
+() S 8 T (first = False) N
+() S 8 T () S
+(for) K
+( part ) p
+(in) K
+( msg.walk\(\):) p n
+() S 8 T () S 16 T () S
+(#And this is where our story ends. message_from_string\(data\) giv) c n
+(es no complaints but there is clearly something wrong) N
+() p 8 T () S 16 T () S
+(#as it cannot be parsed in the normal way. Maybe im just over lo) c n
+(oking something silly) N
+() p 8 T () S 16 T () S
+(if) K
+( part.get_content_type\(\) == ") p
+(text/plain) str
+(":) p n
+() S 8 T () S 16 T () S 24 T (ebody = part.get_payload\(\)) N
+() S 8 T () S 16 T () S 24 T (f = open\(") S
+(/tmp/enc_data) str
+(", ") p
+(w) str
+("\)) p n
+() S 8 T () S 16 T () S 24 T (f.write\(ebody\)) N
+() S 8 T () S 16 T () S 24 T (f.close\(\)) N
+() S 8 T () S 16 T () S
+(if) K
+( part.get_content_type\(\) == ") p
+(application/octet-stream) str
+(":) p n
+() S 8 T () S 16 T () S 24 T (edigest = part.get_payload\(decode=True\)) N
+() S 8 T () S 16 T () S
+(else) K
+(:) p n
+() S 8 T () S 16 T () S 24 T (open\(") S
+(/tmp/encrypted_pass_recv) str
+(", ") p
+(w) str
+("\).write\(part.get_payload\(d) p n
+(mymail.py) (Page 3/4) (Apr 05, 11 22:01) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(ecode=True\)\)) p n
+() S 8 T () S 16 T () S 24 T () S
+(#passwd = decrypt_pass\(user\)) c n
+() p 8 T () S 16 T () S 24 T (passwd = ") S
+(test) str
+(" ) p
+(#le sigh) c n
+() p 8 T () S 16 T () S 24 T (first = True) N
+() S 8 T () N
+() S 8 T (os.popen\(") S
+(echo %s | openssl enc -d -aes-256-cbc -a -out %s -pass pass:test) str
+(" %\(ebody, ") p
+(/tmp/) str n
+(mail) S
+("\)\)) p n
+() N
+() N
+(#decrypt the password attatched to the message so we can then decrypt the messag) c n
+(e body) N
+(def) K
+( decrypt_pass\(user\):) p n
+() S 8 T (private_key = ") S
+(./keys/%s/private_key.pem) str
+(" %user) p n
+() S 8 T () S
+(print) K
+( ") p
+(\\n\\nUser :) str
+(",private_key) p n
+() S 8 T (os.popen\(") S
+(openssl enc -a -d -in /tmp/encrypted_pass_recv -out /tmp/encrypted_pass_formatted) str
+("\)) p n
+() S 8 T (os.popen\(") S
+(openssl rsautl -decrypt -inkey %s -in %s) str
+(" %\( private_key, ") p
+(/tmp/encrypted_pass_) str n
+(formatted) S
+("\)\)) p n
+() N
+() N
+() N
+(def) K
+( send_mail\(body, subject, to, from_\):) p n
+() S 8 T () S
+(print) K
+( ") p
+(Sending) str
+(") p n
+() S 8 T (msg = MIMEMultipart\(\)) N
+() S 8 T () S
+(#msg = MIMEText\(body\)) c n
+() p 8 T (msg.attach\(MIMEText\(body, ') S
+(plain) str
+('\)\)) p n
+() S 8 T () N
+() S 8 T (msg[") S
+(Subject) str
+("] = subject) p n
+() S 8 T (msg[") S
+(From) str
+("] = from_) p n
+() S 8 T (msg[") S
+(To) str
+("] = to) p n
+() S 8 T () S
+(#Attatch the encrypted password to the message) c n
+( ) p 8 T (file_pass = MIMEBase\(') S
+(application) str
+(', ") p
+(octet-stream) str
+("\)) p n
+() S 8 T (file_pass.set_payload\(open\(") S
+(/tmp/encrypted_pass) str
+(", ") p
+(rb) str
+("\).read\(\)\)) p n
+() S 8 T () S
+(#Set attachment name) c n
+() p 8 T (file_pass.add_header\(") S
+(Content-Disposition) str
+(", ") p
+(attachment; filename = passphrase) str
+("\)) p n
+() S 8 T (msg.attach\(file_pass\)) N
+() S 8 T () N
+() S 8 T () S
+(#Attatch the checksum of the message body to the message) c n
+() p 8 T (file_digest = MIMEBase\(') S
+(application) str
+(', ") p
+(octet-stream) str
+("\)) p n
+() S 8 T (file_digest.set_payload\(open\(") S
+(/tmp/digest) str
+(", ") p
+(rb) str
+("\).read\(\)\)) p n
+() S 8 T (file_digest.add_header\(") S
+(Content-Disposition) str
+(", ") p
+(attachment; filename = digest) str
+("\)) p n
+() S 8 T (msg.attach\(file_digest\)) N
+() S 8 T () N
+() S 8 T (s = smtplib.SMTP\(') S
+(127.0.0.1) str
+(', 1026\)) p n
+() S 8 T (s.sendmail\(from_, to, msg.as_string\(\)\)) N
+() S 8 T (s.quit\(\)) N
+() N
+(def) K
+( main\(\):) p n
+() S 8 T (init_curses\(\)) S 24 T () N
+() N
+(if) K
+( __name__ == ') p
+(__main__) str
+(':) p n
+() S 8 T (main\(\)) N
+(mymail.py) (Page 4/4) (Apr 05, 11 22:01) title
+border
+grestore
+(Printed by Mr.Divenson) rhead
+(./mymail.py) (2/2) (Tuesday April 05, 2011) footer
+end % of iso1dict
+pagesave restore
+showpage
+
+%%Trailer
+end
+%%EOF
