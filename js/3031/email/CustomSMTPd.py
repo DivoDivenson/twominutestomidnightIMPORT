@@ -2,6 +2,8 @@ import smtpd
 import asyncore
 import socket
 from smtpd import SMTPChannel
+import os
+
 
 class CustomServer(smtpd.SMTPServer):
 	def process_message(self, sender, sender_addr, rec, data):
@@ -12,7 +14,7 @@ class CustomServer(smtpd.SMTPServer):
 		print "From ", sender_addr
 		f.write(sender_addr)
 		print "To ", rec
-		f.write(rec[0]) #Assume only one receiver for the moment
+		f.write(rec[0]) #Assume only one receiver for the moment, this also overwrites any previous mails
 		print "Data ", repr(data)
 		f.write(data)
 		f.close
@@ -27,12 +29,11 @@ class CustomServer(smtpd.SMTPServer):
 class MySMTPChannel(smtpd.SMTPChannel):
 
 	def collect_incomming_data(self, data):
+		print "Collect_incoming_data"
 		self.__line.append(data)
 		print data
 #Extend SMTPChannel and overwrite it's handle read method ( from async_chat). Simple. Not	
-	def handle_read(self):
-		print "Getting data"
-		print repr(self.recv(1024))
+	
 try:
 	server = CustomServer(('127.0.0.1', 1026), None)
 
