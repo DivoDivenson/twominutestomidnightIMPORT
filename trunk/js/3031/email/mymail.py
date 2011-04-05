@@ -6,6 +6,12 @@ import os
 import smtplib
 import email.utils
 from email.mime.text import MIMEText
+from email import encoders
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEBase import MIMEBase
+from email.MIMEText import MIMEText
+from email.MIMEAudio import MIMEAudio
+from email.MIMEImage import MIMEImage
 stdscr = curses.initscr()
 #Not gonna sanatize user input
 
@@ -46,6 +52,23 @@ def get_bool_input(prompt):
 	stdscr.addstr(2,2,prompt)
 	input = stdscr.getch()
 	return input
+
+def get_pub_key(user):
+	user_cert = "./cert/%s" %user
+	print user_cert
+	pipe = os.popen("openssl verify -CAfile ./cert/demoCA/cacert.pem %s/newcert.pem" %user_cert)
+	result = pipe.read()
+	if result.find("OK") != -1:
+		os.popen("openssl x509 -inform pem -in %s/newcert.pem -pubkey -noout > %s" %(user_cert, "/tmp/user_public.pem"))
+		return "/tmp/user_public.pem"
+	else:
+		print "Did not verify"
+		return None
+
+def encrypt_password(passphrase, user):
+	pub_key = get_pub_key(user)
+	#Encrypt the passphrase with the public key
+	pipe = os.popen("echo %s | openssl rsautl -encrypt -pubin -inkey %s -out /tmp/encrypted_pass" %(passphrase, pub_key))
 
 def init_curses():
 
@@ -98,10 +121,18 @@ def init_curses():
 		encrypted_body = ""
 		for line in f:
 			encrypted_body += line
+		#
+		#Not nice but it works
+		encrypted_password = encrypt_password(passphrase, to)
+		
 		send_mail(encrypted_body, subject, to, from_)	
+		
+	
+	
 	#Get mail
 	elif  key == ord('2'):	
-		user = get_input("Please enter user name:")
+		#user = get_input("Please enter user name:")
+		user = "assign2.test@gmail.com"
 		(family, _, _, _, sockaddr) = socket.getaddrinfo('127.0.0.1', 8080)[0]
 		s = socket.socket(family)
 		s.connect(sockaddr)
@@ -112,14 +143,27 @@ def init_curses():
 	stdscr.clear()
 def send_mail(body, subject, to, from_):
 	print "Sending"
-	msg = MIMEText(body)
-	msg['Subject'] = subject
-	msg['From'] = from_
-	msg['To'] = to
+	msg = MIMEMultipart()
+	#msg = MIMEText(body)
+	msg.attach(MIMEText(body, 'plain'))
+	
+	msg["Subject"] = subject
+	msg["From"] = from_
+	msg["To"] = to
+ 	file_pass = MIMEBase('application', "octet-stream")
+	file_pass.set_payload(open("/tmp/encrypted_pass", "rb").read())
+	#Set attachment name
+	file_pass.add_header("Content-Disposition", "attachment; filename = passphrase")
+	msg.attach(file_pass)
+	
+	file_digest = MIMEBase('application', "octet-stream")
+	file_digest.set_payload(open("/tmp/digest", "rb").read())
+	file_digest.add_header("Content-Disposition", "attachment; filename = digest")
+	msg.attach(file_digest)
 	
 	s = smtplib.SMTP('127.0.0.1', 1026)
-#	s.sendmail(from_, to, msg.as_string())
-#	s.quit()
+	s.sendmail(from_, to, msg.as_string())
+	s.quit()
 
 def main():
 	init_curses()	
