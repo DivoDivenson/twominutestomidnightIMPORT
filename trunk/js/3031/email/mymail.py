@@ -102,23 +102,24 @@ def init_curses():
 	#Get mail
 	elif  key == ord('2'):	
 		user = get_input("Please enter user name:")
-		s = smtplib.SMTP('127.0.0.1', 1026)
-		#s.helo()
+		(family, _, _, _, sockaddr) = socket.getaddrinfo('127.0.0.1', 8080)[0]
+		s = socket.socket(family)
+		s.connect(sockaddr)
 		s.send(user)
-		#(family, _, _, _, _) =socket.getaddrinfo('127.0.0.1', 1026)[0]
-		#s = socket.socket(family)
-		#s.send("hello")
 		s.close()
+
+
 	stdscr.clear()
 def send_mail(body, subject, to, from_):
+	print "Sending"
 	msg = MIMEText(body)
 	msg['Subject'] = subject
 	msg['From'] = from_
 	msg['To'] = to
 	
 	s = smtplib.SMTP('127.0.0.1', 1026)
-	s.sendmail(from_, to, msg.as_string())
-	s.quit()
+#	s.sendmail(from_, to, msg.as_string())
+#	s.quit()
 
 def main():
 	init_curses()	
