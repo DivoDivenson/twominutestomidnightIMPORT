@@ -65,10 +65,16 @@ def get_pub_key(user):
 		print "Did not verify"
 		return None
 
+def get_private_key():
+	keys = "./keys/%s" %(user)
+	return keys + "/" + "private_key.pem"
+
+
 def encrypt_password(passphrase, user):
 	pub_key = get_pub_key(user)
 	#Encrypt the passphrase with the public key
 	pipe = os.popen("echo %s | openssl rsautl -encrypt -pubin -inkey %s -out /tmp/encrypted_pass" %(passphrase, pub_key))
+
 
 def init_curses():
 
@@ -137,10 +143,34 @@ def init_curses():
 		s = socket.socket(family)
 		s.connect(sockaddr)
 		s.send(user)
+		data = s.recv(4098) #Limiting to really small messages, fix this
+		msg = email.message_from_string(data)
+		#Pull the message apart and decrypt it
+		parse_recv(msg)
+		
 		s.close()
 
 
 	stdscr.clear()
+#Take in email and decrypt it
+def parse_recv(msg):
+	first = False
+	for part in msg.walk():
+		if part.get_content_type() == "text/plain":
+			ebody = part.get_payload()
+			print ebody
+		if part.get_content_type() == "application/octet-stream":
+			edigest = part.get_payload(decode=True)
+		else:
+			open("/tmp/epass", "w").write(part.get_payload(decode=True))
+			passwd = decrypt_pass(user)
+			first = True
+
+
+def decrypt_pass(user):
+	private_key = get_private_key(user)
+
+
 def send_mail(body, subject, to, from_):
 	print "Sending"
 	msg = MIMEMultipart()
