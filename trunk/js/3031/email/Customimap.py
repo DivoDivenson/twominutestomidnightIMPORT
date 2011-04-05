@@ -1,6 +1,7 @@
 import socket
 import thread
 import os, sys
+import email
 class ConnectionHandler:
 	def __init__(self, connection, addr):
 		self.connection = connection
@@ -11,22 +12,13 @@ class ConnectionHandler:
 		print mails
 		if os.path.exists(mails):
 			print "Found"
-			f = open(mails)
-			text = ""
-			#Read in mail and parse it
-			f.readline()
-			f.readline()
-			f.readline() #Discard first 3 lines
-			subject = f.readline()
-			subject = subject[subject.find(':')+3:] #+3 to hack out the whitespace
-			from_ = f.readline()
-			from_ = from_[from_.find(':')+3:]
-			to = f.readline()
-			to = to[to.find(':')+3:]
-			text = ""
+			f = open(mails, "rb")
+			data = ""
 			for line in f:
-				text += line
-			print text
+				data += line
+
+		#	msg = email.message_from_string(data)
+			connection.send(data)	
 		else:
 			print "Not found"
 
