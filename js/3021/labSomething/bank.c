@@ -12,10 +12,11 @@ struct account_holder{
 	int * dst;
 };
 
-int lock_var = 0;
-int count_var = 0;
+int lock = 0;
+int count = 0;
 
-void lock(){
+
+/*void lock(){
   	
 	__asm__(
 		"mov $1, %edx;"
@@ -32,10 +33,10 @@ void lock(){
 				"test %eax, %eax;"
 				"jnz count"
 			
-			/*	"cmpl $0, lock_var;"
+			*	"cmpl $0, lock_var;"
 				"jne count;"
 				"movl $1, lock_var"
-			*///	"lock cmpxchg %edx, lock_var;"
+			///	"lock cmpxchg %edx, lock_var;"
 				//"test %eax, %eax;" This instruction does not work
 			//	"cmpl $0, %eax;"
 			//	"jnz count;"
@@ -45,15 +46,35 @@ void lock(){
 
 void unlock(){
 	__asm__(
-	/*	"_unlock:;"
+		"_unlock:;"
 			"movl $0, %edx;"
 			"xchg %edx, lock_var;"
 			"movl $0, lock_var;"
 			"ret;"
-	*/	
 		"movl $0, lock_var;"
 	);
 
+}
+*/
+
+static inline int swap(volatile int *mem, int value){
+	int result;
+	asm volatile(
+		"xchgl %0, %1"
+		: "=r" (result), "=m" (*mem)
+		: "0" (value), "m" (*mem)
+	);
+	return result;
+}
+
+static inline int fetch_increment(int *mem, int value){
+	asm volatile(
+		"lock xadd %0, %1"
+		: "=r" (value), "=m" (*mem)
+		: "0" (value)
+		: "memory"
+	);
+	return value;
 }
 
 void* transfare(void * argument){
@@ -62,18 +83,14 @@ void* transfare(void * argument){
 	temp = (struct account_holder *) argument;
 	int * srcB = temp->src;
 	int * dstB = temp->dst;
-
-	int i;
 	int amount;
+	int i;
 	int one = 1;
-	for(i = 0; i < 1000; i++){
+	for(i = 0; i < 1000000; i++){
 		amount = rand() % 21;
-		lock();
-		//printf("Lock acquired\n");
-		
-//		printf("%d\n", amount);
-	//	printf("lock\n");
-		//lock();
+		while(swap(&lock, 1)) {
+		count++;
+		}
 		if( *srcB < amount){
 			amount = *srcB;
 		}
@@ -81,9 +98,7 @@ void* transfare(void * argument){
 			*srcB -= amount;
 			*dstB += amount;
 		}
-	//	printf("Unlock\n");
-		unlock();
-		//printf("Lock released %d\n", i);
+		swap(&lock, 0);
 	}
 	printf("Done\n");
 	//pthread_exit(NULL);
@@ -118,6 +133,7 @@ int main(){
 	*/
 	printf("a: %d, b: %d, c %d\n", account_a, account_b, account_c);
 	printf("Sum: %d\n", account_a + account_b + account_c);
+	printf("Spin counts: %d\n", count);
 	return 0;
 }
 
