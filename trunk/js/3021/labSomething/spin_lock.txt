@@ -1,0 +1,13 @@
+Joining
+Done
+Killed 0
+Joining
+Done
+Killed 1
+Joining
+Done
+Killed 2
+Hello
+a: 300, b: 0, c 0
+Sum: 300
+Spin counts: 2158922

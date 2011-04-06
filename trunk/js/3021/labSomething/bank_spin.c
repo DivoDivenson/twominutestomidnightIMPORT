@@ -15,9 +15,15 @@ struct account_holder{
 int lock = 0;
 int count = 0;
 
-/*
-Tried this way but all the threads testing the same register causes a seg fault 
-//Locking
+
+/*void lock(){
+  	
+	__asm__(
+		"mov $1, %edx;"
+		"mov lock_var, %eax;"
+		"jmp start;"
+			"count:;"
+			//	"addl $1,count_var;"
 			"start:;"
 				//Check if the lock is free
 				"test %eax, %eax;"
@@ -27,16 +33,30 @@ Tried this way but all the threads testing the same register causes a seg fault
 				"test %eax, %eax;"
 				"jnz count"
 			
-				"cmpl $0, lock_var;"
+			*	"cmpl $0, lock_var;"
 				"jne count;"
 				"movl $1, lock_var"
-//Unlocking
-		"movl $0, lock_var;"
-
+			///	"lock cmpxchg %edx, lock_var;"
+				//"test %eax, %eax;" This instruction does not work
+			//	"cmpl $0, %eax;"
+			//	"jnz count;"
+		//		"ret;" 
+				);
 }
 
+void unlock(){
+	__asm__(
+		"_unlock:;"
+			"movl $0, %edx;"
+			"xchg %edx, lock_var;"
+			"movl $0, lock_var;"
+			"ret;"
+		"movl $0, lock_var;"
+	);
 
+}
 */
+
 static inline int swap(volatile int *mem, int value){
 	int result;
 	asm volatile(
