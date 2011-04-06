@@ -1,2 +1,13 @@
-a: 0, b: 0, c 20
-Sum: 20
+Joining
+Done
+Done
+Done
+Killed 0
+Joining
+Killed 1
+Joining
+Killed 2
+Hello
+a: 0, b: 13, c 0
+Sum: 13
+Spin counts: 0

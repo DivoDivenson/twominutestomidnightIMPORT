@@ -109,3 +109,29 @@ int main(){
 }
 
 
+
+
+/*
+
+
+Times
+
+Without lock:
+real	0m1.443s
+user	0m1.244s
+sys	0m1.508s
+
+a: 0, b: 13, c 0
+Sum: 13
+
+
+With lock
+real	0m1.154s
+user	0m2.104s
+sys	0m0.048s
+
+
+a: 0, b: 300, c 0
+Sum: 300
+Spin counts: 1886250
+*/
