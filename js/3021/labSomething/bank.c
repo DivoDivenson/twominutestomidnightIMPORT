@@ -47,15 +47,6 @@ static inline int swap(volatile int *mem, int value){
 	return result;
 }
 
-static inline int fetch_increment(int *mem, int value){
-	asm volatile(
-		"lock xadd %0, %1"
-		: "=r" (value), "=m" (*mem)
-		: "0" (value)
-		: "memory"
-	);
-	return value;
-}
 
 void* transfare(void * argument){
 	struct account_holder * temp;
