@@ -29,6 +29,7 @@ void qsort(int arr[], int left, int right, int level)
 	#pragma omp parallel sections
 	{
 
+	printf(" Num threads :%d\n", omp_get_num_threads());
 		#pragma omp section
 		qsort(arr, left, last -1, level + 1);
 			
