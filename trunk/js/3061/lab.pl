@@ -10,7 +10,7 @@ normalizeLeft( L, left(L)).
 
 
 holdPrim( intState(q0), init ).
-holdPrim( headPos(0), init ) .
+holdPrim( headPos(0), init ) . %Not sure what these two do, something about relativizing dynamic predicates to a state. I have no idea what I just said
 
 poss( moveRight, Situation ):-
 	mr(Q,X,Qnew),
@@ -47,4 +47,11 @@ holds(derAt(X, Loc), Situation) :- holdPrim(at(X, Loc), Situation), !.
 
 holds(derAt(b-k,Loc), Situation).
 
+poss( moveLeft, Situation):-
+	ml(Q, X, Qnew),
+	holdPrim(intState(Q), Situation),
+	holds(derAt(X, Loc), Situation),
+	holdPrim(headPos(Loc), Situation).
+
+delL(moveLeft, Situation intState(Q)
 %not(P) :- P, !, fail ; true. % Is this built in?
