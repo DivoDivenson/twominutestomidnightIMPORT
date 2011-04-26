@@ -72,19 +72,21 @@ addL(moveLeft, Situation, headPos(Loc)) :-
 poss(write, Situation):-
 	wl(Q, X, Y, Qnew),
 	holdPrim(intState(Q), Situation),
-	holds(derAt(X, Loc), Situation),
-	holdPrim(headPos(Loc), Situation).
+	holds(derAt(X, Loc), Situation).
+	%holdPrim(headPos(Loc), Situation).
 
 delL(write, Situation, intState(Q)):-
 	holdPrim( intState(Q), Situation).
 
-delL(write, Situation, headPos(Q)):-
-	holdPrim( headPos(Loc), Situation).
+delL(write, Situation, derAt(X,Loc)):-
+	holdPrim( derAt(X,Loc), Situation).
 
 addL(write, Situation, intState(Q)):-
 	wl(Q0, X, Y, Q),
 	holdPrim( intState(Q0), Situation),
 	holds(derAt(Y,Loc), Situation).
+  %holds(headPos(Loc),Situation).
+
 
 %addL(write, Situation, headPos(Loc)):-  %Dont think we need this
 %	holdPrim(headPos(Loc), Situation).
@@ -97,6 +99,6 @@ mr(q0, 0, q1).
 
 ml(q1, 1, q2).
 
-wl(q2, 0, 1, q2).
+wl(q2, 0, 1, q0).
 
 %not(P) :- P, !, fail ; true. % Is this built in?
