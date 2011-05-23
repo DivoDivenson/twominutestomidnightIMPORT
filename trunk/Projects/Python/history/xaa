@@ -1,0 +1,16 @@
+
+build
+
+
+
+
+
+
+
+if __name__ == '__main__':
+	from sys import argv
+	if(argv[1]):
+		build(argv[1])
+	else:
+		print "Need file name"
+	
