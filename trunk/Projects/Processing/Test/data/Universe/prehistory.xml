@@ -306,7 +306,7 @@
 				<text>First complex multicelled lifeforms</text>
 			</event>
 			<event>
-				<time>-635.0</time>
+				<time>-635000000.0</time>
 				<text>Beginning of the ediacaran period.</text>
 			</event>
 		</events>
@@ -332,7 +332,7 @@
 				<text>End of the archaean eon; beginning of the proterozoic eon</text>
 			</event>
 			<event>
-				<time>3800000000.0</time>
+				<time>-3800000000.0</time>
 				<text>Age of the mare imbrium, the lower imbrian epoch</text>
 			</event>
 			<event>
@@ -340,7 +340,7 @@
 				<text>Origin of life (cyanobacteria). end of the hadean eon and beginning of the archaean eon.</text>
 			</event>
 			<event>
-				<time>4500000000.0</time>
+				<time>-4500000000.0</time>
 				<text>Age of the earth (see: precambrian)</text>
 			</event>
 		</events>
@@ -354,11 +354,11 @@
 				<text>The solar system begins to form</text>
 			</event>
 			<event>
-				<time>13200000000.0</time>
+				<time>-13200000000.0</time>
 				<text>Age of the oldest known star, he 1523-0901</text>
 			</event>
 			<event>
-				<time>13700000000.0</time>
+				<time>-13700000000.0</time>
 				<text>Estimated age of the universe according to the big bang theory</text>
 			</event>
 		</events>
