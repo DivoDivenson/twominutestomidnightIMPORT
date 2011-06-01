@@ -1,5 +1,6 @@
 package Universe;
 
+import java.util.Iterator;
 import java.util.Vector;
 
 public class Period {
@@ -32,6 +33,17 @@ public class Period {
 	
 	public String toString(){
 		return name;
+	}
+
+	public String print() {
+		String result = '\n' + name + '\n' + text;
+		for(Iterator<Event> i = events.iterator(); i.hasNext(); ){
+			Event temp = i.next();
+			result += "\n\n\t" + temp.getName() + '\n';
+			result += "\t" + temp.getTime();
+		}
+		return result;
+		
 	}
 	
 	
