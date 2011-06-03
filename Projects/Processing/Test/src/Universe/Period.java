@@ -27,8 +27,12 @@ public class Period {
 		return text;
 	}
 
-	public Vector<Event> getEvents() {
-		return events;
+	public Event[] getEvents() {
+		return (Event[])events.toArray(new Event[0]);
+	}
+	
+	public int getEventsLength(){
+		return events.size();
 	}
 	
 	public String toString(){
