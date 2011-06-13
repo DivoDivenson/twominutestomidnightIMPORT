@@ -1,0 +1,23 @@
+Array ( [0] => Array ( [tag] => RSS [type] => open [level] => 1 [attributes] => Array ( [VERSION] => 2.0 ) ) [1] => Array (
+[tag] => CHANNEL [type] => open [level] => 2 ) [2] => Array ( [tag] => TITLE [type] => complete [level] => 3 [value] =>
+irishrail.ie: Sutton -Current time is: 20:29pm ) [3] => Array ( [tag] => DESCRIPTION [type] => complete [level] => 3 [value]
+=> Estimated Time of Arrival: ) [4] => Array ( [tag] => LINK [type] => complete [level] => 3 [value] =>
+http://www.irishrail.ie ) [5] => Array ( [tag] => ITEM [type] => open [level] => 3 ) [6] => Array ( [tag] => TITLE [type] =>
+complete [level] => 4 [value] => 20:36 to Howth ) [7] => Array ( [tag] => DESCRIPTION [type] => complete [level] => 4
+[value] => E920 - Origin : Bray - Destination : Howth | - Expected departure at Sutton :20:36 | - Scheduled departure at
+20:36 ) [8] => Array ( [tag] => ITEM [type] => close [level] => 3 ) [9] => Array ( [tag] => ITEM [type] => open [level] => 3
+) [10] => Array ( [tag] => TITLE [type] => complete [level] => 4 [value] => 20:38 to Greystones ) [11] => Array ( [tag] =>
+DESCRIPTION [type] => complete [level] => 4 [value] => E112 - Origin : Howth - Destination : Greystones | - Expected
+departure at Sutton :20:38 | - Scheduled departure at 20:38 ) [12] => Array ( [tag] => ITEM [type] => close [level] => 3 )
+[13] => Array ( [tag] => ITEM [type] => open [level] => 3 ) [14] => Array ( [tag] => TITLE [type] => complete [level] => 4
+[value] => 20:51 to Howth ) [15] => Array ( [tag] => DESCRIPTION [type] => complete [level] => 4 [value] => E921 - Origin :
+Bray - Destination : Howth | - Expected departure at Sutton :20:51 | - Scheduled departure at 20:51 ) [16] => Array ( [tag]
+=> ITEM [type] => close [level] => 3 ) [17] => Array ( [tag] => ITEM [type] => open [level] => 3 ) [18] => Array ( [tag] =>
+TITLE [type] => complete [level] => 4 [value] => 21:08 to Bray ) [19] => Array ( [tag] => DESCRIPTION [type] => complete
+[level] => 4 [value] => E222 - Origin : Howth - Destination : Bray | - Expected departure at Sutton :21:08 | - Scheduled
+departure at 21:08 ) [20] => Array ( [tag] => ITEM [type] => close [level] => 3 ) [21] => Array ( [tag] => ITEM [type] =>
+open [level] => 3 ) [22] => Array ( [tag] => TITLE [type] => complete [level] => 4 [value] => 21:28 to Bray ) [23] => Array
+( [tag] => DESCRIPTION [type] => complete [level] => 4 [value] => E223 - Origin : Howth - Destination : Bray | - Expected
+departure at Sutton :21:28 | - Scheduled departure at 21:28 ) [24] => Array ( [tag] => ITEM [type] => close [level] => 3 )
+[25] => Array ( [tag] => CHANNEL [type] => close [level] => 2 ) [26] => Array ( [tag] => RSS [type] => close [level] => 1 )
+)
