@@ -3,7 +3,7 @@
 		<title>DART Times</title>
 		<meta name="viewport" content="user-scalable=no, width=device-width" />
 		<link rel="stylesheet" type="text/css" href="android.css" media="only screen and (max-width: 480px)" /> 
-		<!--  <link rel="stylesheet" type="text/css" href="desktop.css" media="screen and (min-width: 481px)" /> -->
+		<link rel="stylesheet" type="text/css" href="desktop.css" media="screen and (min-width: 481px)" />
 	</head>
 	<body>
 		<div id="header">
@@ -12,10 +12,10 @@
 				$places=array("Sutton","Pearse");
 				$all_places=array("Bayside", "Blackrock", "Bray", "Clontarf", "Connolly", "Dalkey", "Dun_Laoghaire", "Grand_Canal_Dock", "Glenageary", "Greystones", "Harmonstown", "Howth", "Howth_Jct", "Kilbarrack", "Killester", "Killiney", "Lansdowne_Road", "Malahide", "Pearse", "Portmarnock", "Raheny", "Salthill", "Sandycove", "Sandymount", "Seapoint", "Shankill", "Sutton", "Sydney_Parade", "Tara_Street");
 
-				echo '<ul>';
+				echo "<ul>\r";
 				foreach($all_places as $value)
 				{
-					$tmp = '<li><a href="./time.php?place='.$value.'">'.str_replace("_", " ",$value).'</a></li>';
+					$tmp = "\t\t\t".'<li><a href="./time.php?place='.$value.'">'.str_replace("_", " ",$value)."</a></li>\r";
 					echo $tmp;
 				}
 				echo '</ul>';
