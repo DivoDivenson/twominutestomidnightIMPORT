@@ -3,11 +3,11 @@
 		<?php echo '<title>'.$_GET["place"].' times</title>'; ?>
 		<meta name="viewport" content="user-scalable=no, width=device-width" />
 		<link rel="stylesheet" type="text/css" href="android.css" media="only screen and (max-width: 480px)" /> 
-		<!--  <link rel="stylesheet" type="text/css" href="desktop.css" media="screen and (min-width: 481px)" /> -->
+		<link rel="stylesheet" type="text/css" href="desktop.css" media="screen and (min-width: 481px)" />
 	</head>
 	<body>
 		<div id="header">
-		<?php echo '<h1><a href="./">'.str_replace("_", " ", $_GET["place"]).' times</a></h1>'; ?>
+		<?php echo '<h1><a href="./">'.str_replace("_", " ", $_GET["place"])." times</a></h1>\r"; ?>
 			<h2>
 			<?php
 
@@ -56,7 +56,7 @@
 												$currHour = (int)$tmp[0];
 												$currMin = (int)$tmp[1];	
 									 }else{
-												echo "<li>";
+												echo "\t\t\t\t<li>";
 												echo $data;
 												preg_match('/[0-9]+(?:\:[0-9]*)?/', $data, $matches);
 												$tmp = explode(":", $matches[0]);
@@ -66,7 +66,7 @@
 													$time_rem = (int)$tmp[1] +(60 - $currMin);
 												}
 												echo '<br/>'.$time_rem." mins";
-				   	 					   echo "</li>";
+				   	 					   echo "</li>\r";
 									 }
 						  }
 				}
@@ -74,11 +74,11 @@
 				xml_set_element_handler($parser,"begin_cus","stop");
 				xml_set_character_data_handler($parser,"char");
 
-				echo '<ul>';
+				echo "<ul>\r";
 				xml_parse($parser, $output);
 				xml_parser_free($parser);
 					
-				echo '</ul>';
+				echo "\t\t\t</ul>\r";
 				//print_r($results[2]['value']);	
 
 			?>
