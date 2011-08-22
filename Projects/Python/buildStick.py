@@ -28,7 +28,7 @@ while 1:
 				if num != 0:
 					moving = 1
 				elif num == 0 and moving == 1:
-					print 'Build'
+					print 'Build\n'
 					moving = 0
 				action = []
 				#os.system('ls')
