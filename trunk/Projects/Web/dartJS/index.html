@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<title>Dart Times</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link rel="stylesheet" href="jquery.mobile/jquery.mobile-1.0b3.css" />
+	<script type="text/javascript" src="jquery.mobile/jquery-1.6.3.js"></script>
+	<script type="text/javascript" src="jquery.mobile/jquery.mobile-1.0b3.min.js"></script>
+	<link rel="stylesheet" href="style.css" />
+
+
+	</head>
+	<body>
+	<div data-role="page" id="menu">
+		<div data-role="header">
+			<h1>Dart times</h1>
+		</div>
+
+
+		<div data-role="content" id="menu">
+			
+			<ul data-role="listview" data-inset="true" id="stations">
+				<li>Test</li>
+			</ul>
+
+		</div>
+
+	</div><!-- Page -->
+
+	<div data-role="page" id="timePage">
+		<div data-role="header" >
+			<h1 id="time_header"> </h1>
+		</div>
+
+		<div data-role="content">
+			<ul data-role="listview" id="times" class="custom-list" data-inset="true">
+
+			</ul>
+
+		</div>
+
+
+
+
+	</div><!--Page -->
+
+	</body>
+
+	<script type="text/javascript">
+		//var stations=["Bayside", "Blackrock", "Bray", "Clontarf", "Connolly", "Dalkey", "Dun_Laoghaire", "Grand_Canal_Dock", "Glenageary", "Greystones", "Harmonstown", "Howth", "Howth_Jct", "Kilbarrack", "Killester", "Killiney", "Lansdowne_Road", "Malahide", "Pearse", "Portmarnock", "Raheny", "Salthill", "Sandycove", "Sandymount", "Seapoint", "Shankill", "Sutton", "Sydney_Parade", "Tara_Street"];
+
+		//If timePage is viewed more then once we need to refresh the listview on that page
+		var timesLoaded = 0;
+
+		var stations = new Array();
+		stations[0] = stationObj={name:"Bayside",code:"BYSDE", side:"n"};
+		stations[1] = stationObj={name:"Blackrock",code:"BROCK", side:"s"};
+		stations[2] = stationObj={name:"Bray",code:"BRAY", side:"s"};	
+		stations[3] = stationObj={name:"Clontarf",code:"CTARF", side:"n"};
+		stations[4] = stationObj={name:"Connolly",code:"CNLLY", side:"n"};
+		stations[5] = stationObj={name:"Dalkey",code:"DLKEY", side:"s"};
+		stations[6] = stationObj={name:"Dun Laoghaire",code:"DLERY", side:"s"};
+		stations[7] = stationObj={name:"Glenageary",code:"GLGRY", side:"s"};
+		stations[8] = stationObj={name:"Grand Canal Dock",code:"GCDK", side:"s"};
+		stations[9] = stationObj={name:"Greystones",code:"GSTNS", side:"s"};
+		stations[10] = stationObj={name:"Harmonstown",code:"HTOWN", side:"n"};
+		stations[11] = stationObj={name:"Howth",code:"HOWTH", side:"n"};
+		stations[12] = stationObj={name:"Howth Junction",code:"HWYHJ", side:"n"};
+		stations[13] = stationObj={name:"Kilbarrack",code:"KBRCK", side:"n"};
+		stations[14] = stationObj={name:"Killester",code:"KLSTR", side:"n"};
+		stations[15] = stationObj={name:"Killiney",code:"KILNY", side:"s"};
+		stations[16] = stationObj={name:"Lansdowne Rd",code:"LDWNE", side:"s"};
+		stations[17] = stationObj={name:"Malahide",code:"MHIDE", side:"n"};
+		stations[18] = stationObj={name:"Dublin Pearse",code:"PERESE", side:"s"};
+		stations[19] = stationObj={name:"Portmarnock",code:"PMNCK", side:"n"};
+		stations[20] = stationObj={name:"Raheny",code:"RAHNY", side:"n"};
+		stations[21] = stationObj={name:"Salthill",code:"SHILL", side:"s"};
+		stations[22] = stationObj={name:"Sandycove",code:"SCOVE", side:"s"};
+		stations[23] = stationObj={name:"Sandymount",code:"SMONT", side:"s"};
+		stations[24] = stationObj={name:"Seapoint",code:"SEAPT", side:"s"};
+		stations[25] = stationObj={name:"Shankhill",code:"SKILL", side:"s"};
+		stations[26] = stationObj={name:"Sydney Parade",code:"SIDNY", side:"s"};
+		stations[27] = stationObj={name:"Sutton",code:"SUTTN", side:"n"};
+		stations[28] = stationObj={name:"Tara Street",code:"TARA", side:"s"};
+
+	
+		function populateList(){
+			var list = ""
+			for (x in stations){
+				list += '<li><a onClick="getStation(' + x + ')">' + stations[x].name + '</a></li>';
+			}
+
+			$('#stations').html(list);
+
+			//$('#stations').listview('refresh');
+		}
+
+
+		function getStation(index){
+			$.mobile.showPageLoadingMsg();
+			/*$.getJSON('http://www.irishrail.ie/realtime/publicinfo.asp',{strLocation: stations[x].code},
+			function(data){alert(data);});*/
+			$.get( 'getInfo.php',{station: stations[index].code}, 
+			function(data){
+				var times = parseXML(data);	
+				populateTimes(times);
+				$('#time_header').html(stations[index].name);
+				$.mobile.hidePageLoadingMsg();
+				$.mobile.changePage($("#timePage"))		
+			});
+			
+
+
+		}
+
+		function parseXML(data){
+			var xmlDoc = $.parseXML(data);
+			$xml = $(xmlDoc);
+			var times = $xml.find("item");
+			return times;
+
+		}
+
+		//Takes an array of DART times and parses them into a list
+		function populateTimes(times){
+			//console.log(times);
+			var timeListNorth = "";
+			var timeListSouth = "";
+			//for each loop overflows horribly for some reason
+			var i = 0;
+			for (i=0; i < times.length; i++) {
+				$xml = $(times[i]);
+				var text = $xml.find('title').text()
+				var station = text.split(' ')[3];
+				
+				//Find the station and see if it is north or south, UGLY
+				//Could improve slightly with caching etc
+				var j;
+				console.log('Searching for: ' + station);
+				for(j = 0; j < stations.length; j++ ){
+					if(stations[j].name.indexOf(station) != -1){
+						if(stations[j].side == "n"){
+							timeListNorth += '<li><h3>' + text +'</h3><p></p>' + '<p class="ul-li-aside">On time</p>' + '</li>';
+							//console.log('Northbound');
+						}else{
+							timeListSouth += '<li><h3>' + text +'</h3><p></p>' + '<p class="ul-li-aside">On time</p>' + '</li>';
+							//console.log('Southbound');
+						}
+						break;
+					}
+				}
+				
+			}
+
+			//list.hide();
+			$('#times').html('<li data-role="list-divider">Northbound</li>')
+			$('#times').append(timeListNorth);
+			$('#times').append('<li data-role="list-divider">Southbound</li>')
+			$('#times').append(timeListSouth);
+
+			if(timesLoaded != 0){			
+				$('#times').listview('refresh');
+			}
+			//list.show();
+			timesLoaded++;
+
+		}
+
+		//This was fucking stupid
+		function getLexical(inputString){
+			var i;
+			var result = 0;
+			for(i = 0; i < inputString.length; i++){
+				//shut up, that's why
+				result *= Math.pow(10, i) * 100;
+				//console.log(result);
+				result  += inputString.charCodeAt(i);
+				//console.log(result);
+			}
+			console.log(result %28);
+			return result;
+		}
+	
+
+
+
+	$('#menu').live('pagecreate', populateList());
+
+
+
+
+
+	</script>
+</html>
