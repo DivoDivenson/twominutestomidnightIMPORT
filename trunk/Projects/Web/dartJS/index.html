@@ -73,7 +73,7 @@
 		stations[15] = stationObj={name:"Killiney",code:"KILNY", side:"s"};
 		stations[16] = stationObj={name:"Lansdowne Rd",code:"LDWNE", side:"s"};
 		stations[17] = stationObj={name:"Malahide",code:"MHIDE", side:"n"};
-		stations[18] = stationObj={name:"Dublin Pearse",code:"PERESE", side:"s"};
+		stations[18] = stationObj={name:"Dublin Pearse",code:"PERSE", side:"s"};
 		stations[19] = stationObj={name:"Portmarnock",code:"PMNCK", side:"n"};
 		stations[20] = stationObj={name:"Raheny",code:"RAHNY", side:"n"};
 		stations[21] = stationObj={name:"Salthill",code:"SHILL", side:"s"};
@@ -142,8 +142,9 @@
 					//Find the station and get rid of trains terminating. Latter is done very lazy
 					if(stations[j].name.indexOf(station) != -1 && text.indexOf('Terminates') == -1){
 						var desc = $xml.find('description').text();
-						var delay = findDelay(desc);
-						var info = '<li><h3>' + text +'</h3><p></p>' + '<p class="ui-li-aside">'+ delay + '</p>' + '</li>';
+						//var delay = findDelay(desc);
+						var delay = findTimes(desc)
+						var info = '<li><h3>' + text +'</h3><p>' + delay[0] +'</p>' + '<p class="ui-li-aside">'+ delay[1] + '</p>' + '</li>';
 						if(stations[j].side == "n"){
 							timeListNorth += info;
 							//console.log('Northbound');
@@ -195,6 +196,41 @@
 
 				//HOLD ONTO YOUR SHIT, WE ABOUT TO GO OLD SCHOOL
 				result = '<font color="red">' + diff.getMinutes() + ' mins</font>';
+
+			}
+
+			return result;
+			
+
+		}
+
+		function findTimes(input){
+			var result = ["On time", ""];
+			var patt= /[0-9]+(?:\:[0-9]*)?/g;
+			//[code][Expected][Scheduled]
+			var times = input.match(patt);
+			//Create date from expected arival time
+			var expecDate = new Date();
+			var expec = times[1].split(':');
+			expecDate.setHours(expec[0]);
+			expecDate.setMinutes(expec[1]);
+			
+			var currentTime = new Date(); //Should proably set time remining of data, not users phone
+			result[1] = new Date(expecDate - currentTime).getMinutes() + ' mins';
+			//If there is a delay, find it
+			if(times[1] != times[2]){
+				
+				var sched = times[2].split(':');
+				
+				var schedDate = new Date();
+
+				schedDate.setHours(sched[0]);
+				schedDate.setMinutes(sched[1]);
+
+				var diff = new Date(expecDate - schedDate);
+
+				//HOLD ONTO YOUR SHIT, WE ABOUT TO GO OLD SCHOOL
+				result[0] = '<font color="red">' + diff.getMinutes() + ' mins delayed</font>';
 
 			}
 
