@@ -1,3 +1,9 @@
 .custom-list >*{
 	background-image: none;
 }
+
+
+/* Hack to stop aside taking up silly amounts of room */
+.ui-li-aside{
+	width: 20%;
+}
