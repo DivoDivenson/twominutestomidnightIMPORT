@@ -38,11 +38,11 @@ public class Document {
 	private void open() {
 
 		try {
-			File file = new File("src/data/tmp/invoice.ods");
+			File file = new File("data/tmp/invoice.ods");
 			sheet = SpreadSheet.createFromFile(file).getSheet(0);
 			// sheet.getCellAt("B12").setValue("Hello, this is a test");
 			write();
-			File outputFile = new File("src/data/invoice1.ods");
+			File outputFile = new File("data/invoice1.ods");
 			sheet.getSpreadSheet().saveAs(outputFile);
 
 		} catch (IOException e) {
@@ -66,7 +66,7 @@ public class Document {
 		sheet.getCellAt("D18").setValue(formatCell(invoice.getSize()));
 		sheet.getCellAt("B37").setValue(formatCell(invoice.getReturnEmpty()));
 		writeDes();
-		sheet.getCellAt("H8").setValue(formatCell(Integer.toString(invoice.getDocNo())));
+		//sheet.getCellAt("H8").setValue(formatCell(Integer.toString(invoice.getDocNo())));
 		if (invoice instanceof InvoiceHaz) {
 			// System.out.println("Haz");
 			InvoiceHaz invoice = (InvoiceHaz) this.invoice;

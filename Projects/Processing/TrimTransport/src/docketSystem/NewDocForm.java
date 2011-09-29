@@ -2,6 +2,9 @@ package docketSystem;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.Date;
 
 import javax.swing.ImageIcon;
@@ -10,24 +13,25 @@ import javax.swing.JFrame;
 
 public class NewDocForm extends JFrame {
 
-	private javax.swing.JTextField berth;
+	CheckListener checkListener;
+	protected javax.swing.JTextField berth;
 	private javax.swing.JLabel berthLabel;
 	private javax.swing.JButton cancelButton;
-	private javax.swing.JTextArea collect;
+	protected javax.swing.JTextArea collect;
 	private javax.swing.JLabel collectLabel;
 //	private javax.swing.JList collectList;
 	private AddressList collectList;
-	private javax.swing.JTextField customer;
+	protected javax.swing.JTextField customer;
 	private javax.swing.JLabel customerLabel;
 	private javax.swing.JLabel decriptionLabel;
-	private javax.swing.JTextArea deliver;
+	protected javax.swing.JTextArea deliver;
 	private javax.swing.JLabel deliverLabel;
 //	private javax.swing.JList deliverList;
 	private AddressList deliverList;
-	private javax.swing.JTextField description;
-	private javax.swing.JTextField equip;
+	protected javax.swing.JTextField description;
+	protected javax.swing.JTextField equip;
 	private javax.swing.JLabel equipLabel;
-	private javax.swing.JCheckBox hazCheckBox;
+	protected javax.swing.JCheckBox hazCheckBox;
 	private javax.swing.JPanel hazPanel;
 	//private javax.swing.JList jList2;
 	private javax.swing.JScrollPane jScrollPane1;
@@ -35,46 +39,53 @@ public class NewDocForm extends JFrame {
 	private javax.swing.JScrollPane jScrollPane3;
 	private javax.swing.JScrollPane jScrollPane4;
 	private javax.swing.JScrollPane jScrollPane5;
-	private javax.swing.JTextField name;
+	protected javax.swing.JTextField name; //UN name
 	private javax.swing.JLabel nameLabel;
 	private javax.swing.JLabel packLabel;
 	private javax.swing.JComboBox packing;
 	private javax.swing.JComboBox primary;
 	private javax.swing.JLabel primaryLabel;
 	private javax.swing.JButton printButton;
-	private javax.swing.JTextField returnEmpty;
+	protected javax.swing.JTextField returnEmpty;
 	private javax.swing.JLabel returnEmptyLabel;
 	private javax.swing.JButton saveButton;
-	private javax.swing.JTextField seal;
+	protected javax.swing.JTextField seal;
 	private javax.swing.JLabel sealLabel;
 	private javax.swing.JComboBox secondary;
 	private javax.swing.JLabel secondaryLabel;
-	private javax.swing.JTextField size;
+	protected javax.swing.JTextField size;
 	private javax.swing.JLabel sizeLabel;
 	private javax.swing.JPanel standardPanel;
 	private javax.swing.JTextField tunnel;
 	private javax.swing.JLabel tunnelLabel;
-	private javax.swing.JTextField un;
+	protected javax.swing.JTextField un;
 	private javax.swing.JLabel unLabel;
-	private javax.swing.JTextField weight;
+	protected javax.swing.JTextField weight;
 	private javax.swing.JLabel weightLabel;
+	
+	protected boolean save;
 	
 
 	JComponent stuff[];
 	JComponent haz[];
 
 	private Invoice invoice;
-	private Interface interfaceRef; // Reference to the main interface
+	protected Interface interfaceRef; // Reference to the main interface
 
 	public NewDocForm(Interface interfaceRef) {
 		this.interfaceRef = interfaceRef;
+		save = false;
 
 		initComponents();
 		// invoice = new Invoice();
 		// this.invoice = interfaceRef.getInvoice();
 	}
+	
+	public NewDocForm(){
+		;
+	}
 
-	private void hazCheckBoxActionPerformed() {
+	protected void hazCheckBoxActionPerformed() {
 		if (haz[0].isVisible()) { // Check to see if the haz stuff is on or off
 			for (JComponent n : haz) {
 				n.setVisible(false);
@@ -117,6 +128,7 @@ public class NewDocForm extends JFrame {
 	}
 
 	private void saveButtonActionPerformed() {
+		save = true;
 		initInvoice();		
 		interfaceRef.setInvoice(invoice);
 		deliverList.initList();
@@ -124,6 +136,7 @@ public class NewDocForm extends JFrame {
 	}
 
 	private void printButtonActionPerformed() {
+		save = true;
 		initInvoice();
 		interfaceRef.setInvoice(invoice);
 		interfaceRef.printActionPreformed(invoice);
@@ -131,7 +144,11 @@ public class NewDocForm extends JFrame {
 		collectList.initList();
 	}
 
-	private void cancelButtonActionPerformed() {
+	protected void cancelButtonActionPerformed() {
+		if(save){
+			interfaceRef.saveActionPreformed();
+		}
+		this.setVisible(false);
 		this.dispose();
 	}
 
@@ -247,7 +264,13 @@ public class NewDocForm extends JFrame {
 		});
 		//jScrollPane4.setViewportView(jList2);*/
 
-		setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+		this.addWindowListener(new WindowAdapter(){
+			public void windowClosing(java.awt.event.WindowEvent e){
+				cancelButtonActionPerformed();
+				
+			}
+		});
 		setSize(new java.awt.Dimension(545, 590));
 		setResizable(false);
 
@@ -424,12 +447,18 @@ public class NewDocForm extends JFrame {
 		hazPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
 		hazCheckBox.setText("Hazardous");
-		
-		hazCheckBox.addActionListener(new ActionListener() {
+		checkListener = new CheckListener(){
 			public void actionPerformed(ActionEvent evt) {
+				//System.out.println(evt.getActionCommand());
+				hazCheckBoxActionPerformed();
+			}	
+			
+			public void simulateAction(){
+				hazCheckBox.setSelected(true);
 				hazCheckBoxActionPerformed();
 			}
-		});
+		};
+		hazCheckBox.addActionListener(checkListener);
 		primaryLabel.setText("Primary Class");
 
 		packLabel.setText("Packing Group");
@@ -627,7 +656,7 @@ public class NewDocForm extends JFrame {
 												Short.MAX_VALUE)));
 
 		printButton.setText("Print");
-		printButton.setIcon(new ImageIcon("src/data/resources/print.png"));
+		printButton.setIcon(new ImageIcon("data/resources/print.png"));
 		printButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         printButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 		printButton.addActionListener(new ActionListener() {
@@ -637,7 +666,7 @@ public class NewDocForm extends JFrame {
 		});
 
 		saveButton.setText("Save");
-		saveButton.setIcon(new ImageIcon("src/data/resources/save.png"));
+		saveButton.setIcon(new ImageIcon("data/resources/save.png"));
 		saveButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         saveButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 		saveButton.addActionListener(new ActionListener() {
@@ -646,8 +675,8 @@ public class NewDocForm extends JFrame {
 			}
 		});
 
-		cancelButton.setText("Cancel");
-		cancelButton.setIcon(new ImageIcon("src/data/resources/close.png"));
+		cancelButton.setText("Close");
+		cancelButton.setIcon(new ImageIcon("data/resources/close.png"));
 		cancelButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         cancelButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 		cancelButton.addActionListener(new ActionListener() {
