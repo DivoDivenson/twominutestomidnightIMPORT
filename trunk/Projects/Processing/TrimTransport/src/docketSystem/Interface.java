@@ -7,6 +7,7 @@ package docketSystem;
  * **************************** 
  */
 import java.sql.*;
+import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -61,6 +62,7 @@ public class Interface extends JFrame {
 	private JComponent stuff[];
 
 	private javax.swing.JButton closeButton;
+	private javax.swing.JButton editButton;
 	private javax.swing.JMenu file;
 	private javax.swing.JMenu edit;
 	private javax.swing.JMenuBar jMenuBar1;
@@ -83,6 +85,7 @@ public class Interface extends JFrame {
 		newDoc = new javax.swing.JButton();
 		searchButton = new javax.swing.JButton();
 		closeButton = new javax.swing.JButton();
+		editButton = new javax.swing.JButton();
 		jMenuBar1 = new javax.swing.JMenuBar();
 		file = new javax.swing.JMenu();
 		edit = new javax.swing.JMenu();
@@ -106,6 +109,7 @@ public class Interface extends JFrame {
 			e.printStackTrace();
 		}
 		resultTable = new JTable(tableModel);
+		
 
 		tableScroll.setViewportView(resultTable);
 		// End jtable
@@ -113,7 +117,7 @@ public class Interface extends JFrame {
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
 		newDoc.setText("New");
-		newDoc.setIcon(new ImageIcon("src/data/resources/new.png"));
+		newDoc.setIcon(new ImageIcon("data/resources/new.png"));
 		newDoc.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 		newDoc.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 		newDoc.addActionListener(new java.awt.event.ActionListener() {
@@ -123,7 +127,7 @@ public class Interface extends JFrame {
 		});
 
 		searchButton.setText("Find");
-		searchButton.setIcon(new ImageIcon("src/data/resources/search.png"));
+		searchButton.setIcon(new ImageIcon("data/resources/search.png"));
 		searchButton
 				.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 		searchButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -134,7 +138,7 @@ public class Interface extends JFrame {
 		});
 
 		closeButton.setText("Close");
-		closeButton.setIcon(new ImageIcon("src/data/resources/close.png"));
+		closeButton.setIcon(new ImageIcon("data/resources/close.png"));
 		closeButton
 				.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 		closeButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -143,6 +147,19 @@ public class Interface extends JFrame {
 				closeButtonActionPerformed();
 			}
 		});
+		
+		editButton.setText("Edit");
+		editButton.setIcon(new ImageIcon("data/resources/edit.png"));
+		editButton
+			.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+		editButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+		editButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				editButtonActionPerformed();
+			}
+		});
+		
+		
 
 		javax.swing.GroupLayout mainLayout = new javax.swing.GroupLayout(main);
 		main.setLayout(mainLayout);
@@ -165,6 +182,11 @@ public class Interface extends JFrame {
 																javax.swing.GroupLayout.PREFERRED_SIZE)
 														.addComponent(
 																searchButton,
+																javax.swing.GroupLayout.PREFERRED_SIZE,
+																66,
+																javax.swing.GroupLayout.PREFERRED_SIZE)
+														.addComponent(
+																editButton,
 																javax.swing.GroupLayout.PREFERRED_SIZE,
 																66,
 																javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -209,6 +231,13 @@ public class Interface extends JFrame {
 																				javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
 																		.addComponent(
 																				searchButton,
+																				javax.swing.GroupLayout.PREFERRED_SIZE,
+																				68,
+																				javax.swing.GroupLayout.PREFERRED_SIZE)
+																		.addPreferredGap(
+																				javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+																		.addComponent(
+																				editButton,
 																				javax.swing.GroupLayout.PREFERRED_SIZE,
 																				68,
 																				javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -265,6 +294,63 @@ public class Interface extends JFrame {
 
 		// String insert = new String("INSERT INTO docket ")
 
+	}
+	
+	public void updateActionPreformed(String id){
+		System.out.println("Updating record");
+		int collectID, deliverID, hazID = 0;
+		//False flag stops the weight from being updated if address is unchanged
+		collectID = insertAddress(invoice.getFrom(), false);
+		deliverID = insertAddress(invoice.getTo(), false);
+		if (invoice instanceof InvoiceHaz) {
+			hazID = insertHaz();
+		}
+		//Worry about the haz later i guess
+		
+		updateDocket(collectID, deliverID, hazID, id);
+		
+		
+	}
+	
+	public void updateDocket(int collectID, int deliverID, int hazID, String ID){
+		Statement statement;
+		ResultSet rs;
+		try{
+			statement = connection.createStatement();
+			String query = new String(
+					"UPDATE docket SET Equipment='"
+					+ invoice.getEqupNo()
+					+ "', Customer='"
+					+ invoice.getCustomerRefer()
+					+ "', Seal='"
+					+ invoice.getSeal()
+					+ "', Description='"
+					+ invoice.getDescript()
+					+ "', Berth='"
+					+ invoice.getBerth()
+					+ "', Weight='"
+					+ invoice.getWeight()
+					+ "', Size_='"
+					+ invoice.getSize()
+					+ "', Return_Empty='"
+					+ invoice.getReturnEmpty()
+					+ "', Deliver_to='"
+					+ deliverID
+					+ "', Collect_from='"
+					+ collectID
+					+ "', Haz='"
+					+ hazID
+					+ "' WHERE Docket_Number='"
+					+ ID
+					+ "';"
+					);
+			//System.out.println(query);
+			statement.executeUpdate(query);
+		}catch (SQLException e) {
+			e.printStackTrace();
+		}
+		setDefaultQuery(); //Be lazy for the moment
+		
 	}
 
 	public int insertDocket(int collectID, int deliverID, int hazID) {
@@ -362,8 +448,12 @@ public class Interface extends JFrame {
 
 		return result;
 	}
+	
 
-	public int insertAddress(String address) {
+	public int insertAddress(String address){
+		return insertAddress(address, true);
+	}
+	public int insertAddress(String address, boolean update) {
 		ResultSet resultSet;
 		Statement statement;
 		int result = 0;
@@ -375,11 +465,14 @@ public class Interface extends JFrame {
 							+ "\""));
 			// Presume the first object found is the address, as each is unique
 			if (resultSet.next()) {
-				// If found, store its id and add 1 to its weight
 				result = resultSet.getInt(1);
-				statement.executeUpdate(new String(
-						"UPDATE addresses SET weight=" + ((resultSet.getInt(3)) + 1)
-						+ " WHERE ID='" + result + "';"));
+				// If found, store its id and add 1 to its weight
+				if(update){
+					
+					statement.executeUpdate(new String(
+							"UPDATE addresses SET weight=" + ((resultSet.getInt(3)) + 1)
+							+ " WHERE ID='" + result + "';"));
+				}
 			}// Else insert the new address into addresses
 			else {
 				// Insert into address
@@ -429,7 +522,7 @@ public class Interface extends JFrame {
 	public void printActionPreformed(Invoice invoice) {
 		document = new Document(invoice);
 		final OpenDocument doc = new OpenDocument();
-		doc.loadFrom("src/data/invoice1.ods");
+		doc.loadFrom("data/invoice1.ods");
 
 		// Show time !
 		final JFrame mainFrame = new JFrame("Viewer");
@@ -465,6 +558,49 @@ public class Interface extends JFrame {
 	private void closeButtonActionPerformed() {
 		this.setVisible(false);
 		this.dispose();
+		//exit(0); ??
+	}
+	
+	private void editButtonActionPerformed(){
+		int row = resultTable.getSelectedRow();
+		if(row != -1){
+			//Pull selected row from backend
+			int id = (Integer) resultTable.getValueAt(row, 0); //Modifying the default query may break this, badly
+			String query = "SELECT docket.Docket_Number, docket.Date_, addresses.address, addresses1.address,"
+                        + " docket.Description, docket.Seal, docket.Customer, docket.Equipment, docket.Return_Empty, haz.Name, haz.UN_Number, docket.Size_, docket.Weight, docket.Berth"
+                        + " FROM docket LEFT JOIN addresses ON docket.Deliver_to=addresses.ID LEFT"
+                        + " JOIN addresses AS addresses1 ON docket.Collect_From=addresses1.ID"
+                        + " LEFT JOIN haz ON docket.Haz=haz.ID WHERE docket.Docket_Number=" + Integer.toString(id);
+			//System.out.println(query);
+			try {
+				Statement statement = connection.createStatement();
+				ResultSet resultSet = statement.executeQuery(query);
+				resultSet.next();
+				
+				//This is going to be long and tedious, pull data out of resultSet and feed it to EditDocForm
+				//ArrayList <String>list = new ArrayList();
+				String[] list = new String[14]; //Ok, now we are getting hacky
+				for(int i = 1; i <= 14; i++ ){
+					list[(i-1)] = resultSet.getString(i);
+					//System.out.println(resultSet.getString(i));
+				}
+				
+				if (newDocForm != null)
+					newDocForm = null; // Just in case
+				newDocForm = new EditDocForm(this, list );
+				newDocForm.setVisible(true);
+				
+				
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			//Shove it into subclassed NewDocForm
+			
+			//Save any changes
+		}else{ //User has not selected a row
+			
+		}
 	}
 
 	/**
@@ -474,11 +610,12 @@ public class Interface extends JFrame {
 	 * @param invoice
 	 * @return ID of invoice in SQL database, also used as the invoice number
 	 */
-	public int setInvoice(Invoice invoice) {
+	public void setInvoice(Invoice invoice) {
 		this.invoice = invoice;
-		invoice.setDocNo(getMaxID() + 1); // Set the docket number as the
+		//invoice.setDocNo(getMaxID() + 1); // Set the docket number as the
 		// previous most recent invoice
-		return saveActionPreformed();
+		//return saveActionPreformed();
+		
 	}
 
 	public Invoice getInvoice() {
@@ -496,7 +633,7 @@ public class Interface extends JFrame {
 	
 	public void setQuery(String where){
 		try {
-			System.out.println(DEFAULT_QUERY + where + TERM);
+			//System.out.println(DEFAULT_QUERY + where + TERM);
 			tableModel.setQuery(DEFAULT_QUERY + where + TERM);
 		} catch (IllegalStateException e) {
 			// TODO Auto-generated catch block

@@ -16,6 +16,7 @@
 	<div data-role="page" id="menu">
 		<div data-role="header">
 			<h1>Dart times</h1>
+			<a href="" class="ui-btn-right" data-icon="star" id="favoritesBtn">Favorites</a>
 		</div>
 
 
@@ -54,6 +55,11 @@
 		//If timePage is viewed more then once we need to refresh the listview on that page
 		var timesLoaded = 0;
 
+		var favorites = new Array();
+
+
+		//Not storeing favorites as object atributes, more overhead for nothing gained
+		//except fancy code
 		var stations = new Array();
 		stations[0] = stationObj={name:"Bayside",code:"BYSDE", side:"n"};
 		stations[1] = stationObj={name:"Blackrock",code:"BROCK", side:"s"};
@@ -87,14 +93,46 @@
 
 	
 		function populateList(){
-			var list = ""
+
+			//putting this here because i'm lazy
+			$('#favoritesBtn').click(function(){setFavorites()});
+
+			var list = '<li data-role="list-divider">Stations</li>';
 			for (x in stations){
 				list += '<li><a onClick="getStation(' + x + ')">' + stations[x].name + '</a></li>';
 			}
 
 			$('#stations').html(list);
+			getFavorites();
 
 			//$('#stations').listview('refresh');
+		}
+
+		//Store and fetch favorites array index from localStorage
+		function storeFavorites(){
+			
+		}
+
+		function getFavorites(){
+			var number;
+			if((number = parseInt(localStorage.getItem('numberFav')))){
+				var i;
+				for(i = 0; i <=number; i++){
+					console.log('Favorite');
+				}
+			}else{
+				console.log('No favorites')
+			}
+		}
+
+		//Allow user to select favorite stations
+		function setFavorites(){
+			var icons = $('#stations span');
+			var i;
+			for(i = 0; i < icons.length; i++){
+				$(icons[i]) .toggleClass("ui-icon-arrow-r");
+				console.log(icons[i]);
+			}
 		}
 
 
