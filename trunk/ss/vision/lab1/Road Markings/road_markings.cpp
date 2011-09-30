@@ -20,6 +20,27 @@ because it's shit out and the camera is pointed at the road.
 
 
 */
+int max = 0;
+int isGrey(unsigned char * pixel){
+	int bright = 60;
+	int result = 0;
+	//If the RGB values are close together, class as grey
+	/*if((variation*2) <= (abs(pixel[RED_CH] - pixel[BLUE_CH]) + abs(pixel[RED_CH] - pixel[GREEN_CH]))){
+		result = 1;
+	}*/
+	/* HSV version */
+	if( (pixel[2] > 70) && (pixel[1] < 20)){
+		result = 1;
+	}
+	if(pixel[1] > max){
+		max = pixel[1];
+	}
+
+	
+	return result;
+}
+
+
 
 // This routine creates a binary result image where the points are 255,255,255 when the corresponding
 // source points are grey/white.  The rule for deciding which points are white/grey is very debatable.
@@ -36,20 +57,28 @@ void select_white_points( IplImage* source, IplImage* result )
 	unsigned char white_pixel[4] = {255, 255, 255, 0};
 	int row, col;
 
+	cvCvtColor(source, temp, CV_RGB2HSV); //Too expensive
+
+
+
 	for(row=0; row < result->height; row++){
 		for(col=0; col < result->width; col++){
-			unsigned char* curr_point = GETPIXELPTRMACRO( source, col, row, width_step, pixel_step );
-			if ((curr_point[RED_CH] >= THRESHOLD) && ((curr_point[BLUE_CH] > THRESHOLD) || (curr_point[GREEN_CH] > THRESHOLD))){
+			//CHange back to source
+			unsigned char* curr_point = GETPIXELPTRMACRO( temp, col, row, width_step, pixel_step );
+			//if ((curr_point[RED_CH] >= THRESHOLD) && ((curr_point[BLUE_CH] > THRESHOLD) || (curr_point[GREEN_CH] > THRESHOLD))){
+			if(isGrey(curr_point)){
 				PUTPIXELMACRO( result, col, row, white_pixel, width_step, pixel_step, number_channels );
 			}
 		}
 	}
 
-	/*cvMorphologyEx( result, temp, NULL, NULL, CV_MOP_OPEN, 3 );
-	cvMorphologyEx( temp, result, NULL, NULL, CV_MOP_CLOSE, 3 );*/
+
+	/*cvMorphologyEx( result, temp, NULL, NULL, CV_MOP_OPEN, 1 );
+	cvMorphologyEx( temp, result, NULL, NULL, CV_MOP_CLOSE, 1 );*/
 
 
 }
+
 
 int main( int argc, char** argv )
 {
@@ -64,21 +93,35 @@ int main( int argc, char** argv )
 	int fps = (int) cvGetCaptureProperty( capture, CV_CAP_PROP_FPS);
 
 	//1 scales the window to the content size (I think)
-	cvNamedWindow("StayingInLane", 1);
 	cvNamedWindow("Original",1 );
+	cvNamedWindow("StayingInLane", 1);
 
+	cvSetMouseCallback( "Original", on_mouse_show_values, 0 );
+	window_name_for_on_mouse_show_values="Original";
+
+
+	//1048608 unicode? Who knows, it's space anyway.
 	while(key != 'q'){
-		printf("Frame");
+		//printf("key : %d\n", key);
 		frame = cvQueryFrame( capture );
 		if(!frame) break;
+
+		//Hack to pause video
+		if(key == 1048608){
+			key = cvWaitKey(0);
+		}
 
 		input = cvCloneImage(frame);
 		result = cvCloneImage(input);
 		select_white_points(input, result);
+		image_for_on_mouse_show_values=input;
+
 		cvShowImage("StayingInLane", result);
 		cvShowImage("Original", input);
-		key = cvWaitKey(fps);
+		key = cvWaitKey(1000 / fps);
 	}
+		printf("Max : %d\n", max);
+
 
 	cvReleaseCapture(&capture);
 	cvDestroyWindow( "StayingInLane");
