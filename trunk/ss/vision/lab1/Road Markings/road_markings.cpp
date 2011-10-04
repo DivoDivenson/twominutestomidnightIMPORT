@@ -11,8 +11,8 @@
 #include "cv.h"
 #include "highgui.h"
 #include "../utilities.h"
-
-#define THRESHOLD 70
+//Arbitrary constant is best constant
+#define THRESHOLD 40
 
 /*
 TODO
@@ -21,16 +21,19 @@ Analyze different frames (at asy 0% 25% 50% 75% 100% of the video).
 The white should be bit brighter (say 30) then the average RGB value of the scene. This works
 because it's shit out and the camera is pointed at the road.
 
+Turns out this big mad approach was only a tad better then just looking at the RGB values
+
 
 
 */
 int max = 0;
-int isGrey(unsigned char * pixel){
+int isGrey(unsigned char * pixel, float max ){
 	int variation = 3;
 	int result = 1;
 	//If the RGB values are close together, class as grey
 	//printf("%d\n",pixel[0]);
-	if(pixel[1] < 100){
+	//printf("%d : %f\n", pixel[0], max);
+	if(pixel[0] < max - THRESHOLD){
 		result = 0;
 	}
 	
@@ -46,9 +49,10 @@ int isGrey(unsigned char * pixel){
 	return result;
 }
 
+/*
 //Map value from one range to another, assuming min of both is 0
 //value, current max, new max
-float mapHistValue(int value, int curMax, int newMax){
+float mapHistValue(float value, int curMax, int newMax){
 	//float result = (newMax * (value / curMax));
 	//F*ck c++
 	float result = (float)newMax * ((float)((float)value / (float)curMax));
@@ -56,83 +60,27 @@ float mapHistValue(int value, int curMax, int newMax){
 	//return (float)5 / 6;
 }
 
-
-//Pass in the image you want to get the histogram off, result is the histogram
-//Expects greyScale for the moment
-/*
-And then I looked in the docs. Was a fun little exercise.
-
-
-void drawHist(IplImage * image, IplImage * result){
-	//Init
-	int height = result->height;
-	int width = result->width;
-	int i;
-
-	int max = 0;
-	int histogram[256];
-
-
-	int width_step=result->widthStep;
-	int pixel_step=result->widthStep/result->width;
-	int number_channels=result->nChannels;
-
-	for(i = 0; i < 256; i++){
-		histogram[i] = 0;
-	}
-
-	unsigned char white_pixel[4] = {255, 255, 255, 0};
-	int row, col;
-
-
-
-	//All the heights / widths are the same so they get swapped around a lot
-	for(row=0; row < image->height; row++){
-		for(col=0; col < image->width; col++){
-			unsigned char* curr_point = GETPIXELPTRMACRO( image, col, row, width_step, pixel_step );
-			histogram[curr_point[0]]++;			
-		}
-	}
-
-
-	for(i = 0; i < 256; i++){
-		if(histogram[i] > max) max = histogram[i];
-		//printf("HIST at %d: %d\n",i, histogram[i]);
-	}
-
-	cvZero(result);
-
-	for(col=0; col < 256; col++){
-
-		//Loss of percision and all that
-		int point = (int) mapHistValue(histogram[col], max, 256);
-		//So for some reason I can't invert the histogram. Thanks c++
-		//point = height - point;
-		printf("%d : %d\n",col,  point);
-
-		PUTPIXELMACRO( result, col*2, point, white_pixel, width_step, pixel_step, number_channels);
-	}
-	printf("Done\n");
-
-
-
-
-}
 */
 
-//As above but after reading up online, http://www.aishack.in/2010/07/drawing-histograms-in-opencv/
 
+//Wrote my own histogram code but it was a bit terrible, wrote this after reading up online, http://www.aishack.in/2010/07/drawing-histograms-in-opencv/
+//This is to give me a better understanding of the scene and is not used for analysis
 IplImage * drawHist(CvHistogram * hist, float scaleX=1, float scaleY=1){
 	float max = 0;
 	cvGetMinMaxHistValue(hist, 0, &max, 0, 0);
 
-	IplImage * imgHist = cvCreateImage(cvSize(256*scaleX, 64*scaleY), 0 ,1);
+
+	IplImage * imgHist = cvCreateImage(cvSize(256*scaleX, 64*scaleY), 8 ,1);
 	cvZero(imgHist);
+	float most = 0;
 
 	for(int i = 0; i<255; i++){
 		float value = cvQueryHistValue_1D(hist, i);
 		float nextValue = cvQueryHistValue_1D(hist, i+1);
+		if(most < value) most = value;
 
+		//Draw a poly showing the change between this and the next point 
+		//along the top. (A bar) I have no idea how the math works, come back to this
 		CvPoint pt1 = cvPoint(i*scaleX, 64*scaleY);
 		CvPoint pt2 = cvPoint(i*scaleX+scaleX, 64*scaleY);
 		CvPoint pt3 = cvPoint(i*scaleX+scaleX, (64-nextValue*64/max)*scaleY);
@@ -143,13 +91,57 @@ IplImage * drawHist(CvHistogram * hist, float scaleX=1, float scaleY=1){
 		cvFillConvexPoly(imgHist, pts, 5, cvScalar(255));
 				
 	}
-
 	return imgHist;
 }
 
 
+//return the most common pixel the a greyScale image
+//or the average luminance
+int mostFrequent(IplImage * source, int row){
+	int width_step=source->widthStep;
+	int pixel_step=source->widthStep/source->width;
+	int number_channels=source->nChannels;
 
+	//int row;
+	int col;
 
+	int max = 0;
+	int result = 0;
+	int i;
+    int histogram[256];
+	for(i = 0; i < 256; i++){
+		histogram[i] = 0;
+	}
+
+	//for(row=0; row < source->height; row++){
+		for(col =0; col < source->width; col++){
+			unsigned  char * curr_point = GETPIXELPTRMACRO( source, col, row, width_step, pixel_step );
+			histogram[curr_point[0]]++;
+		}
+	//}
+
+	for(i = 0; i < 256; i++){
+		//MOst common value
+		/*if(histogram[i] > max){
+			max = histogram[i];
+			result = i;
+		}*/
+		//Average
+		result += (i * histogram[i]);
+	}
+	result = (int)result / 256;
+
+	return result;
+}
+
+//Very simple bounds, might make more complex later
+int boundImage(int row, int col){
+	int result = 0;
+	if(row > 33){
+		result = 1;
+	}
+	return result;
+}
 
 
 // This routine creates a binary result image where the points are 255,255,255 when the corresponding
@@ -159,55 +151,42 @@ IplImage * drawHist(CvHistogram * hist, float scaleX=1, float scaleY=1){
 //Takes a greyscale image
 void select_white_points( IplImage* source, IplImage* result )
 {
-	//IplImage * temp = cvCloneImage(source) ;
-	//IplImage * temp = cvCreateImage( cvSize(source->width, source->height), IPL_DEPTH_8U, 1);
-	//cvtGrey(source, temp);
-
-	
 	int width_step=source->widthStep;
 	int pixel_step=source->widthStep/source->width;
 	int number_channels=source->nChannels;
-
-	
 
 	cvZero(result);
 	unsigned char white_pixel[4] = {255, 255, 255, 0};
 	int row, col;
 
 
-
 	//All the heights / widths are the same so they get swapped around a lot
 	for(row=0; row < source->height; row++){
+		//Get most common lum for a scene, row by row
+		int max = mostFrequent(source, row);
+
 		for(col=0; col < source->width; col++){
-			//CHange back to source
 			unsigned char* curr_point = GETPIXELPTRMACRO( source, col, row, width_step, pixel_step );			
-			//if ((curr_point[RED_CH] >= THRESHOLD) && ((curr_point[BLUE_CH] > THRESHOLD) || (curr_point[GREEN_CH] > THRESHOLD))){
-			if(isGrey(curr_point)){
-				//PUTPIXELMACRO( result, col, row, white_pixel, width_step, pixel_step, number_channels );
+			if(boundImage(row, col) && isGrey(curr_point, max)){
 				PUTPIXELMACRO( result, col, row, white_pixel, width_step, pixel_step, number_channels );
 			}
 			
 		}
 	}
 
-
-
-	/*cvMorphologyEx( result, temp, NULL, NULL, CV_MOP_OPEN, 1 );
-	cvMorphologyEx( temp, result, NULL, NULL, CV_MOP_CLOSE, 1 );*/
-
-
+	//Without these applied the reflections of the road markings on the car bonnet are picked up :)
+	//cvMorphologyEx( result, result, NULL, NULL, CV_MOP_OPEN, 1 );
+	cvMorphologyEx( result, result, NULL, NULL, CV_MOP_CLOSE, 1 );
 
 }
 
 
 
-
-
-//Why this doesn't work as a a function I do not know
+/*Why this doesn't work as a a function I do not know
 void cvtGrey(IplImage * source, IplImage * result){
 	result = cvCreateImage( cvSize(source->width, source->height), IPL_DEPTH_8U, 1);
 	cvCvtColor(source, result, CV_RGB2GRAY ); 
-}
+}*/
 
 
 int main( int argc, char** argv )
@@ -232,10 +211,12 @@ int main( int argc, char** argv )
 	cvSetMouseCallback( "Original", on_mouse_show_values, 0 );
 	window_name_for_on_mouse_show_values="Original";
 
+	//Histogram stuff
 	float range[] = {0, 255};
 	float * ranges[] = {range};
 	int numBits = 256;
 
+	float max = 0;
 
 	//1048608 unicode? Who knows, it's space anyway.
 	while(key != 1048689){
@@ -255,15 +236,19 @@ int main( int argc, char** argv )
 		input =  cvCreateImage( cvSize(frame->width, frame->height), IPL_DEPTH_8U, 1);
 		cvCvtColor(frame, input, CV_RGB2GRAY);
 
+		histogram = cvCreateHist(1, &numBits, CV_HIST_ARRAY, ranges, 1);
+		cvCalcHist(&input, histogram, 0 , 0);
+		IplImage * histImage = drawHist(histogram, 3, 3);
+		cvGetMinMaxHistValue(histogram, 0, &max, 0, 0);
+
+
 		//init result
 		result = cvCloneImage( input );
 		//result = cvCloneImage(input);
 		select_white_points(input, result);
-		image_for_on_mouse_show_values=input;
+		image_for_on_mouse_show_values=frame;
 
-		histogram = cvCreateHist(1, &numBits, CV_HIST_ARRAY, ranges, 1);
-		cvCalcHist(&input, histogram, 0 , 0);
-		IplImage * histImage = drawHist(histogram);
+		
 
 		//drawHist(input, histogram);
 		cvShowImage("Histogram", histImage);
