@@ -5,7 +5,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
 #include <highgui.h>
+
 #include "cv.h"
 #include "highgui.h"
 #include "../utilities.h"
@@ -60,7 +62,7 @@ float mapHistValue(int value, int curMax, int newMax){
 /*
 And then I looked in the docs. Was a fun little exercise.
 
-*/
+
 void drawHist(IplImage * image, IplImage * result){
 	//Init
 	int height = result->height;
@@ -116,6 +118,36 @@ void drawHist(IplImage * image, IplImage * result){
 
 
 }
+*/
+
+//As above but after reading up online, http://www.aishack.in/2010/07/drawing-histograms-in-opencv/
+
+IplImage * drawHist(CvHistogram * hist, float scaleX=1, float scaleY=1){
+	float max = 0;
+	cvGetMinMaxHistValue(hist, 0, &max, 0, 0);
+
+	IplImage * imgHist = cvCreateImage(cvSize(256*scaleX, 64*scaleY), 0 ,1);
+	cvZero(imgHist);
+
+	for(int i = 0; i<255; i++){
+		float value = cvQueryHistValue_1D(hist, i);
+		float nextValue = cvQueryHistValue_1D(hist, i+1);
+
+		CvPoint pt1 = cvPoint(i*scaleX, 64*scaleY);
+		CvPoint pt2 = cvPoint(i*scaleX+scaleX, 64*scaleY);
+		CvPoint pt3 = cvPoint(i*scaleX+scaleX, (64-nextValue*64/max)*scaleY);
+		CvPoint pt4 = cvPoint(i*scaleX, (64-value*64/max)*scaleY);
+
+		CvPoint pts[] = {pt1, pt2, pt3, pt4, pt1};
+		//5 == num of points
+		cvFillConvexPoly(imgHist, pts, 5, cvScalar(255));
+				
+	}
+
+	return imgHist;
+}
+
+
 
 
 
@@ -231,7 +263,7 @@ int main( int argc, char** argv )
 
 		histogram = cvCreateHist(1, &numBits, CV_HIST_ARRAY, ranges, 1);
 		cvCalcHist(&input, histogram, 0 , 0);
-		IplImage * histImage = DrawHistogram(histogram);
+		IplImage * histImage = drawHist(histogram);
 
 		//drawHist(input, histogram);
 		cvShowImage("Histogram", histImage);
