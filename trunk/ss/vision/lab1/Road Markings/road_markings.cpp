@@ -27,13 +27,13 @@ Turns out this big mad approach was only a tad better then just looking at the R
 
 */
 int max = 0;
-int isGrey(unsigned char * pixel, float max ){
+int isGrey(unsigned char * pixel, float average ){
 	int variation = 3;
 	int result = 1;
 	//If the RGB values are close together, class as grey
 	//printf("%d\n",pixel[0]);
 	//printf("%d : %f\n", pixel[0], max);
-	if(pixel[0] < max - THRESHOLD){
+	if(pixel[0] < average - THRESHOLD){
 		result = 0;
 	}
 	
