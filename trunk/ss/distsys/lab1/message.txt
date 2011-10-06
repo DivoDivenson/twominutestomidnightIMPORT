@@ -1,0 +1,9 @@
+{
+	"encoding" : "ascii",
+	"language" : "english",
+	"degree"   : "low",
+	"data"	   " "this is a message"
+}
+
+Here four fields are defined in JSON. The encoding, language and degree are simple strings choosen from a set list. The fourth field, data, is the message to send.
+
