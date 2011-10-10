@@ -22,7 +22,7 @@ riffle _ [] = []
 riffle [] _ = []
 riffle (x:xs) (y:ys) = x:y: riffle ys xs
 
-
+{-
 vowels = "aeiou"
 unixname :: [Char] -> [Char]
 unixname [] = []
@@ -30,7 +30,7 @@ unixname (c:cs) | vowel c = unixname cs
                 | otherwise = [c] ++ unixname cs
                   where vowel x = x 'elem' vowels
 
-
+-}
 
 
 
