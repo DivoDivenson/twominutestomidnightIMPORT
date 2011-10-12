@@ -14,9 +14,35 @@
 // Locate the red pixels in the source image.
 void find_red_points( IplImage* source, IplImage* result, IplImage* temp )
 {
-	// TO DO:  Write code to select all the red road sign points.  You may need to clean up the result
-	//        using mathematical morphology.  The result should be a binary image with the selected red
-	//        points as white points.  The temp image passed may be used in your processing.
+	int width_step=source->widthStep;
+	int pixel_step=source->widthStep/source->width;
+	int n_channels=source->nChannels;
+
+	double threshold = 70;
+
+	cvZero(result);
+	unsigned char white[4] = {255,255,255,0};
+	int row = 0, col = 0;
+
+	for(row=0; row < result->height; row++){
+		for(col=0; col < result->width; col++){
+			unsigned char * curr_point = GETPIXELPTRMACRO(source, col, row, width_step, pixel_step);
+			//if((curr_point[RED_CH] <= threshold) && ((curr_point[BLUE_CH] < threshold) || (curr_point[GREEN_CH] < threshold))){
+			
+			//If the channels fluctuate suffecently then we have an image pixel (This eliminates the white background)
+			if(( (curr_point[RED_CH] - 10) > curr_point[BLUE_CH]) && ((curr_point[RED_CH] - 10) > curr_point[GREEN_CH])){
+				//Now analyse for red content. Want the red component to be a certain percentage greater then green and blue
+				//After lots of looking at pixel values and playing around 5.95 was chosen.
+				threshold = curr_point[RED_CH] - curr_point[RED_CH] / 5.95f;  //Found through experimentation. Seems a bit mad. Also makes the process very expensive
+				if((curr_point[RED_CH] >= threshold) && ((curr_point[BLUE_CH] < threshold) || (curr_point[GREEN_CH] < threshold))){
+					PUTPIXELMACRO( result, col, row, white, width_step, pixel_step, n_channels);
+				}
+			}
+		}
+	}
+
+	cvMorphologyEx( result, temp, NULL, NULL, CV_MOP_OPEN, 1 );
+	cvMorphologyEx( temp, result, NULL, NULL, CV_MOP_CLOSE, 1 );
 }
 
 CvSeq* connected_components( IplImage* source, IplImage* result )
@@ -40,10 +66,35 @@ CvSeq* connected_components( IplImage* source, IplImage* result )
 	return contours;
 }
 
+//Tested, works 100%
 void invert_image( IplImage* source, IplImage* result )
 {
 	// TO DO:  Write code to invert all points in the source image (i.e. for each channel for each pixel in the result
 	//        image the value should be 255 less the corresponding value in the source image).
+	int width_step=source->widthStep;
+	int pixel_step=source->widthStep/source->width;
+	int n_channels=source->nChannels;
+	cvZero(result);
+	
+
+	int threshold = 70;
+
+	cvZero(result);
+	int row = 0, col = 0, chan = 0;
+	unsigned char white[4] = {255,255,255,0};
+
+
+	for(row=0; row < result->height; row++){
+		for(col=0; col < result->width; col++){
+			unsigned char * curr_point = GETPIXELPTRMACRO(source, col, row, width_step, pixel_step);
+			for(chan = 0; chan < n_channels; chan++){
+				curr_point[chan] = 255 - curr_point[chan];
+			}
+			PUTPIXELMACRO(result, col, row, curr_point, width_step, pixel_step, n_channels);
+		}
+	}
+
+	
 }
 
 // Assumes a 1D histogram of 256 elements.
@@ -147,7 +198,6 @@ int main( int argc, char** argv )
 		if( (images[4] = cvLoadImage("./NoParking.jpg",-1)) == 0 )
 			return 0;
 	}
-	printf("there\n");
 
 	// Explain the User Interface
     printf( "Hot keys: \n"
@@ -175,7 +225,6 @@ int main( int argc, char** argv )
 
 	int user_clicked_key = 0;
 	do {
-		printf("%d\n", user_clicked_key);
 		// Create images to do the processing in.
 		if (red_point_image != NULL)
 		{
@@ -224,10 +273,12 @@ int main( int argc, char** argv )
 	        user_clicked_key = (char)cvWaitKey(0);
 		} while ((!((user_clicked_key >= '1') && (user_clicked_key <= '0'+NUM_IMAGES))) &&
 			     ( user_clicked_key != ESC ));
+
 		if ((user_clicked_key >= '1') && (user_clicked_key <= '0'+NUM_IMAGES))
 		{
 			selected_image_num = user_clicked_key-'0';
 		}
+
 	} while ( user_clicked_key != ESC );
 
     return 1;
