@@ -147,6 +147,7 @@ int main( int argc, char** argv )
 		if( (images[4] = cvLoadImage("./NoParking.jpg",-1)) == 0 )
 			return 0;
 	}
+	printf("there\n");
 
 	// Explain the User Interface
     printf( "Hot keys: \n"
@@ -174,6 +175,7 @@ int main( int argc, char** argv )
 
 	int user_clicked_key = 0;
 	do {
+		printf("%d\n", user_clicked_key);
 		// Create images to do the processing in.
 		if (red_point_image != NULL)
 		{
@@ -219,7 +221,7 @@ int main( int argc, char** argv )
 				cvShowImage( "Processed Image", result_image );
 				break;
 			}
-	        user_clicked_key = cvWaitKey(0);
+	        user_clicked_key = (char)cvWaitKey(0);
 		} while ((!((user_clicked_key >= '1') && (user_clicked_key <= '0'+NUM_IMAGES))) &&
 			     ( user_clicked_key != ESC ));
 		if ((user_clicked_key >= '1') && (user_clicked_key <= '0'+NUM_IMAGES))
