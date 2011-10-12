@@ -30,7 +30,7 @@ void find_red_points( IplImage* source, IplImage* result, IplImage* temp )
 			//if((curr_point[RED_CH] <= threshold) && ((curr_point[BLUE_CH] < threshold) || (curr_point[GREEN_CH] < threshold))){
 			
 			//If the channels fluctuate suffecently then we have an image pixel (This eliminates the white background)
-			if(( (curr_point[RED_CH] - 10) > curr_point[BLUE_CH]) && ((curr_point[RED_CH] - 10) > curr_point[GREEN_CH])){
+			if(( (curr_point[RED_CH] - 10) > curr_point[BLUE_CH]) || ((curr_point[RED_CH] - 10) > curr_point[GREEN_CH])){
 				//Now analyse for red content. Want the red component to be a certain percentage greater then green and blue
 				//After lots of looking at pixel values and playing around 5.95 was chosen.
 				threshold = curr_point[RED_CH] - curr_point[RED_CH] / 5.95f;  //Found through experimentation. Seems a bit mad. Also makes the process very expensive
@@ -98,6 +98,7 @@ void invert_image( IplImage* source, IplImage* result )
 }
 
 // Assumes a 1D histogram of 256 elements.
+//From looking at the histogram we can see 3 very clear peaks
 int determine_optimal_threshold( CvHistogram* hist )
 {
 	// TO DO:  Given a 1-D CvHistogram you need to determine and return the optimal threshold value.
@@ -106,7 +107,15 @@ int determine_optimal_threshold( CvHistogram* hist )
 	//         To get the histogram value at index i
 	//            int histogram_value_at_i = ((int) *cvGetHistValue_1D(hist, i));
 
-	return 127;  // Just so that the project will compile...
+	int i;
+	for(i=0; i < 256; i++){
+		int value = ((int) *cvGetHistValue_1D(hist, i));
+		//printf("%d ", value);
+	}
+
+	//printf("\n\n\n");
+
+	return 1;  // Just so that the project will compile...
 }
 
 void apply_threshold_with_mask(IplImage* grayscale_image,IplImage* result_image,IplImage* mask_image,int threshold)
@@ -152,6 +161,7 @@ void determine_optimal_sign_classification( IplImage* original_image, IplImage* 
 			apply_threshold_with_mask(grayscale_image,result_image,mask_image,optimal_threshold);
 		}
 		curr_red_region = curr_red_region->h_next;
+		
 	}
 
 	for (row=0; row < result_image->height; row++)
