@@ -99,6 +99,7 @@ void invert_image( IplImage* source, IplImage* result )
 
 // Assumes a 1D histogram of 256 elements.
 //From looking at the histogram we can see 3 very clear peaks
+//TODO, check for divide by 0 properly
 int determine_optimal_threshold( CvHistogram* hist )
 {
 	// TO DO:  Given a 1-D CvHistogram you need to determine and return the optimal threshold value.
@@ -108,20 +109,70 @@ int determine_optimal_threshold( CvHistogram* hist )
 	//            int histogram_value_at_i = ((int) *cvGetHistValue_1D(hist, i));
 
 	int i;
-	for(i=0; i < 256; i++){
-		int value = ((int) *cvGetHistValue_1D(hist, i));
-		//printf("%d ", value);
-	}
-
+	int threshold = 127; //Start in the middle
+	int thresholdNext = 127;// t+1
+	int t=0;
+	int background = 1; 
+	int foreground = 1;
+	int nobackpixels = 1;  //Number of backrgound pixels, 1 to avoid divide by zero error DO PROPER LATER
+	//Sum of background and foreground
+	do{
+		nobackpixels = 1;
+		background = 1;
+		foreground = 1;
+		threshold = thresholdNext;
+		for(i=0; i < 256; i++){
+			int value = ((int) *cvGetHistValue_1D(hist, i));
+			if( i < threshold ){ //Backround pixel
+				background += value * i;
+				nobackpixels++;
+			}else{ //foreground
+				foreground += value * i;
+			}
+		}
+		//printf("BACK %d\n", thresholdNext);
+		//divided by number of background and foreground respectivly
+		background = background / nobackpixels;
+		foreground = foreground / ((255 - nobackpixels)+1); //Again, divide by zero error
+		//printf("H %d %d\n", background, foreground);
+		thresholdNext = (background + foreground) / 2;
+	}while(threshold != thresholdNext);
 	//printf("\n\n\n");
-
-	return 1;  // Just so that the project will compile...
+	printf("%d %d\n", thresholdNext, threshold);
+	return thresholdNext;  // Just so that the project will compile...
 }
 
 void apply_threshold_with_mask(IplImage* grayscale_image,IplImage* result_image,IplImage* mask_image,int threshold)
 {
 	// TO DO:  Apply binary thresholding to those points in the passed grayscale_image which correspond to non-zero
 	//        points in the passed mask_image.  The binary results (0 or 255) should be stored in the result_image.
+	int row = 0;
+	int col = 0;
+	int width_step = grayscale_image->widthStep;
+	int pixel_step = grayscale_image->widthStep / grayscale_image->width;
+	int n_channels= grayscale_image->nChannels;
+	//Just a quick check to see if I can use the same step for all images. Turns out I can. Spoke too soon
+	//printf("%d %d %d\n", width_step, pixel_step, n_channels);
+
+	int result_width_step = result_image->widthStep;
+	int result_pixel_step = result_image->widthStep / result_image->width;
+	int result_channels = result_image->nChannels;
+	//cvZero(result_image); Already zeroed elsewhere
+	unsigned char white[4] = {255,255,255,0};
+
+	for(row = 0; row < grayscale_image->height; row++){
+		for(col = 0; col < grayscale_image->width; col++){
+			unsigned char * mask_point = GETPIXELPTRMACRO(mask_image, col, row, width_step, pixel_step);
+			if(mask_point[0] != 0){ //Taken as 255 means apply the mask
+				//printf("%d\n", mask_point[0]);
+				unsigned char * grey_point = GETPIXELPTRMACRO(grayscale_image, col, row, width_step, pixel_step);
+				//If greater than or equal to thresh we want the pixel
+				if(grey_point[0] >= threshold){
+					PUTPIXELMACRO(result_image, col, row, white, result_width_step, result_pixel_step, result_channels);
+				}
+			}
+		}
+	}
 }
 
 void determine_optimal_sign_classification( IplImage* original_image, IplImage* red_point_image, CvSeq* red_components, CvSeq* background_components, IplImage* result_image )
@@ -205,6 +256,7 @@ int main( int argc, char** argv )
 			return 0;
 		if( (images[3] = cvLoadImage("./Parking.jpg",-1)) == 0 )
 			return 0;
+
 		if( (images[4] = cvLoadImage("./NoParking.jpg",-1)) == 0 )
 			return 0;
 	}
