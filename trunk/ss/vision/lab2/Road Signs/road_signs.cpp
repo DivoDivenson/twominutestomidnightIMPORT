@@ -193,7 +193,6 @@ int determine_optimal_threshold( CvHistogram* hist )
 
 	}while(threshold != (int)threshNext);
 	//}while(0);
-	printf ("Done:%d\n", (int)threshNext);
 	return threshold+10;
 }
 
