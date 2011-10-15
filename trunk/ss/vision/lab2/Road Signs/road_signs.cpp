@@ -12,37 +12,54 @@
 #define NUM_IMAGES 5
 
 // Locate the red pixels in the source image.
+//Tried HSV and HLS. Could not get anything workable
 void find_red_points( IplImage* source, IplImage* result, IplImage* temp )
 {
+	/*
+	IplImage * hsv = cvCreateImage(cvGetSize(source), IPL_DEPTH_8U, 3);
+	cvCvtColor(source, hsv, CV_RGB2HSV);
+
+	IplImage * h_space = cvCreateImage(cvGetSize(source) , 8, 1);
+	IplImage * s_space = cvCreateImage(cvGetSize(source) , 8, 1);
+	IplImage * v_space = cvCreateImage(cvGetSize(source) , 8, 1);
+	cvCvtPixToPlane(hsv, h_space, s_space, v_space, 0);
+	*/
+
+
+
+	//cvCvtColor(source, result, CV_BGR2HLS);
+
+	float threshold;
 	int width_step=source->widthStep;
 	int pixel_step=source->widthStep/source->width;
-	int n_channels=source->nChannels;
-
-	double threshold = 70;
-
-	cvZero(result);
-	unsigned char white[4] = {255,255,255,0};
-	int row = 0, col = 0;
-
-	for(row=0; row < result->height; row++){
-		for(col=0; col < result->width; col++){
-			unsigned char * curr_point = GETPIXELPTRMACRO(source, col, row, width_step, pixel_step);
-			//if((curr_point[RED_CH] <= threshold) && ((curr_point[BLUE_CH] < threshold) || (curr_point[GREEN_CH] < threshold))){
-			
-			//If the channels fluctuate suffecently then we have an image pixel (This eliminates the white background)
-			if(( (curr_point[RED_CH] - 10) > curr_point[BLUE_CH]) || ((curr_point[RED_CH] - 10) > curr_point[GREEN_CH])){
-				//Now analyse for red content. Want the red component to be a certain percentage greater then green and blue
-				//After lots of looking at pixel values and playing around 5.95 was chosen.
-				threshold = curr_point[RED_CH] - curr_point[RED_CH] / 5.95f;  //Found through experimentation. Seems a bit mad. Also makes the process very expensive
-				if((curr_point[RED_CH] >= threshold) && ((curr_point[BLUE_CH] < threshold) || (curr_point[GREEN_CH] < threshold))){
-					PUTPIXELMACRO( result, col, row, white, width_step, pixel_step, n_channels);
+	int number_channels=source->nChannels;
+	cvZero( result );
+	unsigned char white_pixel[4] = {255,255,255,0};
+	int row=0,col=0;
+	// Find all red points in the image
+	for (row=0; row < result->height; row++)
+		for (col=0; col < result->width; col++)
+		{
+			unsigned char* curr_point = GETPIXELPTRMACRO( source, col, row, width_step, pixel_step );
+			//First get rid of any points where red is not the brightest colour.
+			if(( (curr_point[RED_CH]) > curr_point[BLUE_CH]) && ((curr_point[RED_CH]) > curr_point[GREEN_CH])){
+				
+				//Now filter for the red on the road sign. The red is fairly bright so the red channel should be a good bit higher
+				//than green and blue. If the overall luminance of the scene is low, than all three channel values will be closer
+				//together. Solve this by scaling the threshold, green and blue should be at least 1/5 below red.
+				threshold = curr_point[RED_CH] - (curr_point[RED_CH]*  0.2f);
+				if (((curr_point[BLUE_CH] < threshold) || (curr_point[GREEN_CH] < threshold)))
+				{
+					PUTPIXELMACRO( result, col, row, white_pixel, width_step, pixel_step, number_channels );
 				}
 			}
 		}
-	}
 
+	// Apply morphological opening and closing operations to clean up the image
 	cvMorphologyEx( result, temp, NULL, NULL, CV_MOP_OPEN, 1 );
-	cvMorphologyEx( temp, result, NULL, NULL, CV_MOP_CLOSE, 1 );
+	cvMorphologyEx( temp, result, NULL, NULL, CV_MOP_CLOSE, 1);
+
+	
 }
 
 CvSeq* connected_components( IplImage* source, IplImage* result )
@@ -87,14 +104,45 @@ void invert_image( IplImage* source, IplImage* result )
 	for(row=0; row < result->height; row++){
 		for(col=0; col < result->width; col++){
 			unsigned char * curr_point = GETPIXELPTRMACRO(source, col, row, width_step, pixel_step);
+			unsigned char * result_point = GETPIXELPTRMACRO(result, col, row, width_step, pixel_step);
+			//white = {255,255,255,0};
 			for(chan = 0; chan < n_channels; chan++){
-				curr_point[chan] = 255 - curr_point[chan];
+				result_point[chan] = 255 - curr_point[chan];
 			}
-			PUTPIXELMACRO(result, col, row, curr_point, width_step, pixel_step, n_channels);
+			PUTPIXELMACRO(result, col, row, white, width_step, pixel_step, n_channels);
 		}
 	}
 
 	
+}
+
+IplImage * drawHist(CvHistogram * hist, float scaleX=1, float scaleY=1){
+	float max = 0;
+	cvGetMinMaxHistValue(hist, 0, &max, 0, 0);
+
+
+	IplImage * imgHist = cvCreateImage(cvSize(256*scaleX, 64*scaleY), 8 ,1);
+	cvZero(imgHist);
+	float most = 0;
+
+	for(int i = 0; i<255; i++){
+		float value = cvQueryHistValue_1D(hist, i);
+		float nextValue = cvQueryHistValue_1D(hist, i+1);
+		if(most < value) most = value;
+
+		//Draw a poly showing the change between this and the next point 
+		//along the top. (A bar) I have no idea how the math works, come back to this
+		CvPoint pt1 = cvPoint(i*scaleX, 64*scaleY);
+		CvPoint pt2 = cvPoint(i*scaleX+scaleX, 64*scaleY);
+		CvPoint pt3 = cvPoint(i*scaleX+scaleX, (64-nextValue*64/max)*scaleY);
+		CvPoint pt4 = cvPoint(i*scaleX, (64-value*64/max)*scaleY);
+
+		CvPoint pts[] = {pt1, pt2, pt3, pt4, pt1};
+		//5 == num of points
+		cvFillConvexPoly(imgHist, pts, 5, cvScalar(255));
+				
+	}
+	return imgHist;
 }
 
 // Assumes a 1D histogram of 256 elements.
@@ -115,6 +163,7 @@ int determine_optimal_threshold( CvHistogram* hist )
 	int background = 1; 
 	int foreground = 1;
 	int nobackpixels = 1;  //Number of backrgound pixels, 1 to avoid divide by zero error DO PROPER LATER
+	int noforepixels = 1;
 	//Sum of background and foreground
 	do{
 		nobackpixels = 1;
@@ -125,21 +174,23 @@ int determine_optimal_threshold( CvHistogram* hist )
 			int value = ((int) *cvGetHistValue_1D(hist, i));
 			if( i < threshold ){ //Backround pixel
 				background += value * i;
-				nobackpixels++;
+				nobackpixels += value;
 			}else{ //foreground
 				foreground += value * i;
+				noforepixels += value;
 			}
 		}
 		//printf("BACK %d\n", thresholdNext);
 		//divided by number of background and foreground respectivly
 		background = background / nobackpixels;
-		foreground = foreground / ((255 - nobackpixels)+1); //Again, divide by zero error
+		foreground = foreground / noforepixels; 
 		//printf("H %d %d\n", background, foreground);
 		thresholdNext = (background + foreground) / 2;
 	}while(threshold != thresholdNext);
 	//printf("\n\n\n");
 	printf("%d %d\n", thresholdNext, threshold);
 	return thresholdNext;  // Just so that the project will compile...
+	//return 200;
 }
 
 void apply_threshold_with_mask(IplImage* grayscale_image,IplImage* result_image,IplImage* mask_image,int threshold)
@@ -148,6 +199,7 @@ void apply_threshold_with_mask(IplImage* grayscale_image,IplImage* result_image,
 	//        points in the passed mask_image.  The binary results (0 or 255) should be stored in the result_image.
 	int row = 0;
 	int col = 0;
+	//cvConvertImage(result_image, result_image);
 	int width_step = grayscale_image->widthStep;
 	int pixel_step = grayscale_image->widthStep / grayscale_image->width;
 	int n_channels= grayscale_image->nChannels;
@@ -157,8 +209,9 @@ void apply_threshold_with_mask(IplImage* grayscale_image,IplImage* result_image,
 	int result_width_step = result_image->widthStep;
 	int result_pixel_step = result_image->widthStep / result_image->width;
 	int result_channels = result_image->nChannels;
-	//cvZero(result_image); Already zeroed elsewhere
+	//cvZero(result_image); 
 	unsigned char white[4] = {255,255,255,0};
+	unsigned char black[4] = {0,0,0,0};
 
 	for(row = 0; row < grayscale_image->height; row++){
 		for(col = 0; col < grayscale_image->width; col++){
@@ -169,6 +222,8 @@ void apply_threshold_with_mask(IplImage* grayscale_image,IplImage* result_image,
 				//If greater than or equal to thresh we want the pixel
 				if(grey_point[0] >= threshold){
 					PUTPIXELMACRO(result_image, col, row, white, result_width_step, result_pixel_step, result_channels);
+				}else{
+					PUTPIXELMACRO(result_image, col, row, black, result_width_step, result_pixel_step, result_channels);					
 				}
 			}
 		}
@@ -206,14 +261,19 @@ void determine_optimal_sign_classification( IplImage* original_image, IplImage* 
 			}
 			int hist_size=256;
 			CvHistogram* hist = cvCreateHist( 1, &hist_size, CV_HIST_ARRAY );
+
 			cvCalcHist( &grayscale_image, hist, 0, mask_image );
 			// Determine an optimal threshold on the points within those components (using the mask)
 			int optimal_threshold = determine_optimal_threshold( hist );
 			apply_threshold_with_mask(grayscale_image,result_image,mask_image,optimal_threshold);
+			IplImage * histImage = drawHist(hist, 3, 3);
+			cvShowImage("Debug", histImage);
 		}
 		curr_red_region = curr_red_region->h_next;
 		
 	}
+
+	unsigned char black[4] = {0,0,0,0};
 
 	for (row=0; row < result_image->height; row++)
 	{
@@ -224,7 +284,8 @@ void determine_optimal_sign_classification( IplImage* original_image, IplImage* 
 			curr_red += pixel_step;
 			curr_result += pixel_step;
 			if (curr_red[0] > 0)
-				curr_result[2] = 255;
+				curr_result[2] = 255; //Is this not ment to turn it black? Not red
+				//curr_result = black;
 		}
 	}
 
@@ -278,6 +339,7 @@ int main( int argc, char** argv )
 	// Create display windows for images
     cvNamedWindow( "Original", 1 );
     cvNamedWindow( "Processed Image", 1 );
+    cvNamedWindow( "Debug", 1);
 
 	// Setup mouse callback on the original image so that the user can see image values as they move the
 	// cursor over the image.
