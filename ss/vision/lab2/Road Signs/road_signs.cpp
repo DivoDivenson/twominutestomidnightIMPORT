@@ -156,41 +156,45 @@ int determine_optimal_threshold( CvHistogram* hist )
 	//         To get the histogram value at index i
 	//            int histogram_value_at_i = ((int) *cvGetHistValue_1D(hist, i));
 
-	int i;
-	int threshold = 127; //Start in the middle
-	int thresholdNext = 127;// t+1
-	int t=0;
-	int background = 1; 
-	int foreground = 1;
-	int nobackpixels = 1;  //Number of backrgound pixels, 1 to avoid divide by zero error DO PROPER LATER
-	int noforepixels = 1;
-	//Sum of background and foreground
+	int threshold;
+	//Casting this to an int will introduce rounding errors but we can live with that
+	float threshNext = 127;
+
+	float sum_bg;
+	float sum_fg;
+	float num_bg;
+	float num_fg;
+	int i, value;
 	do{
-		nobackpixels = 1;
-		background = 1;
-		foreground = 1;
-		threshold = thresholdNext;
-		for(i=0; i < 256; i++){
-			int value = ((int) *cvGetHistValue_1D(hist, i));
-			if( i < threshold ){ //Backround pixel
-				background += value * i;
-				nobackpixels += value;
-			}else{ //foreground
-				foreground += value * i;
-				noforepixels += value;
-			}
+		//Set to one to avoid divide by zero errors and other such nastiness
+		//Could use exception handling but this seems acceptable
+		sum_bg = 1;
+		sum_fg = 1;
+		num_bg = 1;
+		num_fg = 1;
+		//Get sum of bg
+		threshold = (int)threshNext;
+		//fprintf(stderr,"%d\n", threshold);
+		for(i = 0; i < threshold; i++){
+			value = ((int) * cvGetHistValue_1D(hist, i));
+			sum_bg += (float)(value *i);
+			num_bg += (float)value;
 		}
-		//printf("BACK %d\n", thresholdNext);
-		//divided by number of background and foreground respectivly
-		background = background / nobackpixels;
-		foreground = foreground / noforepixels; 
-		//printf("H %d %d\n", background, foreground);
-		thresholdNext = (background + foreground) / 2;
-	}while(threshold != thresholdNext);
-	//printf("\n\n\n");
-	printf("%d %d\n", thresholdNext, threshold);
-	return thresholdNext;  // Just so that the project will compile...
-	//return 200;
+		//get sum of fg
+		for(i; i < 256; i++){
+			value = ((int) * cvGetHistValue_1D(hist, i));
+			sum_fg += (float)(value *i);
+			num_fg += (float)value;
+		}
+		sum_bg = (float)sum_bg / (float)num_bg;
+		sum_fg = (float)sum_fg / (float)num_fg;
+		threshNext = ((sum_bg + sum_fg)/2); //PLACEHOLDER
+		//printf("Next %f %d\n", threshNext, (int) threshNext);
+
+	}while(threshold != (int)threshNext);
+	//}while(0);
+	printf ("Done:%d\n", (int)threshNext);
+	return threshold+10;
 }
 
 void apply_threshold_with_mask(IplImage* grayscale_image,IplImage* result_image,IplImage* mask_image,int threshold)
@@ -306,7 +310,7 @@ int main( int argc, char** argv )
 	CvSeq* red_components = NULL;
 	CvSeq* background_components = NULL;
 
-	// Load all the images.
+	// Load all the images. (Why you loop??)
 	for (int file_num=1; (file_num <= NUM_IMAGES); file_num++)
 	{
 		if( (images[0] = cvLoadImage("./RealRoadSigns.jpg",-1)) == 0 )
