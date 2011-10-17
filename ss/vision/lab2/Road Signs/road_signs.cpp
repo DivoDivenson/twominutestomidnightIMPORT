@@ -46,7 +46,7 @@ void find_red_points( IplImage* source, IplImage* result, IplImage* temp )
 				
 				//Now filter for the red on the road sign. The red is fairly bright so the red channel should be a good bit higher
 				//than green and blue. If the overall luminance of the scene is low, than all three channel values will be closer
-				//together. Solve this by scaling the threshold, green and blue should be at least 1/5 below red.
+				//together. Solve this by scaling the threshold, green _or_ blue should be at least 1/5 below red.
 				threshold = curr_point[RED_CH] - (curr_point[RED_CH]*  0.2f);
 				if (((curr_point[BLUE_CH] < threshold) || (curr_point[GREEN_CH] < threshold)))
 				{
@@ -83,7 +83,7 @@ CvSeq* connected_components( IplImage* source, IplImage* result )
 	return contours;
 }
 
-//Tested, works 100%
+//Tested, works 100%. That was a lie
 void invert_image( IplImage* source, IplImage* result )
 {
 	// TO DO:  Write code to invert all points in the source image (i.e. for each channel for each pixel in the result
@@ -104,7 +104,8 @@ void invert_image( IplImage* source, IplImage* result )
 	for(row=0; row < result->height; row++){
 		for(col=0; col < result->width; col++){
 			unsigned char * curr_point = GETPIXELPTRMACRO(source, col, row, width_step, pixel_step);
-			unsigned char * result_point = GETPIXELPTRMACRO(result, col, row, width_step, pixel_step);
+			unsigned char * result_point = GETPIXELPTRMACRO(result, col, row, width_step, pixel_step); //Avoid modifing the source image,
+														   //Could use a differnet macro above but this works
 			//white = {255,255,255,0};
 			for(chan = 0; chan < n_channels; chan++){
 				result_point[chan] = 255 - curr_point[chan];
@@ -116,6 +117,7 @@ void invert_image( IplImage* source, IplImage* result )
 	
 }
 
+//For debugging
 IplImage * drawHist(CvHistogram * hist, float scaleX=1, float scaleY=1){
 	float max = 0;
 	cvGetMinMaxHistValue(hist, 0, &max, 0, 0);
@@ -165,6 +167,7 @@ int determine_optimal_threshold( CvHistogram* hist )
 	float num_bg;
 	float num_fg;
 	int i, value;
+	//Optimal thresholding algo described in the lecture notes
 	do{
 		//Set to one to avoid divide by zero errors and other such nastiness
 		//Could use exception handling but this seems acceptable
@@ -192,8 +195,7 @@ int determine_optimal_threshold( CvHistogram* hist )
 		//printf("Next %f %d\n", threshNext, (int) threshNext);
 
 	}while(threshold != (int)threshNext);
-	//}while(0);
-	return threshold+10;
+	return threshold;
 }
 
 void apply_threshold_with_mask(IplImage* grayscale_image,IplImage* result_image,IplImage* mask_image,int threshold)
@@ -212,10 +214,10 @@ void apply_threshold_with_mask(IplImage* grayscale_image,IplImage* result_image,
 	int result_width_step = result_image->widthStep;
 	int result_pixel_step = result_image->widthStep / result_image->width;
 	int result_channels = result_image->nChannels;
-	//cvZero(result_image); 
 	unsigned char white[4] = {255,255,255,0};
 	unsigned char black[4] = {0,0,0,0};
-
+	
+	//Iterate over the greyscale image. If the pixel is in the mask apply the threshold to it, otherwise nothing
 	for(row = 0; row < grayscale_image->height; row++){
 		for(col = 0; col < grayscale_image->width; col++){
 			unsigned char * mask_point = GETPIXELPTRMACRO(mask_image, col, row, width_step, pixel_step);
