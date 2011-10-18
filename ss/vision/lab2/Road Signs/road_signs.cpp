@@ -47,7 +47,7 @@ void find_red_points( IplImage* source, IplImage* result, IplImage* temp )
 				//Now filter for the red on the road sign. The red is fairly bright so the red channel should be a good bit higher
 				//than green and blue. If the overall luminance of the scene is low, than all three channel values will be closer
 				//together. Solve this by scaling the threshold, green _or_ blue should be at least 1/5 below red.
-				threshold = curr_point[RED_CH] - (curr_point[RED_CH]*  0.2f);
+				threshold = curr_point[RED_CH] - (curr_point[RED_CH]*  0.23f);
 				if (((curr_point[BLUE_CH] < threshold) || (curr_point[GREEN_CH] < threshold)))
 				{
 					PUTPIXELMACRO( result, col, row, white_pixel, width_step, pixel_step, number_channels );
