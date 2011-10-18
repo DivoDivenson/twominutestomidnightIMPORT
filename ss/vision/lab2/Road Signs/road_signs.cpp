@@ -41,8 +41,8 @@ void find_red_points( IplImage* source, IplImage* result, IplImage* temp )
 		for (col=0; col < result->width; col++)
 		{
 			unsigned char* curr_point = GETPIXELPTRMACRO( source, col, row, width_step, pixel_step );
-			//First get rid of any points where red is not the brightest colour.
-			if(( (curr_point[RED_CH]) > curr_point[BLUE_CH]) && ((curr_point[RED_CH]) > curr_point[GREEN_CH])){
+			//First get rid of any points where red is not the brightest colour. Also get rid of any black.
+			if( (curr_point[RED_CH] > 20) &&( (curr_point[RED_CH]) > curr_point[BLUE_CH]) && ((curr_point[RED_CH]) > curr_point[GREEN_CH])){
 				
 				//Now filter for the red on the road sign. The red is fairly bright so the red channel should be a good bit higher
 				//than green and blue. If the overall luminance of the scene is low, than all three channel values will be closer
@@ -105,11 +105,11 @@ void invert_image( IplImage* source, IplImage* result )
 		for(col=0; col < result->width; col++){
 			unsigned char * curr_point = GETPIXELPTRMACRO(source, col, row, width_step, pixel_step);
 			unsigned char * result_point = GETPIXELPTRMACRO(result, col, row, width_step, pixel_step); //Avoid modifing the source image,
-														   //Could use a differnet macro above but this works
-			//white = {255,255,255,0};
+												//Could use a differnet macro above but this works
 			for(chan = 0; chan < n_channels; chan++){
-				result_point[chan] = 255 - curr_point[chan];
+				result_point[chan] = 255 - curr_point[chan]; //Invert ecah channel
 			}
+			//Store the inverted point into the reuslt image
 			PUTPIXELMACRO(result, col, row, white, width_step, pixel_step, n_channels);
 		}
 	}
@@ -148,8 +148,8 @@ IplImage * drawHist(CvHistogram * hist, float scaleX=1, float scaleY=1){
 }
 
 // Assumes a 1D histogram of 256 elements.
-//From looking at the histogram we can see 3 very clear peaks
-//TODO, check for divide by 0 properly
+//The following is an implementaion of the optimal thresholding
+//algorithm described in the lecture notes. Does nothing else.
 int determine_optimal_threshold( CvHistogram* hist )
 {
 	// TO DO:  Given a 1-D CvHistogram you need to determine and return the optimal threshold value.
@@ -167,37 +167,46 @@ int determine_optimal_threshold( CvHistogram* hist )
 	float num_bg;
 	float num_fg;
 	int i, value;
-	//Optimal thresholding algo described in the lecture notes
+	//Optimal thresholding algorithm described in the lecture notes
 	do{
 		//Set to one to avoid divide by zero errors and other such nastiness
-		//Could use exception handling but this seems acceptable
+		//Could use exception handling but this seems acceptable. Also a lot
+		//faster than raising exceptions, although this would depend on the image. Not really a problem here.
 		sum_bg = 1;
 		sum_fg = 1;
 		num_bg = 1;
 		num_fg = 1;
 		//Get sum of bg
-		threshold = (int)threshNext;
+		threshold = (int)threshNext; //advance t by one
 		//fprintf(stderr,"%d\n", threshold);
 		for(i = 0; i < threshold; i++){
 			value = ((int) * cvGetHistValue_1D(hist, i));
+			//Calculate sum of background pixels
 			sum_bg += (float)(value *i);
+			//Calcualte number of background pixels
 			num_bg += (float)value;
 		}
 		//get sum of fg
 		for(i; i < 256; i++){
 			value = ((int) * cvGetHistValue_1D(hist, i));
+			//Calculate sum of foreground pixels
 			sum_fg += (float)(value *i);
+			//Calcualte number of foreground pixels
 			num_fg += (float)value;
 		}
-		sum_bg = (float)sum_bg / (float)num_bg;
-		sum_fg = (float)sum_fg / (float)num_fg;
-		threshNext = ((sum_bg + sum_fg)/2); //PLACEHOLDER
+		sum_bg = (float)sum_bg / (float)num_bg; // "mu"b
+		sum_fg = (float)sum_fg / (float)num_fg; // "mu"f
+		threshNext = ((sum_bg + sum_fg)/2); //Compute T + 1
 		//printf("Next %f %d\n", threshNext, (int) threshNext);
 
 	}while(threshold != (int)threshNext);
 	return threshold;
 }
 
+/*
+Iterates over each pixel in the mask. If the value is 255 or the pixel is in the mask / of intrest apply binary
+thresholding to the same pixel in the greyscale image and store the resulting point in result.
+*/
 void apply_threshold_with_mask(IplImage* grayscale_image,IplImage* result_image,IplImage* mask_image,int threshold)
 {
 	// TO DO:  Apply binary thresholding to those points in the passed grayscale_image which correspond to non-zero
@@ -211,6 +220,7 @@ void apply_threshold_with_mask(IplImage* grayscale_image,IplImage* result_image,
 	//Just a quick check to see if I can use the same step for all images. Turns out I can. Spoke too soon
 	//printf("%d %d %d\n", width_step, pixel_step, n_channels);
 
+	//To get result to work, quicker than re-initilizing the image. 
 	int result_width_step = result_image->widthStep;
 	int result_pixel_step = result_image->widthStep / result_image->width;
 	int result_channels = result_image->nChannels;
@@ -221,10 +231,11 @@ void apply_threshold_with_mask(IplImage* grayscale_image,IplImage* result_image,
 	for(row = 0; row < grayscale_image->height; row++){
 		for(col = 0; col < grayscale_image->width; col++){
 			unsigned char * mask_point = GETPIXELPTRMACRO(mask_image, col, row, width_step, pixel_step);
+			//If the pixel is in the mask we want to apply thresholding. Otherwise skip it.
 			if(mask_point[0] != 0){ //Taken as 255 means apply the mask
 				//printf("%d\n", mask_point[0]);
 				unsigned char * grey_point = GETPIXELPTRMACRO(grayscale_image, col, row, width_step, pixel_step);
-				//If greater than or equal to thresh we want the pixel
+				//If greater than or equal to thresh we want the pixel, otherwise discard it.
 				if(grey_point[0] >= threshold){
 					PUTPIXELMACRO(result_image, col, row, white, result_width_step, result_pixel_step, result_channels);
 				}else{
