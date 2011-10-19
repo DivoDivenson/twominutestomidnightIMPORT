@@ -59,13 +59,12 @@ void determine_moving_points_using_running_gaussian_averages( IplImage *current_
 	int float_pixel_step = averages_image->widthStep/averages_image->width;
 	int float_nChannels = averages_image->nChannels;
 	//Update the average
-	cvZero(moving_mask_image);
 	for(row = 0; row < averages_image->height; row++){
 		for(col = 0; col < averages_image->width; col++){
 			float * curr_avg_point = (float *)GETPIXELPTRMACRO(averages_image, col, row, float_width_step, float_pixel_step);
 			float * curr_stan_point = (float *)GETPIXELPTRMACRO(stan_devs_image, col, row, float_width_step, float_pixel_step);
 			unsigned char * curr_point = GETPIXELPTRMACRO( current_frame, col, row, width_step, pixel_step);
-			unsigned char * mask_point = GETPIXELPTRMACRO( current_frame, col, row, width_step, pixel_step);
+			unsigned char * mask_point = GETPIXELPTRMACRO( moving_mask_image, col, row, width_step, pixel_step);
 			for(i = 0; i < float_nChannels; i++){
 				if( abs(curr_point[i] - curr_avg_point[i]) > (K * sqrt(curr_stan_point[i]))){
 					mask_point[i] = 255;
