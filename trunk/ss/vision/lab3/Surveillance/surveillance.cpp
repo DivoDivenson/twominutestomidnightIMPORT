@@ -7,15 +7,19 @@
 #include "cv.h"
 #include "highgui.h"
 #include "../utilities.h"
+#include <math.h>
 
-
+#define ALPHA 0.005
+#define ONEMINUS 0.995 //One minus alpha
+#define K 3.0
 
 void update_running_gaussian_averages( IplImage *current_frame, IplImage *averages_image, IplImage *stan_devs_image )
 {
 	// TO-DO:  Update the average and standard deviation for each channel for each pixel based on the values in the
 	// current_frame
 
-	float alpha = 0.005f;
+	//float alpha = 0.005f;
+	//float minusalpha = 0.995f;
 
 	int row, col, i;
 	int width_step= current_frame->widthStep;
@@ -30,14 +34,13 @@ void update_running_gaussian_averages( IplImage *current_frame, IplImage *averag
 	for(row = 0; row < averages_image->height; row++){
 		for(col = 0; col < averages_image->width; col++){
 			float * curr_avg_point = (float *)GETPIXELPTRMACRO(averages_image, col, row, float_width_step, float_pixel_step);
+			float * curr_stan_point = (float *)GETPIXELPTRMACRO(stan_devs_image, col, row, float_width_step, float_pixel_step);
 			unsigned char * curr_point = GETPIXELPTRMACRO( current_frame, col, row, width_step, pixel_step);
 			for(i = 0; i < float_nChannels; i++){
-				curr_avg_point[i] = alpha * curr_point[i] + (float)( 1 - alpha) * curr_avg_point[i];
-				printf("%f\n", curr_avg_point[i]);
-				break;
+				curr_stan_point[i] = (ALPHA * pow((int)curr_point[i] - curr_avg_point[i],2.0f )) + (ONEMINUS * curr_stan_point[i]);
+				curr_avg_point[i] = (ALPHA * (int)curr_point[i]) + (ONEMINUS * curr_avg_point[i]);
 			}
-			//printf("%f %f %f\n", curr_point[0], curr_point[1], curr_point[2]);	
-			
+						
 		}
 	}
 }
@@ -46,6 +49,33 @@ void determine_moving_points_using_running_gaussian_averages( IplImage *current_
 {
 	// TO-DO:  Determine which pixels on each channel are "foreground" by considering the absolute difference in comparison
 	// with the standard deviation...
+	int row, col, i;
+	int width_step= current_frame->widthStep;
+	int pixel_step= current_frame->widthStep/current_frame->width;
+	int number_channels=current_frame->nChannels;
+
+	//Different attributes for floating point images
+	int float_width_step = averages_image->widthStep;
+	int float_pixel_step = averages_image->widthStep/averages_image->width;
+	int float_nChannels = averages_image->nChannels;
+	//Update the average
+	cvZero(moving_mask_image);
+	for(row = 0; row < averages_image->height; row++){
+		for(col = 0; col < averages_image->width; col++){
+			float * curr_avg_point = (float *)GETPIXELPTRMACRO(averages_image, col, row, float_width_step, float_pixel_step);
+			float * curr_stan_point = (float *)GETPIXELPTRMACRO(stan_devs_image, col, row, float_width_step, float_pixel_step);
+			unsigned char * curr_point = GETPIXELPTRMACRO( current_frame, col, row, width_step, pixel_step);
+			unsigned char * mask_point = GETPIXELPTRMACRO( current_frame, col, row, width_step, pixel_step);
+			for(i = 0; i < float_nChannels; i++){
+				if( abs(curr_point[i] - curr_avg_point[i]) > (K * sqrt(curr_stan_point[i]))){
+					mask_point[i] = 255;
+				}else{
+					mask_point[i] = 0;
+				}
+			}
+						
+		}
+	}
 }
 
 
