@@ -9,10 +9,37 @@
 #include "../utilities.h"
 
 
+
 void update_running_gaussian_averages( IplImage *current_frame, IplImage *averages_image, IplImage *stan_devs_image )
 {
 	// TO-DO:  Update the average and standard deviation for each channel for each pixel based on the values in the
 	// current_frame
+
+	float alpha = 0.005f;
+
+	int row, col, i;
+	int width_step= current_frame->widthStep;
+	int pixel_step= current_frame->widthStep/current_frame->width;
+	int number_channels=current_frame->nChannels;
+
+	//Different attributes for floating point images
+	int float_width_step = averages_image->widthStep;
+	int float_pixel_step = averages_image->widthStep/averages_image->width;
+	int float_nChannels = averages_image->nChannels;
+	//Update the average
+	for(row = 0; row < averages_image->height; row++){
+		for(col = 0; col < averages_image->width; col++){
+			float * curr_avg_point = (float *)GETPIXELPTRMACRO(averages_image, col, row, float_width_step, float_pixel_step);
+			unsigned char * curr_point = GETPIXELPTRMACRO( current_frame, col, row, width_step, pixel_step);
+			for(i = 0; i < float_nChannels; i++){
+				curr_avg_point[i] = alpha * curr_point[i] + (float)( 1 - alpha) * curr_avg_point[i];
+				printf("%f\n", curr_avg_point[i]);
+				break;
+			}
+			//printf("%f %f %f\n", curr_point[0], curr_point[1], curr_point[2]);	
+			
+		}
+	}
 }
 
 void determine_moving_points_using_running_gaussian_averages( IplImage *current_frame, IplImage *averages_image, IplImage *stan_devs_image, IplImage *moving_mask_image )
@@ -61,6 +88,8 @@ int main( int argc, char** argv )
 
 	// Create display windows for images
 	cvNamedWindow( "Input video", 0 );
+	cvMoveWindow("Input video", 0, 0);
+
     cvNamedWindow( "Static Background", 0 );
 	cvMoveWindow("Static Background", 360, 0);
 
@@ -82,7 +111,6 @@ int main( int argc, char** argv )
     cvNamedWindow( "Moving Points - Running Gaussian Average", 0 );
 	cvMoveWindow( "Moving Points - Running Gaussian Average", 360, 580);
 
-//352 X 288
 	// Setup mouse callback on the original image so that the user can see image values as they move the
 	// cursor over the image.
     cvSetMouseCallback( "Input video", on_mouse_show_values, 0 );
