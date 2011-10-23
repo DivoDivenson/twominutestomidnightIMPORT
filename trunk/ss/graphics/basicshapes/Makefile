@@ -1,8 +1,8 @@
 CC = g++
 CFLAGS = -Wall
-PROG = basicshapes
+PROG = output
 
-SRCS = main.cpp
+SRCS = lights.cpp
 
 ifeq ($(shell uname),Darwin)
 	LIBS = -framework OpenGL -framework GLUT

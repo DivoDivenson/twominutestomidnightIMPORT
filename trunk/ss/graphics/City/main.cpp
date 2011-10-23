@@ -5,6 +5,8 @@
 
 using namespace std;
 
+float pi = 3.14159265;
+
 void handleKeypress(unsigned char key, int x, int y){
 	switch(key){
 		case 27:
@@ -30,6 +32,7 @@ void handleResize(int w, int h){
 
 //Expects colours + quads to be set
 //Actualy draws a brick (Right rectangular prisim)
+//Add an angle
 void drawCube(float x, float y, float z, float w, float l, float h){
 	glPushMatrix();
 	glTranslatef(x, y, z);
@@ -87,7 +90,33 @@ void drawCube(float x, float y, float z, float w, float l, float h){
 
 
 }
+//Add an angle and a width / classification
+void roadSection(float x, float z, float l, float _angle=0){
+	float w = 1.0f;
 
+	glPushMatrix();
+	glTranslatef(x,0, z);//All at ground level for the moment
+	glRotatef(_angle, 0.0f, 1.0f, 0.0f);
+
+
+	glBegin(GL_QUADS);
+
+	glNormal3f(0.0f, -1.0f, 0.0f);
+	glVertex3f(0.0f, 0.0f, 0.0f);
+	glVertex3f(w, 0.0f, 0.0f);
+	glVertex3f(w, 0.0f, l);
+	glVertex3f(0.0f, 0.0f, l);
+
+	glEnd();
+	glPopMatrix();
+}
+
+void glCircle3f(GLfloat x, GLfloat y, GLfloat radius){
+	float angle;
+	glPushMatrix();
+
+	
+}
 
 float _angle = 30.0f;
 void drawScene(){
@@ -112,8 +141,14 @@ void drawScene(){
 	glRotatef(_angle, 1.0f, 0.0f, 0.0f);
 	glColor3f(1.0f, 1.0f, 1.0f);
    
-   	drawCube(0.0f, 0.0f, 0.0f, 2.0f, 2.0f, 5.0f);
-   	drawCube(4.0f, 0.0f, 4.0f, 2.0f, 2.0f, 5.0f);
+   	//drawCube(0.0f, 0.0f, 0.0f, 2.0f, 2.0f, 5.0f);
+   	//drawCube(4.0f, 0.0f, 4.0f, 2.0f, 2.0f, 5.0f);
+   	//roadSection(1, 2, 5, 45);
+   	/*glBegin(GL_LINE_STRIP);
+  		 glVertex3f(0.0f, 0.0f, 0.0f);  // V0
+  glVertex3f(5.0f, 5.0f, 0.0f);  // V1
+  glVertex3f(5.0f, 10.0f, 0.0f);  // V2
+	glEnd();*/
 
 
     glPopMatrix(); //Undo the move to the center of the triangle	
