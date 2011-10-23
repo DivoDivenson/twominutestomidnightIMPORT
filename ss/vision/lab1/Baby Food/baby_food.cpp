@@ -110,7 +110,7 @@ int main( int argc, char** argv )
 		cvShowImage( "Processed Image", result_image );
 
 		// Wait for user input
-        user_clicked_key = cvWaitKey(0);
+        user_clicked_key = (char) cvWaitKey(0);
 		if ((user_clicked_key >= '1') && (user_clicked_key <= '0'+NUM_IMAGES))
 		{
 			selected_image_num = user_clicked_key-'0';
