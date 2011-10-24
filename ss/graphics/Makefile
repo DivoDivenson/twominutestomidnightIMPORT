@@ -1,8 +1,7 @@
 CC = g++
 CFLAGS = -Wall
-PROG = cube
-
-SRCS = main.cpp imageloader.cpp
+PROG = lab2
+SRCS = lab2.cpp 
 
 ifeq ($(shell uname),Darwin)
 	LIBS = -framework OpenGL -framework GLUT

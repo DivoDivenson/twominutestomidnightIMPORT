@@ -1,9 +1,9 @@
-#include <windows.h>    // for timeGetTime()
-#include <mmsystem.h>    // ditto
-#include <iostream>        // I/O
-#include "glut/glut.h"
-
-
+//#include <windows.h>  // for timeGetTime()
+//#include <mmsystem.h> // ditto
+#include <iostream>     // I/O
+//#include <glut.h>     // for gluPerspective & gluLookAt
+#include <GL/freeglut.h>
+#include <sys/time.h>
 void setupScene();
 void updateScene();
 void renderScene();
@@ -11,11 +11,13 @@ void exitScene();
 void keypress(unsigned char key, int x, int y);
 void setViewport(int width, int height);
 
+typedef unsigned int DWORD;
+
 
 int         rotationAngle=0;
 bool        wireframe=false;
 int         windowId;
-DWORD        lastTickCount;
+DWORD       lastTickCount;
 GLfloat white_light[] = {1.0, 1.0, 1.0, 1.0};
 GLfloat left_light_position[] = {1,0,-1, 1.0}; 
 GLfloat right_light_position[] = {-1,0,-1, 1.0};
@@ -31,94 +33,74 @@ void renderScene(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     //Enable lighting
-         glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHTING);
 
     //Set the material properties
-        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, emerald_ambient);
-        glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, emerald_diffuse);
-        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, emerald_specular);
-        glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, emerald_shininess);   
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, emerald_ambient);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, emerald_diffuse);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, emerald_specular);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, emerald_shininess);   
 
-    // Reset Modelview matrix          
+    // Reset Modelview matrix       
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    
-    GLUquadric* nQ;
-    nQ=gluNewQuadric();
+    //Go back 10 along Z axis so we can see the models
+    gluLookAt(0,0,10,  0,0,-1,  0,1,0);
 
-    // Set view position & direction
-    // (Camera at (0,0,5) looking down the negative Z-axis)
-    gluLookAt(0,0,5,  0,0,-1,  0,1,0);
-
-    //Rotate for so i can see what i'm doing
-    glRotatef(45.0f, 1.0f, 1.0f, 0.0f);
-    glTranslatef(0.0, -1.0, 0.0);
-
-    //Draw cube at origin
-    glutSolidCube(1.0f);
-
-    //0.5 + 1
-    glTranslatef(0.0f, 0.5f, 0.0f);
-    //Rotate to rotate joint here
-    glRotatef(90.0f, -1.0, 0.0, 0.0f);
-    gluCylinder(nQ, 0.15, 0.15, 1.0f, 20, 5);
-    glRotatef(90.0f, 1.0, 0.0, 0.0f);
-
-    glTranslatef(0.0f, 1.0f, 0.0f);
-
-
+    //Rotate so things look isometric
+    glRotatef(45.0f, 1.0f, 0.0f, 0.0f);
+    glRotatef(45.0f, 0.0f, 1.0f, 0.0f);
 
     //To setup the creation of quadric objects
-    /*GLUquadric* nQ;
+    GLUquadric* nQ;
     nQ=gluNewQuadric();
+    GLUquadric * nQ2;
+    nQ2 = gluNewQuadric();
 
-    glPushMatrix(); //remember the current state of the modelview matrix
-
-    //Draw cube at origin
-    glTranslatef(0.0, 2.0f, 0.0f);
-    gluCylinder(nQ, 0.15, 0.15, 2, 20, 5); 
-
-    glPopMatrix();
-
-    glPushMatrix();
+    //at origin draw base
     glutSolidCube(1.0f);
-    //Rotate and draw a lit cylinder using glu
+    
+    glTranslatef(0.0f, 0.5f, 0.0f);
+    //rotate everything above the base
+    glRotatef(-1*rotationAngle/4.f,0,1,0);
+    glRotatef(-1*rotationAngle/3.f,1,0,0);
+    glRotatef(-1*rotationAngle/2.f,0,0,1);
+//  glPushMatrix();
+    //draw first joint
+    glutSolidSphere(0.3f, 20, 20);  
 
-    /*glTranslatef(1.25,0.0,-2.0);
-    //glRotatef(-1*rotationAngle/4.f,0,1,0);
-   // glRotatef(-1*rotationAngle/3.f,1,0,0);
-   // glRotatef(-1*rotationAngle/2.f,0,0,1);    
-
-    gluCylinder(nQ, 0.15, 0.15, 1.5, 20, 5); 
+    //cylinder, draw upper arm
+    glPushMatrix();
+    glRotatef(90.0f, -1.0f, 0.0f, 0.0f);
+    gluCylinder(nQ, 0.15, 0.15, 1.5f, 20, 5);
+    //glRotatef(90.0f, 1.0f, 0.0f, 0.0f); //Same as pop
+    glPopMatrix(); //Undo the rotate
+    
+    glTranslatef(0.0f, 1.7f, 0.0f);
+    //Rotate the lower arm
+    glRotatef(-1*rotationAngle/4.f,0,1,0);
+    glRotatef(-1*rotationAngle/3.f,1,0,0);
+    glRotatef(-1*rotationAngle/2.f,0,0,1);
+    
+    //second join
+    glutSolidSphere(0.3f, 20, 20);
+    //Horizontal cylinder for lower arm
+    gluCylinder(nQ2, 0.15, 0.15, 1.5f, 20, 5);
 
     glPopMatrix(); //restore the state of the modelview matrix
-   
-    glPushMatrix(); //remember the current state of the modelview matrix
-    glTranslatef(-1.25,0.0,-2.0);
-    //glRotatef(rotationAngle/4.f,0,1,0);
-   // glRotatef(rotationAngle/3.f,1,0,0);
-    //glRotatef(rotationAngle/2.f,0,0,1);    
-
-    //Rotate and draw a lit sphere using glut
-
-
-    glutSolidSphere(0.5, 20, 20);
-    */
-
-    glDisable(GL_LIGHTING);
-    glPopMatrix(); //restore the state of the modelview matrix
-
     // Swap double buffer for flicker-free animation
     glutSwapBuffers();
         
 }
 
 void updateScene(){
-    
+    timeval tim;
+    gettimeofday(&tim,NULL);
     // Wait until at least 16ms passed since start of last frame
     // Effectively caps framerate at ~60fps
-    while(timeGetTime()-lastTickCount<16);
-    lastTickCount=timeGetTime();
+    double t2 = tim.tv_sec +(tim.tv_usec/1000000.0);
+    while(t2-lastTickCount<16);
+    lastTickCount=gettimeofday(&tim,NULL);
     
     // Increment angle for next frame
     rotationAngle+=2;
@@ -171,7 +153,7 @@ void setupScene(){
     // Generate GL texture ID & load texture
 //    glGenTextures(1, &textureId);
     //textureTga logoTexture("BushRumsfeld2.tga", textureId);
-//    textureTga logoTexture("BushRumsfeld.tga", textureId);
+//  textureTga logoTexture("BushRumsfeld.tga", textureId);
         
 }
 
@@ -232,4 +214,3 @@ int main(int argc, char *argv[]){
     return 0;
     
 }
-
