@@ -1,4 +1,4 @@
--- Ste=ven Diviney 08462267
+-- Steven Diviney 08462267
 
 module Tut03xcl where
 import Data.Char
