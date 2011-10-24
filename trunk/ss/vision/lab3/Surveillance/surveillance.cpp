@@ -13,6 +13,8 @@
 #define ONEMINUS 0.995 //One minus alpha
 #define K 3.0
 
+//TODO, DEFINE CONSTANTS AND RELEASE IMAGES
+
 void update_running_gaussian_averages( IplImage *current_frame, IplImage *averages_image, IplImage *stan_devs_image )
 {
 	// TO-DO:  Update the average and standard deviation for each channel for each pixel based on the values in the
