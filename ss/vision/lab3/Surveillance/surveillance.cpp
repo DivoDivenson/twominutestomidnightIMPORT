@@ -12,16 +12,13 @@
 #define ALPHA 0.005
 #define ONEMINUS 0.995 //One minus alpha
 #define K 3.0
+#define SQUARE 2
 
-//TODO, DEFINE CONSTANTS AND RELEASE IMAGES
-
+//No need to release anything.
 void update_running_gaussian_averages( IplImage *current_frame, IplImage *averages_image, IplImage *stan_devs_image )
 {
 	// TO-DO:  Update the average and standard deviation for each channel for each pixel based on the values in the
 	// current_frame
-
-	//float alpha = 0.005f;
-	//float minusalpha = 0.995f;
 
 	int row, col, i;
 	int width_step= current_frame->widthStep;
@@ -32,14 +29,18 @@ void update_running_gaussian_averages( IplImage *current_frame, IplImage *averag
 	int float_width_step = averages_image->widthStep;
 	int float_pixel_step = averages_image->widthStep/averages_image->width;
 	int float_nChannels = averages_image->nChannels;
-	//Update the average
+	//Update the Gaussian distribution as per the formula provided in the lecture notes
 	for(row = 0; row < averages_image->height; row++){
 		for(col = 0; col < averages_image->width; col++){
 			float * curr_avg_point = (float *)GETPIXELPTRMACRO(averages_image, col, row, float_width_step, float_pixel_step);
 			float * curr_stan_point = (float *)GETPIXELPTRMACRO(stan_devs_image, col, row, float_width_step, float_pixel_step);
 			unsigned char * curr_point = GETPIXELPTRMACRO( current_frame, col, row, width_step, pixel_step);
+			//Might as well get the average and the standard dev at the same time.
 			for(i = 0; i < float_nChannels; i++){
-				curr_stan_point[i] = (ALPHA * pow((int)curr_point[i] - curr_avg_point[i],2.0f )) + (ONEMINUS * curr_stan_point[i]);
+				//Standard Dev calculation first because it requires the current average
+				//And when I say standard deviation, I mean variance. That's what the note suggest anyway
+				curr_stan_point[i] = (ALPHA * pow((int)curr_point[i] - curr_avg_point[i], SQUARE )) + (ONEMINUS * curr_stan_point[i]);
+				//Calculate the average
 				curr_avg_point[i] = (ALPHA * (int)curr_point[i]) + (ONEMINUS * curr_avg_point[i]);
 			}
 						
@@ -68,7 +69,9 @@ void determine_moving_points_using_running_gaussian_averages( IplImage *current_
 			unsigned char * curr_point = GETPIXELPTRMACRO( current_frame, col, row, width_step, pixel_step);
 			unsigned char * mask_point = GETPIXELPTRMACRO( moving_mask_image, col, row, width_step, pixel_step);
 			for(i = 0; i < float_nChannels; i++){
+				//Check if point is too var from K * standard deviation.
 				if( abs(curr_point[i] - curr_avg_point[i]) > (K * sqrt(curr_stan_point[i]))){
+					//If it is the pixel is "moving" so include it in the mask
 					mask_point[i] = 255;
 				}else{
 					mask_point[i] = 0;
@@ -184,7 +187,7 @@ int main( int argc, char** argv )
         cvShowImage( "Moving Points - Static", static_moving_mask_image );
 
 		// Running Average Background Processing
-		cvRunningAvg( current_frame, running_average_background, 0.01 /*, moving_mask_image*/ );
+		cvRunningAvg( current_frame, running_average_background, 0.01 , moving_mask_image );
 		cvConvert( running_average_background, running_average_background_image );
 		cvAbsDiff( current_frame, running_average_background_image, subtracted_image );
 		cvThreshold( subtracted_image, running_average_moving_mask_image, 30, 255, CV_THRESH_BINARY );
@@ -207,8 +210,8 @@ int main( int argc, char** argv )
 				paused = !paused;
 			}
 			if (paused)
-				user_clicked_key = cvWaitKey(0);
-			else user_clicked_key = cvWaitKey( 1000 / fps );
+				user_clicked_key = (char) cvWaitKey(0);
+			else user_clicked_key = (char) cvWaitKey( 1000 / fps );
 		} while (( user_clicked_key != ESC ) && ( user_clicked_key != -1 ));
 	}
     
