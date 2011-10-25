@@ -187,7 +187,7 @@ int main( int argc, char** argv )
         cvShowImage( "Moving Points - Static", static_moving_mask_image );
 
 		// Running Average Background Processing
-		cvRunningAvg( current_frame, running_average_background, 0.01 , moving_mask_image );
+		cvRunningAvg( current_frame, running_average_background, 0.01 /*, moving_mask_image*/ );
 		cvConvert( running_average_background, running_average_background_image );
 		cvAbsDiff( current_frame, running_average_background_image, subtracted_image );
 		cvThreshold( subtracted_image, running_average_moving_mask_image, 30, 255, CV_THRESH_BINARY );
