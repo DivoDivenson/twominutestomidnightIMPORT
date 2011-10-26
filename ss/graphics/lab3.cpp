@@ -118,7 +118,7 @@ void renderScene(){
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    glOrtho(-3.0, 3.0, -3.0, 3.0, 1.0, 50.0);
+    gluPerspective(70.0, 1.0, 1, 50);
     gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -131,8 +131,8 @@ void renderScene(){
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    glOrtho(-3.0, 3.0, -3.0, 3.0, 1.0, 50.0);
-    gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+    gluPerspective(120.0, 1.0, 1, 50);    
+    gluLookAt(0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glRotatef(30.0f, 1.0f, 0.0f, 0.0f);
