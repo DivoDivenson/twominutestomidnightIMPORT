@@ -1,7 +1,7 @@
 #include <iostream>     // I/O
 #include <GL/glut.h>     // for gluPerspective & gluLookAt
 //#include <GL/freeglut.h>
-//#include <sys/time.h>
+#include <sys/time.h>
 void setupScene();
 void updateScene();
 void renderScene();
@@ -9,7 +9,7 @@ void exitScene();
 void keypress(unsigned char key, int x, int y);
 void setViewport(int width, int height);
 
-//typedef unsigned int DWORD;
+typedef unsigned int DWORD;
 
 
 int         rotationAngle=0;
@@ -17,7 +17,8 @@ bool        wireframe=false;
 int         windowId;
 int win_height = 640;
 int win_width = 480;
-//DWORD       lastTickCount;
+
+DWORD       lastTickCount;
 
 
 GLfloat white_light[] = {1.0, 1.0, 1.0, 1.0};
@@ -29,20 +30,23 @@ GLfloat emerald_ambient[] =
 {0.07568, 0.61424, 0.07568}, emerald_specular[] =
 {0.633, 0.727811, 0.633}, emerald_shininess = 76.8;
 
-void drawObjects(){
+void drawObjects(int move = 0){
 //Stick this here for the moment, lazy
 	GLUquadric* nQ;
-nQ=gluNewQuadric();
-GLUquadric * nQ2;
-nQ2 = gluNewQuadric();
+    nQ=gluNewQuadric();
+    GLUquadric * nQ2;
+    nQ2 = gluNewQuadric();
 
-	  glutSolidCube(1.0f);
+	glutSolidCube(1.0f);
     
     //glTranslatef(0.0f, -1.0f, 0.0f);
     //rotate everything above the base
-    glRotatef(-1*rotationAngle/4.f,0,1,0);
-    glRotatef(-1*rotationAngle/3.f,1,0,0);
-    glRotatef(-1*rotationAngle/2.f,0,0,1);
+    if(move){
+        glRotatef(-1*rotationAngle/4.f,0,1,0);
+        glRotatef(-1*rotationAngle/2.f,0,0,1);
+        glRotatef(-1*rotationAngle/3.f,1,0,0);
+    }
+
 //  glPushMatrix();
     //draw first joint
     glutSolidSphere(0.3f, 20, 20);  
@@ -56,10 +60,11 @@ nQ2 = gluNewQuadric();
     
     glTranslatef(0.0f, 1.7f, 0.0f);
     //Rotate the lower arm
-    glRotatef(-1*rotationAngle/4.f,0,1,0);
-    glRotatef(-1*rotationAngle/3.f,1,0,0);
-    glRotatef(-1*rotationAngle/2.f,0,0,1);
-    
+    if(move){
+        glRotatef(-1*rotationAngle/4.f,0,1,0);
+        glRotatef(-1*rotationAngle/3.f,1,0,0);
+        glRotatef(-1*rotationAngle/2.f,0,0,1);
+    }
     //second join
     glutSolidSphere(0.3f, 20, 20);
     //Horizontal cylinder for lower arm
@@ -70,9 +75,10 @@ void renderScene(){
         
     // Clear framebuffer & depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.2f, 0.2f, 0.9f, 1.0f);
 
     //Enable lighting
-    //glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHTING);
 
     //Set the material properties
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, emerald_ambient);
@@ -80,6 +86,7 @@ void renderScene(){
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, emerald_specular);
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, emerald_shininess);   
 
+    //Top left; top view
 	glViewport(0, win_height/2, win_width/2, win_height/2);
     // Reset Modelview matrix       
     glMatrixMode(GL_PROJECTION);
@@ -88,19 +95,52 @@ void renderScene(){
 	glOrtho(-3.0, 3.0, -3.0, 3.0, 1.0, 50.0);
 	gluLookAt(0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0);
 	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+    glLoadIdentity();
 
 	drawObjects();
 
-	glViewport(win_width/2, win_height/2, win_width/2, win_height/2);
-	glMatrixMode(GL_PROJECTION);
-glLoadIdentity();
-glOrtho(-3.0, 3.0, -3.0, 3.0, 1.0, 50.0);
-gluLookAt(5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-glMatrixMode(GL_MODELVIEW);
-glLoadIdentity();
-drawObjects();
-    //To setup the creation of quadric objects
+    //Top right; right view
+    glViewport(win_width/2, win_height/2, win_width/2, win_height/2);
+    // Reset Modelview matrix       
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+    glOrtho(-3.0, 3.0, -3.0, 3.0, 1.0, 50.0);
+    gluLookAt(5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    drawObjects();
+
+     //Bottom left; front view
+    glViewport(0, 0, win_width/2, win_height/2);
+    // Reset Modelview matrix       
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+    glOrtho(-3.0, 3.0, -3.0, 3.0, 1.0, 50.0);
+    gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    drawObjects();
+
+     //Bottom right; rotating
+    glViewport(win_width/2, 0, win_width/2, win_height/2);
+    // Reset Modelview matrix       
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+    glOrtho(-3.0, 3.0, -3.0, 3.0, 1.0, 50.0);
+    gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glRotatef(30.0f, 1.0f, 0.0f, 0.0f);
+    glRotatef(rotationAngle, 0.0f, 1.0f, 0.0f);
+
+    drawObjects(1);
+
+
    
 
   
@@ -111,7 +151,7 @@ drawObjects();
 }
 
 void updateScene(){
-    /*timeval tim;
+    timeval tim;
     gettimeofday(&tim,NULL);
     // Wait until at least 16ms passed since start of last frame
     // Effectively caps framerate at ~60fps
@@ -192,6 +232,8 @@ void setViewport(int width, int height) {
     // Work out window ratio, avoid divide-by-zero
     if(height==0)height=1;
     float ratio = float(width)/float(height);
+    win_width = width;
+    win_height = height;
 
     // Reset projection matrix
     glMatrixMode(GL_PROJECTION);
