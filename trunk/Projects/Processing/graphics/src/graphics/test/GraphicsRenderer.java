@@ -39,6 +39,7 @@ public class GraphicsRenderer implements GLSurfaceView.Renderer {
      
         // define the vertices we want to draw
         gl.glVertexPointer(3, GL10.GL_FLOAT, 0, _vertexBuffer);
+        
      
         // finally draw the vertices
         gl.glDrawElements(GL10.GL_TRIANGLES, _nrOfVertices, GL10.GL_UNSIGNED_SHORT, _indexBuffer);
