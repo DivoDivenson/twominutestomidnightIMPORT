@@ -1,7 +1,7 @@
 CC = g++
 CFLAGS = -Wall
-PROG = lab2
-SRCS = lab2.cpp 
+PROG = lab3
+SRCS = lab3.cpp 
 
 ifeq ($(shell uname),Darwin)
 	LIBS = -framework OpenGL -framework GLUT
