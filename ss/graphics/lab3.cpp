@@ -1,7 +1,5 @@
-#include <windows.h>  // for timeGetTime()
-#include <mmsystem.h> // ditto
 #include <iostream>     // I/O
-#include <glut.h>     // for gluPerspective & gluLookAt
+#include <GL/glut.h>     // for gluPerspective & gluLookAt
 //#include <GL/freeglut.h>
 //#include <sys/time.h>
 void setupScene();
