@@ -4,7 +4,8 @@ import xmlrpclib
 
 class RemoteFile(file):
 
-	def __init__(self,)
+	def __init__(self):
+		
 
 	def ls(self):
 		return "Hello"
