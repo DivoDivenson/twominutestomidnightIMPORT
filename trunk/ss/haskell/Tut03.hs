@@ -15,3 +15,5 @@ calcLine x = foldl step 0 (words x)
 	where step acc x = acc + (read x :: Int)
 
 
+
+
