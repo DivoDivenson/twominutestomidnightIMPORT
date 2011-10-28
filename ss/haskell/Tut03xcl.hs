@@ -11,7 +11,7 @@ xcl stack = do
 		
 
 apply stack x
-	| isDigits x  =  xcl ((read x:: Int):stack)
+	| all isDigit x  =  xcl ((read x:: Int):stack)
 	| otherwise = isOp x stack 
 
 isOp "+" (x:y:xs) = xcl ((x + y):xs)
@@ -22,9 +22,5 @@ isOp "c" stack = xcl []
 
 isOp x stack = xcl stack
 
-	
-isDigits (x:[]) = isDigit x
-isDigits (x:xs) | isDigit x = isDigits xs
-		| otherwise = False	
 main = do
 	xcl []
