@@ -3,7 +3,7 @@ import xmlrpclib
 import os
 from file_id import *
 
-
+#This class presents the same functionality as a normal file object
 class ClientProxy():
 
 	server = xmlrpclib.ServerProxy("http://localhost:8080/")
@@ -21,13 +21,15 @@ class ClientProxy():
 		#Check if file exists on server
 		response = self.server.lookup(path, name)
 		if response:
-			open_file = file_identifier(response['name'], response['path'])
-			print response.name
+			self.open_file = file_identifier.fromOne(response)
 		else:
 			raise IOError ("No such file or directory: " + name)
 
-	def read(self):
-		server.read(open_file)
+	def read(self, size):
+		print self.open_file
+		result = self.server.read(self.open_file, size)
+
+		return result
 		
 
 		
@@ -35,6 +37,8 @@ class ClientProxy():
 	
 c = ClientProxy()
 c.open('/home/divo/media/sata/College/twominutestomidnight/ss/distsys/project/server.py')
+print c.read(1024)
+
 
 
 
