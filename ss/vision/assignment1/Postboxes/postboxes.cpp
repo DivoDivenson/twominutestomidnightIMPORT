@@ -119,12 +119,10 @@ bool motion_free_frame(IplImage* input_image, IplImage* previous_frame)
 		}
 		
 	}
-	//this is not getting copied
-	previous_frame = cvCloneImage(grayscale_image);
-	cvShowImage("Debug", grayscale_image);		
+	cvShowImage("Debug", prev_frame);		
+	prev_frame = cvCloneImage(grayscale_image);
 //	cvReleaseImage(&grayscale_image);
- 
-	if( (( movement/total)*100) > ALLOWED_MOTION_FOR_MOTION_FREE_IMAGE){
+	if( ( (float) ((float)movement/(float)total)*100) > ALLOWED_MOTION_FOR_MOTION_FREE_IMAGE){
 		return false;
 	}
 	return true;  // Just to allow the system to compile while the code is missing.
@@ -200,6 +198,7 @@ int main( int argc, char** argv )
 			labelled_image = cvCloneImage( corrected_frame );
 			vertical_edge_image = cvCloneImage( corrected_frame );
 			prev_frame = cvCreateImage( cvGetSize(input_image), 8, 1 );
+			//This is screwed up, fix later
 			cvConvertImage( corrected_frame, prev_frame );
 
 		}
