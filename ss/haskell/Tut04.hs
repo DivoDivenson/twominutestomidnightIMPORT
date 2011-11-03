@@ -31,20 +31,34 @@ mergeTrees tree1 tree2
 
 -- Q1  Write an instance of Eq for BinTree (the derived one)
 --     (Leave this commented out in the final deliverable)
---instance Eq BinTree where
-	
+--instance (Eq k, Eq d) => Eq (BinTree k d) where
+--	Nil == Nil = True
+--	Branch ltree1 key1 data1 rtree1 == Branch ltree2 key2 data2 rtree2 = ltree1 == ltree2 && key1 == key2 && data1 == data2 && ltree1 == rtree2
+--	_  == _   = False
 
 -- Q2  Write an instance of Show for BinTree
- 
+instance (Show k, Show d) => Show (BinTree k d) where
+	show Nil = ""
+	show (Branch ltree key datum rtree) =  show ltree ++ show key ++ " |-> " ++ show datum ++ ", " ++ show rtree
 
 -- Q3 Write an instance of Eq for BinTree that respects Show
-
-  
+instance (Eq k, Eq d) => Eq (BinTree k d) where
+--	Branch ltree1 key1 data1 rtree1 == Branch ltree2 key2 data2 rtree2 = tree2list (Branch ltree1 key1 data1 rtree1) == tree2list (Branch ltree2 key2 data2 rtree2)
+	a == b = tree2list a == tree2list b
 -- Q4 Design a Ordered Collection Class (OrdColl): none fuse
-
+class OrdColl a where
+	none :: a
+	fuse :: a -> a -> a
 
 -- Q5 Instantiate List as OrdColl
-  
+instance (Ord a) => (OrdColl [a]) where
+	none = []
+	fuse [] b = b
+	fuse b [] = b
+	fuse (x:xs) (y:ys) | x < y = x : (fuse xs (y:ys))
+			   | x >= y = y : (fuse (x:xs) ys)
 -- Q6 Instantiate BinTRee as OrdColl
-  
-  
+instance (Ord k) => OrdColl (BinTree k d) where
+	none = Nil
+	fuse x y = foldl step y (tree2list x) 
+		where step acc (k, d) = addEntry k d acc   
