@@ -14,15 +14,28 @@ public class GraphicsView extends GLSurfaceView {
 		setRenderer(renderer);
 	}
 	
-    public boolean onTouchEvent(final MotionEvent event) {
-    	 queueEvent(new Runnable() {
-    	        public void run() {
-    	            //renderer.setColor(event.getX() / getWidth(), event.getY() / getHeight(), 1.0f);
-    	            renderer.setAngle(event.getX() / 100, event.getY() / 100);
-    	        }
-    	    });
-    	    return true;
-    }
-
-
+	private float _x = 0;
+	private float _y = 0;
+	 
+	// code snipped
+	 
+	public boolean onTouchEvent(final MotionEvent event) {
+	    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+	        _x = event.getX();
+	        _y = event.getY();
+	    }
+	    if (event.getAction() == MotionEvent.ACTION_MOVE) {
+	        final float xdiff = (_x - event.getX());
+	        final float ydiff = (_y - event.getY());
+	        queueEvent(new Runnable() {
+	            public void run() {
+	                renderer.setXAngle(renderer.getXAngle() + ydiff);
+	                renderer.setYAngle(renderer.getYAngle() + xdiff);
+	            }
+	        });
+	        _x = event.getX();
+	        _y = event.getY();
+	    }
+	    return true;
+	}
 }
