@@ -31,6 +31,9 @@ mergeTrees tree1 tree2
 
 -- Q1  Write an instance of Eq for BinTree (the derived one)
 --     (Leave this commented out in the final deliverable)
+--data BinTree k d = Nil | Branch (BinTree k d) k d (BinTree K d) deriving ( Show )
+
+--Or did you mean write it to have the same behaviour?
 --instance (Eq k, Eq d) => Eq (BinTree k d) where
 --	Nil == Nil = True
 --	Branch ltree1 key1 data1 rtree1 == Branch ltree2 key2 data2 rtree2 = ltree1 == ltree2 && key1 == key2 && data1 == data2 && ltree1 == rtree2
