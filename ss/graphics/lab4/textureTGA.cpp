@@ -116,7 +116,7 @@ textureTGA::textureTGA(const char *filename, const int textureId){
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     
     // Upload texture to card with bound texture ID
-	//gluBuild2DMipmaps(GL_TEXTURE_2D, internalFormat, m_width, m_height, fileFormat, GL_UNSIGNED_BYTE, &fileData[18]);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, internalFormat, m_width, m_height, fileFormat, GL_UNSIGNED_BYTE, &fileData[18]);
     
     // Texture's uploaded, don't need data any more   
     //UnmapViewOfFile(fileData);
