@@ -12,7 +12,7 @@ COMPILER Taste
 /*--------------------------------------------------------------------------*/
 CHARACTERS
   letter = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".
-  characters = "!$%^&*(){}[]:;'@#~<,>.?/`¬'\"\\|".
+  characters = "!$%^&*(){}[]:;'_@#~<,>.?/`¬'\"\\|".
   digit = "0123456789".
   cr  = '\r'.
   lf  = '\n'.
@@ -52,7 +52,8 @@ Factor<out int type>     (. int n; Obj obj; string name; .)
     [ '[' number           (. n = Convert.ToInt32(t.val);
 			      if(n < 0 || n > obj.size) SemErr("Array index out of bounds"); .)
     ']' ]
-                            (.if (obj.kind == var || obj.kind == constant) {			      if (obj.level == 0) gen.Emit(Op.LOADG, obj.adr + n);
+                            (.if (obj.kind == var || obj.kind == constant) {
+			      if (obj.level == 0) gen.Emit(Op.LOADG, obj.adr + n);
 			      else gen.Emit(Op.LOAD, obj.adr + n);
                             } else SemErr("variable expected or constant");
                             .)
@@ -229,7 +230,7 @@ Stat                     (. int type,type1,type2; string name; Obj obj;
 
 | "do"                  	(. loopstart = gen.pc; .)
    Stat                 
-   "while" '(' Expr<out type> ')' (. if(type != boolean) SemErr("Boolean type expected");
+   "while" '(' Expr<out type> ')'';' (. if(type != boolean) SemErr("Boolean type expected");
                                      gen.Emit(Op.FJMP, 0); adr = gen.pc -2;
                                      gen.Emit(Op.JMP, loopstart);
                                      gen.Patch(adr, gen.pc); .)

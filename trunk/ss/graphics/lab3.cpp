@@ -69,6 +69,8 @@ void drawObjects(int move = 0){
     glutSolidSphere(0.3f, 20, 20);
     //Horizontal cylinder for lower arm
     gluCylinder(nQ2, 0.15, 0.15, 1.5f, 20, 5);
+	glTranslatef(0.0f, 0.0f, 1.5f);
+	glutSolidSphere(0.3f, 20, 20);
 }
  
 void renderScene(){

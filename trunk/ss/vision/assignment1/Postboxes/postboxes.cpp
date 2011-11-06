@@ -45,47 +45,74 @@ void compute_vertical_edge_image(IplImage* input_image, IplImage* output_image)
 	
 	//Having the same src and dest might make a bit of a mess of thing but does the job here
 	IplImage * temp = cvCloneImage(grayscale_image);
-	cvSmooth(temp, grayscale_image, CV_GAUSSIAN);
+	cvSmooth(temp, grayscale_image);
     //cvShowImage( "Debug", grayscale_image );
 	cvZero( output_image);
 
 	int row, col;
 	int i, j; //Mask iterators
-	int sum =0;
 	
 	int width_step= input_image->widthStep;
 	int pixel_step= input_image->widthStep/input_image->width;
 	int number_channels=input_image->nChannels;
 
+	unsigned char black[4] = {0, 0, 0, 0};
+
 	int gray_width_step = grayscale_image->widthStep;
 	int gray_pixel_step = grayscale_image->widthStep/grayscale_image->width;
 	int gray_number_channels = grayscale_image->nChannels;
 
-	int mask[3][3] = {{-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1}};
+	//int mask[3][3] = {{-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1}}; //sobel
+	//int mask[3][3] = {{-1, 0 , 1}, {-1, 0, 1}, {-1, 0, 1}}; //Prewitt
+	int mask[3][3] = {{ 0, 0, 0}, {-1, 0, 1}, {0, 0, 0}}; //Funzo
 	//Get pixel at each point in mask, mul by value in mask and sum the result
-	//Put the edges in later
-	for(row = 1; row < grayscale_image->height - 1; row++){
-		for(col = 1; col < grayscale_image->width - 1; col++){
-			//unsigned char * curr_point = GETPIXELPTRMACRO( _image, col, row, width_step, pixel_step);
-			unsigned char * result_point = GETPIXELPTRMACRO( output_image, col, row, width_step, pixel_step);
-			//Might as well get the average and the standard dev at the same time.
-			//Put the edges in later
+
+
+	
+
+
+
+	int postbox;
+	//Only run edge edtection inside the postboxes, ignore the rest of the image
+	for(postbox = 0; postbox < NUMBER_OF_POSTBOXES; postbox++){
+		for(row = PostboxLocations[postbox][POSTBOX_TOP_BASE_ROW]; row <= PostboxLocations[postbox][POSTBOX_BOTTOM_ROW]; row++){
+			for(col = PostboxLocations[postbox][POSTBOX_LEFT_COLUMN]; col <= PostboxLocations[postbox][POSTBOX_RIGHT_COLUMN]; col++){
+				unsigned char * result_point = GETPIXELPTRMACRO( output_image, col, row, width_step, pixel_step);
 			//Could just use the i and j values, but using mask array makes it more explcit what im doing
-			for(i = -1; i < 2; i++){
-				for(j = -1; j < 2; j++){
-					unsigned char * curr_point = GETPIXELPTRMACRO( grayscale_image, (col + j), (row + i), gray_width_step, gray_pixel_step);
-					sum += curr_point[0] * mask[i + 1][j + 1];	
-					//printf("%d x %d : ", mask[i + 1][j + 1], curr_point[0]);	
+				int sum = 0;
+				for(i = -1; i < 2; i++){
+					for(j = -1; j < 2; j++){
+						unsigned char * curr_point = GETPIXELPTRMACRO( grayscale_image, (col + j), (row + i), gray_width_step, gray_pixel_step);
+						sum += curr_point[0] * mask[i + 1][j + 1];
+					}
 				}
-				//printf("\n");
+				unsigned char x = abs(sum);
+				if( x > MINIMUM_GRADIENT_VALUE + 10){
+					result_point[RED_CH] = abs(sum);
+				}
+			
 			}
-			//printf("%d\n", sum);
-			if( abs(sum) > MINIMUM_GRADIENT_VALUE + 50 ){
-				result_point[RED_CH] = 255;
-			}
-			sum = 0;
 		}
-	//printf("Hello %d\n", row);
+	}
+	//Do the non-maxima suppression here for the moment, put in another method later
+	//I presume by along each row we need only consider the points to the left and right of a pixel.
+	//THIS IS WHERE THE PROBLEM IS
+	for(row = 1; row < output_image->height -1; row++){
+		for(col = 1; col < output_image->width -1; col++){
+			unsigned char * current_point = GETPIXELPTRMACRO(output_image, col, row, width_step, pixel_step);
+			unsigned char * left_point = GETPIXELPTRMACRO(output_image, col -1, row, width_step, pixel_step);
+			unsigned char * right_point = GETPIXELPTRMACRO(output_image, col +1, row, width_step, pixel_step);
+			//printf("%d %d %d\n", left_point[RED_CH], current_point[RED_CH], right_point[RED_CH]);
+			if( (current_point[RED_CH] == 0 ) || (current_point[RED_CH] < left_point[RED_CH]) || (current_point[RED_CH] < right_point[RED_CH]) ){
+				//printf("Point\n");
+				current_point[RED_CH] = 0;
+
+			}else{
+				current_point[RED_CH] = 255;
+			}
+
+			
+		}
 	}
 	cvReleaseImage(&temp);
 	cvReleaseImage(&grayscale_image);
@@ -127,18 +154,38 @@ bool motion_free_frame(IplImage* input_image, IplImage* previous_frame)
 	}
 	return true;  // Just to allow the system to compile while the code is missing.
 }
-
+int temp = 0;
 void check_postboxes(IplImage* input_image, IplImage* labelled_output_image, IplImage* vertical_edge_image )
 {
 	// TO-DO:  If the input_image is not motion free then do nothing.  Otherwise determine the vertical_edge_image and check
 	//        each postbox to see if there is mail (by analysing the vertical edges).  Highlight the edge points used during your
 	//        processing.  If there is post in a box indicate that there is on the labelled_output_image.
+	
 	//Passing in a global, keeps the method reusable
 	if(motion_free_frame(input_image, prev_frame)){
 		compute_vertical_edge_image(input_image, vertical_edge_image);
+		//Do some kind of function based on number and length of lines
+		//iterate through the postboxes an examine them
+		int postbox, row, col;
+
+		int width_step= vertical_edge_image->widthStep;
+		int pixel_step= vertical_edge_image->widthStep/vertical_edge_image->width;
+		
+		//Iterate through all the postboxes
+		for(postbox = 0; postbox < NUMBER_OF_POSTBOXES; postbox++){
+			//Iterate through all the points in a single post box
+			for(row = PostboxLocations[postbox][POSTBOX_TOP_BASE_ROW]; row <= PostboxLocations[postbox][POSTBOX_BOTTOM_ROW]; row++){
+				for(col = PostboxLocations[postbox][POSTBOX_LEFT_COLUMN]; col <= PostboxLocations[postbox][POSTBOX_RIGHT_COLUMN]; col++){
+					unsigned char * temp = GETPIXELPTRMACRO(vertical_edge_image, col, row, width_step, pixel_step);
+		//			temp[0] = 255;
+				}
+			}
+
+		}
 	}else{
-		printf("Motion in frame");
+		printf("Motion in frame\n");
 	}
+	temp++;
 	
 }
 
@@ -195,13 +242,14 @@ int main( int argc, char** argv )
 
 		if (labelled_image == NULL)
 		{	// The first time around the loop create the image for processing
-			labelled_image = cvCloneImage( corrected_frame );
 			vertical_edge_image = cvCloneImage( corrected_frame );
 			prev_frame = cvCreateImage( cvGetSize(input_image), 8, 1 );
 			//This is screwed up, fix later
 			cvConvertImage( corrected_frame, prev_frame );
 
 		}
+		//Refresh labelled image each time so we can write on it and get rid of the writing too
+		labelled_image = cvCloneImage( corrected_frame );
 		check_postboxes(corrected_frame, labelled_image, vertical_edge_image );
 
 		// Display the current frame and results of processing
@@ -210,7 +258,8 @@ int main( int argc, char** argv )
         cvShowImage( "Results", labelled_image );
         
         // Wait for the delay between frames
-        user_clicked_key = (char) cvWaitKey( 1000 / fps );
+        //Set to 500 just to speed up debugging
+        user_clicked_key = (char) cvWaitKey( 500 / fps );
 		if (user_clicked_key == ' ')
 		{
 			user_clicked_key = (char) cvWaitKey(0);

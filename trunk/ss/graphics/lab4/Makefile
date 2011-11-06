@@ -1,7 +1,7 @@
-CC = gcc
+CC = g++
 CFLAGS = -Wall
 PROG = output
-SRCS = 3dsplay.c 
+SRCS = Lab4.cpp model3DS.cpp textureBMP.cpp textureTGA.cpp  
 
 ifeq ($(shell uname),Darwin)
 	LIBS = -framework OpenGL -framework GLUT

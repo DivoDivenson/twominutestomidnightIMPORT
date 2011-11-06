@@ -482,6 +482,7 @@ const int // types
 			Expect(13);
 			Expr(out type);
 			Expect(14);
+			Expect(24);
 			if(type != boolean) SemErr("Boolean type expected");
 			gen.Emit(Op.FJMP, 0); adr = gen.pc -2;
 			gen.Emit(Op.JMP, loopstart);
