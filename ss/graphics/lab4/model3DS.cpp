@@ -23,7 +23,7 @@ model3DS::model3DS(const char* filename, float scale) : m_filename(filename), m_
 	// Extract path from filename
 	int lastSlashPosition=-1, lastForwardSlash=-1, lastBackslash=-1;
 	lastForwardSlash = (int)m_filename.find_last_of('/');
-	lastBackslash = (int)m_filename.find_last_of('\\');
+	lastBackslash = (int)m_filename.find_last_of('/');
 	if(lastForwardSlash > lastSlashPosition) lastSlashPosition = lastForwardSlash;
 	if(lastBackslash > lastSlashPosition) lastSlashPosition = lastBackslash;
 	m_filepath = m_filename.substr(0,lastSlashPosition+1);
@@ -360,9 +360,10 @@ void material3DS::loadTexture(std::string filename, int chunkType){
 	if(filename.find(".tga") != std::string::npos){
 		textureTGA newTexture(filename, newTextureId);
 	}
-	else if(filename.find(".bmp") != std::string::npos){
-		textureBMP newTexture(filename, newTextureId);
-	}
+	//Put support for this in later
+	//else if(filename.find(".bmp") != std::string::npos){
+	//	textureBMP newTexture(filename, newTextureId);
+	//}
 	else return;
 
 	switch(chunkType){

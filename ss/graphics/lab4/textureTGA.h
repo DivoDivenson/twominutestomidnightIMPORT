@@ -14,6 +14,13 @@
 #include <fstream>
 #include "GL/gl.h"
 #include "GL/glu.h"
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <string.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 typedef unsigned char byte;
 
