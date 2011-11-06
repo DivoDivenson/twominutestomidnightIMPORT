@@ -14,7 +14,7 @@ class Stackish:
 		self.items = [[-1] * (k + 1)] * (size  +1)
 		#self.item = [-1] * (size + 1)
 	def contains(self, item, tag):
-		print self.items[item]
+#		print self.items[item]
 		if tag in self.items[item]:
 			return True
 	 	else:

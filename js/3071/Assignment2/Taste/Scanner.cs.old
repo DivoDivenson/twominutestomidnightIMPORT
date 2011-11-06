@@ -442,7 +442,7 @@ public class Scanner {
 				if (ch >= '0' && ch <= '9') {AddCh(); goto case 2;}
 				else {t.kind = 2; break;}
 			case 3:
-				if (ch >= '!' && ch <= '*' || ch == ',' || ch >= '.' && ch <= '<' || ch >= '>' && ch <= '^' || ch >= '`' && ch <= '~' || ch == 172 || ch == 194) {AddCh(); goto case 4;}
+				if (ch >= '!' && ch <= '*' || ch == ',' || ch >= '.' && ch <= '<' || ch >= '>' && ch <= '~' || ch == 172 || ch == 194) {AddCh(); goto case 4;}
 				else {goto case 0;}
 			case 4:
 				if (ch == 39) {AddCh(); goto case 5;}

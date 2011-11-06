@@ -40,6 +40,7 @@ mergeTrees tree1 tree2
 --	_  == _   = False
 
 -- Q2  Write an instance of Show for BinTree
+
 instance (Show k, Show d) => Show (BinTree k d) where
 	show Nil = ""
 	show (Branch ltree key datum rtree) =  show ltree ++ show key ++ " |-> " ++ show datum ++ ", " ++ show rtree

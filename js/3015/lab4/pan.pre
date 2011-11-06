@@ -1,53 +1,41 @@
-# 1 "./final_final.pml"
+# 1 "./tele.pml"
 # 1 "<built-in>"
 # 1 "<command-line>"
-# 1 "./final_final.pml"
+# 1 "./tele.pml"
+mtype {MSG, ACK}
+
+chan toS = [0] of {mtype, bit};
+chan toR = [0] of {mtype, bit};
 
 
-mtype = { SYN, ACK, REQUEST, TRYING, BUSY, CON, TERM, END };
 
 
-chan line = [0] of { mtype, chan };
-# 18 "./final_final.pml"
-active proctype recevier()
-{ chan sub;
-idle: line ? SYN,sub;
-        { sub ! ACK;
-                sub ? REQUEST;
-                if
-                :: sub ! BUSY; goto zombie
-                :: sub ! TRYING ->
-                        sub ! CON;
-                        if
-                        :: sub ! END; goto zombie
-                        :: skip
-                        fi
-                fi
-         } unless
-         { if
-                :: sub ? TERM -> goto idle
-                :: timeout -> goto zombie
-                fi
-          }
-zombie: sub ? TERM; goto idle
+proctype Sender(chan in_, out){
+
+  bit sendbit, recvbit;
+  do
+    :: out ! MSG, sendbit ->
+       in_ ? ACK, recvbit;
+       if
+       :: recvbit == sendbit ->
+          sendbit = 1-sendbit
+       :: else
+       fi
+  od
+
+ }
+
+proctype Receiver(chan in_, out)
+{
+  bit recvbit;
+  do
+    :: in_ ? MSG, recvbit ->
+       out ! ACK, recvbit;
+       printf("Received %d\n", recvbit);
+  od
 }
 
-active [4] proctype sender()
-{ chan connection = [0] of { mtype };
-idle: line ! SYN,connection;
-      connection ? ACK;
-      connection ! REQUEST;
-      if
-      :: connection ? BUSY;
-      :: connection ? TRYING ->
-              if
-              :: connection ? CON;
-                      if
-                      :: connection ? END
-                      :: timeout
-                      fi
-              :: skip
-              fi
-      fi;
-      connection ! TERM; goto idle
+init{
+  run Sender(toS, toR);
+  run Receiver(toR, toS);
 }

@@ -17,7 +17,8 @@ poss( moveRight, Situation ):-
 	holdPrim( intState(Q), Situation),
 	holds( derAt(X,Loc), Situation ),
 	holdPrim( headPos( Loc ), Situation ).
-	
+
+
 delL( moveRight, Situation, intState(Q)) :-
 	holdPrim( intState(Q), Situation ). 
 

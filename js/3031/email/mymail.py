@@ -103,7 +103,7 @@ def init_curses():
 				body += line
 				print line
 		else:
-			#to = get_input("To:")
+			to = get_input("To:")
 			to = "assign2.test@gmail.com"
 			#from_ = get_input("From:")
 			from_ = "assign2.test@gmail.com"
