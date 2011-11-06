@@ -71,8 +71,8 @@ void updateScene(){
 	
 	// Wait until at least 16ms passed since start of last frame
 	// Effectively caps framerate at ~60fps
-	while(timeGetTime()-lastTickCount<16);
-	lastTickCount=timeGetTime();
+	//while(timeGetTime()-lastTickCount<16);
+	//lastTickCount=timeGetTime();
     
     // Increment angle for next frame
     tetrahedronAngle+=2;
@@ -114,7 +114,7 @@ void setupScene(){
 	glEnable(GL_DEPTH_TEST);
 
 	//Load the teddy model
-	teddyModel = new model3DS("teddy\\teddy.3ds", 2);
+	teddyModel = new model3DS("./teddy/teddy.3ds", 2);
       
 }
 

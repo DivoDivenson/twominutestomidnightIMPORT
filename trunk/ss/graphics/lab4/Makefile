@@ -1,7 +1,7 @@
 CC = g++
-CFLAGS = -Wall
+CFLAGS = -Wall -g
 PROG = output
-SRCS = Lab4.cpp model3DS.cpp textureBMP.cpp textureTGA.cpp  
+SRCS = Lab4.cpp model3DS.cpp textureTGA.cpp  
 
 ifeq ($(shell uname),Darwin)
 	LIBS = -framework OpenGL -framework GLUT
