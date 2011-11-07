@@ -16,6 +16,10 @@ int PostboxLocations[NUMBER_OF_POSTBOXES][5] = {
                                 {   6,  73,  95, 5, 92 }, {   6,  73,  95, 105, 192 },
                                 { 105, 158, 193, 5, 92 }, { 105, 158, 193, 105, 192 },
                                 { 204, 245, 292, 5, 92 }, { 204, 245, 292, 105, 192 } };
+
+int number_points[NUMBER_OF_POSTBOXES] = {0, 0, 0, 0, 0,0}; //The number of red points (edges) for each postbox in the first image
+int thresholds[NUMBER_OF_POSTBOXES] = {20, 20, 40, 40, 200, 200}; //Thresholds for each postbox
+
 #define POSTBOX_TOP_ROW 0
 #define POSTBOX_TOP_BASE_ROW 1
 #define POSTBOX_BOTTOM_ROW 2
@@ -63,8 +67,8 @@ void compute_vertical_edge_image(IplImage* input_image, IplImage* output_image)
 	int gray_number_channels = grayscale_image->nChannels;
 
 	//int mask[3][3] = {{-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1}}; //sobel
-	//int mask[3][3] = {{-1, 0 , 1}, {-1, 0, 1}, {-1, 0, 1}}; //Prewitt
-	int mask[3][3] = {{ 0, 0, 0}, {-1, 0, 1}, {0, 0, 0}}; //Funzo
+	int mask[3][3] = {{-1, 0 , 1}, {-1, 0, 1}, {-1, 0, 1}}; //Prewitt
+	//int mask[3][3] = {{ 0, 0, 0}, {-1, 0, 1}, {0, 0, 0}}; //Funzo
 	//Get pixel at each point in mask, mul by value in mask and sum the result
 
 
@@ -96,24 +100,28 @@ void compute_vertical_edge_image(IplImage* input_image, IplImage* output_image)
 	}
 	//Do the non-maxima suppression here for the moment, put in another method later
 	//I presume by along each row we need only consider the points to the left and right of a pixel.
-	//THIS IS WHERE THE PROBLEM IS
-	for(row = 1; row < output_image->height -1; row++){
-		for(col = 1; col < output_image->width -1; col++){
-			unsigned char * current_point = GETPIXELPTRMACRO(output_image, col, row, width_step, pixel_step);
-			unsigned char * left_point = GETPIXELPTRMACRO(output_image, col -1, row, width_step, pixel_step);
-			unsigned char * right_point = GETPIXELPTRMACRO(output_image, col +1, row, width_step, pixel_step);
-			//printf("%d %d %d\n", left_point[RED_CH], current_point[RED_CH], right_point[RED_CH]);
-			if( (current_point[RED_CH] == 0 ) || (current_point[RED_CH] < left_point[RED_CH]) || (current_point[RED_CH] < right_point[RED_CH]) ){
-				//printf("Point\n");
-				current_point[RED_CH] = 0;
+	for(postbox = 0; postbox < NUMBER_OF_POSTBOXES; postbox++){
+		int redcount = 0;
+		for(row = PostboxLocations[postbox][POSTBOX_TOP_BASE_ROW]; row <= PostboxLocations[postbox][POSTBOX_BOTTOM_ROW]; row++){
+			for(col = PostboxLocations[postbox][POSTBOX_LEFT_COLUMN]; col <= PostboxLocations[postbox][POSTBOX_RIGHT_COLUMN]; col++){
+				unsigned char * current_point = GETPIXELPTRMACRO(output_image, col, row, width_step, pixel_step);
+				unsigned char * left_point = GETPIXELPTRMACRO(output_image, col -1, row, width_step, pixel_step);
+				unsigned char * right_point = GETPIXELPTRMACRO(output_image, col +1, row, width_step, pixel_step);
+				//printf("%d %d %d\n", left_point[RED_CH], current_point[RED_CH], right_point[RED_CH]);
+				if( (current_point[RED_CH] == 0 ) || (current_point[RED_CH] < left_point[RED_CH]) || (current_point[RED_CH] < right_point[RED_CH]) ){
+					current_point[RED_CH] = 0;
 
-			}else{
-				current_point[RED_CH] = 255;
+				}else{
+					current_point[RED_CH] = 255;
+					redcount++;
+				}			
 			}
-
-			
 		}
-	}
+		//if first frame
+		if(number_points[postbox] == 0){
+			number_points[postbox] = redcount;
+		}
+	}	
 	cvReleaseImage(&temp);
 	cvReleaseImage(&grayscale_image);
 }
@@ -154,7 +162,6 @@ bool motion_free_frame(IplImage* input_image, IplImage* previous_frame)
 	}
 	return true;  // Just to allow the system to compile while the code is missing.
 }
-int temp = 0;
 void check_postboxes(IplImage* input_image, IplImage* labelled_output_image, IplImage* vertical_edge_image )
 {
 	// TO-DO:  If the input_image is not motion free then do nothing.  Otherwise determine the vertical_edge_image and check
@@ -174,18 +181,25 @@ void check_postboxes(IplImage* input_image, IplImage* labelled_output_image, Ipl
 		//Iterate through all the postboxes
 		for(postbox = 0; postbox < NUMBER_OF_POSTBOXES; postbox++){
 			//Iterate through all the points in a single post box
+			int redcount = 0;
 			for(row = PostboxLocations[postbox][POSTBOX_TOP_BASE_ROW]; row <= PostboxLocations[postbox][POSTBOX_BOTTOM_ROW]; row++){
 				for(col = PostboxLocations[postbox][POSTBOX_LEFT_COLUMN]; col <= PostboxLocations[postbox][POSTBOX_RIGHT_COLUMN]; col++){
 					unsigned char * temp = GETPIXELPTRMACRO(vertical_edge_image, col, row, width_step, pixel_step);
-		//			temp[0] = 255;
+					if(temp[RED_CH] == 255){
+						redcount++;
+					}
 				}
+			}
+			printf("Postbox: %d found: %d thresh: %d\n", postbox, redcount, number_points[postbox]);
+			if(redcount < number_points[postbox] - thresholds[postbox]){
+				indicate_post_in_box(labelled_output_image, postbox);
 			}
 
 		}
+		printf("FRAME\n\n");
 	}else{
-		printf("Motion in frame\n");
+
 	}
-	temp++;
 	
 }
 
@@ -244,7 +258,6 @@ int main( int argc, char** argv )
 		{	// The first time around the loop create the image for processing
 			vertical_edge_image = cvCloneImage( corrected_frame );
 			prev_frame = cvCreateImage( cvGetSize(input_image), 8, 1 );
-			//This is screwed up, fix later
 			cvConvertImage( corrected_frame, prev_frame );
 
 		}
@@ -259,7 +272,7 @@ int main( int argc, char** argv )
         
         // Wait for the delay between frames
         //Set to 500 just to speed up debugging
-        user_clicked_key = (char) cvWaitKey( 500 / fps );
+        user_clicked_key = (char) cvWaitKey( 1000 / fps );
 		if (user_clicked_key == ' ')
 		{
 			user_clicked_key = (char) cvWaitKey(0);
