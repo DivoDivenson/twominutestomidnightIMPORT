@@ -10,8 +10,9 @@ class ClientProxy():
 	open_file = ""
 
 	#Extend for access type for locking
-	def open(self, filename):
+	def open(self, filename, mode="r"):
 		#first do a lookup, split filename into path and name
+		#if mode not in {'r', 'w'}
 		temp = filename.split('/')
 		name = temp.pop()
 		path = ''
@@ -19,15 +20,22 @@ class ClientProxy():
 			path += i + '/'
 
 		#Check if file exists on server
-		response = self.server.lookup(path, name)
+		temp = file_identifier(path, name)
+		response = self.server.lookup(temp)
 		if response:
 			self.open_file = file_identifier.fromOne(response)
-		else:
+		elif mode == 'r':
 			raise IOError ("No such file or directory: " + name)
+		#IMPLEMENT CREATION
+
 
 	def read(self, size):
-		print self.open_file
 		result = self.server.read(self.open_file, size)
+
+		return result
+
+	def write(self, string):
+		result = self.server.write(self.open_file, string)
 
 		return result
 		
@@ -38,6 +46,9 @@ class ClientProxy():
 c = ClientProxy()
 c.open('/home/divo/media/sata/College/twominutestomidnight/ss/distsys/project/server.py')
 print c.read(1024)
+c.open("/home/divo/media/sata/College/twominutestomidnight/ss/distsys/project/sample.txt")
+#c.write("This is a test")
+
 
 
 
