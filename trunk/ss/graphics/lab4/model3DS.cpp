@@ -28,6 +28,8 @@ model3DS::model3DS(const char* filename, float scale) : m_filename(filename), m_
 	if(lastBackslash > lastSlashPosition) lastSlashPosition = lastBackslash;
 	m_filepath = m_filename.substr(0,lastSlashPosition+1);
 	m_filename = m_filename.substr(lastSlashPosition+1);
+	std::cout<<"Test "<<m_filepath<<std::endl;
+
 	
 	// Check to make sure file is valid 3DS format (begins with 0x4D4D)
     ushort chunkHeader;
@@ -260,7 +262,9 @@ bool model3DS::readChunk(std::ifstream *modelFile, const int objectStart, const 
 				do{
 					modelFile->read(&currentLetter,1);
 					m_tempString += currentLetter;
-				}while(currentLetter!='\0' && m_tempString.length()<20);
+				}while(currentLetter!='\0'  && m_tempString.length()<20);
+
+				//if(currentLetter == '\0') m_tempString.erase();
 				break;
 
 			case CHUNK_MATERIAL_TWO_SIDED:
@@ -348,7 +352,7 @@ bool model3DS::readChunk(std::ifstream *modelFile, const int objectStart, const 
 void material3DS::loadTexture(std::string filename, int chunkType){
 
 	std::transform(filename.begin(),filename.end(),filename.begin(),tolower);
-	
+
 	if((filename.find(".tga") == std::string::npos) && (filename.find(".bmp") == std::string::npos)){
 		std::cout<<"[3DS] WARNING: Could not load map '"<<filename<<"'\n[3DS] WARNING: (texture must be TGA or BMP)"<<std::endl;
 		return;        

@@ -194,7 +194,7 @@ void setupScene(){
 	//Load the teddy model
 	teddyModel = new model3DS("./teddy/teddy.3ds", 2);
 	table = new model3DS("./table/table.3ds", 50);
-	carpark = new model3DS("./carpark/carpark.3ds", 30);
+	carpark = new model3DS("./carpark/carparkfinal.3ds", 30);
       
 }
 
