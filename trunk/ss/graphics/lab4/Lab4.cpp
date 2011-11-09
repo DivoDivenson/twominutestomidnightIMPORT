@@ -10,7 +10,9 @@
 
 model3DS *teddyModel;
 model3DS * table;
-model3DS * carpark;
+model3DS * carpark; //My model
+
+model3DS * car; //From the web
 
 void setupScene();
 void updateScene();
@@ -21,6 +23,9 @@ void setViewport(int width, int height);
 typedef unsigned int DWORD;
 
 int         tetrahedronAngle=0;
+
+int rotationAngle=0; //For moving object
+
 bool		wireframe=false;
 int         windowId;
 
@@ -33,15 +38,64 @@ float lastx, lasty;
 
 
 GLuint      textureId;
-DWORD		lastTickCount;
+
 GLfloat white_light[] = {1.0, 1.0, 1.0, 1.0};
 GLfloat left_light_position[] = {1,0,-1, 1.0}; 
 GLfloat right_light_position[] = {-1,0,-1, 1.0};
+
+GLfloat emerald_ambient[] =
+{0.0215, 0.1745, 0.0215}, emerald_diffuse[] =
+{0.07568, 0.61424, 0.07568}, emerald_specular[] =
+{0.633, 0.727811, 0.633}, emerald_shininess = 76.8;
 
 void camera (void) {
     glRotatef(xrot,1.0,0.0,0.0);  
     glRotatef(yrot,0.0,1.0,0.0);  
     glTranslated(-xpos,-ypos,-zpos); 
+}
+
+void drawObjects(int move = 0, int scale = 1.0f){
+//Stick this here for the moment, lazy
+
+	GLUquadric* nQ;
+    nQ=gluNewQuadric();
+    GLUquadric * nQ2;
+    nQ2 = gluNewQuadric();
+
+	glutSolidCube(1.0f * scale);
+    
+    //glTranslatef(0.0f, -1.0f, 0.0f);
+    //rotate everything above the base
+    if(move){
+        glRotatef(-1*rotationAngle/4.f,0,1,0);
+        glRotatef(-1*rotationAngle/2.f,0,0,1);
+        glRotatef(-1*rotationAngle/3.f,1,0,0);
+    }
+
+//  glPushMatrix();
+    //draw first joint
+    glutSolidSphere(0.3f * scale, 20, 20);  
+
+    //cylinder, draw upper arm
+    glPushMatrix();
+    glRotatef(90.0f, -1.0f, 0.0f, 0.0f);
+    gluCylinder(nQ, 0.15 * scale, 0.15 * scale, 1.5f * scale, 20, 5);
+    //glRotatef(90.0f, 1.0f, 0.0f, 0.0f); //Same as pop
+    glPopMatrix(); //Undo the rotate
+    
+    glTranslatef(0.0f, 1.7f * scale, 0.0f);
+    //Rotate the lower arm
+    if(move){
+        glRotatef(-1*rotationAngle/4.f,0,1,0);
+        glRotatef(-1*rotationAngle/3.f,1,0,0);
+        glRotatef(-1*rotationAngle/2.f,0,0,1);
+    }
+    //second join
+    glutSolidSphere(0.3f * scale, 20, 20);
+    //Horizontal cylinder for lower arm
+    gluCylinder(nQ2, 0.15 * scale, 0.15 * scale, 1.5f * scale, 20, 5);
+	glTranslatef(0.0f, 0.0f, 1.5f * scale);
+	glutSolidSphere(0.3f * scale, 20, 20);
 }
 
 
@@ -80,6 +134,24 @@ void renderScene(){
 	//teddyModel->draw();
 	//table->draw();
 	carpark->draw();
+	
+	glPushMatrix();
+	glDisable(GL_TEXTURE_2D);
+  	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, emerald_ambient);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, emerald_diffuse);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, emerald_specular);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, emerald_shininess);  
+
+	glTranslatef(200.0f, -20.0f, 0.0f);
+	drawObjects(1, 20);
+	glPopMatrix();
+	glEnable(GL_TEXTURE_2D);
+
+	
+	glTranslatef(-1000.0, -40.0, 250);
+	glRotatef(90.0, 0.0, 1.0, 0.0);
+
+	car->draw();
 
 
     glDisable(GL_TEXTURE_2D);
@@ -100,6 +172,7 @@ void updateScene(){
     
     // Increment angle for next frame
     //tetrahedronAngle+=2;
+    rotationAngle+=2;
 
 	// Do any other updates here
 	
@@ -192,9 +265,10 @@ void setupScene(){
 	glEnable(GL_DEPTH_TEST);
 
 	//Load the teddy model
-	teddyModel = new model3DS("./teddy/teddy.3ds", 2);
+	teddyModel = new model3DS("./teddy/teddy.3ds", 1);
 	table = new model3DS("./table/table.3ds", 50);
 	carpark = new model3DS("./carpark/carparkfinal.3ds", 30);
+	car = new model3DS("./car/car.3ds",5);
       
 }
 
