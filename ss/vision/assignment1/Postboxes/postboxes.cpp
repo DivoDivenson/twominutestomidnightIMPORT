@@ -17,8 +17,12 @@ int PostboxLocations[NUMBER_OF_POSTBOXES][5] = {
                                 { 105, 158, 193, 5, 92 }, { 105, 158, 193, 105, 192 },
                                 { 204, 245, 292, 5, 92 }, { 204, 245, 292, 105, 192 } };
 
-int number_points[NUMBER_OF_POSTBOXES] = {0, 0, 0, 0, 0,0}; //The number of red points (edges) for each postbox in the first image
-int thresholds[NUMBER_OF_POSTBOXES] = {20, 20, 40, 40, 200, 200}; //Thresholds for each postbox
+//Old redcount method
+//int number_points[NUMBER_OF_POSTBOXES] = {0, 0, 0, 0, 0,0}; //The number of red points (edges) for each postbox in the first image
+//int thresholds[NUMBER_OF_POSTBOXES] = {20, 20, 40, 40, 200, 200}; //Thresholds for each postbox
+
+//Better line counting method
+int number_lines[NUMBER_OF_POSTBOXES]; //Number of edges in each postbox in first image
 
 #define POSTBOX_TOP_ROW 0
 #define POSTBOX_TOP_BASE_ROW 1
@@ -26,6 +30,9 @@ int thresholds[NUMBER_OF_POSTBOXES] = {20, 20, 40, 40, 200, 200}; //Thresholds f
 #define POSTBOX_LEFT_COLUMN 3
 #define POSTBOX_RIGHT_COLUMN 4
 #define MASK_SIZE 3
+
+#define MAX_LINE_LENGTH 10
+#define LINE_AMOUNT_VAR 3
 
 IplImage * prev_frame;
 
@@ -35,6 +42,68 @@ void indicate_post_in_box( IplImage* image, int postbox )
 	write_text_on_image(image,(PostboxLocations[postbox][POSTBOX_TOP_ROW]+PostboxLocations[postbox][POSTBOX_BOTTOM_ROW])/2,PostboxLocations[postbox][POSTBOX_LEFT_COLUMN]+2, "Post in");
 	write_text_on_image(image,(PostboxLocations[postbox][POSTBOX_TOP_ROW]+PostboxLocations[postbox][POSTBOX_BOTTOM_ROW])/2+19,PostboxLocations[postbox][POSTBOX_LEFT_COLUMN]+2, "this box");
 }
+//Follow a line segment and blank it out
+int follow_line(IplImage * input_image, int row, int col, int length){
+
+	int width_step= input_image->widthStep;
+	int pixel_step= input_image->widthStep/input_image->width;
+	int number_channels=input_image->nChannels;
+
+	//Blank off point
+	unsigned char * start_point = GETPIXELPTRMACRO(input_image, col, row, width_step, pixel_step);
+	start_point[RED_CH] = 0;
+
+	int i, j;
+
+	//Look for the next pixel in the line
+	for(i = -1; i < 2; i++){
+			for(j = -1; j < 2; j++){
+			unsigned char * curr_point = GETPIXELPTRMACRO( input_image, (col + j), (row + i), width_step, pixel_step);
+			if(curr_point[RED_CH] == 255){
+				length += 1;
+				length = follow_line(input_image, (row + i), (col + j), length);
+			}
+		}
+	}
+	//If end of line reached, bottom out and return the length
+
+	return length;
+}
+
+int count_lines(IplImage * input_image, int x, int y, int width, int height){
+	int row, col;
+	int i, j;
+	IplImage * temp = cvCloneImage(input_image);
+
+
+	int result = 0;
+	int width_step= input_image->widthStep;
+	int pixel_step= input_image->widthStep/input_image->width;
+	int number_channels=input_image->nChannels;
+
+
+	for(row = x; row <= height; row++){
+		for(col = y; col <= width; col++){
+			unsigned char * point = GETPIXELPTRMACRO(temp, col, row, width_step, pixel_step);
+			//If edge, follow it, deleting each point so we don't follow it twice. Then count it. Bit of brute force approach
+			if(point[RED_CH] == 255){
+				//Follow the line and get it's length, discard line that are two small
+				int length = follow_line(temp, row, col, 1);
+				if(length > MAX_LINE_LENGTH){
+					result++;
+				}
+
+			}
+		}
+	}
+	cvShowImage("Debug", temp);		
+
+
+	cvReleaseImage(&temp);
+	return result;
+}
+
+
 
 void compute_vertical_edge_image(IplImage* input_image, IplImage* output_image)
 {
@@ -67,13 +136,9 @@ void compute_vertical_edge_image(IplImage* input_image, IplImage* output_image)
 	int gray_number_channels = grayscale_image->nChannels;
 
 	//int mask[3][3] = {{-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1}}; //sobel
-	int mask[3][3] = {{-1, 0 , 1}, {-1, 0, 1}, {-1, 0, 1}}; //Prewitt
-	//int mask[3][3] = {{ 0, 0, 0}, {-1, 0, 1}, {0, 0, 0}}; //Funzo
+	//int mask[3][3] = {{-1, 0 , 1}, {-1, 0, 1}, {-1, 0, 1}}; //Prewitt
+	int mask[3][3] = {{ 0, 0, 0}, {-1, 0, 1}, {0, 0, 0}}; //Funzo
 	//Get pixel at each point in mask, mul by value in mask and sum the result
-
-
-	
-
 
 
 	int postbox;
@@ -97,29 +162,38 @@ void compute_vertical_edge_image(IplImage* input_image, IplImage* output_image)
 			
 			}
 		}
+		
 	}
-	//Do the non-maxima suppression here for the moment, put in another method later
+	//Do the non-maxima suppression here.
 	//I presume by along each row we need only consider the points to the left and right of a pixel.
 	for(postbox = 0; postbox < NUMBER_OF_POSTBOXES; postbox++){
-		int redcount = 0;
+		//int redcount = 0;
 		for(row = PostboxLocations[postbox][POSTBOX_TOP_BASE_ROW]; row <= PostboxLocations[postbox][POSTBOX_BOTTOM_ROW]; row++){
 			for(col = PostboxLocations[postbox][POSTBOX_LEFT_COLUMN]; col <= PostboxLocations[postbox][POSTBOX_RIGHT_COLUMN]; col++){
+				//Could do some fancy pointer manipulation here, but can't depend on memory alignment.
 				unsigned char * current_point = GETPIXELPTRMACRO(output_image, col, row, width_step, pixel_step);
+				//Consider the two points to the left and right
 				unsigned char * left_point = GETPIXELPTRMACRO(output_image, col -1, row, width_step, pixel_step);
 				unsigned char * right_point = GETPIXELPTRMACRO(output_image, col +1, row, width_step, pixel_step);
+
+				unsigned char * left_point2 = GETPIXELPTRMACRO(output_image, col -2, row, width_step, pixel_step);
+				unsigned char * right_point2 = GETPIXELPTRMACRO(output_image, col +2, row, width_step, pixel_step);
 				//printf("%d %d %d\n", left_point[RED_CH], current_point[RED_CH], right_point[RED_CH]);
-				if( (current_point[RED_CH] == 0 ) || (current_point[RED_CH] < left_point[RED_CH]) || (current_point[RED_CH] < right_point[RED_CH]) ){
+				//Well this if statement turned out hideous
+				if( (current_point[RED_CH] == 0 ) || (current_point[RED_CH] < left_point[RED_CH]) || (current_point[RED_CH] < right_point[RED_CH]) || (current_point[RED_CH] < left_point2[RED_CH]) || (current_point[RED_CH] < right_point2[RED_CH]) ){
 					current_point[RED_CH] = 0;
 
 				}else{
 					current_point[RED_CH] = 255;
-					redcount++;
+					//redcount++;
 				}			
 			}
 		}
+		//printf("No lines for %d: %d vs %d\n", postbox,redcount, count_lines(output_image, PostboxLocations[postbox][POSTBOX_TOP_BASE_ROW], PostboxLocations[postbox][POSTBOX_LEFT_COLUMN], PostboxLocations[postbox][POSTBOX_RIGHT_COLUMN], PostboxLocations[postbox][POSTBOX_BOTTOM_ROW]));
 		//if first frame
-		if(number_points[postbox] == 0){
-			number_points[postbox] = redcount;
+		if(number_lines[postbox] == 0){
+			number_lines[postbox] = count_lines(output_image, PostboxLocations[postbox][POSTBOX_TOP_BASE_ROW], PostboxLocations[postbox][POSTBOX_LEFT_COLUMN], PostboxLocations[postbox][POSTBOX_RIGHT_COLUMN], PostboxLocations[postbox][POSTBOX_BOTTOM_ROW]);
+			//number_points[postbox] = redcount;
 		}
 	}	
 	cvReleaseImage(&temp);
@@ -154,7 +228,6 @@ bool motion_free_frame(IplImage* input_image, IplImage* previous_frame)
 		}
 		
 	}
-	cvShowImage("Debug", prev_frame);		
 	prev_frame = cvCloneImage(grayscale_image);
 //	cvReleaseImage(&grayscale_image);
 	if( ( (float) ((float)movement/(float)total)*100) > ALLOWED_MOTION_FOR_MOTION_FREE_IMAGE){
@@ -180,8 +253,11 @@ void check_postboxes(IplImage* input_image, IplImage* labelled_output_image, Ipl
 		
 		//Iterate through all the postboxes
 		for(postbox = 0; postbox < NUMBER_OF_POSTBOXES; postbox++){
+			//Count the number of lines in each postbox
+			int numLines = count_lines(vertical_edge_image, PostboxLocations[postbox][POSTBOX_TOP_BASE_ROW], PostboxLocations[postbox][POSTBOX_LEFT_COLUMN], PostboxLocations[postbox][POSTBOX_RIGHT_COLUMN], PostboxLocations[postbox][POSTBOX_BOTTOM_ROW]);
+
 			//Iterate through all the points in a single post box
-			int redcount = 0;
+			/*int redcount = 0;
 			for(row = PostboxLocations[postbox][POSTBOX_TOP_BASE_ROW]; row <= PostboxLocations[postbox][POSTBOX_BOTTOM_ROW]; row++){
 				for(col = PostboxLocations[postbox][POSTBOX_LEFT_COLUMN]; col <= PostboxLocations[postbox][POSTBOX_RIGHT_COLUMN]; col++){
 					unsigned char * temp = GETPIXELPTRMACRO(vertical_edge_image, col, row, width_step, pixel_step);
@@ -189,9 +265,11 @@ void check_postboxes(IplImage* input_image, IplImage* labelled_output_image, Ipl
 						redcount++;
 					}
 				}
-			}
-			printf("Postbox: %d found: %d thresh: %d\n", postbox, redcount, number_points[postbox]);
-			if(redcount < number_points[postbox] - thresholds[postbox]){
+			}*/
+
+			//printf("Postbox: %d found: %d thresh: %d\n", postbox, numLines,  number_lines[postbox]);
+			//If the number of lines decrease sufficiently, assume post in box. The > case never succeeds in this example but make the algo more robust
+			if(numLines < number_lines[postbox] - LINE_AMOUNT_VAR || numLines > number_lines[postbox] + LINE_AMOUNT_VAR){
 				indicate_post_in_box(labelled_output_image, postbox);
 			}
 
@@ -272,7 +350,7 @@ int main( int argc, char** argv )
         
         // Wait for the delay between frames
         //Set to 500 just to speed up debugging
-        user_clicked_key = (char) cvWaitKey( 1000 / fps );
+        user_clicked_key = (char) cvWaitKey( 300 / fps );
 		if (user_clicked_key == ' ')
 		{
 			user_clicked_key = (char) cvWaitKey(0);
