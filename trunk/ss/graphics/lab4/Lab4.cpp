@@ -39,8 +39,8 @@ float lastx, lasty;
 
 GLuint      textureId;
 
-GLfloat white_light[] = {1.0, 1.0, 1.0, 1.0};
-GLfloat left_light_position[] = {1,0,-1, 1.0}; 
+GLfloat white_light[] = {1.0, 1.0, 1.0, .5};
+GLfloat left_light_position[] = {-200,20.0,-1, 1.0}; 
 GLfloat right_light_position[] = {-1,0,-1, 1.0};
 
 GLfloat emerald_ambient[] =
@@ -50,8 +50,9 @@ GLfloat emerald_ambient[] =
 
 void camera (void) {
     glRotatef(xrot,1.0,0.0,0.0);  
-    glRotatef(yrot,0.0,1.0,0.0);  
+    glRotatef(yrot,0.0,1.0,0.0);
     glTranslated(-xpos,-ypos,-zpos); 
+ 
 }
 
 void drawObjects(int move = 0, int scale = 1.0f){
@@ -103,6 +104,7 @@ void renderScene(){
         
     // Clear framebuffer & depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_LIGHTING);
     
     // Reset Modelview matrix      	
     glMatrixMode(GL_MODELVIEW);
@@ -131,7 +133,7 @@ void renderScene(){
     //glRotatef(-1*tetrahedronAngle/2.f,0,0,1);	
 
 	//DrawTetrahedron();
-	//teddyModel->draw();
+	teddyModel->draw();
 	//table->draw();
 	carpark->draw();
 	
@@ -140,7 +142,7 @@ void renderScene(){
   	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, emerald_ambient);
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, emerald_diffuse);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, emerald_specular);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, emerald_shininess);  
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, emerald_shininess); 
 
 	glTranslatef(200.0f, -20.0f, 0.0f);
 	drawObjects(1, 20);
@@ -196,38 +198,44 @@ void keypress(unsigned char key, int x, int y){
 	}
 
 	if(key=='w'){
-	float xrotrad, yrotrad;
+	/*float xrotrad, yrotrad;
     yrotrad = (yrot / 180 * 3.141592654f);
     xrotrad = (xrot / 180 * 3.141592654f); 
     xpos += float(sin(yrotrad));
     zpos -= float(cos(yrotrad))+10;
-    ypos -= float(sin(xrotrad));
+    ypos -= float(sin(xrotrad));*/
 	//Backward
+	zpos -= 10;
 	}
 
 	if(key =='s'){
-	float xrotrad, yrotrad;
+	/*float xrotrad, yrotrad;
     yrotrad = (yrot / 180 * 3.141592654f);
     xrotrad = (xrot / 180 * 3.141592654f); 
     xpos -= float(sin(yrotrad));
     zpos += float(cos(yrotrad))+10;
-    ypos += float(sin(xrotrad));
+    ypos += float(sin(xrotrad));*/
+    zpos += 10;
 	}
 
 	if(key=='d')
     {
-    float yrotrad;
+    /*float yrotrad;
 	yrotrad = (yrot / 180 * 3.141592654f);
-	xpos += float(cos(yrotrad)) * 0.2 + 10;
+	xpos += float(cos(yrotrad)) * 0.2;
 	zpos += float(sin(yrotrad)) * 0.2;
+	*/
+	xpos += 10;
     }
 
     if(key=='a')
     {
-   	float yrotrad;
+   	/*float yrotrad;
 	yrotrad = (yrot / 180 * 3.141592654f);
-	xpos -= float(cos(yrotrad)) * 0.2 + 10;
+	xpos -= float(cos(yrotrad)) * 0.2;
 	zpos -= float(sin(yrotrad)) * 0.2;
+	*/
+	xpos -= 10;
     }
 	
 
@@ -257,7 +265,7 @@ void setupScene(){
 	glLightfv(GL_LIGHT1, GL_POSITION, right_light_position);
 	glLightfv(GL_LIGHT1, GL_SPECULAR, white_light);
 	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHT1);
+	//glEnable(GL_LIGHT1);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, white_light);
 	glShadeModel(GL_SMOOTH);
