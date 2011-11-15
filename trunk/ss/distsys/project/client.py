@@ -22,14 +22,22 @@ class ClientProxy():
 		#Check if file exists on server
 		temp = file_identifier(path, name)
 		response = self.server.lookup(temp)
+		print response
 		if response:
 			self.open_file = file_identifier.fromOne(response)
 		elif mode == 'r':
 			raise IOError ("No such file or directory: " + name)
-		#IMPLEMENT CREATION
+		elif mode == 'w':
+			print "Attempting"
+			response = self.server.create(temp)
+			print response
+			if ( response ):
+				print "HEllo"
+				self.open_file = file_identifier.fromOne(response)
+			else:
+				raise IOError ("No such directory: " + path)
 
-
-	def read(self, size):
+	def read(self, size=0):
 		result = self.server.read(self.open_file, size)
 
 		return result
@@ -45,8 +53,8 @@ class ClientProxy():
 	
 c = ClientProxy()
 c.open('/home/divo/media/sata/College/twominutestomidnight/ss/distsys/project/server.py')
-print c.read(1024)
-c.open("/home/divo/media/sata/College/twominutestomidnight/ss/distsys/project/sample.txt")
+#print c.read()
+c.open("/home/divo/media/sata/College/twominutestomidnight/ss/distsys/project/sample.txt", "w")
 #c.write("This is a test")
 
 
