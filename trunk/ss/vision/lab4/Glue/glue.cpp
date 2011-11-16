@@ -13,6 +13,9 @@
 #define FIRST_LABEL_ROW_TO_CHECK 390
 #define LAST_LABEL_ROW_TO_CHECK 490
 #define ROW_STEP_FOR_LABEL_CHECK 20
+#define NUMBER_STEPS 5
+
+
 
 
 bool find_label_edges( IplImage* edge_image, IplImage* result_image, int row, int& left_label_column, int& right_label_column )
@@ -22,9 +25,19 @@ bool find_label_edges( IplImage* edge_image, IplImage* result_image, int row, in
 	//        are found set the left_label_column and the right_label_column and return true.  Otherwise return false.
 	//        The routine should mark the points searched (in yellow), the edges of the bottle (in blue) and the edges of the
 	//        label (in red) - all in the result_image.
+	int i;
+	left_label_column = 0;
+	right_label_column = 0;
+	cvZero()
+
+	for(i = 0; i < edge_image->width; i++){
+		//unsigned char * point = GETPIXELPTRMACRO( output_image, i, row, width_step, pixel_step);
+
+	}
 
 	return false;  // Just to let the project compile until the code is written.
 }
+
 
 void check_glue_bottle( IplImage* original_image, IplImage* result_image )
 {
@@ -36,6 +49,30 @@ void check_glue_bottle( IplImage* original_image, IplImage* result_image )
 
 	//         To implement this you may need to use smoothing (cv::GaussianBlur() perhaps) and edge detection (cvCanny() perhaps).
 	//        You might also need cvConvertImage() which converts between different types of image.
+	IplImage* temp_image = cvCreateImage( cvGetSize(original_image), 8, 1 );
+
+	cvConvertImage(original_image, temp_image);
+	IplImage * grey_image = cvCloneImage(temp_image);
+	cvSmooth(temp_image, grey_image, CV_GAUSSIAN, 11, 11);
+
+	
+	cvCanny(grey_image, grey_image, 20, 40, 3);
+    cvShowImage( "Edges", grey_image );
+
+    int step;
+    int * left_result = new int[NUMBER_STEPS];
+    int * right_result = new int[NUMBER_STEPS];
+
+    int * lptr = left_result;
+    int * rptr = right_result;
+    int i =0;
+    for(step = FIRST_LABEL_ROW_TO_CHECK; step <= LAST_LABEL_ROW_TO_CHECK; step += ROW_STEP_FOR_LABEL_CHECK){
+    	find_label_edges( grey_image, result_image, step,  * lptr++, * rptr++);
+    	
+    }
+
+	cvReleaseImage(&grey_image);
+
 }
 
 int main( int argc, char** argv )
@@ -62,6 +99,7 @@ int main( int argc, char** argv )
 	// Create display windows for images
     cvNamedWindow( "Original", 1 );
     cvNamedWindow( "Processed Image", 1 );
+    cvNamedWindow( "Edges", 1);
 
 	// Create images to do the processing in.
 	selected_image = cvCloneImage( images[selected_image_num-1] );
@@ -83,7 +121,7 @@ int main( int argc, char** argv )
 		cvShowImage( "Processed Image", result_image );
 
 		// Wait for user input
-        user_clicked_key = cvWaitKey(0);
+        user_clicked_key = (char) cvWaitKey(0);
 		if ((user_clicked_key >= '1') && (user_clicked_key <= '0'+NUM_IMAGES))
 		{
 			selected_image_num = user_clicked_key-'0';
