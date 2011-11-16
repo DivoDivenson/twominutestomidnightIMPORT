@@ -50,7 +50,8 @@ bool find_label_edges(IplImage* result_image, int row, int& left_label_column, i
 	unsigned char red[4] = {0, 0, 255, 0};
 
 	//Loop through, find the edge points.
-	for(i = 0; i < result_image->width; i++){
+	//Only look at half the image. If the label aint found by then, presume it's not there
+	for(i = 0; i < result_image->width / 2; i++){
 		unsigned char * point = GETPIXELPTRMACRO( result_image, i, row, width_step, pixel_step);
 		if(point[0] == 255 && edge_no == 0){
 			PUTPIXELMACRO( result_image, i, row, blue, width_step, pixel_step, number_channels );
@@ -66,31 +67,31 @@ bool find_label_edges(IplImage* result_image, int row, int& left_label_column, i
 		}
 	}
 
-	//Do the same stuff for the right side
-	edge_no = 0;
-	for(i = result_image->width; i > 0; i--){
-		unsigned char * point = GETPIXELPTRMACRO( result_image, i, row, width_step, pixel_step);
-		if(point[0] == 255 && edge_no == 0){
-			//If the edge of the bottle (on the right) us equal to the edge of the bottle on the left
-			//there is no label
-			if(i == left_temp){
-				return false;
+	//If no left edge found, don't bother looking for a right edge
+	if(edge_no == 2){
+		//Do the same stuff for the right side
+		edge_no = 0;
+		for(i = result_image->width; i > 0; i--){
+			unsigned char * point = GETPIXELPTRMACRO( result_image, i, row, width_step, pixel_step);
+			if(point[0] == 255 && edge_no == 0){
+				PUTPIXELMACRO( result_image, i, row, blue, width_step, pixel_step, number_channels );
+				edge_no++;
+			}else if(point[0] ==255 && edge_no == 1){
+				PUTPIXELMACRO( result_image, i, row, blue, width_step, pixel_step, number_channels );
+				right_temp = i;
+				edge_no++;
+			}else if(edge_no != 2){
+				PUTPIXELMACRO( result_image, i, row, yellow, width_step, pixel_step, number_channels );
+			}else{
+				break;
 			}
-			PUTPIXELMACRO( result_image, i, row, blue, width_step, pixel_step, number_channels );
-			edge_no++;
-		}else if(point[0] ==255 && edge_no == 1){
-			PUTPIXELMACRO( result_image, i, row, blue, width_step, pixel_step, number_channels );
-			right_temp = i;
-			edge_no++;
-		}else if(edge_no != 2){
-			PUTPIXELMACRO( result_image, i, row, yellow, width_step, pixel_step, number_channels );
-		}else{
-			break;
 		}
+		left_label_column = left_temp;
+		right_label_column = right_temp;
+		return true;
+	}else{
+		return false;
 	}
-	left_label_column = left_temp;
-	right_label_column = right_temp;
-	return true;
 
 }
 
@@ -162,7 +163,7 @@ void check_glue_bottle( IplImage* original_image, IplImage* result_image )
     	
     }
 
-    lmax = find_max(left_result, NUMBER_STEPS);
+    /*lmax = find_max(left_result, NUMBER_STEPS);
     lmin = find_min(left_result, NUMBER_STEPS);
     //Next two lines look unintuitve, and could be swapped around, but make sense if you think about it
     rmax = find_min(right_result, NUMBER_STEPS);
@@ -170,6 +171,12 @@ void check_glue_bottle( IplImage* original_image, IplImage* result_image )
 
     if((lmax - lmin) < VARIATION && (rmax - rmin) < VARIATION){
 	    write_text_on_image(result_image, 10, 10, "Label Present");
+    }else{
+   		write_text_on_image(result_image, 10, 10, "Label crooked");
+    }*/
+    //This is slightly quicker then the above way
+    if(abs(left_result[0] - left_result[NUMBER_STEPS]) < VARIATION && abs(right_result[0] - right_result[NUMBER_STEPS]) < VARIATION){
+    	write_text_on_image(result_image, 10, 10, "Label Present");
     }else{
    		write_text_on_image(result_image, 10, 10, "Label crooked");
     }
