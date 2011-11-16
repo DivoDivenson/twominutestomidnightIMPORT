@@ -49,6 +49,7 @@ bool find_label_edges(IplImage* result_image, int row, int& left_label_column, i
 	unsigned char blue[4] = {255, 0, 0, 0};
 	unsigned char red[4] = {0, 0, 255, 0};
 
+	//Loop through, find the edge points.
 	for(i = 0; i < result_image->width; i++){
 		unsigned char * point = GETPIXELPTRMACRO( result_image, i, row, width_step, pixel_step);
 		if(point[0] == 255 && edge_no == 0){
@@ -128,12 +129,13 @@ void check_glue_bottle( IplImage* original_image, IplImage* result_image )
 
 	//         To implement this you may need to use smoothing (cv::GaussianBlur() perhaps) and edge detection (cvCanny() perhaps).
 	//        You might also need cvConvertImage() which converts between different types of image.
+
+	//Greyscale, smooth and compute edge image
 	IplImage* temp_image = cvCreateImage( cvGetSize(original_image), 8, 1 );
 
 	cvConvertImage(original_image, temp_image);
 	IplImage * grey_image = cvCloneImage(temp_image);
 	cvSmooth(temp_image, grey_image, CV_GAUSSIAN, 15, 15);
-
 	
 	cvCanny(grey_image, grey_image, LOWTHRESH, HIGHTHRESH, 3);
     //cvShowImage( "Edges", grey_image );
@@ -149,7 +151,7 @@ void check_glue_bottle( IplImage* original_image, IplImage* result_image )
 
     int lmax, lmin, rmax, rmin;
 
-	//result_image = edge_image;
+    //Just copy the edge data to the result so I don't have to get twp pointers later
 	cvMerge( grey_image, grey_image, grey_image, NULL, result_image);
     for(step = FIRST_LABEL_ROW_TO_CHECK; step <= LAST_LABEL_ROW_TO_CHECK; step += ROW_STEP_FOR_LABEL_CHECK){
     	if(find_label_edges( result_image, step,  * lptr++, * rptr++) == false){
