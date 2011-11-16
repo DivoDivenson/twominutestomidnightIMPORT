@@ -265,7 +265,7 @@ void setupScene(){
 	glLightfv(GL_LIGHT1, GL_POSITION, right_light_position);
 	glLightfv(GL_LIGHT1, GL_SPECULAR, white_light);
 	glEnable(GL_LIGHT0);
-	//glEnable(GL_LIGHT1);
+//	glEnable(GL_LIGHT1);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, white_light);
 	glShadeModel(GL_SMOOTH);
