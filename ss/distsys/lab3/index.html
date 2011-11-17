@@ -1,0 +1,32 @@
+<html>
+<head>
+<script type="text/javascript">
+var access = 279803412063830;
+
+function show_name(data){
+	document.getElementById('name').innerHTML = data["name"];
+}
+
+function init(){
+	if(location.hash == ""){
+		window.location ="http://www.facebook.com/dialog/oauth?client_id=279803412063830&redirect_uri=http://divines.netsoc.ie/&response_type=token";
+
+	}else{
+		var token = location.hash.split('#access_token=')[1];
+		token = token.split('&')[0];
+		var url="https://graph.facebook.com/me?access_token="+token+"&callback=show_name";
+		var script = document.createElement("script");
+		script.src = url;
+		document.body.appendChild(script)
+	}
+}
+</script>
+
+
+</head>
+
+<body onload="init()">
+<p id="name"></p>
+</body>
+
+</html>
