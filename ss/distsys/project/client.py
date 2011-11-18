@@ -13,7 +13,7 @@ PASS = "pass"
 #All of these methods throw socket exceptions
 def login(socket):
 	message = json.dumps({"type" : "login", "user" : USER})
-	sock.send(message)
+	sock.send(USER)
 	response = ""
 	while 1:
 		data = sock.recv(1024)
