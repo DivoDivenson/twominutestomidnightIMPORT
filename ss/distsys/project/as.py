@@ -38,17 +38,13 @@ class AuthenticationServer(SocketServer.BaseRequestHandler):
 	def handle(self):
 		#for the moment presume all message are under 1024
 		user = self.request.recv(msg_size)
-		#self.data = json.loads(self.data)
-		#I know it doen't do anything else, but it COULD
-		#if(self.data['type'] == "login"):
-			#user = self.data['user']
-			#Gen client key by hashing user password
+	
 		client_key = self.lookup(user)
 
 			#Client-TGS session key
 		client_TGS_key = encrypt(client_key, TGS_key)
 		a = encrypt(client_TGS_key, client_key)
-		print client_TGS_key
+		
 
 			#Encryptde ticket
 		b = json.dumps({"user" : user, "address" : self.client_address[0], "client_tgs" : client_TGS_key})
@@ -57,6 +53,9 @@ class AuthenticationServer(SocketServer.BaseRequestHandler):
 
 			#reply
 		self.request.send(response)
+		print "Session key sent to " + user
+
+
 
 		
 			

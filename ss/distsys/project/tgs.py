@@ -7,20 +7,49 @@ import json
 
 msg_size = 1024
 
+#No need for service ID as we only have one
 
 #Secret key
 TGS_key = "thisbeakey"
+SS_key = "anotherkey"
 
 
 class TicketGrantingServer(SocketServer.BaseRequestHandler):
 
 	def handle(self):
+		data = self.request.recv(msg_size)
+		
+		data = json.loads(data)
+		#Decrypt AS private payload and get client_TGS_key
+		ticket = decrypt(data['ticket'], TGS_key)
+		ticket = json.loads(ticket, strict=False)
+		client_TGS_key = ticket['client_tgs']
+
+		authenticator = decrypt(data['auth'], client_TGS_key)
+		authenticator = json.loads(authenticator, strict=False)
+
+		#Client-SS key is sha1 of username encrypted with AES against the SS key
+		client_SS_key = encrypt(genKey(authenticator['user']), SS_key)
+		ticket = json.dumps({"user" : authenticator['user'], "address" : self.client_address[0], "client_ss" : client_SS_key} )
+		ticket = encrypt(ticket, SS_key);
+
+		#Not quite sure what the point of this part is
+		private = json.dumps({"client_ss" : client_SS_key})
+		private = encrypt(private, client_TGS_key)
+
+		response = json.dumps({"ticket" : ticket, "private" : private})
+
+		self.request.send(response)
+		print "Response sent to client"
 
 
 
 
-if __name__ == "__main__"
-	server = SocketServer.TCPServer(("localhost", 8082, TicketGrantingServer))
+
+
+
+if __name__ == "__main__":
+	server = SocketServer.TCPServer(("localhost", 8082), TicketGrantingServer)
 
 	try:
 		print "Ticket granting server running"
