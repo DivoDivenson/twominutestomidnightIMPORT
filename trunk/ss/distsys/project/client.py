@@ -10,7 +10,7 @@ class ClientProxy():
 	open_file = ""
 
 	#Extend for access type for locking
-	def open(self, filename, mode="r"):
+	'''def open(self, filename, mode="r"):
 		#first do a lookup, split filename into path and name
 		#if mode not in {'r', 'w'}
 		temp = filename.split('/')
@@ -28,14 +28,31 @@ class ClientProxy():
 		elif mode == 'r':
 			raise IOError ("No such file or directory: " + name)
 		elif mode == 'w':
-			print "Attempting"
 			response = self.server.create(temp)
-			print response
 			if ( response ):
-				print "HEllo"
 				self.open_file = file_identifier.fromOne(response)
 			else:
-				raise IOError ("No such directory: " + path)
+				raise IOError ("No such directory: " + path)'''
+
+	def open(self, filename, mode="r"):
+		response = self.server.lookup(filename)
+		if response:
+			self.open_file = response
+			print self.open_file
+		elif mode == 'r':
+			raise IOError ("No such file or directory: " + filename)
+		elif mode == 'w':
+			response = self.server.create(filename)
+			if(response):
+				self.open_file = response
+			else:
+				raise IOError ("No such directory: " + filename)
+
+
+
+
+
+
 
 	def read(self, size=0):
 		result = self.server.read(self.open_file, size)
@@ -44,6 +61,9 @@ class ClientProxy():
 
 	def write(self, string):
 		result = self.server.write(self.open_file, string)
+
+	def close(self, string):
+		open_file = ""
 
 		return result
 		
@@ -54,8 +74,9 @@ class ClientProxy():
 c = ClientProxy()
 c.open('/home/divo/media/sata/College/twominutestomidnight/ss/distsys/project/server.py')
 #print c.read()
-c.open("/home/divo/media/sata/College/twominutestomidnight/ss/distsys/project/sample.txt", "w")
-#c.write("This is a test")
+b = ClientProxy()
+b.open('/home/divo/media/sata/College/twominutestomidnight/ss/distsys/project/test.txt', 'w');
+c.write("This is a test")
 
 
 
