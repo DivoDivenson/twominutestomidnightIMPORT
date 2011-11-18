@@ -3,6 +3,7 @@
 import SocketServer
 import hashlib
 from crypto import *
+import json
 
 #Put all this stuff in files later
 users = {'divines' : "pass"}
@@ -10,15 +11,16 @@ users = {'divines' : "pass"}
 #Make these complicated later
 TGS_key = "thisbeakey"
 
-client_TGS_key = "anotherkey"
+#client_TGS_key = "anotherkey"
 
-
+msg_size = 1024
 
 
 requests = ["login"]
 
 #Leave expiry out for now
 '''
+All messages are now using json
 Messages
 Client -> Server
 Login request: "login\n<username>\n"
@@ -28,22 +30,34 @@ Login response: "client_key(<client tgs key>)\nTGS(<username>,<client address>,<
 
 
 '''
-
-
-class AuthenticationServer(SocketServer.StreamRequestHandler):
+#Login works
+#Client-TGS key is just a AES of the client key against the TGS secret key
+class AuthenticationServer(SocketServer.BaseRequestHandler):
 
 	def handle(self):
-		self.data = self.rfile.readline().rstrip('\n')
-		print self.data
-		if(self.data == "login"):
-			user = self.rfile.readline().rstrip('\n')
+		#for the moment presume all message are under 1024
+		self.data = self.request.recv(msg_size)
+		self.data = json.loads(self.data)
+		if(self.data['type'] == "login"):
+			user = self.data['user']
+			#Gen client key by hashing user password
 			client_key = self.lookup(user)
 
-			response = encrypt(client_TGS_key, client_key) + '\n'
-			encrypted_payload = user + '\n' + self.client_address[0] + '\n' + client_TGS_key + '\n'
-			response += encrypt(encrypted_payload, TGS_key)
+			#Client-TGS session key
+			client_TGS_key = encrypt(client_key, TGS_key)
+			a = encrypt(client_TGS_key, client_key)
+			print client_TGS_key
+
+			b = json.dumps({"user" : user, "address" : self.client_address[0], "client_tgs" : client_TGS_key})
+			b = encrypt(b, TGS_key)
+			response = json.dumps({"public" : a, "private" : b})
+
+			self.request.send(response)
+
+			#b = user + '\n' + self.client_address[0] + '\n' + client_TGS_key
+			#response += encrypt(encrypted_payload, TGS_key)
 			#Send back encryptde message
-			self.wfile.write(response)
+			#self.wfile.write(response)'''
 			
 			
 
