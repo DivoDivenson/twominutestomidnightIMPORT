@@ -42,7 +42,8 @@ class AuthenticationServer(SocketServer.StreamRequestHandler):
 			response = encrypt(client_TGS_key, client_key) + '\n'
 			encrypted_payload = user + '\n' + self.client_address[0] + '\n' + client_TGS_key + '\n'
 			response += encrypt(encrypted_payload, TGS_key)
-			print response
+			#Send back encryptde message
+			self.wfile.write(response)
 			
 			
 
@@ -50,7 +51,7 @@ class AuthenticationServer(SocketServer.StreamRequestHandler):
 	def lookup(self, name):
 		if name in users:
 			password = users[name]
-			key = hashlib.sha1(password).hexdigest()
+			key = genKey(password)
 			return key
 
 
