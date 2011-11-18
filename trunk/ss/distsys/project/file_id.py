@@ -6,10 +6,6 @@ class file_identifier(object):
 	def __init__(self, path, name):
 		self.path = path
 		self.name = name
-		#Bit of a hack to get directories working
-		if(name == ''):
-			path = path.rstrip('/');
-	
 
 	#Parse list back into object
 	@classmethod
