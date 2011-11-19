@@ -85,7 +85,7 @@ class FileServer():
 	def readdir(self, file_id):
 		if(self.lookup(file_id)):
 			return os.listdir(file_id)
-		else
+		else:
 			return False
 
 
