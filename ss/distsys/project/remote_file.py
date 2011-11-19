@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import xmlrpclib
+import xmlrpclib, httplib
 import os
 #from file_id import *
 
@@ -56,9 +56,9 @@ class RemoteFile():
 
 	
 
-#c = RemoteFile()
-#c.open('/home/divo/media/sata/College/twominutestomidnight/ss/distsys/project/server.py')
-#print c.read()
+c = RemoteFile()
+c.open('/home/divo/media/sata/College/twominutestomidnight/ss/distsys/project/server.py')
+print c.read()
 #b = RemoteFile()
 #b.open('/home/divo/media/sata/College/twominutestomidnight/ss/distsys/project/test.txt', 'w');
 #b.write("This is a test")

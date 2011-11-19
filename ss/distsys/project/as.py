@@ -31,6 +31,11 @@ Login response: "client_key(<client tgs key>)\nTGS(<username>,<client address>,<
 
 
 '''
+
+class TCPServer(SocketServer.TCPServer):
+	allow_reuse_address = True
+
+	
 #Login works
 #Client-TGS key is just a AES of the client key against the TGS secret key
 class AuthenticationServer(SocketServer.BaseRequestHandler):
