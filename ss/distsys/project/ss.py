@@ -21,12 +21,34 @@ class ServicesServer(SocketServer.BaseRequestHandler):
 		data = self.request.recv(msg_size)
 		data = json.loads(data, strict=False)
 
-		client_ss_key = data['ticket']
-		client_ss_key = decrypt(client_ss_key, key)
+		tgs_ticket = data['ticket']
+		tgs_ticket = decrypt(tgs_ticket, key)
+		tgs_ticket = json.loads(tgs_ticket, strict=False)
+
+		tgs_user = tgs_ticket['user']
+
+		client_ss_key = tgs_ticket['client_ss']
 
 		authenticator = data['auth']
 		authenticator = decrypt(authenticator, client_ss_key)
-		print authenticator
+		authenticator = json.loads(authenticator, strict=False)
+
+		ss_user = authenticator['user']
+
+		#Verfiy that it's the user that contaced the TGS
+		if(tgs_user == ss_user):
+			#If users match, send back user timestamp encryptde with CLient_ss_key
+			response = encrypt(authenticator['time'], client_ss_key)
+			response = json.dumps({"time" : response})
+		else:
+			print "Client authentication failed"
+			response = "Nope"
+
+		print("Sending response to client")
+		self.request.send(response)
+
+		
+
 
 
 
