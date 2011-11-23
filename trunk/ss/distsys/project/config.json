@@ -1,0 +1,14 @@
+{
+	"users" : {
+		"divines" : "thisisapassword"
+		"test" : "thisisanotherpassword"
+	},
+
+	"servers" : { 
+					"tgs" : [ ["localhost", "8082", "d4630ffae8ae85e03740c2d750996f69f54a9427"] ]
+					"file_server" [ ["localhost", "8083","5298417ae3de8481fb3e62a92c7620ed5360b790"] ]
+		
+
+	}
+
+}
