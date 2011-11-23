@@ -12,7 +12,7 @@ SS_PORT =  8083
 msg_size = 1024
 
 USER = "divines"
-PASS = "pass"
+PASS = "thisisapassword"
 
 
 def login():
@@ -25,7 +25,7 @@ def login():
 			data = sock.recv(msg_size)
 			if not data: break
 			response += data
-
+		
 		return response
 	
 	finally:
@@ -121,6 +121,7 @@ def get_ss_key():
 		return client_ss
 	else:
 		raise Warning ("Something went wrong contacting SS server")
+
 
 if __name__ == "__main__":
 	print get_ss_key()
