@@ -4,14 +4,14 @@ import SocketServer
 import hashlib
 from crypto import *
 import json
+from misc import *
 
 msg_size = 1024
 
 #No need for service ID as we only have one
 
-#Secret key
-TGS_key = "thisbeakey"
-SS_key = "anotherkey"
+TGS_key = ""
+SS_key = ""
 
 
 class TCPServer(SocketServer.TCPServer):
@@ -53,7 +53,12 @@ class TicketGrantingServer(SocketServer.BaseRequestHandler):
 
 
 if __name__ == "__main__":
-	server = SocketServer.TCPServer(("localhost", 8082), TicketGrantingServer)
+	keys = read_config("./config/tgs.json")
+	TGS_key = keys['tgs_key']
+	SS_key = keys['ss_key']
+
+	config = (read_config("./config/servers.json"))['servers']['tgs']
+	server = TCPServer((config[0], int(config[1])), TicketGrantingServer)
 
 	try:
 		print "Ticket granting server running"

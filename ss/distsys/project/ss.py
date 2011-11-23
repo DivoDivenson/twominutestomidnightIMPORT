@@ -4,8 +4,9 @@ import SocketServer
 import hashlib
 from crypto import *
 import json
+from misc import *
 
-key = "anotherkey"
+key = ""
 
 msg_size = 1024
 
@@ -56,8 +57,11 @@ class ServicesServer(SocketServer.BaseRequestHandler):
 
 
 if __name__ == "__main__":
-	server = SocketServer.TCPServer(("localhost", 8083), ServicesServer)
-
+	key = (read_config("./config/ss.json"))['key']
+	
+	config = (read_config("./config/servers.json"))['servers']['ss']
+	server = TCPServer((config[0], int(config[1])), ServicesServer)
+	
 	try:
 		print "Services server running"
 		server.serve_forever()

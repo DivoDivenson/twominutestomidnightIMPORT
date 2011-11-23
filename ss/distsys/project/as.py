@@ -44,7 +44,6 @@ class AuthenticationServer(SocketServer.BaseRequestHandler):
 
 	def handle(self):
 		#for the moment presume all message are under 1024
-		print TGS_key
 		user = self.request.recv(msg_size)
 	
 		client_key = self.lookup(user)
@@ -82,7 +81,10 @@ if __name__ == "__main__":
 	users = (read_config("./config/users.json"))['users']
 	TGS_key = (read_config("./config/as.json"))['key']
 
-	server = SocketServer.TCPServer(("localhost", 8081), AuthenticationServer)
+	config = (read_config("./config/servers.json"))['servers']['as']
+
+
+	server = TCPServer((config[0], int(config[1])), AuthenticationServer)
 
 	try:
 		print "Authentication Server Running"
