@@ -63,7 +63,8 @@ def auth_ss(tgs_ticket, client_ss, time_stamp):
 		authenticator = build_authenticator(time_stamp)
 		authenticator = encrypt(authenticator, client_ss)
 
-		message = json.dumps({"ticket" : tgs_ticket, "auth" : authenticator})
+		#Service servers have arequest type because they can do more than one thing
+		message = json.dumps({"type" : "auth", "ticket" : tgs_ticket, "auth" : authenticator})
 		sock.send(message)
 
 		response = ""
