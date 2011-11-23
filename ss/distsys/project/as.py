@@ -12,7 +12,6 @@ users = {'divines' : "pass"}
 #Secret key
 TGS_key = "thisbeakey"
 
-#client_TGS_key = "anotherkey"
 
 msg_size = 1024
 
