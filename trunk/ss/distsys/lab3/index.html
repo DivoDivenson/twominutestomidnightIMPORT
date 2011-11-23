@@ -3,17 +3,23 @@
 <script type="text/javascript">
 var access = 279803412063830;
 
+//Takes in json data and inserts 'name' into the page
 function show_name(data){
 	document.getElementById('name').innerHTML = data["name"];
 }
 
+
+
 function init(){
+	//Get token if we haven't already
 	if(location.hash == ""){
 		window.location ="http://www.facebook.com/dialog/oauth?client_id=279803412063830&redirect_uri=http://divines.netsoc.ie/&response_type=token";
 
 	}else{
+		//Otherwise contact graph API and get user info.
 		var token = location.hash.split('#access_token=')[1];
 		token = token.split('&')[0];
+		//Tie url to a new script element and insert it into the page. Bit of a funky way of doing things
 		var url="https://graph.facebook.com/me?access_token="+token+"&callback=show_name";
 		var script = document.createElement("script");
 		script.src = url;
