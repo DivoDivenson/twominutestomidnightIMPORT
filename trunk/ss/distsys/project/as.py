@@ -4,13 +4,16 @@ import SocketServer
 import hashlib
 from crypto import *
 import json
+from misc import *
 
 #Put all this stuff in files later
-users = {'divines' : "pass"}
+#users = {'divines' : "pass"}
 
 #Make these complicated later
 #Secret key
-TGS_key = "thisbeakey"
+#TGS_key = "thisbeakey"
+TGS_key = ""
+users = ""
 
 
 msg_size = 1024
@@ -41,6 +44,7 @@ class AuthenticationServer(SocketServer.BaseRequestHandler):
 
 	def handle(self):
 		#for the moment presume all message are under 1024
+		print TGS_key
 		user = self.request.recv(msg_size)
 	
 		client_key = self.lookup(user)
@@ -75,6 +79,9 @@ class AuthenticationServer(SocketServer.BaseRequestHandler):
 
 
 if __name__ == "__main__":
+	users = (read_config("./config/users.json"))['users']
+	TGS_key = (read_config("./config/as.json"))['key']
+
 	server = SocketServer.TCPServer(("localhost", 8081), AuthenticationServer)
 
 	try:
