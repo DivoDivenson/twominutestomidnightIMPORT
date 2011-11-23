@@ -8,6 +8,8 @@ from misc import *
 
 key = ""
 
+users = []
+
 msg_size = 1024
 
 
@@ -21,7 +23,15 @@ class ServicesServer(SocketServer.BaseRequestHandler):
 	def handle(self):
 		data = self.request.recv(msg_size)
 		data = json.loads(data, strict=False)
+		if(data['type'] == "auth"):
+			self.handle_auth(data)
+		#elif(data['type'] == "lookup"):
 
+
+		
+
+	#Takes in a bunch of json
+	def handle_auth(self, data):
 		tgs_ticket = data['ticket']
 		tgs_ticket = decrypt(tgs_ticket, key)
 		tgs_ticket = json.loads(tgs_ticket, strict=False)
@@ -35,10 +45,13 @@ class ServicesServer(SocketServer.BaseRequestHandler):
 		authenticator = json.loads(authenticator, strict=False)
 
 		ss_user = authenticator['user']
-
 		#Verfiy that it's the user that contaced the TGS
 		if(tgs_user == ss_user):
-			#If users match, send back user timestamp encryptde with CLient_ss_key
+			#If users match, store them as authenticated and
+			#send back user timestamp encryptde with Client_ss_key
+			users.append({ss_user : client_ss_key})
+			print users
+
 			response = encrypt(authenticator['time'], client_ss_key)
 			response = json.dumps({"time" : response})
 		else:
@@ -47,6 +60,7 @@ class ServicesServer(SocketServer.BaseRequestHandler):
 
 		print("Sending response to client")
 		self.request.send(response)
+
 
 		
 
@@ -61,7 +75,7 @@ if __name__ == "__main__":
 	
 	config = (read_config("./config/servers.json"))['servers']['ss']
 	server = TCPServer((config[0], int(config[1])), ServicesServer)
-	
+
 	try:
 		print "Services server running"
 		server.serve_forever()
