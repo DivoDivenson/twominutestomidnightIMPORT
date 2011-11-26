@@ -4,12 +4,13 @@ import sys
 from crypto import *
 import json
 import time
+from misc import *
 
+#READ THIS IN LATER
 HOST, AS_PORT = "localhost", 8081
 TGS_PORT = 8082
 SS_PORT =  8083
 
-msg_size = 1024
 
 USER = "divines"
 PASS = "thisisapassword"
