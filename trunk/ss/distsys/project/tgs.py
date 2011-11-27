@@ -11,7 +11,8 @@ msg_size = 1024
 #No need for service ID as we only have one
 
 TGS_key = ""
-SS_key = ""
+FS_key = ""
+DS_key = ""
 
 
 class TCPServer(SocketServer.TCPServer):
@@ -25,6 +26,11 @@ class TicketGrantingServer(SocketServer.BaseRequestHandler):
 		
 		data = json.loads(data, strict=False)
 		#Decrypt AS private payload and get client_TGS_key
+		if(data['request'] == "ds"):
+			service_key = DS_key
+		elif(data['request'] == "fs"):
+			service_key = FS_key
+
 		ticket = decrypt(data['ticket'], TGS_key)
 		ticket = json.loads(ticket, strict=False)
 		client_TGS_key = ticket['client_tgs']
@@ -33,9 +39,9 @@ class TicketGrantingServer(SocketServer.BaseRequestHandler):
 		authenticator = json.loads(authenticator, strict=False)
 
 		#Client-SS key is sha1 of username encrypted with AES against the SS key
-		client_SS_key = encrypt(genKey(authenticator['user']), SS_key)
+		client_SS_key = encrypt(genKey(authenticator['user']), service_key)
 		ticket = json.dumps({"user" : authenticator['user'], "address" : self.client_address[0], "client_ss" : client_SS_key} )
-		ticket = encrypt(ticket, SS_key);
+		ticket = encrypt(ticket, service_key);
 
 		#Not quite sure what the point of this part is
 		client_ss = json.dumps({"client_ss" : client_SS_key})
@@ -55,7 +61,8 @@ class TicketGrantingServer(SocketServer.BaseRequestHandler):
 if __name__ == "__main__":
 	keys = read_config("./config/tgs.json")
 	TGS_key = keys['tgs_key']
-	SS_key = keys['ss_key']
+	FS_key = keys['fs_key']
+	DS_key = keys['ds_key']
 
 	config = (read_config("./config/servers.json"))['servers']['tgs']
 	server = TCPServer((config[0], int(config[1])), TicketGrantingServer)

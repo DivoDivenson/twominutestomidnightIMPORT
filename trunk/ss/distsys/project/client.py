@@ -10,20 +10,41 @@ from misc import *
 #Tcp version
 class RemoteFile():
 
-	server =(read_config("./config/servers.json"))['servers']['ss']
+	#Only one directory server for the moment
+	ds_server = (read_config("./config/servers.json"))['servers']['ds']
 	open_file = ""
 	permission = ""
 
 	#user and client_ss_key
-	def __init__(self, user, auth_key):
-		self.key = auth_key
+	def __init__(self, user):
+		#self.fs_key = get_ss_key("fs")
+		self.ds_key = get_ss_key("ds")
 		self.user = user
+
+	#Query directory server to map filename
+	def map_filename(self, filename):
+		message = self.construct_message("map", self.ds_key, filename)
+		response = self.send_message(message, self.ds_server)
+		response = decrypt(response, self.ds_key)
+
+		return response
+
+
 
 	def open(self, filename, mode="r"):
 		self.open_file = filename
-		message = self.construct_message("lookup")
+		#first contact directory server and map the filename
+		print filename
+		filename = self.map_filename(filename)
+		print filename
+
+
+
+
+
+		'''message = self.construct_message("lookup")
 		response = self.send_message(message)
-		response = decrypt(response, self.key)
+		response = decrypt(response, self.fs_key)
 
 		if response == "file found":
 			self.permission = mode
@@ -35,35 +56,35 @@ class RemoteFile():
 			#create the file
 			message = self.construct_message("create")
 			response = self.send_message(message)
-			response = decrypt(response, self.key)
+			response = decrypt(response, self.fs_key)'''
 
 	#Extend for size and such later
 	def read(self, size=0):
 		message = self.construct_message("read")
 		response = self.send_message(message)
-		response = decrypt(response, self.key)
+		response = decrypt(response, self.fs_key)
 
 		return response
 
 	def write(self, data,):
 		message = self.construct_message("write", data)
 		response = self.send_message(message)
-		response = decrypt(response, self.key)	
+		response = decrypt(response, self.fs_key)	
 
 		return response
 
 	#Prehaps need to add an arguments field
-	def construct_message(self, request, args=""):
+	def construct_message(self, request, key, args=""):
 		payload = json.dumps({"type" : request, "file" : self.open_file, "args" : args})
-		payload = encrypt(payload, self.key)
+		payload = encrypt(payload, key)
 		message = json.dumps({"type" : "request", "user" : self.user, "message" : payload})
 		return message
 
 	#Open a connection to services server and return the response
-	def send_message(self, message):
+	def send_message(self, message, server):
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		try:
-			sock.connect((self.server[0], int(self.server[1])))
+			sock.connect((server[0], int(server[1])))
 			sock.send(message)
 			
 			response = ""
@@ -80,10 +101,9 @@ class RemoteFile():
 	
 
 if __name__ == "__main__":
-	service_key = get_ss_key()
 	user = "divines"
-	r_file = RemoteFile(user, service_key)
-	r_file.open("/home/divo/media/sata/College/twominutestomidnight/ss/distsys/project/test.txt", 'w')
+	r_file = RemoteFile(user)
+	r_file.open("/home/divo/vdrive/test.txt", 'w')
 	#print r_file.read()
-	r_file.write("test")
+	#r_file.write("test")
 
