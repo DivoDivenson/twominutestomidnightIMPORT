@@ -487,8 +487,10 @@ void mesh3DS::draw(){
     int face, numFaces, vertexIndex, texcoordIndex;
 	GLuint materialFaces; //GL_FRONT or GL_FRONT_AND_BACK
 
+	int count = 0;
 	std::map<std::string, std::vector<ushort> >::iterator materialsIter;
 	for(materialsIter=m_materialFaces.begin(); materialsIter!=m_materialFaces.end(); ++materialsIter){
+		printf("count %d\n", count++);
 		const material3DS& currentMaterial = m_parentModel->getMaterial(materialsIter->first);
 
 		// Bind texture map (if any)
@@ -592,6 +594,7 @@ void mesh3DS::draw(){
 		}
 
 		glPopAttrib(); // GL_LIGHTING_BIT
+
 	}
 }
 
@@ -605,6 +608,7 @@ void model3DS::draw(){
 
 		for(meshIter = m_meshes.begin(); meshIter != m_meshes.end(); meshIter++){
 			meshIter->draw();
+			break;
 		}
 	glPopMatrix();
 }

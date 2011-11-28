@@ -16,17 +16,56 @@ typedef struct tLicensePlateCharacterFeatures_tag {
 	char name[10];
 } tLicensePlateCharacterFeatures;
 
+
+CvSeq* connected_components( IplImage* source, IplImage* result )
+{
+	IplImage* binary_image = cvCreateImage( cvGetSize(source), 8, 1 );
+	cvConvertImage( source, binary_image );
+	CvMemStorage* storage = cvCreateMemStorage(0);
+	CvSeq* contours = 0;
+	cvThreshold( binary_image, binary_image, 1, 255, CV_THRESH_BINARY );
+	cvFindContours( binary_image, storage, &contours, sizeof(CvContour),	CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
+	if (result)
+	{
+		cvZero( result );
+		for(CvSeq* contour = contours ; contour != 0; contour = contour->h_next )
+		{
+			CvScalar color = CV_RGB( rand()&255, rand()&255, rand()&255 );
+			/* replace CV_FILLED with 1 to see the outlines */
+			cvDrawContours( result, contour, color, color, -1, CV_FILLED, 8 );
+		}
+	}
+	return contours;
+}
+
 void ident_number(IplImage * src, IplImage * dst){
 	//smooth image
+	IplImage * temp;
 	cvSmooth(src, dst);
 	//cvThreshold(src, dst, 40, 255, CV_THRESH_BINARY);
 	CvScalar c = cvAvg(dst);
 	float threshold = c.val[0];
-	cvThreshold(src, dst, threshold, 255, CV_THRESH_BINARY);
+	cvThreshold(src, dst, threshold-10, 255, CV_THRESH_BINARY);
+	temp = cvCloneImage(dst);
+	cvMorphologyEx(dst, temp, NULL, NULL, CV_MOP_OPEN, 1);
+	//cvMorphologyEx(temp, dst, NULL, NULL, CV_MOP_CLOSE, 1);
 
+
+
+	dst = cvCloneImage(temp);
+	//cvSetImageROI(temp, cvRect(10, 15, dst->width, dst->height));
+	connected_components(temp, dst);
 	//find the conturs
+
+
+
+	cvReleaseImage(&temp);
 	
 
+}
+//Blank everything outside of the ROI
+void blank_region( IplImage * img, CvRect roi){
+	;
 }
 
 int main( int argc, char** argv )
