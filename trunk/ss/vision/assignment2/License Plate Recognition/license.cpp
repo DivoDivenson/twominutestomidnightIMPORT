@@ -16,10 +16,24 @@ typedef struct tLicensePlateCharacterFeatures_tag {
 	char name[10];
 } tLicensePlateCharacterFeatures;
 
+void ident_number(IplImage * src, IplImage * dst){
+	//smooth image
+	cvSmooth(src, dst);
+	//cvThreshold(src, dst, 40, 255, CV_THRESH_BINARY);
+	CvScalar c = cvAvg(dst);
+	float threshold = c.val[0];
+	cvThreshold(src, dst, threshold, 255, CV_THRESH_BINARY);
+
+	//find the conturs
+	
+
+}
+
 int main( int argc, char** argv )
 {
 	int selected_image_num = 1;
 	IplImage* selected_image = NULL;
+	IplImage* result_image = NULL;
 	IplImage* sample_number_images[NUMBER_OF_KNOWN_CHARACTERS];
 	IplImage* images[NUM_IMAGES];
 	tLicensePlateCharacterFeatures known_object_features[NUMBER_OF_KNOWN_CHARACTERS];
@@ -52,9 +66,13 @@ int main( int argc, char** argv )
     
 	// Create display windows for images
     cvNamedWindow( "Original", 1 );
+    cvNamedWindow( "Result", 1);
+    cvMoveWindow( "Result", 200, 0);
+
 
 	// Create images to do the processing in.
 	selected_image = cvCloneImage( images[selected_image_num-1] );
+	result_image = cvCloneImage(selected_image);
 
 	// Setup mouse callback on the original image so that the user can see image values as they move the
 	// cursor over the image.
@@ -66,12 +84,15 @@ int main( int argc, char** argv )
 	do {
 		// Process image (i.e. setup and find the number of spoons)
 		cvCopyImage( images[selected_image_num-1], selected_image );
+		result_image = cvCloneImage(selected_image);
 
 		printf("\nProcessing Image %d:\n",selected_image_num);
+		ident_number(selected_image, result_image);
         cvShowImage( "Original", selected_image );
+        cvShowImage( "Result", result_image);
 
 		// Wait for user input
-        user_clicked_key = cvWaitKey(0);
+        user_clicked_key = (char) cvWaitKey(0);
 		if ((user_clicked_key >= '1') && (user_clicked_key <= '0'+NUM_IMAGES))
 		{
 			selected_image_num = user_clicked_key-'0';
