@@ -93,6 +93,13 @@ CvSeq* connected_components( IplImage* source, IplImage* result )
 	return contours;
 }
 
+int seq_len(CvSeq * sequence){
+	int result = 0;
+	for(CvSeq* contour = sequence; contour != 0; contour = contour->h_next){
+		result++;
+	}
+	return result;
+}
 //DO THIS
 feature_set analyse_contour(CvSeq * contour){
 	CvScalar color = CV_RGB( rand()&255, rand()&255, rand()&255 );
@@ -100,7 +107,18 @@ feature_set analyse_contour(CvSeq * contour){
 	IplImage * tempImage = cvCreateImage( cvSize(400, 400), 8, 1);
 	cvZero(tempImage);
 	cvDrawContours( tempImage, contour, color, color, -1, CV_FILLED, 8);
+
+	//First find the number of holes
+	invert_image(tempImage);
+	CvSeq * holes = connected_components(tempImage, tempImage);
+	int no_holes = seq_len(holes) -1 ; //-1 to account for background
+
+	
+
+	printf("No elemnts %d\n", no_holes);
 	cvShowImage( "Debug", tempImage);
+
+//old ---------------------------------
 	float arc_length = cvArcLength(contour);
 	float area = cvContourArea(contour);
 	feature_set result = {area, arc_length, (area / arc_length)};
@@ -113,9 +131,10 @@ feature_set analyse_contour(CvSeq * contour){
 //Pass in a sequence of components and classify them
 void ident_numbers(CvSeq * components, feature_set * known){
 	//smooth image
-	for(CvSeq * contour = components; contour != 0; contour = contour->h_next){
+	CvSeq * contour = components->h_next->h_next->h_next->h_next;
+	//for(CvSeq * contour = components; contour != 0; contour = contour->h_next){
 		print_feature(analyse_contour(contour));
-	}
+	//}
 
 }
 //Blank everything outside of the ROI
