@@ -17,6 +17,17 @@ typedef struct tLicensePlateCharacterFeatures_tag {
 	char name[10];
 } tLicensePlateCharacterFeatures;
 
+typedef struct feature_set{
+	double area;
+	double arc_length;
+	double ratio;
+
+} feature_set;
+
+void print_feature(feature_set set){
+	printf("Area : %f, Arc: %f, Ratio: %f\n", set.area, set.arc_length,set.ratio);
+}
+
 //Simple invert
 void invert_image( IplImage* source)
 {
@@ -82,41 +93,29 @@ CvSeq* connected_components( IplImage* source, IplImage* result )
 	return contours;
 }
 
-void analyse_contour(CvSeq * contour){
+//DO THIS
+feature_set analyse_contour(CvSeq * contour){
 	CvScalar color = CV_RGB( rand()&255, rand()&255, rand()&255 );
 	//40 x 40 should be plenty big for the moment
 	IplImage * tempImage = cvCreateImage( cvSize(400, 400), 8, 1);
 	cvZero(tempImage);
 	cvDrawContours( tempImage, contour, color, color, -1, CV_FILLED, 8);
-	//cvShowImage( "Result", tempImage);
-	printf("%d\n", contour->delta_elems);
+	cvShowImage( "Debug", tempImage);
+	float arc_length = cvArcLength(contour);
+	float area = cvContourArea(contour);
+	feature_set result = {area, arc_length, (area / arc_length)};
+	return result;
 
 	cvReleaseImage(&tempImage);
 
 }
 
-void ident_number(IplImage * src, IplImage * dst){
+//Pass in a sequence of components and classify them
+void ident_numbers(CvSeq * components, feature_set * known){
 	//smooth image
-	IplImage * temp;
-	cvSmooth(src, dst);
-	//cvThreshold(src, dst, 40, 255, CV_THRESH_BINARY);
-	CvScalar c = cvAvg(dst);
-	float threshold = c.val[0];
-	cvThreshold(src, dst, threshold-10, 255, CV_THRESH_BINARY);
-	temp = cvCloneImage(dst);
-	cvMorphologyEx(dst, temp, NULL, NULL, CV_MOP_OPEN, 1);
-	//cvMorphologyEx(temp, dst, NULL, NULL, CV_MOP_CLOSE, 1);
-
-
-
-	dst = cvCloneImage(temp);
-	//cvSetImageROI(temp, cvRect(10, 15, dst->width, dst->height));
-	//find the conturs
-
-
-
-	cvReleaseImage(&temp);
-	
+	for(CvSeq * contour = components; contour != 0; contour = contour->h_next){
+		print_feature(analyse_contour(contour));
+	}
 
 }
 //Blank everything outside of the ROI
@@ -132,17 +131,28 @@ int main( int argc, char** argv )
 	IplImage* bin_image = NULL;
 	IplImage* sample_number_images[NUMBER_OF_KNOWN_CHARACTERS];
 	IplImage* images[NUM_IMAGES];
+
 	tLicensePlateCharacterFeatures known_object_features[NUMBER_OF_KNOWN_CHARACTERS];
 	tLicensePlateCharacterFeatures unknown_object_features[100];
+
+	feature_set known_number[NUMBER_OF_KNOWN_CHARACTERS];
+
 	CvSeq * components = NULL;
 
-	// Load all the sample images and determine feature values for these characters.
+	// Load all the real number sample images and determine feature values for these characters.
 	for (int character=0; (character<NUMBER_OF_KNOWN_CHARACTERS); character++)
 	{
 		char filename[100];
-		sprintf(filename,"./%d.jpg",character);
+		sprintf(filename,"./real_numbers/%d.jpg",character);
 		if( (sample_number_images[character] = cvLoadImage(filename,-1)) == 0 )
 			return 0;
+		//known_number[character] = analyse_contour();
+		sample_number_images[character] = binary_image(sample_number_images[character]);
+		invert_image(sample_number_images[character]);
+		components = connected_components(sample_number_images[character], sample_number_images[character]);
+		known_number[character] =  analyse_contour(components);
+		print_feature(known_number[character]);
+		//cvShowImage( "Debug", sample_number_images[character]);
 		sprintf(known_object_features[character].name,"%d",character);
 	}
 
@@ -164,6 +174,7 @@ int main( int argc, char** argv )
 	// Create display windows for images
     cvNamedWindow( "Original", 1 );
     cvNamedWindow( "Result", 1);
+    cvNamedWindow( "Debug", 1);
     cvMoveWindow( "Result", 200, 0);
 
 
@@ -194,6 +205,7 @@ int main( int argc, char** argv )
 		//ident_number(selected_image, result_image);
 		components = connected_components( bin_image, result_image);
 		//analyse_contour(components->h_next->h_next->h_next->h_next->h_next);
+		ident_numbers(components, known_number);
         cvShowImage( "Result", result_image);
 
 		// Wait for user input
