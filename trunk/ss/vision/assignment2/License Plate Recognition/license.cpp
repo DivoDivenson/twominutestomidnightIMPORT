@@ -113,8 +113,10 @@ feature_set analyse_contour(CvSeq * contour){
 	CvSeq * holes = connected_components(tempImage, tempImage);
 	int no_holes = seq_len(holes) -1 ; //-1 to account for background
 
-	
+	//Need to get convex hull area / bouding box area
+	//Wait, surly covex area is just CvContourArea -- LOOK AT THIS
 
+	//CvArr can be an image
 	printf("No elemnts %d\n", no_holes);
 	cvShowImage( "Debug", tempImage);
 
