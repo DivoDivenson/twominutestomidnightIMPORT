@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../utilities.h"
+#include <float.h>
+#include <math.h>
 
 #define NUM_IMAGES 9
 #define NUMBER_OF_KNOWN_CHARACTERS 10
@@ -18,14 +20,16 @@ typedef struct tLicensePlateCharacterFeatures_tag {
 } tLicensePlateCharacterFeatures;
 
 typedef struct feature_set{
-	double area;
-	double arc_length;
-	double ratio;
+	int no_holes;
+	double hull_to_box;
+	//This is just for drawing the number on the image
+	CvPoint2D32f center;
+
 
 } feature_set;
 
 void print_feature(feature_set set){
-	printf("Area : %f, Arc: %f, Ratio: %f\n", set.area, set.arc_length,set.ratio);
+	printf("No Holes : %d, Hull to Box: %f\n", set.no_holes, set.hull_to_box);
 }
 
 //Simple invert
@@ -110,20 +114,35 @@ feature_set analyse_contour(CvSeq * contour){
 
 	//First find the number of holes
 	invert_image(tempImage);
-	CvSeq * holes = connected_components(tempImage, tempImage);
-	int no_holes = seq_len(holes) -1 ; //-1 to account for background
+	//sequence, ambiguous name as it's reused for several things
+	CvSeq * sequence = connected_components(tempImage, tempImage);
+	int no_holes = seq_len(sequence) -1 ; //-1 to account for background
 
-	//Need to get convex hull area / bouding box area
-	//Wait, surly covex area is just CvContourArea -- LOOK AT THIS
+	//Bounding box area / hull area.
+	CvRect rect = cvBoundingRect(contour);
+	//this really does not seem right, but returns similar results
+	//Area if hull is better than just area of the character. Less effected by noise and 
+	//the inside of the character being borked
+	sequence = cvConvexHull2(contour, 0, CV_CLOCKWISE, 1);
+	float hull_area = cvContourArea(sequence);
+	float hull_to_box = hull_area / (rect.width * rect.height);
+
+	CvPoint2D32f center;
+	float radius;
+	//Because I'm using CvSeq to store the numbers I need a way of pulling out where they actualy are
+	//in order to draw in top of them. This solytion is less than ideal from a performance point of view
+	//but works well
+	cvMinEnclosingCircle(contour, &center, &radius);
+
 
 	//CvArr can be an image
-	printf("No elemnts %d\n", no_holes);
+	//printf("No elemnts %d\n", no_holes);
 	cvShowImage( "Debug", tempImage);
 
 //old ---------------------------------
-	float arc_length = cvArcLength(contour);
-	float area = cvContourArea(contour);
-	feature_set result = {area, arc_length, (area / arc_length)};
+	//float arc_length = cvArcLength(contour);
+	//float area = cvContourArea(contour);
+	feature_set result = {no_holes, hull_to_box, center};
 	return result;
 
 	cvReleaseImage(&tempImage);
@@ -131,12 +150,31 @@ feature_set analyse_contour(CvSeq * contour){
 }
 
 //Pass in a sequence of components and classify them
-void ident_numbers(CvSeq * components, feature_set * known){
+void ident_numbers(CvSeq * components, feature_set * known, IplImage * result){
 	//smooth image
 	CvSeq * contour = components->h_next->h_next->h_next->h_next;
-	//for(CvSeq * contour = components; contour != 0; contour = contour->h_next){
-		print_feature(analyse_contour(contour));
-	//}
+	feature_set temp;
+	int i;
+	float diff = FLT_MAX;
+	int number = 0;
+	for(CvSeq * contour = components; contour != 0; contour = contour->h_next){
+		temp = analyse_contour(contour);
+		print_feature(temp);
+		//write_text_on_image(result, temp.center.y, temp.center.x, "a");
+		for(i = 0; i < NUMBER_OF_KNOWN_CHARACTERS; i++){
+			if(known[i].no_holes == temp.no_holes){
+				float prox = fabs(known[i].hull_to_box - temp.hull_to_box);
+				if(prox < diff){
+					diff = prox;
+					number = i;
+				}
+			}
+		
+		}
+		char buffer[1];
+		sprintf(buffer, "%d", number);
+		write_text_on_image(result, temp.center.y, temp.center.x, buffer);
+	}
 
 }
 //Blank everything outside of the ROI
@@ -172,8 +210,8 @@ int main( int argc, char** argv )
 		invert_image(sample_number_images[character]);
 		components = connected_components(sample_number_images[character], sample_number_images[character]);
 		known_number[character] =  analyse_contour(components);
-		print_feature(known_number[character]);
 		//cvShowImage( "Debug", sample_number_images[character]);
+		print_feature(known_number[character]);
 		sprintf(known_object_features[character].name,"%d",character);
 	}
 
@@ -218,7 +256,6 @@ int main( int argc, char** argv )
 		bin_image = cvCloneImage(selected_image);
 		result_image = cvCloneImage(selected_image);
 
-		cvShowImage( "Original", selected_image );
 		printf("\nProcessing Image %d:\n",selected_image_num);
 		bin_image = binary_image(selected_image);
 		invert_image(bin_image);
@@ -226,8 +263,10 @@ int main( int argc, char** argv )
 		//ident_number(selected_image, result_image);
 		components = connected_components( bin_image, result_image);
 		//analyse_contour(components->h_next->h_next->h_next->h_next->h_next);
-		ident_numbers(components, known_number);
+		ident_numbers(components, known_number, selected_image);
         cvShowImage( "Result", result_image);
+        cvShowImage( "Original", selected_image );
+
 
 		// Wait for user input
         user_clicked_key = (char) cvWaitKey(0);
