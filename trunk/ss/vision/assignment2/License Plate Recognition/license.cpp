@@ -157,6 +157,8 @@ void ident_numbers(CvSeq * components, feature_set * known, IplImage * result){
 	int i;
 	float diff = FLT_MAX;
 	int number = 0;
+	CvScalar color = CV_RGB( rand()&255, rand()&255, rand()&255 );
+
 	for(CvSeq * contour = components; contour != 0; contour = contour->h_next){
 		temp = analyse_contour(contour);
 		print_feature(temp);
@@ -173,6 +175,7 @@ void ident_numbers(CvSeq * components, feature_set * known, IplImage * result){
 		}
 		char buffer[1];
 		sprintf(buffer, "%d", number);
+		cvDrawContours( result, contour, color, color, CV_FILLED, 8 );
 		write_text_on_image(result, temp.center.y, temp.center.x, buffer);
 	}
 
