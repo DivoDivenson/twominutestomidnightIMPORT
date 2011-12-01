@@ -83,6 +83,8 @@ CvSeq* connected_components( IplImage* source, IplImage* result )
 	return contours;
 }
 
+
+
 //Tested, works 100%. That was a lie
 void invert_image( IplImage* source, IplImage* result )
 {

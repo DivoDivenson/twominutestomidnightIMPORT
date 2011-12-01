@@ -32,6 +32,15 @@ void print_feature(feature_set set){
 	printf("No Holes : %d, Hull to Box: %f\n", set.no_holes, set.hull_to_box);
 }
 
+IplImage * crop_image(IplImage * src){
+	IplImage * temp;
+	cvSetImageROI(src, cvRect(20,12,250,250));
+	temp = cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
+	cvCopy(src, temp, NULL);
+	cvResetImageROI(src);
+	return temp;
+}
+
 //Simple invert
 void invert_image( IplImage* source)
 {
@@ -174,8 +183,9 @@ void ident_numbers(CvSeq * components, feature_set * known, IplImage * result){
 		
 		}
 		char buffer[1];
-		sprintf(buffer, "%d", number);
-		cvDrawContours( result, contour, color, color, CV_FILLED, 8 );
+		//sprintf(buffer, "%d", number);
+		sprintf(buffer, "%d", temp.no_holes);
+		//cvDrawContours( result, contour, color, color, CV_FILLED, 8 );
 		write_text_on_image(result, temp.center.y, temp.center.x, buffer);
 	}
 
@@ -255,7 +265,9 @@ int main( int argc, char** argv )
 	int user_clicked_key = 0;
 	do {
 		// Process image (i.e. setup and find the number of spoons)
-		cvCopyImage( images[selected_image_num-1], selected_image );
+		//cvCopyImage( images[selected_image_num-1], selected_image );
+		selected_image = cvCloneImage(images[selected_image_num-1]);
+		selected_image = crop_image(selected_image);
 		bin_image = cvCloneImage(selected_image);
 		result_image = cvCloneImage(selected_image);
 
