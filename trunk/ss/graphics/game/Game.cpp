@@ -8,6 +8,8 @@
 
 #define PI 3.141592654f.0
 
+#define SPEED 1
+
 model3DS *teddyModel;
 model3DS * table;
 model3DS * carpark; //My model
@@ -34,6 +36,8 @@ int camX, camY;
 //
 float xpos = 0, ypos = 0, zpos = 0, xrot = 0, yrot = 0, angle=0.0;
 float lastx, lasty;
+
+float cRadius = 10.0f;
 
 
 
@@ -123,6 +127,7 @@ void renderScene(){
     glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	
+	enable();
 
 
 
@@ -130,18 +135,32 @@ void renderScene(){
 	// (Camera at (0,0,5) looking down the negative Z-axis)
 	//gluLookAt(0,0,cameraZ,  camX,camY,-1,  0,1,0);
 	//gluLookAt(xpos,ypos,zpos,  xrot + 10,yrot + 10,-1,  0,1,0);
-	camera();
+	//camera();
 
-	enable();
+	//Camera for the object to follow
+	glDisable(GL_TEXTURE_2D);
+	glEnable (GL_COLOR_MATERIAL);
+
+	glTranslatef(0.0f, -2.0f, -cRadius);
+	glRotatef(xrot, 1.0f, 0.0f, 0.0f);
+
+	glColor3f(1.0f, 1.0f, 1.0f);
+	car->draw();
+	//glutSolidCube(2);
+
+	glRotatef(yrot,0.0,1.0,0.0);  //rotate our camera on the y-axis (up and down)
+    glTranslatef(-xpos,2.0f,-zpos); //translate the screen to the position of our camera
+
+    glDisable(GL_COLOR_MATERIAL);
+    glEnable(GL_TEXTURE_2D);
+
 
 
  
-    glPushMatrix();
     //glutSolidCube(2);
-    glTranslatef(0.0,0.0,-600.0);
+    //glTranslatef(0.0,0.0,-600.0);
     carpark->draw();
 
-    glPopMatrix();
 
     /*glPushMatrix();
 
@@ -213,9 +232,9 @@ void keypress(unsigned char key, int x, int y){
     float xrotrad, yrotrad;
     yrotrad = (yrot / 180 * 3.141592654f);
     xrotrad = (xrot / 180 * 3.141592654f); 
-    xpos += float(sin(yrotrad)) ;
-    zpos -= float(cos(yrotrad)) ;
-    ypos -= float(sin(xrotrad)) ;
+    xpos += float(sin(yrotrad) * SPEED);
+    zpos -= float(cos(yrotrad) * SPEED);
+    ypos -= float(sin(xrotrad) * SPEED);
     }
 
     if (key=='s')
@@ -223,21 +242,25 @@ void keypress(unsigned char key, int x, int y){
     float xrotrad, yrotrad;
     yrotrad = (yrot / 180 * 3.141592654f);
     xrotrad = (xrot / 180 * 3.141592654f); 
-    xpos -= float(sin(yrotrad));
-    zpos += float(cos(yrotrad)) ;
-    ypos += float(sin(xrotrad));
+    xpos -= float(sin(yrotrad) * SPEED);
+    zpos += float(cos(yrotrad) * SPEED) ;
+    ypos += float(sin(xrotrad) * SPEED);
     }
 
     if (key=='d')
     {
-    yrot += 1;
-    if (yrot >360) yrot -= 360;
+    	float yrotrad;
+		yrotrad = (yrot / 180 * 3.141592654f);
+		xpos += float(cos(yrotrad)) * SPEED;
+		zpos += float(sin(yrotrad)) * SPEED;
     }
 
     if (key=='a')
     {
-    yrot -= 1;
-    if (yrot < -360)yrot += 360;
+   		float yrotrad;
+		yrotrad = (yrot / 180 * 3.141592654f);
+		xpos -= float(cos(yrotrad)) * SPEED;
+		zpos -= float(sin(yrotrad)) * SPEED;
     }
     if (key==27)
     {
@@ -247,12 +270,12 @@ void keypress(unsigned char key, int x, int y){
 }
 
 void mouseMove(int x, int y){
-	/*int diffx=x-lastx; //check the difference between the current x and the last x position
+	int diffx=x-lastx; //check the difference between the current x and the last x position
 	int diffy=y-lasty; //check the difference between the current y and the last y position
 	lastx=x; //set lastx to the current x position
 	lasty=y; //set lasty to the current y position
 	xrot += (float) diffy; //set the xrot to xrot with the addition of the difference in the y position
-	yrot += (float) diffx;// set the xrot to yrot with the addition of the difference in the x position*/
+	yrot += (float) diffx;// set the xrot to yrot with the addition of the difference in the x position
 }
 
 void setupScene(){
@@ -278,8 +301,8 @@ void setupScene(){
 	//Load the teddy model
 	teddyModel = new model3DS("./teddy/teddy.3ds", 1);
 	table = new model3DS("./table/table.3ds", 50);
-	carpark = new model3DS("./carpark/carparkfinal.3ds", 30);
-	car = new model3DS("./car/car.3ds",5);
+	carpark = new model3DS("./carpark/carparkfinal.3ds", 1);
+	car = new model3DS("./car/car.3ds",0.05f);
       
       
 }
