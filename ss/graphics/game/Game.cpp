@@ -14,8 +14,6 @@ model3DS * carpark; //My model
 
 model3DS * car; //From the web
 
-model3DS * cube1;
-
 void setupScene();
 void updateScene();
 void renderScene();
@@ -33,7 +31,7 @@ int         windowId;
 
 int cameraZ;
 int camX, camY;
-
+//
 float xpos = 0, ypos = 0, zpos = 0, xrot = 0, yrot = 0, angle=0.0;
 float lastx, lasty;
 
@@ -101,6 +99,19 @@ void drawObjects(int move = 0, int scale = 1.0f){
 	glutSolidSphere(0.3f * scale, 20, 20);
 }
 
+void enable(){
+
+	glEnable (GL_DEPTH_TEST); //enable the depth testing
+    glEnable (GL_LIGHTING); //enable the lighting
+    glEnable (GL_LIGHT0); //enable LIGHT0, our Diffuse Light
+    glShadeModel (GL_SMOOTH); //set the shader to smooth shader
+	glEnable(GL_TEXTURE_2D);
+	//glColor3f(1.0,1.0,1.0);
+    glBindTexture(GL_TEXTURE_2D,textureId);
+    
+
+}
+
 
 void renderScene(){
         
@@ -121,36 +132,43 @@ void renderScene(){
 	//gluLookAt(xpos,ypos,zpos,  xrot + 10,yrot + 10,-1,  0,1,0);
 	camera();
 
+	enable();
 
-    // Draw textured tetrahedron
-	glEnable(GL_TEXTURE_2D);
-	glColor3f(1.0,1.0,1.0);
-    glBindTexture(GL_TEXTURE_2D,textureId);
 
+ 
     glPushMatrix();
+    //glutSolidCube(2);
+    glTranslatef(0.0,0.0,-600.0);
+    carpark->draw();
+
+    glPopMatrix();
+
+    /*glPushMatrix();
 
 	glTranslatef(0.0,0.0,-600.0);
-	glRotatef(-1*tetrahedronAngle/4.f,0,1,0);
+	//glRotatef(-1*tetrahedronAngle/4.f,0,1,0);
     //glRotatef(-1*tetrahedronAngle/3.f,1,0,0);
     //glRotatef(-1*tetrahedronAngle/2.f,0,0,1);	
 
 	//DrawTetrahedron();
 	//teddyModel->draw();
-	cube1->draw();
 	//table->draw();
 	//carpark->draw();
 	
+	glPushMatrix();
 	
+	glPopMatrix();
+	glEnable(GL_TEXTURE_2D);
 
 	
-	//glTranslatef(-1000.0, -40.0, 250);
-	//glRotatef(90.0, 0.0, 1.0, 0.0);
+	glTranslatef(-1000.0, -40.0, 250);
+	glRotatef(90.0, 0.0, 1.0, 0.0);
 
-	//car->draw();
+	car->draw();
 
 
     glDisable(GL_TEXTURE_2D);
-	glPopMatrix();
+	glPopMatrix();*/
    
  
     // Swap double buffer for flicker-free animation
@@ -178,71 +196,63 @@ void updateScene(){
 
 void keypress(unsigned char key, int x, int y){
 	
-	// Test if user pressed ESCAPE (ascii 27)
-	// If so, exit the program
-	if(tetrahedronAngle >= 360){
-		//tetrahedronAngle = 0;
-	}
+	   if (key=='q')
+    {
+    xrot += 1;
+    if (xrot >360) xrot -= 360;
+    }
 
-	//printf("%d %d\n", cameraZ, key);
-    if(key==27){
-		exitScene();
-	//Forward
-	}
+    if (key=='z')
+    {
+    xrot -= 1;
+    if (xrot < -360) xrot += 360;
+    }
 
-	if(key=='w'){
-	/*float xrotrad, yrotrad;
+    if (key=='w')
+    {
+    float xrotrad, yrotrad;
     yrotrad = (yrot / 180 * 3.141592654f);
     xrotrad = (xrot / 180 * 3.141592654f); 
-    xpos += float(sin(yrotrad));
-    zpos -= float(cos(yrotrad))+10;
-    ypos -= float(sin(xrotrad));*/
-	//Backward
-	zpos -= 10;
-	}
+    xpos += float(sin(yrotrad)) ;
+    zpos -= float(cos(yrotrad)) ;
+    ypos -= float(sin(xrotrad)) ;
+    }
 
-	if(key =='s'){
-	/*float xrotrad, yrotrad;
+    if (key=='s')
+    {
+    float xrotrad, yrotrad;
     yrotrad = (yrot / 180 * 3.141592654f);
     xrotrad = (xrot / 180 * 3.141592654f); 
     xpos -= float(sin(yrotrad));
-    zpos += float(cos(yrotrad))+10;
-    ypos += float(sin(xrotrad));*/
-    zpos += 10;
-	}
-
-	if(key=='d')
-    {
-    /*float yrotrad;
-	yrotrad = (yrot / 180 * 3.141592654f);
-	xpos += float(cos(yrotrad)) * 0.2;
-	zpos += float(sin(yrotrad)) * 0.2;
-	*/
-	xpos += 10;
+    zpos += float(cos(yrotrad)) ;
+    ypos += float(sin(xrotrad));
     }
 
-    if(key=='a')
+    if (key=='d')
     {
-   	/*float yrotrad;
-	yrotrad = (yrot / 180 * 3.141592654f);
-	xpos -= float(cos(yrotrad)) * 0.2;
-	zpos -= float(sin(yrotrad)) * 0.2;
-	*/
-	xpos -= 10;
+    yrot += 1;
+    if (yrot >360) yrot -= 360;
     }
-	
 
-	// Other possible keypresses go here
-	//if(key == 'a'){...}
+    if (key=='a')
+    {
+    yrot -= 1;
+    if (yrot < -360)yrot += 360;
+    }
+    if (key==27)
+    {
+    exit(0);
+    }
+
 }
 
 void mouseMove(int x, int y){
-	int diffx=x-lastx; //check the difference between the current x and the last x position
+	/*int diffx=x-lastx; //check the difference between the current x and the last x position
 	int diffy=y-lasty; //check the difference between the current y and the last y position
 	lastx=x; //set lastx to the current x position
 	lasty=y; //set lasty to the current y position
 	xrot += (float) diffy; //set the xrot to xrot with the addition of the difference in the y position
-	yrot += (float) diffx;// set the xrot to yrot with the addition of the difference in the x position
+	yrot += (float) diffx;// set the xrot to yrot with the addition of the difference in the x position*/
 }
 
 void setupScene(){
@@ -266,11 +276,11 @@ void setupScene(){
 	glEnable(GL_DEPTH_TEST);
 
 	//Load the teddy model
-	cube1 = new model3DS("./cube/cube1.3ds", 50);
 	teddyModel = new model3DS("./teddy/teddy.3ds", 1);
 	table = new model3DS("./table/table.3ds", 50);
 	carpark = new model3DS("./carpark/carparkfinal.3ds", 30);
 	car = new model3DS("./car/car.3ds",5);
+      
       
 }
 
