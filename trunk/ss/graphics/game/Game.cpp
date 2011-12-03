@@ -5,8 +5,9 @@
 #include <sys/time.h>
 //#include <gl/glu.h>		// for gluPerspective & gluLookAt
 #include "model3DS.h" // 3DS model support
+#include "shot.h"
 
-#define PI 3.141592654f.0
+#define PI M_PI.0
 
 #define SPEED 1
 
@@ -15,6 +16,8 @@ model3DS * table;
 model3DS * carpark; //My model
 
 model3DS * car; //From the web
+
+shot * test_shot;
 
 void setupScene();
 void updateScene();
@@ -146,9 +149,11 @@ void renderScene(){
 
 	glColor3f(1.0f, 1.0f, 1.0f);
 	car->draw();
+    //Third person object goes here
 	//glutSolidCube(2);
 
-	glRotatef(yrot,0.0,1.0,0.0);  //rotate our camera on the y-axis (up and down)
+	glRotatef(yrot,0.0,1.0,0.0);  //rotate our camera on the y-axis
+
     glTranslatef(-xpos,2.0f,-zpos); //translate the screen to the position of our camera
 
     glDisable(GL_COLOR_MATERIAL);
@@ -160,6 +165,9 @@ void renderScene(){
     //glutSolidCube(2);
     //glTranslatef(0.0,0.0,-600.0);
     carpark->draw();
+    test_shot->draw();
+
+
 
 
     /*glPushMatrix();
@@ -213,6 +221,13 @@ void updateScene(){
 
 }
 
+
+void mouse_func(int button, int state, int x, int y){
+    if(button == GLUT_LEFT_BUTTON){
+        test_shot = new shot(xpos, -2.0f, zpos, yrot - 90);
+    }    
+}
+
 void keypress(unsigned char key, int x, int y){
 	
 	   if (key=='q')
@@ -230,8 +245,8 @@ void keypress(unsigned char key, int x, int y){
     if (key=='w')
     {
     float xrotrad, yrotrad;
-    yrotrad = (yrot / 180 * 3.141592654f);
-    xrotrad = (xrot / 180 * 3.141592654f); 
+    yrotrad = (yrot / 180 * M_PI);
+    xrotrad = (xrot / 180 * M_PI); 
     xpos += float(sin(yrotrad) * SPEED);
     zpos -= float(cos(yrotrad) * SPEED);
     ypos -= float(sin(xrotrad) * SPEED);
@@ -240,8 +255,8 @@ void keypress(unsigned char key, int x, int y){
     if (key=='s')
     {
     float xrotrad, yrotrad;
-    yrotrad = (yrot / 180 * 3.141592654f);
-    xrotrad = (xrot / 180 * 3.141592654f); 
+    yrotrad = (yrot / 180 * M_PI);
+    xrotrad = (xrot / 180 * M_PI); 
     xpos -= float(sin(yrotrad) * SPEED);
     zpos += float(cos(yrotrad) * SPEED) ;
     ypos += float(sin(xrotrad) * SPEED);
@@ -250,7 +265,7 @@ void keypress(unsigned char key, int x, int y){
     if (key=='d')
     {
     	float yrotrad;
-		yrotrad = (yrot / 180 * 3.141592654f);
+		yrotrad = (yrot / 180 * M_PI);
 		xpos += float(cos(yrotrad)) * SPEED;
 		zpos += float(sin(yrotrad)) * SPEED;
     }
@@ -258,7 +273,7 @@ void keypress(unsigned char key, int x, int y){
     if (key=='a')
     {
    		float yrotrad;
-		yrotrad = (yrot / 180 * 3.141592654f);
+		yrotrad = (yrot / 180 * M_PI);
 		xpos -= float(cos(yrotrad)) * SPEED;
 		zpos -= float(sin(yrotrad)) * SPEED;
     }
@@ -270,12 +285,16 @@ void keypress(unsigned char key, int x, int y){
 }
 
 void mouseMove(int x, int y){
+    
 	int diffx=x-lastx; //check the difference between the current x and the last x position
 	int diffy=y-lasty; //check the difference between the current y and the last y position
 	lastx=x; //set lastx to the current x position
 	lasty=y; //set lasty to the current y position
 	xrot += (float) diffy; //set the xrot to xrot with the addition of the difference in the y position
 	yrot += (float) diffx;// set the xrot to yrot with the addition of the difference in the x position
+    if(yrot > 360.0f){
+        yrot -= 360.0f;
+    }
 }
 
 void setupScene(){
@@ -303,6 +322,7 @@ void setupScene(){
 	table = new model3DS("./table/table.3ds", 50);
 	carpark = new model3DS("./carpark/carparkfinal.3ds", 1);
 	car = new model3DS("./car/car.3ds",0.05f);
+    test_shot = new shot(0, 0, 0, 45);
       
       
 }
@@ -338,6 +358,8 @@ void setViewport(int width, int height) {
 
 }
 
+
+
 int main(int argc, char *argv[]){
         
     // Initialise OpenGL
@@ -346,7 +368,7 @@ int main(int argc, char *argv[]){
     // Set window position, size & create window
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowPosition(50,50);
-    glutInitWindowSize(640,480);
+    glutInitWindowSize(1280,1000);
 	windowId = glutCreateWindow("Lab 4: Loading a textured model");
     
     // Set GLUT callback functions
@@ -355,6 +377,7 @@ int main(int argc, char *argv[]){
     glutIdleFunc(updateScene);
     glutKeyboardFunc(keypress);
     glutPassiveMotionFunc(mouseMove);
+    glutMouseFunc(mouse_func);
 
     // Setup OpenGL state & scene resources (models, textures etc)
     setupScene();
