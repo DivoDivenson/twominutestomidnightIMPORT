@@ -1,7 +1,7 @@
 CC = g++
 CFLAGS = -Wall -g 
 PROG = output
-SRCS = Game.cpp model3DS.cpp textureTGA.cpp shot.cpp
+SRCS = game_basic.cpp model3DS.cpp textureTGA.cpp shot.cpp
 
 ifeq ($(shell uname),Darwin)
 	LIBS = -framework OpenGL -framework GLUT
