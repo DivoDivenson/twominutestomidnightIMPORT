@@ -11,7 +11,7 @@
 #define VARIATION_ALLOWED_IN_PIXEL_VALUES 30
 #define ALLOWED_MOTION_FOR_MOTION_FREE_IMAGE 1.0
 #define NUMBER_OF_POSTBOXES 6
-#define MINIMUM_GRADIENT_VALUE 5 //Is there something wrong with this value?
+#define MINIMUM_GRADIENT_VALUE 15 
 int PostboxLocations[NUMBER_OF_POSTBOXES][5] = {
                                 {   6,  73,  95, 5, 92 }, {   6,  73,  95, 105, 192 },
                                 { 105, 158, 193, 5, 92 }, { 105, 158, 193, 105, 192 },
@@ -191,7 +191,7 @@ void compute_vertical_edge_image(IplImage* input_image, IplImage* output_image)
 					}
 				}
 				unsigned char x = abs(sum);
-				if( x > MINIMUM_GRADIENT_VALUE + 10){
+				if( x > MINIMUM_GRADIENT_VALUE){
 					result_point[RED_CH] = abs(sum);
 				}
 			
@@ -355,7 +355,7 @@ int main( int argc, char** argv )
         
         // Wait for the delay between frames
         //Set to 500 just to speed up debugging
-        user_clicked_key = (char) cvWaitKey( 300 / fps );
+        user_clicked_key = (char) cvWaitKey( 1000 / fps );
 		if (user_clicked_key == ' ')
 		{
 			user_clicked_key = (char) cvWaitKey(0);

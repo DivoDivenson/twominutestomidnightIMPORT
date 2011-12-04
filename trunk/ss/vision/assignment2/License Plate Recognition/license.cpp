@@ -1,4 +1,4 @@
-#ifdef _CH_
+my#ifdef _CH_
 #pragma package <opencv>
 #endif
 
