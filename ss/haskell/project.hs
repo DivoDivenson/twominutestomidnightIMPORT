@@ -1,6 +1,7 @@
+--ghc --make ./project.hs 
 import System.Environment
 
-main = dp
+main = do
 	args <- getArgs
 	mapM_ (interactFile (unlines . map processIt . lines)) args
 
