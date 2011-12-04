@@ -7,18 +7,50 @@
 #include "GL/glu.h"
 #include "GL/glut.h"
 
+//#include "model3DS.h" //for later
+
+const int t_width = 50;
+const int t_length = 50;
+
+const float step_time = 0.01f;
 //A shot moves along the x and z axis at a given angle to the y-axis
 class hit_box{
 	private:
-		Vec3f v; //Velocity
-		Vec3f pos; //Position
-		float r; //Radius. Hit_sphere for the moment
-		
+		//model3DS * model;
+		float terrainScale;
+		float x0;
+		float z0;
+		float radius0; //Approx radius of model
+		float speed;
+		//The angle at which the guy is currently walking, in radians.  An angle
+		//of 0 indicates the positive x direction, while an angle of PI / 2
+		//indicates the positive z direction.  The angle always lies between 0
+		//and 2 * PI.
+		float angle;
+		float timeUntilNextStep;
+	
+		//These two maybe usless
+		bool isTurningLeft;
+		float timeUntilSwitchDir;
+
+		void step();
+
+
 
 	public:
 
-		shot(float x, float y, float z, float angle);
-		//Manually update shot position
-		void update_shot(float x, float y, float z, float angle);
+		hit_box(float terrainScale1);
+		
+		//Advances the state of the guy by the specified amount of time, by
+		//calling step() the appropriate number of times and adjusting animTime
+		void advance(float dt);
 		void draw();
+		float x();
+		float z();
+		float y();
+		float velocityX();
+		float velocityZ();
+		float radius();
+		float walkAngle();
+		void bounceOff(hit_box * otherBox);
 };
