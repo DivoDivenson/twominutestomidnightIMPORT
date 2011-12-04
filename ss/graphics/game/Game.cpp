@@ -55,6 +55,8 @@ GLfloat emerald_ambient[] =
 {0.07568, 0.61424, 0.07568}, emerald_specular[] =
 {0.633, 0.727811, 0.633}, emerald_shininess = 76.8;
 
+
+
 void camera (void) {
     glRotatef(xrot,1.0,0.0,0.0);  
     glRotatef(yrot,0.0,1.0,0.0);
