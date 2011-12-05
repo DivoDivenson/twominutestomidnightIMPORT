@@ -9,27 +9,11 @@
 
 #define NUM_IMAGES 9
 #define NUMBER_OF_KNOWN_CHARACTERS 10
-#define MIN_AREA 70.0 //This is just easier
+#define MIN_AREA 50.0 	//This is just easier. Had a method to get this from the set of sample images. That was a 
+						//waste of time.
 
-float min_number_area; //Inited in main. Hurray globals
 
 
-// Structure to store features of a known or unknown character.
-typedef struct tLicensePlateCharacterFeatures_tag {
-	char name[10];
-} tLicensePlateCharacterFeatures;
-
-typedef struct feature_set{
-	int no_holes;
-	double hull_to_box;
-	//This is just for drawing the number on the image
-	CvPoint2D32f center;
-	double area; //Used to get rid of small structures
-} feature_set;
-
-void print_feature(feature_set set){
-	printf("No Holes : %d, Hull to Box: %f, Area %f\n", set.no_holes, set.hull_to_box, set.area);
-}
 
 IplImage * crop_image(IplImage * src){
 	IplImage * temp;
@@ -131,33 +115,6 @@ int count_num_holes(CvSeq * contour){
 
 
 	return no_holes;
-	//Bounding box area / hull area.
-	CvRect rect = cvBoundingRect(contour);
-	//this really does not seem right, but returns similar results
-	//Area if hull is better than just area of the character. Less effected by noise and 
-	//the inside of the character being borked
-	sequence = cvConvexHull2(contour, 0, CV_CLOCKWISE, 1);
-	float hull_area = cvContourArea(sequence);
-	float hull_to_box = hull_area / (rect.width * rect.height);
-
-	CvPoint2D32f center;
-	float radius;
-	//Because I'm using CvSeq to store the numbers I need a way of pulling out where they actualy are
-	//in order to draw in top of them. This solytion is less than ideal from a performance point of view
-	//but works well
-	cvMinEnclosingCircle(contour, &center, &radius);
-
-
-	//CvArr can be an image
-	//printf("No elemnts %d\n", no_holes);
-	//cvShowImage( "Debug", tempImage);
-
-//old ---------------------------------
-	//float arc_length = cvArcLength(contour);
-	//float area = cvContourArea(contour);
-	
-
-
 }
 
 int template_match(IplImage * input, IplImage * template_img){
@@ -184,13 +141,14 @@ int template_match(IplImage * input, IplImage * template_img){
 void ident_numbers(CvSeq * components, IplImage * known[], IplImage * result){
 	//smooth image
 	CvSeq * contour = components->h_next->h_next->h_next->h_next;
-	feature_set temp;
 	int i;
 	float diff = FLT_MAX;
 	int number = 0;
 	CvScalar color = CV_RGB( 255, 255, 255 );
 	IplImage * number_image;
 	IplImage * translated_number;
+
+	int known_holes[] = {1, 0, 0, 0, 1, 0, 1, 0, 2, 1,};
 
 	for(CvSeq * contour = components; contour != 0; contour = contour->h_next){
 		//Skip a contour if it's too small.
@@ -202,27 +160,27 @@ void ident_numbers(CvSeq * components, IplImage * known[], IplImage * result){
 		cvDrawContours( number_image, contour, color, color, -1, CV_FILLED, 8);
 		CvPoint pt1, pt2;
 		CvRect r = cvBoundingRect(contour, 0);
-		translated_number = cvCreateImage(cvSize(r.width +8 , r.height +8), 8, 1);
+		translated_number = cvCreateImage(cvSize(r.width +6 , r.height +6), 8, 1);
 		cvSetImageROI(number_image, r);
-		pt1 = cvPoint(4, 4);
+		pt1 = cvPoint(3, 3);
 		cvCopyMakeBorder(number_image, translated_number, pt1, IPL_BORDER_CONSTANT);
 		int num_holes = count_num_holes(contour); //-1 to account for background
-		printf("Num holes %d\n", num_holes);
-		//translated_number = pad(translated_number);
-		//cvResetImageROI()
-
+	
 		int diff = INT_MAX;
 		int recoginized_number;
+		
 		for(i = 0; i < NUMBER_OF_KNOWN_CHARACTERS; i++){
-			//Need to scale the image to the size of the sample size
-			//resize a temp image to avoid resizing the same image over and over an introducing noise
-			IplImage * tempScaled = cvCreateImage( cvGetSize(known[i]), 8, 1);
-			cvResize(translated_number, tempScaled, CV_INTER_NN);
-			cvShowImage("Debug", tempScaled);
-			int newDiff = template_match(tempScaled, known[i]);
-			if(newDiff < diff){
-				diff = newDiff;
-				recoginized_number = i;
+			if(num_holes == known_holes[i]){
+				//Need to scale the image to the size of the sample size
+				//resize a temp image to avoid resizing the same image over and over an introducing noise
+				IplImage * tempScaled = cvCreateImage( cvGetSize(known[i]), 8, 1);
+				cvResize(translated_number, tempScaled, CV_INTER_NN);
+				//cvShowImage("Debug", tempScaled);
+				int newDiff = template_match(tempScaled, known[i]);
+				if(newDiff < diff){
+					diff = newDiff;
+					recoginized_number = i;
+				}
 			}
 		}
 
@@ -238,61 +196,11 @@ void ident_numbers(CvSeq * components, IplImage * known[], IplImage * result){
 		sprintf(buffer, "%d", recoginized_number);
 		write_text_on_image(result, center.y, center.x, buffer);
 
-		//cvSetImageROI()
-		//Pull out ROI
-
-
-
-		/*pt1.x = r.x;
-        pt2.x = (r.x+r.width);
-        pt1.y = r.y;
-        pt2.y = (r.y+r.height);
-        cvRectangle( result, pt1, pt2, CV_RGB(255,0,0), 3, 8, 0 );
-        */
-
-		//printf("RECT %d %d %d %d\n", bounds.x, bounds.y, bounds.width, bounds.height);
-		//cvWaitKey(0);
-
-		/*temp = analyse_contour(contour);
-		//print_feature(temp);
-
-		if(temp.area > MIN_AREA){
-			print_feature(temp);
-			//write_text_on_image(result, temp.center.y, temp.center.x, "a");
-			for(i = 0; i < NUMBER_OF_KNOWN_CHARACTERS; i++){
-				if(known[i].no_holes == temp.no_holes){
-					
-				}
-			
-			}
-			char buffer[1];
-			//sprintf(buffer, "%d", number);
-			sprintf(buffer, "%d", temp.no_holes);
-			cvDrawContours( result, contour, color, color, CV_FILLED, 8 );
-			write_text_on_image(result, temp.center.y, temp.center.x, buffer);
-		}*/
-
+		
 	}
 
 }
-//Blank everything outside of the ROI
-void blank_region( IplImage * img, CvRect roi){
-	;
-}
 
-//Get the min area of the features in the know_number set
-float getMinArea(feature_set * set){
-	int i;
-	float min = FLT_MAX;
-	for(i = 0; i < NUMBER_OF_KNOWN_CHARACTERS; i++){
-		if(set[i].area < min){
-			min = set[i].area;
-		}
-	}
-	
-	return min;
-	
-}
 
 int main( int argc, char** argv )
 {
@@ -303,11 +211,7 @@ int main( int argc, char** argv )
 	IplImage* sample_number_images[NUMBER_OF_KNOWN_CHARACTERS];
 	IplImage* images[NUM_IMAGES];
 
-	tLicensePlateCharacterFeatures known_object_features[NUMBER_OF_KNOWN_CHARACTERS];
-	tLicensePlateCharacterFeatures unknown_object_features[100];
-
-	feature_set known_number[NUMBER_OF_KNOWN_CHARACTERS];
-
+	
 	CvSeq * components = NULL;
 
 	// Load all the real number sample images and determine feature values for these characters.
@@ -320,14 +224,8 @@ int main( int argc, char** argv )
 		sample_number_images[character] = binary_image(sample_number_images[character]);
 		invert_image(sample_number_images[character]);
 		components = connected_components(sample_number_images[character], sample_number_images[character]);
-		//known_number[character] =  analyse_contour(components);
-		//cvShowImage( "Debug", sample_number_images[character]);
-		//print_feature(known_number[character]);
-		//sprintf(known_object_features[character].name,"%d",character);
-		//cvShowImage("Debug", sample_number_images[character]);
 	}
 
-	min_number_area = getMinArea(known_number);
 
 	// Load all the unknown license plate images.
 	for (int file_num=1; (file_num <= NUM_IMAGES); file_num++)
@@ -347,7 +245,6 @@ int main( int argc, char** argv )
 	// Create display windows for images
     cvNamedWindow( "Original", 1 );
     cvNamedWindow( "Result", 1);
-    cvNamedWindow( "Debug", 0);
     cvMoveWindow( "Result", 200, 0);
 
 
