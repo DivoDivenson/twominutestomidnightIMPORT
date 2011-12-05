@@ -88,6 +88,7 @@ CvSeq* connected_components( IplImage* source, IplImage* result )
 	CvScalar c = cvAvg(source);
 	float threshold = c.val[0];
 	//FIX. So this is done twice for some image, but is need to pull out holes.
+	//This was a clever hack but now I forget how it works
 	cvThreshold( binary_image, binary_image, threshold-15, 255, CV_THRESH_BINARY );
 	cvFindContours( binary_image, storage, &contours, sizeof(CvContour),	CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
 	if (result)
@@ -233,7 +234,6 @@ int main( int argc, char** argv )
 		sprintf(filename,"./real_numbers/%d.jpg",character);
 		if( (sample_number_images[character] = cvLoadImage(filename,-1)) == 0 )
 			return 0;
-		//known_number[character] = analyse_contour();
 		sample_number_images[character] = binary_image(sample_number_images[character]);
 		invert_image(sample_number_images[character]);
 		components = connected_components(sample_number_images[character], sample_number_images[character]);
