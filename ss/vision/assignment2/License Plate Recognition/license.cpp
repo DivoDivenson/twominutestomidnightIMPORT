@@ -69,7 +69,7 @@ IplImage * binary_image(IplImage * source){
 	cvConvertImage( source, binary_image );
 	IplImage * temp = cvCloneImage(binary_image);
 	cvSmooth(temp, binary_image);
-	CvScalar c = cvAvg(source);
+	CvScalar c = cvAvg(binary_image);
 	float threshold = c.val[0];
 	cvThreshold( binary_image, binary_image, threshold-15, 255, CV_THRESH_BINARY );
 	//cvMorphologyEx(binary_image, binary_image, NULL, NULL, CV_MOP_CLOSE, 1);
@@ -160,6 +160,29 @@ feature_set analyse_contour(CvSeq * contour){
 
 }
 
+//Pad the image to prefrom template matching on. To account for the border around 
+IplImage * pad(IplImage * src){
+	int width_step = src->widthStep;
+	int pixel_step = src->widthStep/src->width;
+	int number_channels=src->nChannels;
+	//Add an 4 pixel border to the image
+	IplImage* result = cvCreateImage(cvSize(src->width+8, src->height+8), 8 ,number_channels);
+	cvZero(result);
+	unsigned char white[] = {255,255,255,0};
+	int width_step2 = result->widthStep;
+	int pixel_step2 = result->widthStep/result->width;
+	for(int row = 4; row < result->height-4;row++){
+		for (int col=4; col < result->width-4; col++){
+			unsigned char * currpoint = GETPIXELPTRMACRO(src,col-4, row-4, width_step,pixel_step);
+			//if (currpoint[0]==white[0] && currpoint[1]==white[1] && currpoint[2]==white[2]){
+				PUTPIXELMACRO(result,  col, row,white , width_step2, pixel_step2, number_channels);	
+			//}
+		}
+	}
+	return result;
+
+}
+
 //Pass in a sequence of components and classify them
 void ident_numbers(CvSeq * components, feature_set * known, IplImage * result){
 	//smooth image
@@ -169,9 +192,40 @@ void ident_numbers(CvSeq * components, feature_set * known, IplImage * result){
 	float diff = FLT_MAX;
 	int number = 0;
 	CvScalar color = CV_RGB( rand()&255, rand()&255, rand()&255 );
+	IplImage * number_image;
+	IplImage * translated_number;
 
 	for(CvSeq * contour = components; contour != 0; contour = contour->h_next){
-		temp = analyse_contour(contour);
+		number_image = cvCreateImage( cvSize(400, 400), 8, 1);
+		cvZero(number_image);
+		cvDrawContours( number_image, contour, color, color, -1, CV_FILLED, 8);
+		CvPoint pt1, pt2;
+		CvRect r = cvBoundingRect(contour, 0);
+		translated_number = cvCreateImage(cvSize(r.width +4 , r.height +4), 8, 1);
+		cvSetImageROI(number_image, r);
+		pt1 = cvPoint(2, 2);
+		cvCopyMakeBorder(number_image, translated_number, pt1, IPL_BORDER_CONSTANT);
+		//translated_number = pad(translated_number);
+		//cvResetImageROI()
+
+		cvShowImage("Debug", translated_number);
+
+		//cvSetImageROI()
+		//Pull out ROI
+
+
+
+		/*pt1.x = r.x;
+        pt2.x = (r.x+r.width);
+        pt1.y = r.y;
+        pt2.y = (r.y+r.height);
+        cvRectangle( result, pt1, pt2, CV_RGB(255,0,0), 3, 8, 0 );
+        */
+
+		//printf("RECT %d %d %d %d\n", bounds.x, bounds.y, bounds.width, bounds.height);
+		//cvWaitKey(0);
+
+		/*temp = analyse_contour(contour);
 		//print_feature(temp);
 
 		if(temp.area > MIN_AREA){
@@ -186,9 +240,10 @@ void ident_numbers(CvSeq * components, feature_set * known, IplImage * result){
 			char buffer[1];
 			//sprintf(buffer, "%d", number);
 			sprintf(buffer, "%d", temp.no_holes);
-			//cvDrawContours( result, contour, color, color, CV_FILLED, 8 );
+			cvDrawContours( result, contour, color, color, CV_FILLED, 8 );
 			write_text_on_image(result, temp.center.y, temp.center.x, buffer);
-		}
+		}*/
+
 	}
 
 }
@@ -241,8 +296,7 @@ int main( int argc, char** argv )
 		//cvShowImage( "Debug", sample_number_images[character]);
 		print_feature(known_number[character]);
 		sprintf(known_object_features[character].name,"%d",character);
-		cvShowImage("Debug", sample_number_images[character]);
-		cvWaitKey(0);
+		//cvShowImage("Debug", sample_number_images[character]);
 	}
 
 	min_number_area = getMinArea(known_number);
