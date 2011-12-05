@@ -9,6 +9,7 @@
 
 #define NUM_IMAGES 9
 #define NUMBER_OF_KNOWN_CHARACTERS 10
+#define MIN_AREA 90 //This is just easier
 
 float min_number_area; //Inited in main. Hurray globals
 
@@ -70,7 +71,7 @@ IplImage * binary_image(IplImage * source){
 	cvSmooth(temp, binary_image);
 	CvScalar c = cvAvg(source);
 	float threshold = c.val[0];
-	cvThreshold( binary_image, binary_image, threshold-10, 255, CV_THRESH_BINARY );
+	cvThreshold( binary_image, binary_image, threshold-15, 255, CV_THRESH_BINARY );
 	//cvMorphologyEx(binary_image, binary_image, NULL, NULL, CV_MOP_CLOSE, 1);
 
 	cvReleaseImage(&temp);
@@ -86,7 +87,8 @@ CvSeq* connected_components( IplImage* source, IplImage* result )
 	CvScalar c = cvAvg(source);
 	float threshold = c.val[0];
 	//FIX. So this is done twice for some image, but is need to pull out holes
-	cvThreshold( binary_image, binary_image, threshold-10, 255, CV_THRESH_BINARY );
+	cvThreshold( binary_image, binary_image, threshold-15, 255, CV_THRESH_BINARY );
+	//cvShowImage("Debug", source);
 	cvFindContours( binary_image, storage, &contours, sizeof(CvContour),	CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
 
 	if (result)
@@ -169,23 +171,23 @@ void ident_numbers(CvSeq * components, feature_set * known, IplImage * result){
 
 	for(CvSeq * contour = components; contour != 0; contour = contour->h_next){
 		temp = analyse_contour(contour);
-		print_feature(temp);
-		//write_text_on_image(result, temp.center.y, temp.center.x, "a");
-		for(i = 0; i < NUMBER_OF_KNOWN_CHARACTERS; i++){
-			if(known[i].no_holes == temp.no_holes){
-				float prox = fabs(known[i].hull_to_box - temp.hull_to_box);
-				if(prox < diff){
-					diff = prox;
-					number = i;
+		//print_feature(temp);
+
+		if(temp.area > MIN_AREA){
+			print_feature(temp);
+			//write_text_on_image(result, temp.center.y, temp.center.x, "a");
+			for(i = 0; i < NUMBER_OF_KNOWN_CHARACTERS; i++){
+				if(known[i].no_holes == temp.no_holes){
+					
 				}
+			
 			}
-		
+			char buffer[1];
+			//sprintf(buffer, "%d", number);
+			sprintf(buffer, "%d", temp.no_holes);
+			//cvDrawContours( result, contour, color, color, CV_FILLED, 8 );
+			write_text_on_image(result, temp.center.y, temp.center.x, buffer);
 		}
-		char buffer[1];
-		//sprintf(buffer, "%d", number);
-		sprintf(buffer, "%d", temp.no_holes);
-		//cvDrawContours( result, contour, color, color, CV_FILLED, 8 );
-		write_text_on_image(result, temp.center.y, temp.center.x, buffer);
 	}
 
 }
@@ -225,7 +227,7 @@ int main( int argc, char** argv )
 	CvSeq * components = NULL;
 
 	// Load all the real number sample images and determine feature values for these characters.
-	for (int character=0; (character<NUMBER_OF_KNOWN_CHARACTERS); character++)
+	for (int character=0; (character< NUMBER_OF_KNOWN_CHARACTERS); character++)
 	{
 		char filename[100];
 		sprintf(filename,"./real_numbers/%d.jpg",character);
@@ -239,6 +241,8 @@ int main( int argc, char** argv )
 		//cvShowImage( "Debug", sample_number_images[character]);
 		print_feature(known_number[character]);
 		sprintf(known_object_features[character].name,"%d",character);
+		cvShowImage("Debug", sample_number_images[character]);
+		cvWaitKey(0);
 	}
 
 	min_number_area = getMinArea(known_number);
@@ -261,7 +265,7 @@ int main( int argc, char** argv )
 	// Create display windows for images
     cvNamedWindow( "Original", 1 );
     cvNamedWindow( "Result", 1);
-    cvNamedWindow( "Debug", 1);
+    cvNamedWindow( "Debug", 0);
     cvMoveWindow( "Result", 200, 0);
 
 
