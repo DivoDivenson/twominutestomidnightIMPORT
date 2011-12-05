@@ -9,7 +9,7 @@
 
 #define NUM_IMAGES 9
 #define NUMBER_OF_KNOWN_CHARACTERS 10
-#define MIN_AREA 90 //This is just easier
+#define MIN_AREA 90.0 //This is just easier
 
 float min_number_area; //Inited in main. Hurray globals
 
@@ -96,8 +96,7 @@ CvSeq* connected_components( IplImage* source, IplImage* result )
 		cvZero( result );
 		for(CvSeq* contour = contours ; contour != 0; contour = contour->h_next )
 		{
-			CvScalar color = CV_RGB( rand()&255, rand()&255, rand()&255 );
-			CvScalar color2 = CV_RGB( 255, 255, 0 );
+			CvScalar color = CV_RGB( 255, 255, 255 );
 
 			/* replace CV_FILLED with 1 to see the outlines */
 			cvDrawContours( result, contour, color, color, -1, CV_FILLED, 8 );
@@ -117,7 +116,7 @@ int seq_len(CvSeq * sequence){
 }
 //DO THIS
 feature_set analyse_contour(CvSeq * contour){
-	CvScalar color = CV_RGB( rand()&255, rand()&255, rand()&255 );
+	CvScalar color = CV_RGB( 255, 255, 255 );
 	//40 x 40 should be plenty big for the moment
 	IplImage * tempImage = cvCreateImage( cvSize(400, 400), 8, 1);
 	cvZero(tempImage);
@@ -160,55 +159,80 @@ feature_set analyse_contour(CvSeq * contour){
 
 }
 
-//Pad the image to prefrom template matching on. To account for the border around 
-IplImage * pad(IplImage * src){
-	int width_step = src->widthStep;
-	int pixel_step = src->widthStep/src->width;
-	int number_channels=src->nChannels;
-	//Add an 4 pixel border to the image
-	IplImage* result = cvCreateImage(cvSize(src->width+8, src->height+8), 8 ,number_channels);
-	cvZero(result);
-	unsigned char white[] = {255,255,255,0};
-	int width_step2 = result->widthStep;
-	int pixel_step2 = result->widthStep/result->width;
-	for(int row = 4; row < result->height-4;row++){
-		for (int col=4; col < result->width-4; col++){
-			unsigned char * currpoint = GETPIXELPTRMACRO(src,col-4, row-4, width_step,pixel_step);
-			//if (currpoint[0]==white[0] && currpoint[1]==white[1] && currpoint[2]==white[2]){
-				PUTPIXELMACRO(result,  col, row,white , width_step2, pixel_step2, number_channels);	
-			//}
-		}
-	}
-	return result;
+int template_match(IplImage * input, IplImage * template_img){
+	IplImage * result = cvCreateImage(cvGetSize(input),8,1);
+	cvXor(input, template_img, result);
 
+	int diff = 0;
+
+	int width_step = result->widthStep;
+	int pixel_step = result->widthStep/result->width;
+
+	for (int row =0; row<result->height;row++){
+		for (int col = 0; col<result->width; col++){
+			unsigned char * currpoint = GETPIXELPTRMACRO(result,col,row,width_step,pixel_step);
+			if (currpoint[0]==255){
+				diff++;
+			}
+		}
+	}	
+	return diff;
 }
 
 //Pass in a sequence of components and classify them
-void ident_numbers(CvSeq * components, feature_set * known, IplImage * result){
+void ident_numbers(CvSeq * components, IplImage * known[], IplImage * result){
 	//smooth image
 	CvSeq * contour = components->h_next->h_next->h_next->h_next;
 	feature_set temp;
 	int i;
 	float diff = FLT_MAX;
 	int number = 0;
-	CvScalar color = CV_RGB( rand()&255, rand()&255, rand()&255 );
+	CvScalar color = CV_RGB( 255, 255, 255 );
 	IplImage * number_image;
 	IplImage * translated_number;
 
 	for(CvSeq * contour = components; contour != 0; contour = contour->h_next){
+		if(cvContourArea(contour) < MIN_AREA){
+			continue;
+		}
 		number_image = cvCreateImage( cvSize(400, 400), 8, 1);
 		cvZero(number_image);
 		cvDrawContours( number_image, contour, color, color, -1, CV_FILLED, 8);
 		CvPoint pt1, pt2;
 		CvRect r = cvBoundingRect(contour, 0);
-		translated_number = cvCreateImage(cvSize(r.width +4 , r.height +4), 8, 1);
+		translated_number = cvCreateImage(cvSize(r.width +8 , r.height +8), 8, 1);
 		cvSetImageROI(number_image, r);
-		pt1 = cvPoint(2, 2);
+		pt1 = cvPoint(4, 4);
 		cvCopyMakeBorder(number_image, translated_number, pt1, IPL_BORDER_CONSTANT);
 		//translated_number = pad(translated_number);
 		//cvResetImageROI()
 
-		cvShowImage("Debug", translated_number);
+		int diff = INT_MAX;
+		int recoginized_number;
+		for(i = 0; i < NUMBER_OF_KNOWN_CHARACTERS; i++){
+			//Need to scale the image to the size of the sample size
+			//resize a temp image to avoid resizing the same image over and over an introducing noise
+			IplImage * tempScaled = cvCreateImage( cvGetSize(known[i]), 8, 1);
+			cvResize(translated_number, tempScaled, CV_INTER_NN);
+			cvShowImage("Debug", tempScaled);
+			int newDiff = template_match(tempScaled, known[i]);
+			if(newDiff < diff){
+				diff = newDiff;
+				recoginized_number = i;
+			}
+		}
+
+		CvPoint2D32f center;
+		float radius;
+		//Because I'm using CvSeq to store the numbers I need a way of pulling out where they actualy are
+		//in order to draw in top of them. This solytion is less than ideal from a performance point of view
+		//but works well
+		cvMinEnclosingCircle(contour, &center, &radius);
+
+		char buffer[1];
+			//sprintf(buffer, "%d", number);
+		sprintf(buffer, "%d", recoginized_number);
+		write_text_on_image(result, center.y, center.x, buffer);
 
 		//cvSetImageROI()
 		//Pull out ROI
@@ -353,7 +377,7 @@ int main( int argc, char** argv )
 		//ident_number(selected_image, result_image);
 		components = connected_components( bin_image, result_image);
 		//analyse_contour(components->h_next->h_next->h_next->h_next->h_next);
-		ident_numbers(components, known_number, selected_image);
+		ident_numbers(components, sample_number_images, selected_image);
         cvShowImage( "Result", result_image);
         cvShowImage( "Original", selected_image );
 
