@@ -9,7 +9,7 @@
 
 #define NUM_IMAGES 9
 #define NUMBER_OF_KNOWN_CHARACTERS 10
-#define MIN_AREA 90.0 //This is just easier
+#define MIN_AREA 70.0 //This is just easier
 
 float min_number_area; //Inited in main. Hurray globals
 
@@ -115,7 +115,7 @@ int seq_len(CvSeq * sequence){
 	return result;
 }
 //DO THIS
-feature_set analyse_contour(CvSeq * contour){
+int count_num_holes(CvSeq * contour){
 	CvScalar color = CV_RGB( 255, 255, 255 );
 	//40 x 40 should be plenty big for the moment
 	IplImage * tempImage = cvCreateImage( cvSize(400, 400), 8, 1);
@@ -127,7 +127,10 @@ feature_set analyse_contour(CvSeq * contour){
 	//sequence, ambiguous name as it's reused for several things
 	CvSeq * sequence = connected_components(tempImage, tempImage);
 	int no_holes = seq_len(sequence) -1 ; //-1 to account for background
+	cvReleaseImage(&tempImage);
 
+
+	return no_holes;
 	//Bounding box area / hull area.
 	CvRect rect = cvBoundingRect(contour);
 	//this really does not seem right, but returns similar results
@@ -152,10 +155,8 @@ feature_set analyse_contour(CvSeq * contour){
 //old ---------------------------------
 	//float arc_length = cvArcLength(contour);
 	//float area = cvContourArea(contour);
-	feature_set result = {no_holes, hull_to_box, center, hull_area};
-	return result;
+	
 
-	cvReleaseImage(&tempImage);
 
 }
 
@@ -192,6 +193,7 @@ void ident_numbers(CvSeq * components, IplImage * known[], IplImage * result){
 	IplImage * translated_number;
 
 	for(CvSeq * contour = components; contour != 0; contour = contour->h_next){
+		//Skip a contour if it's too small.
 		if(cvContourArea(contour) < MIN_AREA){
 			continue;
 		}
@@ -204,6 +206,8 @@ void ident_numbers(CvSeq * components, IplImage * known[], IplImage * result){
 		cvSetImageROI(number_image, r);
 		pt1 = cvPoint(4, 4);
 		cvCopyMakeBorder(number_image, translated_number, pt1, IPL_BORDER_CONSTANT);
+		int num_holes = count_num_holes(contour); //-1 to account for background
+		printf("Num holes %d\n", num_holes);
 		//translated_number = pad(translated_number);
 		//cvResetImageROI()
 
@@ -316,10 +320,10 @@ int main( int argc, char** argv )
 		sample_number_images[character] = binary_image(sample_number_images[character]);
 		invert_image(sample_number_images[character]);
 		components = connected_components(sample_number_images[character], sample_number_images[character]);
-		known_number[character] =  analyse_contour(components);
+		//known_number[character] =  analyse_contour(components);
 		//cvShowImage( "Debug", sample_number_images[character]);
-		print_feature(known_number[character]);
-		sprintf(known_object_features[character].name,"%d",character);
+		//print_feature(known_number[character]);
+		//sprintf(known_object_features[character].name,"%d",character);
 		//cvShowImage("Debug", sample_number_images[character]);
 	}
 
