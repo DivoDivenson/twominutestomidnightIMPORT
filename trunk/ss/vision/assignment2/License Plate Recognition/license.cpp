@@ -80,17 +80,16 @@ IplImage * binary_image(IplImage * source){
 
 CvSeq* connected_components( IplImage* source, IplImage* result )
 {
+
 	IplImage* binary_image = cvCreateImage( cvGetSize(source), 8, 1 );
 	cvConvertImage( source, binary_image );
 	CvMemStorage* storage = cvCreateMemStorage(0);
 	CvSeq* contours = 0;
 	CvScalar c = cvAvg(source);
 	float threshold = c.val[0];
-	//FIX. So this is done twice for some image, but is need to pull out holes
+	//FIX. So this is done twice for some image, but is need to pull out holes.
 	cvThreshold( binary_image, binary_image, threshold-15, 255, CV_THRESH_BINARY );
-	//cvShowImage("Debug", source);
 	cvFindContours( binary_image, storage, &contours, sizeof(CvContour),	CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
-
 	if (result)
 	{
 		cvZero( result );
@@ -103,7 +102,8 @@ CvSeq* connected_components( IplImage* source, IplImage* result )
 			cvDrawContours( result, contour, color, color, -1, CV_FILLED, 8 );
 		}
 	}
-	//cvReleaseImage(&binary_image);
+
+	cvReleaseImage(&binary_image);
 	return contours;
 }
 
@@ -227,7 +227,7 @@ int main( int argc, char** argv )
 	CvSeq * components = NULL;
 
 	// Load all the real number sample images and determine feature values for these characters.
-	for (int character=0; (character< NUMBER_OF_KNOWN_CHARACTERS); character++)
+	for (int character=0; character< NUMBER_OF_KNOWN_CHARACTERS; character++)
 	{
 		char filename[100];
 		sprintf(filename,"./real_numbers/%d.jpg",character);
