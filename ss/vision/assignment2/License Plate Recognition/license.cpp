@@ -79,15 +79,15 @@ IplImage * binary_image(IplImage * source){
 
 CvSeq* connected_components( IplImage* source, IplImage* result )
 {
-	//IplImage* binary_image = cvCreateImage( cvGetSize(source), 8, 1 );
-	//cvConvertImage( source, binary_image );
+	IplImage* binary_image = cvCreateImage( cvGetSize(source), 8, 1 );
+	cvConvertImage( source, binary_image );
 	CvMemStorage* storage = cvCreateMemStorage(0);
 	CvSeq* contours = 0;
-	//CvScalar c = cvAvg(source);
-	//float threshold = c.val[0];
-	//FIX. Not really sure why this is here, but it seems to be doing something important.
-	//cvThreshold( binary_image, binary_image, threshold-10, 255, CV_THRESH_BINARY );
-	cvFindContours( source, storage, &contours, sizeof(CvContour),	CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
+	CvScalar c = cvAvg(source);
+	float threshold = c.val[0];
+	//FIX. So this is done twice for some image, but is need to pull out holes
+	cvThreshold( binary_image, binary_image, threshold-10, 255, CV_THRESH_BINARY );
+	cvFindContours( binary_image, storage, &contours, sizeof(CvContour),	CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
 
 	if (result)
 	{
