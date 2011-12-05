@@ -1,6 +1,3 @@
-my#ifdef _CH_
-#pragma package <opencv>
-#endif
 
 #include "cv.h"
 #include "highgui.h"
@@ -13,6 +10,8 @@ my#ifdef _CH_
 #define NUM_IMAGES 9
 #define NUMBER_OF_KNOWN_CHARACTERS 10
 
+float min_number_area; //Inited in main. Hurray globals
+
 
 // Structure to store features of a known or unknown character.
 typedef struct tLicensePlateCharacterFeatures_tag {
@@ -24,12 +23,11 @@ typedef struct feature_set{
 	double hull_to_box;
 	//This is just for drawing the number on the image
 	CvPoint2D32f center;
-
-
+	double area; //Used to get rid of small structures
 } feature_set;
 
 void print_feature(feature_set set){
-	printf("No Holes : %d, Hull to Box: %f\n", set.no_holes, set.hull_to_box);
+	printf("No Holes : %d, Hull to Box: %f, Area %f\n", set.no_holes, set.hull_to_box, set.area);
 }
 
 IplImage * crop_image(IplImage * src){
@@ -81,15 +79,16 @@ IplImage * binary_image(IplImage * source){
 
 CvSeq* connected_components( IplImage* source, IplImage* result )
 {
-	IplImage* binary_image = cvCreateImage( cvGetSize(source), 8, 1 );
-	cvConvertImage( source, binary_image );
+	//IplImage* binary_image = cvCreateImage( cvGetSize(source), 8, 1 );
+	//cvConvertImage( source, binary_image );
 	CvMemStorage* storage = cvCreateMemStorage(0);
 	CvSeq* contours = 0;
-	CvScalar c = cvAvg(source);
-	float threshold = c.val[0];
-	//FIX
-	cvThreshold( binary_image, binary_image, threshold-10, 255, CV_THRESH_BINARY );
-	cvFindContours( binary_image, storage, &contours, sizeof(CvContour),	CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
+	//CvScalar c = cvAvg(source);
+	//float threshold = c.val[0];
+	//FIX. Not really sure why this is here, but it seems to be doing something important.
+	//cvThreshold( binary_image, binary_image, threshold-10, 255, CV_THRESH_BINARY );
+	cvFindContours( source, storage, &contours, sizeof(CvContour),	CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
+
 	if (result)
 	{
 		cvZero( result );
@@ -102,7 +101,7 @@ CvSeq* connected_components( IplImage* source, IplImage* result )
 			cvDrawContours( result, contour, color, color, -1, CV_FILLED, 8 );
 		}
 	}
-	cvReleaseImage(&binary_image);
+	//cvReleaseImage(&binary_image);
 	return contours;
 }
 
@@ -146,12 +145,12 @@ feature_set analyse_contour(CvSeq * contour){
 
 	//CvArr can be an image
 	//printf("No elemnts %d\n", no_holes);
-	cvShowImage( "Debug", tempImage);
+	//cvShowImage( "Debug", tempImage);
 
 //old ---------------------------------
 	//float arc_length = cvArcLength(contour);
 	//float area = cvContourArea(contour);
-	feature_set result = {no_holes, hull_to_box, center};
+	feature_set result = {no_holes, hull_to_box, center, hull_area};
 	return result;
 
 	cvReleaseImage(&tempImage);
@@ -195,6 +194,20 @@ void blank_region( IplImage * img, CvRect roi){
 	;
 }
 
+//Get the min area of the features in the know_number set
+float getMinArea(feature_set * set){
+	int i;
+	float min = FLT_MAX;
+	for(i = 0; i < NUMBER_OF_KNOWN_CHARACTERS; i++){
+		if(set[i].area < min){
+			min = set[i].area;
+		}
+	}
+	
+	return min;
+	
+}
+
 int main( int argc, char** argv )
 {
 	int selected_image_num = 1;
@@ -227,6 +240,8 @@ int main( int argc, char** argv )
 		print_feature(known_number[character]);
 		sprintf(known_object_features[character].name,"%d",character);
 	}
+
+	min_number_area = getMinArea(known_number);
 
 	// Load all the unknown license plate images.
 	for (int file_num=1; (file_num <= NUM_IMAGES); file_num++)
@@ -272,7 +287,9 @@ int main( int argc, char** argv )
 		result_image = cvCloneImage(selected_image);
 
 		printf("\nProcessing Image %d:\n",selected_image_num);
+		//Get binary image of licence plate
 		bin_image = binary_image(selected_image);
+		//Invert binary image
 		invert_image(bin_image);
 
 		//ident_number(selected_image, result_image);
