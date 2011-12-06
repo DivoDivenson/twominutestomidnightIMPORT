@@ -1,16 +1,16 @@
 main = do
-	--strings <- getLine
-	strings
-	let wrds = words strings
-	    len = length $ wrds !! 0
-	putStrLn $ show $ master 0 sent wrds len
-	return ()
+   strings <- getLine --Laziness means only what's needed will be read in. 
+   sent <- getLine
+   let wrds = words strings
+       len = length $ wrds!!0
+   putStrLn $ show $ master 0 sent wrds len
+   return ()
 
 
 master :: Int -> [Char] -> [String] -> Int -> Int 
-master i [] _ len= -1 
+master i [] _ len= -1 -- -1 means not found 
 master i full@(x:xs) actwrds len
-	| (elem (take len full) actwrds) = do_next full actwrds len i
+    | (elem (take len full) actwrds) = do_next full actwrds len i
 	| otherwise = master (i+1) xs actwrds len
 
 do_next :: [Char] -> [String] -> Int -> Int -> Int 
