@@ -22,15 +22,15 @@ void *producer(void *arg){
       token_data =  (rand() / (RAND_MAX / (58))) + 65;//Generate a random letter, trust me
       //Acquire locks
       sem_wait(&empty); //lock emprty
-      pthread_mutex_lock(&mutex); //Not really needed, but should insure no errors
+  //    pthread_mutex_lock(&mutex); //Not really needed, but should insure no errors
       if(bufCount < BUFSIZE){
          buffer[bufCount++] = token_data;
-         printf("Inserted %d. bufCount = %d\n", token_data, bufCount);
+         printf("Insert BufCount = %d\n",  bufCount);
       }else{
          printf("Could not insert %c\n", token_data);
       }
 
-      pthread_mutex_unlock(&mutex);
+     //pthread_mutex_unlock(&mutex);
       sem_post(&full); //Increment full
 
    }
@@ -41,16 +41,15 @@ void *consumer(void *arg){
    while(1){
       sleep((rand() / 100000000));  
       sem_wait(&full); //lock fulll
-      pthread_mutex_lock(&mutex);
+    //  pthread_mutex_lock(&mutex);
       if(bufCount > 0){
          data = buffer[bufCount--];
-         printf("%d removed. bufCount = %d\n", data, bufCount);
+         printf("Removed BufCount = %d\n",  bufCount);
       }else{
          printf("Buffer empty\n");
       }
-
-      pthread_mutex_unlock(&mutex);
-      sem_post(&empty); //Increment empty
+     //pthread_mutex_unlock(&mutex);
+     sem_post(&empty); //Increment empty
    }
 }
 
