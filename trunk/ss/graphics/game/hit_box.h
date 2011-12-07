@@ -13,7 +13,9 @@ const int t_width = 50;
 const int t_length = 50;
 
 const float step_time = 0.01f;
-//A shot moves along the x and z axis at a given angle to the y-axis
+
+
+
 class hit_box{
 	protected:
 		//model3DS * model;
