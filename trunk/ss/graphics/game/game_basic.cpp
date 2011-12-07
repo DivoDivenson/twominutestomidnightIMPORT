@@ -15,11 +15,9 @@
 #define SPEED 1
 
 using namespace std;
-const int NUM_GUYS = 100;
+const int NUM_HIT_BOXS = 100;
 
 const float TERRIAN_WIDTH = 50.0f;
-
-const float TIME_BETWEEN_HANDLE_COLLISIONS = 0.01f;
 
 int cameraZ;
 int camX, camY;
@@ -40,6 +38,7 @@ GLfloat emerald_ambient[] =
 {0.07568, 0.61424, 0.07568}, emerald_specular[] =
 {0.633, 0.727811, 0.633}, emerald_shininess = 76.8;
 
+const float TIME_BETWEEN_HANDLE_COLLISIONS = 0.01f;
 
 
 
@@ -47,6 +46,323 @@ GLfloat emerald_ambient[] =
 model3DS * car;
 
 vector<hit_box*> _objects;
+player * _player;
+
+
+
+//Collision code from movie tutorials rock
+
+struct box_pair {
+	hit_box* hit_box1;
+	hit_box* hit_box2;
+};
+//The amount of time until we next check for and handle all collisions
+float _timeUntilHandleCollisions = 0;
+int _numCollisions; //The total number of collisions that have occurred
+
+const int MAX_QUADTREE_DEPTH = 6;
+const int MIN_HIT_BOXS_PER_QUADTREE = 2;
+const int MAX_HIT_BOXS_PER_QUADTREE = 5;
+
+//Our data structure for making collision detection faster
+class Quadtree {
+	private:
+		float minX;
+		float minZ;
+		float maxX;
+		float maxZ;
+		float centerX; //(minX + maxX) / 2
+		float centerZ; //(minZ + maxZ) / 2
+		
+		/* The children of this, if this has any.  children[0][*] are the
+		 * children with x coordinates ranging from minX to centerX.
+		 * children[1][*] are the children with x coordinates ranging from
+		 * centerX to maxX.  Similarly for the other dimension of the children
+		 * array.
+		 */
+		Quadtree *children[2][2];
+		//Whether this has children
+		bool hasChildren;
+		//The hit_boxs in this, if this doesn't have any children
+		set<hit_box*> hit_boxs;
+		//The depth of this in the tree
+		int depth;
+		//The number of hit_boxs in this, including those stored in its children
+		int numhit_boxs;
+		
+		//Adds a hit_box to or removes one from the children of this
+		void filehit_box(hit_box* hit_box, float x, float z, bool addhit_box) {
+			//Figure out in which child(ren) the hit_box belongs
+			for(int xi = 0; xi < 2; xi++) {
+				if (xi == 0) {
+					if (x - hit_box->radius() > centerX) {
+						continue;
+					}
+				}
+				else if (x + hit_box->radius() < centerX) {
+					continue;
+				}
+				
+				for(int zi = 0; zi < 2; zi++) {
+					if (zi == 0) {
+						if (z - hit_box->radius() > centerZ) {
+							continue;
+						}
+					}
+					else if (z + hit_box->radius() < centerZ) {
+						continue;
+					}
+					
+					//Add or remove the hit_box
+					if (addhit_box) {
+						children[xi][zi]->add(hit_box);
+					}
+					else {
+						children[xi][zi]->remove(hit_box, x, z);
+					}
+				}
+			}
+		}
+		
+		//Creates children of this, and moves the hit_boxs in this to the children
+		void haveChildren() {
+			for(int x = 0; x < 2; x++) {
+				float minX2;
+				float maxX2;
+				if (x == 0) {
+					minX2 = minX;
+					maxX2 = centerX;
+				}
+				else {
+					minX2 = centerX;
+					maxX2 = maxX;
+				}
+				
+				for(int z = 0; z < 2; z++) {
+					float minZ2;
+					float maxZ2;
+					if (z == 0) {
+						minZ2 = minZ;
+						maxZ2 = centerZ;
+					}
+					else {
+						minZ2 = centerZ;
+						maxZ2 = maxZ;
+					}
+					
+					children[x][z] =
+						new Quadtree(minX2, maxX2, minZ2, maxZ2, depth + 1);
+				}
+			}
+			
+			//Remove all hit_boxs from "hit_boxs" and add them to the new children
+			for(set<hit_box*>::iterator it = hit_boxs.begin(); it != hit_boxs.end();
+					it++) {
+				hit_box* hit_box = *it;
+				filehit_box(hit_box, hit_box->x(), hit_box->z(), true);
+			}
+			hit_boxs.clear();
+			
+			hasChildren = true;
+		}
+		
+		//Adds all hit_boxs in this or one of its descendants to the specified set
+		void collecthit_boxs(set<hit_box*> &gs) {
+			if (hasChildren) {
+				for(int x = 0; x < 2; x++) {
+					for(int z = 0; z < 2; z++) {
+						children[x][z]->collecthit_boxs(gs);
+					}
+				}
+			}
+			else {
+				for(set<hit_box*>::iterator it = hit_boxs.begin(); it != hit_boxs.end();
+						it++) {
+					hit_box* hit_box = *it;
+					gs.insert(hit_box);
+				}
+			}
+		}
+		
+		//Destroys the children of this, and moves all hit_boxs in its descendants
+		//to the "hit_boxs" set
+		void destroyChildren() {
+			//Move all hit_boxs in descendants of this to the "hit_boxs" set
+			collecthit_boxs(hit_boxs);
+			
+			for(int x = 0; x < 2; x++) {
+				for(int z = 0; z < 2; z++) {
+					delete children[x][z];
+				}
+			}
+			
+			hasChildren = false;
+		}
+		
+		//Removes the specified hit_box at the indicated position
+		void remove(hit_box* hit_box, float x, float z) {
+			numhit_boxs--;
+			
+			if (hasChildren && numhit_boxs < MIN_HIT_BOXS_PER_QUADTREE) {
+				destroyChildren();
+			}
+			
+			if (hasChildren) {
+				filehit_box(hit_box, x, z, false);
+			}
+			else {
+				hit_boxs.erase(hit_box);
+			}
+		}
+	public:
+		//Constructs a new Quadtree.  d is the depth, which starts at 1.
+		Quadtree(float minX1, float minZ1, float maxX1, float maxZ1, int d) {
+			minX = minX1;
+			minZ = minZ1;
+			maxX = maxX1;
+			maxZ = maxZ1;
+			centerX = (minX + maxX) / 2;
+			centerZ = (minZ + maxZ) / 2;
+			
+			depth = d;
+			numhit_boxs = 0;
+			hasChildren = false;
+		}
+		
+		~Quadtree() {
+			if (hasChildren) {
+				destroyChildren();
+			}
+		}
+		
+		//Adds a hit_box to this
+		void add(hit_box* hit_box) {
+			numhit_boxs++;
+			if (!hasChildren && depth < MAX_QUADTREE_DEPTH &&
+				numhit_boxs > MAX_HIT_BOXS_PER_QUADTREE) {
+				haveChildren();
+			}
+			
+			if (hasChildren) {
+				filehit_box(hit_box, hit_box->x(), hit_box->z(), true);
+			}
+			else {
+				hit_boxs.insert(hit_box);
+			}
+		}
+		
+		//Removes a hit_box from this
+		void remove(hit_box* hit_box) {
+			remove(hit_box, hit_box->x(), hit_box->z());
+		}
+		
+		//Changes the position of a hit_box in this from the specified position to
+		//its current position
+		void hit_boxMoved(hit_box* hit_box, float x, float z) {
+			remove(hit_box, x, z);
+			add(hit_box);
+		}
+		
+		//Adds potential collisions to the specified set
+		void potentialCollisions(vector<box_pair> &collisions) {
+			if (hasChildren) {
+				for(int x = 0; x < 2; x++) {
+					for(int z = 0; z < 2; z++) {
+						children[x][z]->potentialCollisions(collisions);
+					}
+				}
+			}
+			else {
+				//Add all pairs (hit_box1, hit_box2) from hit_boxs
+				for(set<hit_box*>::iterator it = hit_boxs.begin(); it != hit_boxs.end();
+						it++) {
+					hit_box* hit_box1 = *it;
+					for(set<hit_box*>::iterator it2 = hit_boxs.begin();
+							it2 != hit_boxs.end(); it2++) {
+						hit_box* hit_box2 = *it2;
+						//This test makes sure that we only add each pair once
+						if (hit_box1 < hit_box2) {
+							box_pair gp;
+							gp.hit_box1 = hit_box1;
+							gp.hit_box2 = hit_box2;
+							collisions.push_back(gp);
+						}
+					}
+				}
+			}
+		}
+};
+
+void potentialCollisions(vector<box_pair> &cs, Quadtree* quadtree) {
+	quadtree->potentialCollisions(cs);
+}
+
+//Returns whether hit_box1 and hit_box2 are currently colliding
+bool testCollision(hit_box* hit_box1, hit_box* hit_box2) {
+	float dx = hit_box1->x() - hit_box2->x();
+	float dz = hit_box1->z() - hit_box2->z();
+	float r = hit_box1->radius() + hit_box2->radius();
+	if (dx * dx + dz * dz < r * r) {
+		float vx = hit_box1->velocityX() - hit_box2->velocityX();
+		float vz = hit_box1->velocityZ() - hit_box2->velocityZ();
+		return vx * dx + vz * dz < 0;
+	}
+	else {
+		return false;
+	}
+}
+
+void handleCollisions(vector<hit_box*> &hit_boxs,
+					  Quadtree* quadtree,
+					  int &numCollisions) {
+	vector<box_pair> gps;
+	potentialCollisions(gps, quadtree);
+	for(unsigned int i = 0; i < gps.size(); i++) {
+		box_pair gp = gps[i];
+		
+		hit_box* g1 = gp.hit_box1;
+		hit_box* g2 = gp.hit_box2;
+		if (testCollision(g1, g2)) {
+			g1->bounceOff(g2);
+			g2->bounceOff(g1);
+			numCollisions++;
+		}
+	}
+}
+
+//Moves the hit_boxs over the given interval of time, without handling collisions
+void movehit_boxs(vector<hit_box*> &hit_boxs, Quadtree* quadtree, float dt) {
+	for(unsigned int i = 0; i < hit_boxs.size(); i++) {
+		hit_box* hit_box = hit_boxs[i];
+		float oldX = hit_box->x();
+		float oldZ = hit_box->z();
+		hit_box->advance(dt);
+		quadtree->hit_boxMoved(hit_box, oldX, oldZ);
+	}
+}
+
+//Advances the state of the hit_boxs over the indicated interval of time
+void advance(vector<hit_box*> &hit_boxs,
+			 Quadtree* quadtree,
+			 float t,
+			 float &timeUntilHandleCollisions,
+			 int &numCollisions) {
+	while (t > 0) {
+		if (timeUntilHandleCollisions <= t) {
+			movehit_boxs(hit_boxs, quadtree, timeUntilHandleCollisions);
+			handleCollisions(hit_boxs, quadtree, numCollisions);
+			t -= timeUntilHandleCollisions;
+			timeUntilHandleCollisions = TIME_BETWEEN_HANDLE_COLLISIONS;
+		}
+		else {
+			movehit_boxs(hit_boxs, quadtree, t);
+			timeUntilHandleCollisions -= t;
+			t = 0;
+		}
+	}
+}
+
+Quadtree* _quadtree;
 
 void keypress(unsigned char key, int x, int y){
 	
@@ -180,11 +496,13 @@ void enable(){
 
 }
 
-void updateScene(){
-	for (unsigned int i = 0; i < _objects.size(); i++){
+void updateScene(int value){
+	/*for (unsigned int i = 0; i < _objects.size(); i++){
 		_objects[i]->advance(0.01f);
-	}
+	}*/
+	advance(_objects, _quadtree, 0.025f, _timeUntilHandleCollisions, _numCollisions);
 	glutPostRedisplay();
+	glutTimerFunc(25, updateScene, 0);
 }
 
 
@@ -199,7 +517,9 @@ void renderScene(){
 
 	glTranslatef(0.0f, -2.0f, -cRadius);
 	glRotatef(xrot, 1.0f, 0.0f, 0.0f);
-	glutSolidCube(1);
+	//glutSolidCube(1);
+	_player->draw(); //Using the draw function to update the position. Whatever man
+	_player->update_pos(-xpos, 0.0f, -ypos, yrot);
 
 
 	glRotatef(yrot,0.0,1.0,0.0);  //rotate our camera on the y-axis
@@ -215,6 +535,7 @@ void renderScene(){
 	
 }
 
+
 int main(int argc, char ** argv){
 	srand((unsigned int)time(0));
 
@@ -225,13 +546,21 @@ int main(int argc, char ** argv){
 	glutCreateWindow("A Game");
 	init();
 
-	_objects = makeObjects(100);
+	_objects = makeObjects(NUM_HIT_BOXS);
+	_player = new player(1.0f);
+
+	_quadtree = new Quadtree(0.0f, 0.0f, 50.0f, 50.0f, 1);
+	for(unsigned int i =0; i < _objects.size(); i++){
+		_quadtree->add(_objects[i]);
+	}
+
+	_quadtree->add(_player);
 
 	glutDisplayFunc(renderScene);
 	glutReshapeFunc(setViewport);
 	glutKeyboardFunc(keypress);
     glutPassiveMotionFunc(mouseMove);
-    glutIdleFunc(updateScene);
+    glutTimerFunc(25, updateScene, 0);
     //glutMouseFunc(mouse_func);
 
 

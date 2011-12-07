@@ -156,3 +156,50 @@ void hit_box::bounceOff(hit_box * otherBox){
 		angle = atan2(vz, vx);
 	}
 }
+
+void player::bounceOff(hit_box * otherBox){
+	float vx = velocityX();
+	float vz = velocityZ();
+
+	//Find distances between the two
+	float dx = otherBox->x() - x0;
+	float dz = otherBox->z() - z0;
+
+	//What do you know, something I leanred in secondary school
+	float m = sqrt(dx * dx + dz * dz);
+	dx /= m;
+	dz /= m;
+
+	float dotProduct = vx * dx + vz * dz;
+	vx -= 2 * dotProduct * dx;
+	vz -= 2 * dotProduct * dz;
+
+	//This check is somewhat important :)
+	if(vx != 0 || vz != 0){
+		angle = atan2(vz, vx);
+	}
+	printf("SHOOT\n");
+}
+
+void player::advance(float dt){
+	;//PLayer is controlled by the user
+}
+
+void player::update_pos(float xpos, float ypos, float zpos, float angle){
+	x0 = xpos;
+	z0 = zpos;
+	angle = angle;
+}
+
+void player::draw(){
+	
+	
+	//float scale = radius0 / 2.5f;
+	//glPushMatrix();
+	//y will have to be replaced when a proper map is made
+	//glTranslatef(x0, 0.0f, z0);
+	//glRotatef(90 - angle * 180 / M_PI, 0, 1, 0);
+	//model goes here
+	glutSolidCube(1);
+	//glPopMatrix();
+}
