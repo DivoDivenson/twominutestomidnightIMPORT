@@ -324,7 +324,7 @@ void setupScene(){
 	table = new model3DS("./table/table.3ds", 50);
 	carpark = new model3DS("./carpark/carparkfinal.3ds", 1);
 	car = new model3DS("./car/car.3ds",0.05f);
-    test_shot = new shot(0, 0, 0, 45);
+   test_shot = new shot(0, 0, 0, 45);
       
       
 }

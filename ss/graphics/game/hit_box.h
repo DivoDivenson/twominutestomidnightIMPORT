@@ -15,7 +15,7 @@ const int t_length = 50;
 const float step_time = 0.01f;
 //A shot moves along the x and z axis at a given angle to the y-axis
 class hit_box{
-	private:
+	protected:
 		//model3DS * model;
 		float terrainScale;
 		float x0;
@@ -54,3 +54,14 @@ class hit_box{
 		float walkAngle();
 		void bounceOff(hit_box * otherBox);
 };
+
+class player: public hit_box{
+	public:
+		player(float a): hit_box(a){ ; }
+		void bounceOff(hit_box * otherBox);
+		void advance(float dt);// Advance does nothing to the player
+		void update_pos(float xpos, float ypos, float zpos, float angle);
+		void draw();
+
+};
+
