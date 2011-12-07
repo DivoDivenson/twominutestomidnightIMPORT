@@ -505,7 +505,7 @@ void updateScene(int value){
 	glutTimerFunc(25, updateScene, 0);
 }
 
-
+float oldX, oldY;
 void renderScene(){
 	       
     // Clear framebuffer & depth buffer
@@ -519,7 +519,12 @@ void renderScene(){
 	glRotatef(xrot, 1.0f, 0.0f, 0.0f);
 	//glutSolidCube(1);
 	_player->draw(); //Using the draw function to update the position. Whatever man
-	_player->update_pos(-xpos, 0.0f, -ypos, yrot);
+	oldX = _player->x();
+	oldY = _player->z();
+	_player->update_pos(xpos, 0.0f, zpos, yrot);
+	//Presume the player moves every scene
+	_quadtree->hit_boxMoved(_player, oldX, oldY);
+
 
 
 	glRotatef(yrot,0.0,1.0,0.0);  //rotate our camera on the y-axis
@@ -548,13 +553,15 @@ int main(int argc, char ** argv){
 
 	_objects = makeObjects(NUM_HIT_BOXS);
 	_player = new player(1.0f);
+	_objects.push_back(_player);
 
 	_quadtree = new Quadtree(0.0f, 0.0f, 50.0f, 50.0f, 1);
+	_quadtree->add(_player);
+
 	for(unsigned int i =0; i < _objects.size(); i++){
 		_quadtree->add(_objects[i]);
 	}
 
-	_quadtree->add(_player);
 
 	glutDisplayFunc(renderScene);
 	glutReshapeFunc(setViewport);

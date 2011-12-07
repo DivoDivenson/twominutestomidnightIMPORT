@@ -91,6 +91,8 @@ void hit_box::advance(float dt){
 			dt = 0; //bug
 		}
 	}
+	//printf("Ball %f %f\n", x0, z0);
+
 }
 
 void hit_box::draw(){
@@ -155,6 +157,7 @@ void hit_box::bounceOff(hit_box * otherBox){
 	if(vx != 0 || vz != 0){
 		angle = atan2(vz, vx);
 	}
+	//printf("BALL\n");
 }
 
 void player::bounceOff(hit_box * otherBox){
@@ -178,11 +181,11 @@ void player::bounceOff(hit_box * otherBox){
 	if(vx != 0 || vz != 0){
 		angle = atan2(vz, vx);
 	}
-	printf("SHOOT\n");
+	printf("PLAYER\n");
 }
 
 void player::advance(float dt){
-	;//PLayer is controlled by the user
+	printf("Player advanced\n");
 }
 
 void player::update_pos(float xpos, float ypos, float zpos, float angle){
