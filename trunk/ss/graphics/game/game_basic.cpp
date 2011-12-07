@@ -46,7 +46,7 @@ const float TIME_BETWEEN_HANDLE_COLLISIONS = 0.01f;
 model3DS * car;
 
 vector<hit_box*> _objects;
-player * _player;
+hit_box * _player;
 
 
 
@@ -330,6 +330,17 @@ void handleCollisions(vector<hit_box*> &hit_boxs,
 	}
 }
 
+//Check if the player collides with anything. Linear for the moment, get working with 
+//quad tree later
+void playerCollide(hit_box * _player, vector<hit_box*> &hit_boxs){
+	for(unsigned int i = 0; i < hit_boxs.size(); i++){
+		if(testCollision(_player, hit_boxs[i])){
+			_player->bounceOff(hit_boxs[i]);
+			hit_boxs[i]->bounceOff(_player);
+		}
+	}
+}
+
 //Moves the hit_boxs over the given interval of time, without handling collisions
 void movehit_boxs(vector<hit_box*> &hit_boxs, Quadtree* quadtree, float dt) {
 	for(unsigned int i = 0; i < hit_boxs.size(); i++) {
@@ -460,7 +471,7 @@ void init(){
 vector<hit_box*> makeObjects(int number){
 	vector<hit_box*> objects;
 	for(int i = 0; i < number; i++){
-		objects.push_back(new hit_box(1.0f));
+		objects.push_back(new enemy(1.0f));
 	}
 	return objects;
 }
@@ -501,6 +512,7 @@ void updateScene(int value){
 		_objects[i]->advance(0.01f);
 	}*/
 	advance(_objects, _quadtree, 0.025f, _timeUntilHandleCollisions, _numCollisions);
+	//playerCollide(_player, _objects);
 	glutPostRedisplay();
 	glutTimerFunc(25, updateScene, 0);
 }
@@ -521,7 +533,7 @@ void renderScene(){
 	_player->draw(); //Using the draw function to update the position. Whatever man
 	oldX = _player->x();
 	oldY = _player->z();
-	_player->update_pos(xpos, 0.0f, zpos, yrot);
+	dynamic_cast<player*>(_player)->update_pos(xpos, 0.0f, zpos, yrot);
 	//Presume the player moves every scene
 	_quadtree->hit_boxMoved(_player, oldX, oldY);
 
@@ -553,10 +565,10 @@ int main(int argc, char ** argv){
 
 	_objects = makeObjects(NUM_HIT_BOXS);
 	_player = new player(1.0f);
-	_objects.push_back(_player);
+	//_objects.push_back(_player);
 
 	_quadtree = new Quadtree(0.0f, 0.0f, 50.0f, 50.0f, 1);
-	_quadtree->add(_player);
+	//_quadtree->add(_player);
 
 	for(unsigned int i =0; i < _objects.size(); i++){
 		_quadtree->add(_objects[i]);

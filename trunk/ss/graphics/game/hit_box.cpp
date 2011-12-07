@@ -98,13 +98,7 @@ void hit_box::advance(float dt){
 void hit_box::draw(){
 	
 	//float scale = radius0 / 2.5f;
-	glPushMatrix();
-	//y will have to be replaced when a proper map is made
-	glTranslatef(x0, 0.0f, z0);
-	glRotatef(90 - angle * 180 / M_PI, 0, 1, 0);
-	//model goes here
-	glutSolidSphere(radius0, 20, 20);
-	glPopMatrix();
+	;
 }
 
 float hit_box::x(){
@@ -185,7 +179,7 @@ void player::bounceOff(hit_box * otherBox){
 }
 
 void player::advance(float dt){
-	printf("Player advanced\n");
+	;//printf("Player advanced\n");
 }
 
 void player::update_pos(float xpos, float ypos, float zpos, float angle){
@@ -205,4 +199,55 @@ void player::draw(){
 	//model goes here
 	glutSolidCube(1);
 	//glPopMatrix();
+}
+
+void enemy::draw(){
+	glPushMatrix();
+	//y will have to be replaced when a proper map is made
+	glTranslatef(x0, 0.0f, z0);
+	glRotatef(90 - angle * 180 / M_PI, 0, 1, 0);
+	//model goes here
+	glutSolidSphere(radius0, 20, 20);
+	glPopMatrix();
+}
+
+void enemy::bounceOff(hit_box * otherBox){
+	float vx = velocityX();
+	float vz = velocityZ();
+
+	//Find distances between the two
+	float dx = otherBox->x() - x0;
+	float dz = otherBox->z() - z0;
+
+	//What do you know, something I leanred in secondary school
+	float m = sqrt(dx * dx + dz * dz);
+	dx /= m;
+	dz /= m;
+
+	float dotProduct = vx * dx + vz * dz;
+	vx -= 2 * dotProduct * dx;
+	vz -= 2 * dotProduct * dz;
+
+	//This check is somewhat important :)
+	if(vx != 0 || vz != 0){
+		angle = atan2(vz, vx);
+	}
+	//printf("BALL\n");
+}
+
+//Advance movement by dt. Calls step the right number of times
+void enemy::advance(float dt){
+
+	while (dt > 0){
+		if(timeUntilNextStep < dt){
+			dt -= timeUntilNextStep;
+			step();
+			timeUntilNextStep = step_time;
+		}else{
+			timeUntilNextStep -= dt;
+			dt = 0; //bug
+		}
+	}
+	//printf("Ball %f %f\n", x0, z0);
+
 }
