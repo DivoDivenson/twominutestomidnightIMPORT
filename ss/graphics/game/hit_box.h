@@ -45,8 +45,7 @@ class hit_box{
 		
 		//Advances the state of the guy by the specified amount of time, by
 		//calling step() the appropriate number of times and adjusting animTime
-		void advance(float dt);
-		void draw();
+		
 		float x();
 		float z();
 		float y();
@@ -54,7 +53,20 @@ class hit_box{
 		float velocityZ();
 		float radius();
 		float walkAngle();
+		virtual void bounceOff(hit_box * otherBox);
+		virtual void advance(float dt);
+		virtual void draw();
+};
+
+
+
+class enemy: public hit_box{
+	public:
+		enemy(float a): hit_box(a){ ; }
 		void bounceOff(hit_box * otherBox);
+		void advance(float dt);// Advance does nothing to the player
+		void draw();
+
 };
 
 class player: public hit_box{
