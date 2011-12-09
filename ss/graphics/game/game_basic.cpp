@@ -15,9 +15,9 @@
 #define SPEED 1
 
 using namespace std;
-const int NUM_HIT_BOXS = 100;
+const int NUM_HIT_BOXS = 40;
 
-const float TERRIAN_WIDTH = 50.0f;
+const float TERRIAN_WIDTH = 30.0f;
 
 int cameraZ;
 int camX, camY;
@@ -301,11 +301,14 @@ void potentialCollisions(vector<box_pair> &cs, Quadtree* quadtree) {
 bool testCollision(hit_box* hit_box1, hit_box* hit_box2) {
 	float dx = hit_box1->x() - hit_box2->x();
 	float dz = hit_box1->z() - hit_box2->z();
+	float dy = hit_box1->y() - hit_box2->y();
 	float r = hit_box1->radius() + hit_box2->radius();
-	if (dx * dx + dz * dz < r * r) {
+	//Not sure If i can just extend the maths like this....
+	if (dx * dx + dz * dz + dy * dy < r * r) {
 		float vx = hit_box1->velocityX() - hit_box2->velocityX();
 		float vz = hit_box1->velocityZ() - hit_box2->velocityZ();
-		return vx * dx + vz * dz < 0;
+		float vy = hit_box1->velocityY() - hit_box2->velocityY();
+		return vx * dx + vz * dz + vy * dy < 0;
 	}
 	else {
 		return false;
@@ -336,12 +339,14 @@ void playerCollide(hit_box * _player, vector<hit_box*> &hit_boxs){
 	for(unsigned int i = 0; i < hit_boxs.size(); i++){
 		if(testCollision(_player, hit_boxs[i])){
 			_player->bounceOff(hit_boxs[i]);
-			hit_boxs[i]->bounceOff(_player);
+			//hit_boxs[i]->bounceOff(_player);
+			hit_boxs.erase(hit_boxs.begin() + i);
 		}
 	}
 }
 
 //Moves the hit_boxs over the given interval of time, without handling collisions
+//Quad tree ignoers Y direction for the moment
 void movehit_boxs(vector<hit_box*> &hit_boxs, Quadtree* quadtree, float dt) {
 	for(unsigned int i = 0; i < hit_boxs.size(); i++) {
 		hit_box* hit_box = hit_boxs[i];
@@ -512,12 +517,12 @@ void updateScene(int value){
 		_objects[i]->advance(0.01f);
 	}*/
 	advance(_objects, _quadtree, 0.025f, _timeUntilHandleCollisions, _numCollisions);
-	//playerCollide(_player, _objects);
+	playerCollide(_player, _objects);
 	glutPostRedisplay();
 	glutTimerFunc(25, updateScene, 0);
 }
 
-float oldX, oldY;
+float oldX, oldZ;
 void renderScene(){
 	       
     // Clear framebuffer & depth buffer
@@ -532,16 +537,18 @@ void renderScene(){
 	//glutSolidCube(1);
 	_player->draw(); //Using the draw function to update the position. Whatever man
 	oldX = _player->x();
-	oldY = _player->z();
-	dynamic_cast<player*>(_player)->update_pos(xpos, 0.0f, zpos, yrot);
+	oldZ = _player->z();
+	dynamic_cast<player*>(_player)->update_pos(xpos, ypos, zpos, yrot);
 	//Presume the player moves every scene
-	_quadtree->hit_boxMoved(_player, oldX, oldY);
+	_quadtree->hit_boxMoved(_player, oldX, oldZ);
 
 
 
 	glRotatef(yrot,0.0,1.0,0.0);  //rotate our camera on the y-axis
 
-    glTranslatef(-xpos,0.0f,-zpos); //translate the screen to the position of our camera
+    glTranslatef(-xpos,-ypos,-zpos); //translate the screen to the position of our camera
+   // glTranslatef(-xpos,1.0f,-zpos); //translate the screen to the position of our camera
+
 
 
 	for (unsigned int i = 0; i < _objects.size(); i++){
@@ -564,10 +571,10 @@ int main(int argc, char ** argv){
 	init();
 
 	_objects = makeObjects(NUM_HIT_BOXS);
-	_player = new player(1.0f);
+	_player = new player(1.0f, 0.0f, 0.0f, 0.0f);
 	//_objects.push_back(_player);
 
-	_quadtree = new Quadtree(0.0f, 0.0f, 50.0f, 50.0f, 1);
+	_quadtree = new Quadtree(0.0f, 0.0f, TERRIAN_WIDTH, TERRIAN_WIDTH, 1);
 	//_quadtree->add(_player);
 
 	for(unsigned int i =0; i < _objects.size(); i++){

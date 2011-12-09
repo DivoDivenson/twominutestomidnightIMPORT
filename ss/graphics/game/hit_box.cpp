@@ -14,9 +14,12 @@ void hit_box::step(){
 
 	float maxX = terrainScale * t_width - radius0;
 	float maxZ = terrainScale * t_length - radius0;
+	float maxY = terrainScale * t_length - radius0;//Change to height
 
 	x0 += velocityX() * step_time;
 	z0 += velocityZ() * step_time;
+	y0 += velocityY() * step_time;
+	//y0 = 1.0f;
 
 	bool hitEdge = false;
 
@@ -36,6 +39,14 @@ void hit_box::step(){
 	}
 	else if (z0 > maxZ) {
 		z0 = maxZ;
+		hitEdge = true;
+	}
+
+	if (y0 < radius0){
+		y0 = radius0;
+		hitEdge = true;
+	}else if(y0 > maxY){
+		y0 = maxY;
 		hitEdge = true;
 	}
 
@@ -70,8 +81,10 @@ hit_box::hit_box(float terrainScale1){
 
 	x0 = randomFloat() * (terrainScale * t_width - radius0) + radius0;
 	z0 = randomFloat() * (terrainScale * t_length - radius0) + radius0;
+	y0 = randomFloat() * (terrainScale * t_length - radius0) + radius0;
+	//y0 = 1.0f;
 
-	speed = 1.5f * randomFloat() + 2.0f;
+	speed = 11.5f * randomFloat() + 2.0f;
 	isTurningLeft = randomFloat() < 0.5f;
 	angle = 2 * M_PI * randomFloat();
 	timeUntilSwitchDir = randomFloat() * (20 * randomFloat() + 15);
@@ -111,7 +124,8 @@ float hit_box::z(){
 
 float hit_box::y(){
 	//replace
-	return 1.0f;
+	//return 1.0f;
+	return y0;
 }
 
 float hit_box::velocityX(){
@@ -120,6 +134,11 @@ float hit_box::velocityX(){
 
 float hit_box::velocityZ(){
 	return speed * sin(angle);
+}
+
+float hit_box::velocityY(){
+	return speed * sin(angle);//Simplest way to do this, although it does suck baddly
+	//return y0;
 }
 
 float hit_box::radius(){
@@ -178,6 +197,23 @@ void player::bounceOff(hit_box * otherBox){
 	printf("PLAYER\n");
 }
 
+player::player(float terrainScale, float xpos, float ypos, float zpos){
+	hit_box(terrainScale);
+
+	timeUntilNextStep = 0;
+	radius0 = 0.4f * randomFloat() + 0.25f;
+
+	x0 = xpos;
+	y0 = ypos;
+	z0 = zpos;
+
+	speed = 11.5f * randomFloat() + 2.0f;
+	isTurningLeft = randomFloat() < 0.5f;
+	angle = 2 * M_PI * randomFloat();
+	timeUntilSwitchDir = randomFloat() * (20 * randomFloat() + 15);
+
+}
+
 void player::advance(float dt){
 	;//printf("Player advanced\n");
 }
@@ -185,6 +221,7 @@ void player::advance(float dt){
 void player::update_pos(float xpos, float ypos, float zpos, float angle){
 	x0 = xpos;
 	z0 = zpos;
+	y0 = ypos;
 	angle = angle;
 }
 
@@ -204,8 +241,10 @@ void player::draw(){
 void enemy::draw(){
 	glPushMatrix();
 	//y will have to be replaced when a proper map is made
-	glTranslatef(x0, 0.0f, z0);
+	glTranslatef(x0, y0, z0);
 	glRotatef(90 - angle * 180 / M_PI, 0, 1, 0);
+	//glRotatef(90 - angle * 180 / M_PI, 1, 0, 0);
+
 	//model goes here
 	glutSolidSphere(radius0, 20, 20);
 	glPopMatrix();
