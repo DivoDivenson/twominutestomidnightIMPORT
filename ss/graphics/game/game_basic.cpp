@@ -46,7 +46,11 @@ const float TIME_BETWEEN_HANDLE_COLLISIONS = 0.01f;
 model3DS * car;
 
 vector<hit_box*> _objects;
+vector<hit_box*> _shots;
+vector<hit_box*> dying; //Draw objects "dying" animation, then delete it
 hit_box * _player;
+
+bool shoot;
 
 
 
@@ -55,6 +59,10 @@ hit_box * _player;
 struct box_pair {
 	hit_box* hit_box1;
 	hit_box* hit_box2;
+	//set<hit_box*>::iterator one;
+	//set<hit_box*>::iterator two;
+	//int one;
+	//int two;
 };
 //The amount of time until we next check for and handle all collisions
 float _timeUntilHandleCollisions = 0;
@@ -63,6 +71,12 @@ int _numCollisions; //The total number of collisions that have occurred
 const int MAX_QUADTREE_DEPTH = 6;
 const int MIN_HIT_BOXS_PER_QUADTREE = 2;
 const int MAX_HIT_BOXS_PER_QUADTREE = 5;
+
+template <class DstType, class SrcType>
+bool IsType(const SrcType* src)
+{
+  return dynamic_cast<const DstType*>(src) != 0;
+}
 
 //Our data structure for making collision detection faster
 class Quadtree {
@@ -315,6 +329,7 @@ bool testCollision(hit_box* hit_box1, hit_box* hit_box2) {
 	}
 }
 
+//Should really have a seperate data structure to contain the shots
 void handleCollisions(vector<hit_box*> &hit_boxs,
 					  Quadtree* quadtree,
 					  int &numCollisions) {
@@ -329,10 +344,34 @@ void handleCollisions(vector<hit_box*> &hit_boxs,
 			g1->bounceOff(g2);
 			g2->bounceOff(g1);
 			numCollisions++;
+			//if either object is a shot, get rid of them both
+			//The following code sucks. HARD
+			shot * v1 = dynamic_cast<shot*>(g1);
+			shot * v2 = dynamic_cast<shot*>(g2);
+			if(v1 != 0 || v2 != 0){
+				dying.push_back(g1);
+				dying.push_back(g2);
+				g1->kill();
+				g2->kill();
+				quadtree->remove(g1);
+				quadtree->remove(g2);
+			}
 		}
 	}
 }
 
+//This is pretty horrible but is the only quick way I could think off. Also it doesn't work
+void clean(vector<hit_box*> &hit_boxs){
+	for(unsigned int i = 0; i < hit_boxs.size(); i++){
+		if(hit_boxs[i]->isDead()){
+			fprintf(stderr,"%d is dead\n", i);
+			hit_boxs.erase(hit_boxs.begin()+1);
+		}else{
+			fprintf(stderr,"%d is not dead\n", i);
+
+		}
+	}
+}
 //Check if the player collides with anything. Linear for the moment, get working with 
 //quad tree later
 void playerCollide(hit_box * _player, vector<hit_box*> &hit_boxs){
@@ -436,6 +475,21 @@ void keypress(unsigned char key, int x, int y){
 
 }
 
+void mouse_func(int button, int state, int x, int y){
+	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
+		shoot = true;
+		//_quadtree->add(_objects.at(_objects.end()));
+	}else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP){
+		shoot = false;
+	}else if(button == 4){ //Zooming
+		cRadius += 0.5f;
+	}else if(button == 3){
+		cRadius -= 0.5f;
+	}
+}
+
+
+
 void mouseMove(int x, int y){
 	int diffx=x-lastx; //check the difference between the current x and the last x position
 	int diffy=y-lasty; //check the difference between the current y and the last y position
@@ -512,14 +566,20 @@ void enable(){
 
 }
 
+
 void updateScene(int value){
 	/*for (unsigned int i = 0; i < _objects.size(); i++){
 		_objects[i]->advance(0.01f);
 	}*/
+
+	if(shoot){
+		_objects.push_back(new shot(1.0f, xpos, ypos, zpos, yrot -90, xrot));
+	}
 	advance(_objects, _quadtree, 0.025f, _timeUntilHandleCollisions, _numCollisions);
 	playerCollide(_player, _objects);
 	glutPostRedisplay();
 	glutTimerFunc(25, updateScene, 0);
+
 }
 
 float oldX, oldZ;
@@ -555,6 +615,11 @@ void renderScene(){
 		_objects[i]->draw();
 	}
 
+	for(unsigned int i = 0; i < dying.size(); i++){
+		;//dying[i]->draw();
+		//check if it's done and remove it
+	}
+
 	glutSwapBuffers();
 	
 }
@@ -562,6 +627,8 @@ void renderScene(){
 
 int main(int argc, char ** argv){
 	srand((unsigned int)time(0));
+
+	shoot = false;
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -585,6 +652,7 @@ int main(int argc, char ** argv){
 	glutDisplayFunc(renderScene);
 	glutReshapeFunc(setViewport);
 	glutKeyboardFunc(keypress);
+	glutMouseFunc(mouse_func);
     glutPassiveMotionFunc(mouseMove);
     glutTimerFunc(25, updateScene, 0);
     //glutMouseFunc(mouse_func);
