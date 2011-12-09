@@ -32,11 +32,15 @@ class hit_box{
 		//indicates the positive z direction.  The angle always lies between 0
 		//and 2 * PI.
 		float angle;
-		float angleY;
+		float angleX;
 		float timeUntilNextStep;
+
+		bool dead;
+
 	
 		//These two maybe usless
 		bool isTurningLeft;
+		bool isGoingUp;
 		float timeUntilSwitchDir;
 
 		void step();
@@ -49,6 +53,7 @@ class hit_box{
 		
 		//Advances the state of the guy by the specified amount of time, by
 		//calling step() the appropriate number of times and adjusting animTime
+
 		
 		float x();
 		float z();
@@ -58,6 +63,8 @@ class hit_box{
 		float velocityY();
 		float radius();
 		float walkAngle();
+		void kill();
+		bool isDead();
 		virtual void bounceOff(hit_box * otherBox);
 		virtual void advance(float dt);
 		virtual void draw();
@@ -67,7 +74,7 @@ class hit_box{
 
 class enemy: public hit_box{
 	public:
-		enemy(float a): hit_box(a){ ; }
+		enemy(float a): hit_box(a){ dead=false; }
 		void bounceOff(hit_box * otherBox);
 		void advance(float dt);// Advance does nothing to the player
 		void draw();
@@ -83,6 +90,14 @@ class player: public hit_box{
 		void update_pos(float xpos, float ypos, float zpos, float angle);
 		void draw();
 
+};
+
+class shot: public hit_box{
+	public:
+		shot(float terrainScale, float xpos, float ypos, float zpos, float angle1, float angle2);
+		void bounceOff(hit_box * otherBox);
+		void advance(float dt);
+		void draw();
 };
 
 

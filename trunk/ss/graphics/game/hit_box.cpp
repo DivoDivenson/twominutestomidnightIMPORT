@@ -10,6 +10,7 @@ void hit_box::step(){
 	while (timeUntilSwitchDir <= 0) {
 		timeUntilSwitchDir += 20 * randomFloat() + 15;
 		isTurningLeft = !isTurningLeft;
+		isGoingUp = !isGoingUp;
 	}
 
 	float maxX = terrainScale * t_width - radius0;
@@ -63,11 +64,31 @@ void hit_box::step(){
 		angle += 0.05f * speed * step_time;
 	}
 
+	if(hitEdge){
+		//Speed up when an edge is hit
+		if(isGoingUp){
+			angleX -= 0.5f * speed * step_time;
+		}else{
+			angleX += 0.5f * speed * step_time;
+		}
+	}else if(isGoingUp){
+		angleX -= 0.05f * speed * step_time;
+	}else{
+		angleX += 0.05f * speed * step_time;
+	}
+
 	while (angle > 2 * M_PI){
 		angle -= 2 * M_PI;
 	}
 	while (angle < 0){
 		angle += 2 * M_PI;
+	}
+
+	while (angleX > 2 * M_PI){
+		angleX -= 2 * M_PI;
+	}
+	while (angleX < 0){
+		angleX += 2 * M_PI;
 	}
 }
 
@@ -75,6 +96,7 @@ void hit_box::step(){
 
 hit_box::hit_box(float terrainScale1){
 	terrainScale = terrainScale1;
+	dead = false;
 
 	timeUntilNextStep = 0;
 	radius0 = 0.4f * randomFloat() + 0.25f;
@@ -86,9 +108,23 @@ hit_box::hit_box(float terrainScale1){
 
 	speed = 11.5f * randomFloat() + 2.0f;
 	isTurningLeft = randomFloat() < 0.5f;
+	isGoingUp = randomFloat() < 0.5f;
+
 	angle = 2 * M_PI * randomFloat();
+	angleX = 2 * M_PI * randomFloat();
+
 	timeUntilSwitchDir = randomFloat() * (20 * randomFloat() + 15);
 
+}
+
+void hit_box::kill(){
+	dead = true;
+	printf("Killed\n");
+}
+
+bool hit_box::isDead(){
+
+	return dead;
 }
 
 //Advance movement by dt. Calls step the right number of times
@@ -137,7 +173,7 @@ float hit_box::velocityZ(){
 }
 
 float hit_box::velocityY(){
-	return speed * sin(angle);//Simplest way to do this, although it does suck baddly
+	return speed * sin(angleX);//Simplest way to do this, although it does suck baddly
 	//return y0;
 }
 
@@ -194,22 +230,20 @@ void player::bounceOff(hit_box * otherBox){
 	if(vx != 0 || vz != 0){
 		angle = atan2(vz, vx);
 	}
-	printf("PLAYER\n");
 }
 
-player::player(float terrainScale, float xpos, float ypos, float zpos){
-	hit_box(terrainScale);
+player::player(float terrainScale, float xpos, float ypos, float zpos) : hit_box(terrainScale){
 
 	timeUntilNextStep = 0;
-	radius0 = 0.4f * randomFloat() + 0.25f;
-
+	radius0 = 1.0f;
 	x0 = xpos;
 	y0 = ypos;
 	z0 = zpos;
+	dead = false;
 
-	speed = 11.5f * randomFloat() + 2.0f;
+	//speed = 11.5f * randomFloat() + 2.0f;
 	isTurningLeft = randomFloat() < 0.5f;
-	angle = 2 * M_PI * randomFloat();
+	//angle = 2 * M_PI * randomFloat();
 	timeUntilSwitchDir = randomFloat() * (20 * randomFloat() + 15);
 
 }
@@ -234,20 +268,60 @@ void player::draw(){
 	//glTranslatef(x0, 0.0f, z0);
 	//glRotatef(90 - angle * 180 / M_PI, 0, 1, 0);
 	//model goes here
-	glutSolidCube(1);
+	glutSolidCube(radius0);
 	//glPopMatrix();
 }
 
-void enemy::draw(){
-	glPushMatrix();
-	//y will have to be replaced when a proper map is made
-	glTranslatef(x0, y0, z0);
-	glRotatef(90 - angle * 180 / M_PI, 0, 1, 0);
-	//glRotatef(90 - angle * 180 / M_PI, 1, 0, 0);
+shot::shot(float terrianScale, float xpos, float ypos, float zpos, float angle1, float angle2): hit_box(terrainScale){
+	timeUntilNextStep = 0;
+	radius0 = 0.3f;
+	x0 = xpos;
+	y0 = ypos;
+	z0 = zpos;
 
-	//model goes here
-	glutSolidSphere(radius0, 20, 20);
-	glPopMatrix();
+	angle = angle1;
+	angleX = angle2;
+	dead = false;
+
+
+	speed = 1.5f;
+	//isTurningLeft = randomFloat() < 0.5f;
+	//angle = 2 * M_PI * randomFloat();
+	//timeUntilSwitchDir = randomFloat() * (20 * randomFloat() + 15);
+}
+
+void shot::bounceOff(hit_box * otherBox){
+	speed = 0;
+}
+
+void shot::draw(){
+	if(!dead){ //So this is a terrible way of doing things
+		glPushMatrix();
+		glTranslatef(x0, y0, z0);
+		glutSolidCube(radius0);
+		glPopMatrix();
+	}
+}
+
+void shot::advance(float dt){
+	x0 += float(cos(angle*M_PI/180)) * speed;
+	z0 += float(sin(angle*M_PI/180)) * speed;
+	y0 += float(-sin(angleX*M_PI/180)) * speed;
+}
+
+void enemy::draw(){
+	if(!dead){
+		glPushMatrix();
+		//y will have to be replaced when a proper map is made
+		glTranslatef(x0, y0, z0);
+		glRotatef(90 - angle * 180 / M_PI, 0, 1, 0);
+		glRotatef(90 - angleX * 180 / M_PI, 1, 0, 0);
+		//glRotatef(90 - angle * 180 / M_PI, 1, 0, 0);
+
+		//model goes here
+		glutSolidSphere(radius0, 20, 20);
+		glPopMatrix();
+	}
 }
 
 void enemy::bounceOff(hit_box * otherBox){
@@ -271,6 +345,8 @@ void enemy::bounceOff(hit_box * otherBox){
 	if(vx != 0 || vz != 0){
 		angle = atan2(vz, vx);
 	}
+
+	
 	//printf("BALL\n");
 }
 
