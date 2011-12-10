@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -Wall -g 
+CFLAGS = -Wall -O3
 PROG = output
 SRCS = game_basic.cpp model3DS.cpp textureTGA.cpp hit_box.cpp
 
