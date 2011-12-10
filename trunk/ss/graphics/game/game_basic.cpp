@@ -17,7 +17,7 @@
 using namespace std;
 const int NUM_HIT_BOXS = 40;
 
-const float TERRIAN_WIDTH = 30.0f;
+const float TERRIAN_WIDTH = 30.0f; //Defines cube region of the game
 
 int cameraZ;
 int camX, camY;
@@ -50,7 +50,7 @@ vector<hit_box*> _shots;
 vector<hit_box*> dying; //Draw objects "dying" animation, then delete it
 hit_box * _player;
 
-bool shoot;
+int shoot;
 
 
 
@@ -360,7 +360,8 @@ void handleCollisions(vector<hit_box*> &hit_boxs,
 	}
 }
 
-//This is pretty horrible but is the only quick way I could think off. Also it doesn't work
+//This is pretty horrible but is the only quick way I could think off. Also it doesn't work.
+//Can't delete from vector you'r iterating over. Makes sense
 void clean(vector<hit_box*> &hit_boxs){
 	for(unsigned int i = 0; i < hit_boxs.size(); i++){
 		if(hit_boxs[i]->isDead()){
@@ -372,6 +373,22 @@ void clean(vector<hit_box*> &hit_boxs){
 		}
 	}
 }
+
+void clean_shots(vector<hit_box*> &hit_boxs){
+	int border = 20;
+	for(unsigned int i = 0; i < hit_boxs.size(); i++){
+		//This is gonna be a long if statement
+		if(hit_boxs[i]->x() < -border || hit_boxs[i]->y() < -border || hit_boxs[i]->z() < -border ||
+			hit_boxs[i]->x() > TERRIAN_WIDTH + border || 
+			hit_boxs[i]->y() > TERRIAN_WIDTH + border || hit_boxs[i]->z() > TERRIAN_WIDTH + border){
+			hit_boxs.erase(hit_boxs.begin()+1);
+
+		}else{
+
+		}
+	}
+}
+
 //Check if the player collides with anything. Linear for the moment, get working with 
 //quad tree later
 void playerCollide(hit_box * _player, vector<hit_box*> &hit_boxs){
@@ -477,10 +494,10 @@ void keypress(unsigned char key, int x, int y){
 
 void mouse_func(int button, int state, int x, int y){
 	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
-		shoot = true;
+		shoot++;
 		//_quadtree->add(_objects.at(_objects.end()));
 	}else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP){
-		shoot = false;
+		shoot = 0;
 	}else if(button == 4){ //Zooming
 		cRadius += 0.5f;
 	}else if(button == 3){
@@ -501,6 +518,8 @@ void mouseMove(int x, int y){
         yrot -= 360.0f;
     }
 }
+
+
 
 
 
@@ -572,10 +591,17 @@ void updateScene(int value){
 		_objects[i]->advance(0.01f);
 	}*/
 
-	if(shoot){
-		_objects.push_back(new shot(1.0f, xpos, ypos, zpos, yrot -90, xrot));
+	if(shoot == 3){
+		//_objects.push_back(new shot(1.0f, xpos, ypos, zpos, yrot -90, xrot));
+		_shots.push_back(new shot(1.0f, xpos, ypos, zpos, yrot -90, xrot));
+		//shoot =0;
+
+	}else if(shoot != 0){
+		shoot++;
 	}
 	advance(_objects, _quadtree, 0.025f, _timeUntilHandleCollisions, _numCollisions);
+	advance(_shots, _quadtree, 0.00000001f, _timeUntilHandleCollisions, _numCollisions);
+	clean_shots(_shots);
 	playerCollide(_player, _objects);
 	glutPostRedisplay();
 	glutTimerFunc(25, updateScene, 0);
@@ -620,6 +646,10 @@ void renderScene(){
 		//check if it's done and remove it
 	}
 
+	for(unsigned int i =0; i < _shots.size(); i++){
+		_shots[i]->draw();
+	}
+
 	glutSwapBuffers();
 	
 }
@@ -654,6 +684,7 @@ int main(int argc, char ** argv){
 	glutKeyboardFunc(keypress);
 	glutMouseFunc(mouse_func);
     glutPassiveMotionFunc(mouseMove);
+    glutMotionFunc(mouseMove);
     glutTimerFunc(25, updateScene, 0);
     //glutMouseFunc(mouse_func);
 
