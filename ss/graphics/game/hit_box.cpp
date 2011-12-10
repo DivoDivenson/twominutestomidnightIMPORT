@@ -232,7 +232,7 @@ void player::bounceOff(hit_box * otherBox){
 	}
 }
 
-player::player(float terrainScale, float xpos, float ypos, float zpos, char * _model) : hit_box(terrainScale){
+player::player(float terrainScale, float xpos, float ypos, float zpos, model3DS * _model) : hit_box(terrainScale){
 
 	timeUntilNextStep = 0;
 	radius0 = 1.0f;
@@ -240,7 +240,7 @@ player::player(float terrainScale, float xpos, float ypos, float zpos, char * _m
 	y0 = ypos;
 	z0 = zpos;
 	dead = false;
-	model = new model3DS(_model, 1);
+	model = _model;
 	//speed = 11.5f * randomFloat() + 2.0f;
 	isTurningLeft = randomFloat() < 0.5f;
 	//angle = 2 * M_PI * randomFloat();
@@ -249,7 +249,7 @@ player::player(float terrainScale, float xpos, float ypos, float zpos, char * _m
 }
 
 void player::advance(float dt){
-	;//printf("Player advanced\n");
+	;//printf("Player advanced\n");Player controled by the player :)
 }
 
 void player::update_pos(float xpos, float ypos, float zpos, float angle){
@@ -311,6 +311,11 @@ void shot::advance(float dt){
 	y0 += float(-sin(angleX*M_PI/180)) * speed;
 }
 
+enemy::enemy(float a, model3DS * _model) : hit_box(a){
+	model = _model;
+	radius0 = 2.0f;
+}
+
 void enemy::draw(){
 	if(!dead){
 		glPushMatrix();
@@ -321,7 +326,7 @@ void enemy::draw(){
 		//glRotatef(90 - angle * 180 / M_PI, 1, 0, 0);
 
 		//model goes here
-		glutSolidSphere(radius0, 20, 20);
+		model->draw();
 		glPopMatrix();
 	}
 }
