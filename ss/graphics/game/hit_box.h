@@ -9,8 +9,8 @@
 
 //#include "model3DS.h" //for later
 
-const int t_width = 30;
-const int t_length = 30;
+const int t_width = 50;
+const int t_length = 50;
 
 const float step_time = 0.01f;
 

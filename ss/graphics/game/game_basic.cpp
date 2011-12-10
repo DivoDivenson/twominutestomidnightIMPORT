@@ -17,12 +17,12 @@
 using namespace std;
 const int NUM_HIT_BOXS = 40;
 
-const float TERRIAN_WIDTH = 30.0f; //Defines cube region of the game
+const float TERRIAN_WIDTH = 50.0f; //Defines cube region of the game
 
 int cameraZ;
 int camX, camY;
 //
-float xpos = 0, ypos = 0, zpos = 0, xrot = 0, yrot = 0, angle=0.0;
+float xpos = TERRIAN_WIDTH / 2, ypos = 0, zpos = TERRIAN_WIDTH / 2, xrot = 0, yrot = 0, angle=0.0;
 float lastx, lasty;
 
 float cRadius = 10.0f;
@@ -40,8 +40,14 @@ GLfloat emerald_ambient[] =
 
 const float TIME_BETWEEN_HANDLE_COLLISIONS = 0.01f;
 
+enum BUTTONS { W, A, S, D };
+//enum WALLS { XNEG, XPOS, YNEG, YPOS, ZNEG, ZPOS};
 
+int button_presses[] = {0, 0, 0, 0}; //Used to keep track of which buttons are pressed how long ago they were released
 
+//GLint sky_textures[5];
+
+enum texture_ints { t_xneg, t_xpos, t_yneg, t_ypos, t_zneg, t_zpos}; //For the skybox
 
 model3DS * car;
 
@@ -381,10 +387,7 @@ void clean_shots(vector<hit_box*> &hit_boxs){
 		if(hit_boxs[i]->x() < -border || hit_boxs[i]->y() < -border || hit_boxs[i]->z() < -border ||
 			hit_boxs[i]->x() > TERRIAN_WIDTH + border || 
 			hit_boxs[i]->y() > TERRIAN_WIDTH + border || hit_boxs[i]->z() > TERRIAN_WIDTH + border){
-			hit_boxs.erase(hit_boxs.begin()+1);
-
-		}else{
-
+			hit_boxs.erase(hit_boxs.begin()+i); //So this is really unsafe
 		}
 	}
 }
@@ -436,61 +439,109 @@ void advance(vector<hit_box*> &hit_boxs,
 
 Quadtree* _quadtree;
 
-void keypress(unsigned char key, int x, int y){
-	
-	   if (key=='q')
-    {
-    xrot += 1;
-    if (xrot >360) xrot -= 360;
-    }
-
-    if (key=='z')
-    {
-    xrot -= 1;
-    if (xrot < -360) xrot += 360;
-    }
-
-    if (key=='w')
-    {
-    float xrotrad, yrotrad;
-    yrotrad = (yrot / 180 * M_PI);
-    xrotrad = (xrot / 180 * M_PI); 
-    xpos += float(sin(yrotrad) * SPEED);
-    zpos -= float(cos(yrotrad) * SPEED);
-    ypos -= float(sin(xrotrad) * SPEED);
-    }
-
-    if (key=='s')
-    {
-    float xrotrad, yrotrad;
-    yrotrad = (yrot / 180 * M_PI);
-    xrotrad = (xrot / 180 * M_PI); 
-    xpos -= float(sin(yrotrad) * SPEED);
-    zpos += float(cos(yrotrad) * SPEED) ;
-    ypos += float(sin(xrotrad) * SPEED);
-    }
-
-    if (key=='d')
-    {
-    	float yrotrad;
-		yrotrad = (yrot / 180 * M_PI);
-		xpos += float(cos(yrotrad)) * SPEED;
-		zpos += float(sin(yrotrad)) * SPEED;
-    }
-
-    if (key=='a')
-    {
-   		float yrotrad;
-		yrotrad = (yrot / 180 * M_PI);
-		xpos -= float(cos(yrotrad)) * SPEED;
-		zpos -= float(sin(yrotrad)) * SPEED;
-    }
-    if (key==27)
+void keypressdown(unsigned char key, int x, int y){
+	if(key == 'w'){
+		button_presses[W] = 10;
+	}
+	if(key == 'a'){
+		button_presses[A] = 10;
+	}
+	if(key == 's'){
+		button_presses[S] = 10;
+	}
+	if(key == 'd'){
+		button_presses[D] = 10;
+	}
+	if (key==27)
     {
     exit(0);
     }
 
 }
+
+void keypressup(unsigned char key, int x, int y){
+	if(key == 'w'){
+		button_presses[W] = 9;
+	}
+	if(key == 'a'){
+		button_presses[A] = 9;
+	}
+	if(key == 's'){
+		button_presses[S] = 9;
+	}
+	if(key == 'd'){
+		button_presses[D] = 9;
+	}
+
+}
+
+
+
+void move_player(){
+	
+	
+    if (xrot >360) xrot -= 360;
+    
+
+    if (xrot < -360) xrot += 360;
+    
+
+    if (button_presses[W]){
+	    float xrotrad, yrotrad;
+	    yrotrad = (yrot / 180 * M_PI);
+	    xrotrad = (xrot / 180 * M_PI);
+	    float adj_speed = float(button_presses[W] / 10.0f);
+	    xpos += float(sin(yrotrad) * adj_speed);
+	    zpos -= float(cos(yrotrad) * adj_speed);
+	    ypos -= float(sin(xrotrad) * adj_speed);
+	    button_presses[W]--;
+    }
+
+    if (button_presses[S]){
+	    float xrotrad, yrotrad;
+	    yrotrad = (yrot / 180 * M_PI);
+	    xrotrad = (xrot / 180 * M_PI); 
+	   	float adj_speed = float(button_presses[S] / 10.0f);
+
+	    xpos -= float(sin(yrotrad) * adj_speed);
+	    zpos += float(cos(yrotrad) * adj_speed) ;
+	    ypos += float(sin(xrotrad) * adj_speed);
+	    button_presses[S]--;
+    }
+
+    if (button_presses[D]){
+    	float yrotrad;
+		yrotrad = (yrot / 180 * M_PI);
+		float adj_speed = float(button_presses[D] / 10.0f);
+
+		xpos += float(cos(yrotrad)) * adj_speed;
+		zpos += float(sin(yrotrad)) * adj_speed;
+		button_presses[D]--;
+    }
+
+    if (button_presses[A]){
+   		float yrotrad;
+		yrotrad = (yrot / 180 * M_PI);
+		float adj_speed = float(button_presses[A] / 10.0f);
+
+		xpos -= float(cos(yrotrad)) * adj_speed;
+		zpos -= float(sin(yrotrad)) * adj_speed;
+		button_presses[A]--;
+    }
+   
+
+}
+
+ void load_sky(){
+ 	textureTGA("./skybox/xneg.tga", t_xneg);
+	textureTGA("./skybox/xpos.tga", t_xpos);
+	textureTGA("./skybox/yneg.tga", t_yneg);
+	textureTGA("./skybox/ypos.tga", t_ypos);
+	textureTGA("./skybox/zneg.tga", t_zneg);
+	textureTGA("./skybox/zpos.tga", t_zpos);
+ }
+
+ 
 
 void mouse_func(int button, int state, int x, int y){
 	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
@@ -541,6 +592,7 @@ void init(){
 	glShadeModel(GL_SMOOTH);
 
 	car = new model3DS("./car/car.3ds", 0.05f);
+	load_sky();
 
 
 	
@@ -578,19 +630,77 @@ void enable(){
     glEnable (GL_LIGHTING); //enable the lighting
     glEnable (GL_LIGHT0); //enable LIGHT0, our Diffuse Light
     glShadeModel (GL_SMOOTH); //set the shader to smooth shader
-	glEnable(GL_TEXTURE_2D);
+	//glEnable(GL_TEXTURE_2D);
 	//glColor3f(1.0,1.0,1.0);
-    glBindTexture(GL_TEXTURE_2D,textureId);
+    //glBindTexture(GL_TEXTURE_2D,textureId);
     
 
 }
 
+void draw_sky(){
+ 	glPushMatrix();
+    // Enable/Disable features
+    glPushAttrib(GL_ENABLE_BIT);
+    glEnable(GL_TEXTURE_2D);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_BLEND);
+
+    float border = 10;
+    float width = TERRIAN_WIDTH + border;
+ 
+    // Just in case we set all vertices to white.
+    //glColor4f(1,1,1,1);
+    glBindTexture(GL_TEXTURE_2D, t_xneg);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0, 0); glVertex3f(  width, -border, -border );
+        glTexCoord2f(1, 0); glVertex3f( width, -border, width  );
+        glTexCoord2f(1, 1); glVertex3f( width,  width, width );
+        glTexCoord2f(0, 1); glVertex3f(  width,  width, -border );
+    glEnd();
+
+    glBindTexture(GL_TEXTURE_2D, t_xpos);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0, 0); glVertex3f(  -border, -border, width );
+        glTexCoord2f(1, 0); glVertex3f( -border, -border, -border  );
+        glTexCoord2f(1, 1); glVertex3f( -border,  width, -border );
+        glTexCoord2f(0, 1); glVertex3f(  -border,  width, width );
+    glEnd();
+
+    glBindTexture(GL_TEXTURE_2D, t_zneg);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0, 0); glVertex3f(  -border, -border, -border );
+        glTexCoord2f(1, 0); glVertex3f( width, -border, -border  );
+        glTexCoord2f(1, 1); glVertex3f( width,  width, -border );
+        glTexCoord2f(0, 1); glVertex3f(  -border,  width, -border );
+    glEnd();
+
+    glBindTexture(GL_TEXTURE_2D, t_zpos);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0, 0); glVertex3f(  width, -border, width );
+        glTexCoord2f(1, 0); glVertex3f( -border, -border, width );
+        glTexCoord2f(1, 1); glVertex3f( -border,  width, width );
+        glTexCoord2f(0, 1); glVertex3f(  width,  width, width );
+    glEnd();
+
+    glBindTexture(GL_TEXTURE_2D, t_yneg);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0, 0); glVertex3f(  width, -border, -border );
+        glTexCoord2f(1, 0); glVertex3f( width, -border, width );
+        glTexCoord2f(1, 1); glVertex3f( -border,  -border, width );
+        glTexCoord2f(0, 1); glVertex3f(  -border,  -border, -border );
+    glEnd();
+
+
+    glPopAttrib();
+    glPopMatrix();
+ }
 
 void updateScene(int value){
 	/*for (unsigned int i = 0; i < _objects.size(); i++){
 		_objects[i]->advance(0.01f);
 	}*/
-
+	move_player();
 	if(shoot == 3){
 		//_objects.push_back(new shot(1.0f, xpos, ypos, zpos, yrot -90, xrot));
 		_shots.push_back(new shot(1.0f, xpos, ypos, zpos, yrot -90, xrot));
@@ -613,10 +723,13 @@ void renderScene(){
 	       
     // Clear framebuffer & depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    	draw_sky();
+
     glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
 	enable();
+
 
 	glTranslatef(0.0f, -2.0f, -cRadius);
 	glRotatef(xrot, 1.0f, 0.0f, 0.0f);
@@ -681,7 +794,8 @@ int main(int argc, char ** argv){
 
 	glutDisplayFunc(renderScene);
 	glutReshapeFunc(setViewport);
-	glutKeyboardFunc(keypress);
+	glutKeyboardFunc(keypressdown);
+	glutKeyboardUpFunc(keypressup);
 	glutMouseFunc(mouse_func);
     glutPassiveMotionFunc(mouseMove);
     glutMotionFunc(mouseMove);
