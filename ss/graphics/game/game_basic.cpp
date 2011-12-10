@@ -12,7 +12,7 @@
 #include "model3DS.h"
 #include "hit_box.h"
 
-#define SPEED 1
+#define SPEED 1.2f
 
 using namespace std;
 const int NUM_HIT_BOXS = 40;
@@ -490,7 +490,7 @@ void move_player(){
 	    float xrotrad, yrotrad;
 	    yrotrad = (yrot / 180 * M_PI);
 	    xrotrad = (xrot / 180 * M_PI);
-	    float adj_speed = float(button_presses[W] / 10.0f);
+	    float adj_speed = float(button_presses[W] / 10.0f) * SPEED;
 	    xpos += float(sin(yrotrad) * adj_speed);
 	    zpos -= float(cos(yrotrad) * adj_speed);
 	    ypos -= float(sin(xrotrad) * adj_speed);
@@ -501,7 +501,7 @@ void move_player(){
 	    float xrotrad, yrotrad;
 	    yrotrad = (yrot / 180 * M_PI);
 	    xrotrad = (xrot / 180 * M_PI); 
-	   	float adj_speed = float(button_presses[S] / 10.0f);
+	   	float adj_speed = float(button_presses[S] / 10.0f) * SPEED;
 
 	    xpos -= float(sin(yrotrad) * adj_speed);
 	    zpos += float(cos(yrotrad) * adj_speed) ;
@@ -512,7 +512,7 @@ void move_player(){
     if (button_presses[D]){
     	float yrotrad;
 		yrotrad = (yrot / 180 * M_PI);
-		float adj_speed = float(button_presses[D] / 10.0f);
+		float adj_speed = float(button_presses[D] / 10.0f) * SPEED;
 
 		xpos += float(cos(yrotrad)) * adj_speed;
 		zpos += float(sin(yrotrad)) * adj_speed;
@@ -522,7 +522,7 @@ void move_player(){
     if (button_presses[A]){
    		float yrotrad;
 		yrotrad = (yrot / 180 * M_PI);
-		float adj_speed = float(button_presses[A] / 10.0f);
+		float adj_speed = float(button_presses[A] / 10.0f)* SPEED;
 
 		xpos -= float(cos(yrotrad)) * adj_speed;
 		zpos -= float(sin(yrotrad)) * adj_speed;
@@ -690,6 +690,15 @@ void draw_sky(){
         glTexCoord2f(1, 1); glVertex3f( -border,  -border, width );
         glTexCoord2f(0, 1); glVertex3f(  -border,  -border, -border );
     glEnd();
+
+    glBindTexture(GL_TEXTURE_2D, t_ypos);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0, 0); glVertex3f(  width,  width, -border );
+        glTexCoord2f(1, 0); glVertex3f(  -border, width, -border );
+        glTexCoord2f(1, 1); glVertex3f( -border, width, width );
+        glTexCoord2f(0, 1); glVertex3f( width,  width, width );
+    glEnd();
+
 
 
     glPopAttrib();
