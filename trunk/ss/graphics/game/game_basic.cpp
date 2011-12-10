@@ -52,6 +52,8 @@ enum texture_ints { t_xneg, t_xpos, t_yneg, t_ypos, t_zneg, t_zpos}; //For the s
 model3DS * car;
 model3DS * city;
 model3DS * player_model;
+model3DS * gun;
+model3DS * baddy;
 
 vector<hit_box*> _objects;
 vector<hit_box*> _shots;
@@ -59,6 +61,8 @@ vector<hit_box*> dying; //Draw objects "dying" animation, then delete it
 hit_box * _player;
 
 int shoot;
+
+int freelook = 0;
 
 
 
@@ -555,6 +559,12 @@ void mouse_func(int button, int state, int x, int y){
 		cRadius += 0.5f;
 	}else if(button == 3){
 		cRadius -= 0.5f;
+	}else if(button == 1 && state == GLUT_DOWN){
+		if(!freelook){
+			freelook = 1;
+		}else{
+			freelook = 0;
+		}
 	}
 }
 
@@ -595,16 +605,17 @@ void init(){
 
 	//car = new model3DS("./car/car.3ds", 0.05f);
 	//city = new model3DS("./city/city.3ds", 1);
+	gun = new model3DS("./player/gun.3ds");
 	load_sky();
 
 
 	
 }
 
-vector<hit_box*> makeObjects(int number){
+vector<hit_box*> makeObjects(int number, model3DS * model){
 	vector<hit_box*> objects;
 	for(int i = 0; i < number; i++){
-		objects.push_back(new enemy(1.0f));
+		objects.push_back(new enemy(1.0f, model));
 	}
 	return objects;
 }
@@ -736,18 +747,27 @@ void renderScene(){
     // Clear framebuffer & depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glShadeModel(GL_FLAT);
-    	draw_sky();
+    draw_sky();
 
     glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-
+	
 
 	enable();
 
 
 	glTranslatef(0.0f, -2.0f, -cRadius);
-	_player->draw();
+	if(!freelook){
+		glEnable(GL_TEXTURE_2D);
+		_player->draw();
+		glPushMatrix();
+		glTranslatef(0, -1.5, 0);
+		glRotatef(180, 0, 1, 0);
+		gun->draw();
+		glPopMatrix();
+	}	
 	glRotatef(xrot, 1.0f, 0.0f, 0.0f);
+
 	//glutSolidCube(1);
 	//_player->draw(); //Using the draw function to update the position. Whatever man
 	oldX = _player->x();
@@ -756,11 +776,21 @@ void renderScene(){
 	//Presume the player moves every scene
 	_quadtree->hit_boxMoved(_player, oldX, oldZ);
 
-
+	if(freelook){
+		glPushMatrix();
+		glTranslatef(0, -1.5, 0);
+		glRotatef(180, 0, 1, 0);
+		gun->draw();
+		glPopMatrix();
+	}
 
 	glRotatef(yrot,0.0,1.0,0.0);  //rotate our camera on the y-axis
-
-
+	if(freelook){
+		glEnable(GL_TEXTURE_2D);
+		_player->draw();
+		
+	}
+		
     glTranslatef(-xpos,-ypos,-zpos); //translate the screen to the position of our camera
    // glTranslatef(-xpos,1.0f,-zpos); //translate the screen to the position of our camera
 
@@ -797,8 +827,9 @@ int main(int argc, char ** argv){
 	glutCreateWindow("A Game");
 	init();
 
-	_objects = makeObjects(NUM_HIT_BOXS);
-	_player = new player(1.0f, 0.0f, 0.0f, 0.0f, "./player/player.3ds");
+	baddy = new model3DS("./player/baddy.3ds");
+	_objects = makeObjects(NUM_HIT_BOXS, baddy);
+	_player = new player(1.0f, 0.0f, 0.0f, 0.0f, new model3DS("./player/playerwholenogun.3ds"));
 	//_objects.push_back(_player);
 
 	_quadtree = new Quadtree(0.0f, 0.0f, TERRIAN_WIDTH, TERRIAN_WIDTH, 1);

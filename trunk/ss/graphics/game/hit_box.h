@@ -77,7 +77,7 @@ class hit_box{
 
 class enemy: public hit_box{
 	public:
-		enemy(float a): hit_box(a){ dead=false; }
+		enemy(float a, model3DS * model);
 		void bounceOff(hit_box * otherBox);
 		void advance(float dt);// Advance does nothing to the player
 		void draw();
@@ -87,7 +87,7 @@ class enemy: public hit_box{
 class player: public hit_box{
 	public:
 		//player(float a): hit_box(a){ ; }
-		player(float terrainScale, float xpos, float ypos, float zpos, char * model);
+		player(float terrainScale, float xpos, float ypos, float zpos, model3DS * model);
 		void bounceOff(hit_box * otherBox);
 		void advance(float dt);// Advance does nothing to the player
 		void update_pos(float xpos, float ypos, float zpos, float angle);
