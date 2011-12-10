@@ -119,7 +119,6 @@ hit_box::hit_box(float terrainScale1){
 
 void hit_box::kill(){
 	dead = true;
-	printf("Killed\n");
 }
 
 bool hit_box::isDead(){
@@ -284,6 +283,7 @@ shot::shot(float terrianScale, float xpos, float ypos, float zpos, float angle1,
 	angle = angle1;
 	angleX = angle2;
 	dead = false;
+	//model = _model;
 
 
 	speed = 1.5f;
@@ -300,7 +300,7 @@ void shot::draw(){
 	if(!dead){ //So this is a terrible way of doing things
 		glPushMatrix();
 		glTranslatef(x0, y0, z0);
-		glutSolidCube(radius0);
+		glutSolidSphere(radius0, 4, 4);
 		glPopMatrix();
 	}
 }
