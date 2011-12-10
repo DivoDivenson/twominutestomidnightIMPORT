@@ -54,6 +54,7 @@ model3DS * city;
 model3DS * player_model;
 model3DS * gun;
 model3DS * baddy;
+model3DS * shot_model;
 
 vector<hit_box*> _objects;
 vector<hit_box*> _shots;
@@ -342,9 +343,10 @@ bool testCollision(hit_box* hit_box1, hit_box* hit_box2) {
 }
 
 //Should really have a seperate data structure to contain the shots
-void handleCollisions(vector<hit_box*> &hit_boxs,
-					  Quadtree* quadtree,
-					  int &numCollisions) {
+bool handleCollisions(vector<hit_box*> &hit_boxs,
+					  Quadtree* quadtree
+					  ) {
+	bool result = false;
 	vector<box_pair> gps;
 	potentialCollisions(gps, quadtree);
 	for(unsigned int i = 0; i < gps.size(); i++) {
@@ -355,7 +357,6 @@ void handleCollisions(vector<hit_box*> &hit_boxs,
 		if (testCollision(g1, g2)) {
 			g1->bounceOff(g2);
 			g2->bounceOff(g1);
-			numCollisions++;
 			//if either object is a shot, get rid of them both
 			//The following code sucks. HARD
 			shot * v1 = dynamic_cast<shot*>(g1);
@@ -367,9 +368,11 @@ void handleCollisions(vector<hit_box*> &hit_boxs,
 				g2->kill();
 				quadtree->remove(g1);
 				quadtree->remove(g2);
+				result = true;
 			}
 		}
 	}
+	return result;
 }
 
 //This is pretty horrible but is the only quick way I could think off. Also it doesn't work.
@@ -377,11 +380,7 @@ void handleCollisions(vector<hit_box*> &hit_boxs,
 void clean(vector<hit_box*> &hit_boxs){
 	for(unsigned int i = 0; i < hit_boxs.size(); i++){
 		if(hit_boxs[i]->isDead()){
-			fprintf(stderr,"%d is dead\n", i);
 			hit_boxs.erase(hit_boxs.begin()+1);
-		}else{
-			fprintf(stderr,"%d is not dead\n", i);
-
 		}
 	}
 }
@@ -406,6 +405,7 @@ void playerCollide(hit_box * _player, vector<hit_box*> &hit_boxs){
 			_player->bounceOff(hit_boxs[i]);
 			//hit_boxs[i]->bounceOff(_player);
 			hit_boxs.erase(hit_boxs.begin() + i);
+			//Update player life here
 		}
 	}
 }
@@ -428,10 +428,13 @@ void advance(vector<hit_box*> &hit_boxs,
 			 float t,
 			 float &timeUntilHandleCollisions,
 			 int &numCollisions) {
+	
 	while (t > 0) {
 		if (timeUntilHandleCollisions <= t) {
 			movehit_boxs(hit_boxs, quadtree, timeUntilHandleCollisions);
-			handleCollisions(hit_boxs, quadtree, numCollisions);
+			if(handleCollisions(hit_boxs, quadtree)){
+				numCollisions++;
+			}
 			t -= timeUntilHandleCollisions;
 			timeUntilHandleCollisions = TIME_BETWEEN_HANDLE_COLLISIONS;
 		}
@@ -606,6 +609,7 @@ void init(){
 	//car = new model3DS("./car/car.3ds", 0.05f);
 	//city = new model3DS("./city/city.3ds", 1);
 	gun = new model3DS("./player/gun.3ds");
+	//shot_model = new model3DS("./player/shot.3ds", 0.3);
 	load_sky();
 
 
@@ -738,6 +742,7 @@ void updateScene(int value){
 	playerCollide(_player, _objects);
 	glutPostRedisplay();
 	glutTimerFunc(25, updateScene, 0);
+	printf("Current Score is %d\n", _numCollisions );
 
 }
 
@@ -830,6 +835,7 @@ int main(int argc, char ** argv){
 	baddy = new model3DS("./player/baddy.3ds");
 	_objects = makeObjects(NUM_HIT_BOXS, baddy);
 	_player = new player(1.0f, 0.0f, 0.0f, 0.0f, new model3DS("./player/playerwholenogun.3ds"));
+
 	//_objects.push_back(_player);
 
 	_quadtree = new Quadtree(0.0f, 0.0f, TERRIAN_WIDTH, TERRIAN_WIDTH, 1);
