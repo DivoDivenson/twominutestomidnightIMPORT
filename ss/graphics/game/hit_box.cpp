@@ -232,7 +232,7 @@ void player::bounceOff(hit_box * otherBox){
 	}
 }
 
-player::player(float terrainScale, float xpos, float ypos, float zpos) : hit_box(terrainScale){
+player::player(float terrainScale, float xpos, float ypos, float zpos, char * _model) : hit_box(terrainScale){
 
 	timeUntilNextStep = 0;
 	radius0 = 1.0f;
@@ -240,7 +240,7 @@ player::player(float terrainScale, float xpos, float ypos, float zpos) : hit_box
 	y0 = ypos;
 	z0 = zpos;
 	dead = false;
-
+	model = new model3DS(_model, 1);
 	//speed = 11.5f * randomFloat() + 2.0f;
 	isTurningLeft = randomFloat() < 0.5f;
 	//angle = 2 * M_PI * randomFloat();
@@ -263,13 +263,15 @@ void player::draw(){
 	
 	
 	//float scale = radius0 / 2.5f;
-	//glPushMatrix();
+	glPushMatrix();
 	//y will have to be replaced when a proper map is made
 	//glTranslatef(x0, 0.0f, z0);
 	//glRotatef(90 - angle * 180 / M_PI, 0, 1, 0);
 	//model goes here
-	glutSolidCube(radius0);
-	//glPopMatrix();
+	//glutSolidCube(radius0);
+	glRotatef(180.0f, 0, 1, 0);
+	model->draw();
+	glPopMatrix();
 }
 
 shot::shot(float terrianScale, float xpos, float ypos, float zpos, float angle1, float angle2): hit_box(terrainScale){

@@ -50,6 +50,8 @@ int button_presses[] = {0, 0, 0, 0}; //Used to keep track of which buttons are p
 enum texture_ints { t_xneg, t_xpos, t_yneg, t_ypos, t_zneg, t_zpos}; //For the skybox
 
 model3DS * car;
+model3DS * city;
+model3DS * player_model;
 
 vector<hit_box*> _objects;
 vector<hit_box*> _shots;
@@ -589,9 +591,10 @@ void init(){
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
 	glEnable(GL_NORMALIZE);
 	glEnable(GL_COLOR_MATERIAL);
-	glShadeModel(GL_SMOOTH);
+	//glShadeModel(GL_SMOOTH);
 
-	car = new model3DS("./car/car.3ds", 0.05f);
+	//car = new model3DS("./car/car.3ds", 0.05f);
+	//city = new model3DS("./city/city.3ds", 1);
 	load_sky();
 
 
@@ -629,7 +632,7 @@ void enable(){
 	glEnable (GL_DEPTH_TEST); //enable the depth testing
     glEnable (GL_LIGHTING); //enable the lighting
     glEnable (GL_LIGHT0); //enable LIGHT0, our Diffuse Light
-    glShadeModel (GL_SMOOTH); //set the shader to smooth shader
+    //glShadeModel (GL_SMOOTH); //set the shader to smooth shader
 	//glEnable(GL_TEXTURE_2D);
 	//glColor3f(1.0,1.0,1.0);
     //glBindTexture(GL_TEXTURE_2D,textureId);
@@ -732,18 +735,21 @@ void renderScene(){
 	       
     // Clear framebuffer & depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glShadeModel(GL_FLAT);
     	draw_sky();
 
     glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
+
 	enable();
 
 
 	glTranslatef(0.0f, -2.0f, -cRadius);
+	_player->draw();
 	glRotatef(xrot, 1.0f, 0.0f, 0.0f);
 	//glutSolidCube(1);
-	_player->draw(); //Using the draw function to update the position. Whatever man
+	//_player->draw(); //Using the draw function to update the position. Whatever man
 	oldX = _player->x();
 	oldZ = _player->z();
 	dynamic_cast<player*>(_player)->update_pos(xpos, ypos, zpos, yrot);
@@ -754,9 +760,11 @@ void renderScene(){
 
 	glRotatef(yrot,0.0,1.0,0.0);  //rotate our camera on the y-axis
 
+
     glTranslatef(-xpos,-ypos,-zpos); //translate the screen to the position of our camera
    // glTranslatef(-xpos,1.0f,-zpos); //translate the screen to the position of our camera
 
+	//city->draw();
 
 
 	for (unsigned int i = 0; i < _objects.size(); i++){
@@ -790,7 +798,7 @@ int main(int argc, char ** argv){
 	init();
 
 	_objects = makeObjects(NUM_HIT_BOXS);
-	_player = new player(1.0f, 0.0f, 0.0f, 0.0f);
+	_player = new player(1.0f, 0.0f, 0.0f, 0.0f, "./player/player.3ds");
 	//_objects.push_back(_player);
 
 	_quadtree = new Quadtree(0.0f, 0.0f, TERRIAN_WIDTH, TERRIAN_WIDTH, 1);

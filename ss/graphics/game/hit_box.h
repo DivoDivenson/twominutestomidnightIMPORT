@@ -6,6 +6,7 @@
 #include "GL/gl.h"
 #include "GL/glu.h"
 #include "GL/glut.h"
+#include "model3DS.h"
 
 //#include "model3DS.h" //for later
 
@@ -36,6 +37,8 @@ class hit_box{
 		float timeUntilNextStep;
 
 		bool dead;
+
+		model3DS * model;
 
 	
 		//These two maybe usless
@@ -84,7 +87,7 @@ class enemy: public hit_box{
 class player: public hit_box{
 	public:
 		//player(float a): hit_box(a){ ; }
-		player(float terrainScale, float xpos, float ypos, float zpos);
+		player(float terrainScale, float xpos, float ypos, float zpos, char * model);
 		void bounceOff(hit_box * otherBox);
 		void advance(float dt);// Advance does nothing to the player
 		void update_pos(float xpos, float ypos, float zpos, float angle);
