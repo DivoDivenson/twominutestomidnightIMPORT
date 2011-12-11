@@ -291,14 +291,12 @@ int main( int argc, char** argv )
 		// Process image (i.e. setup and find the number of spoons)
 		//cvCopyImage( images[selected_image_num-1], selected_image );
 		selected_image = cvCloneImage(images[selected_image_num-1]);
-	    selected_image = cvCloneImage(images[user_clicked_key]);
-
+		cvShowImage( "Original", selected_image );
 		selected_image = crop_image(selected_image);
 		bin_image = cvCloneImage(selected_image);
 		result_image = cvCloneImage(selected_image);
 
 		printf("\nProcessing Image %d:\n",selected_image_num);
-	
 		//Get binary image of licence plate
 		bin_image = binary_image(selected_image);
 		//Invert binary image
@@ -306,29 +304,20 @@ int main( int argc, char** argv )
 
 		//ident_number(selected_image, result_image);
 		components = connected_components( bin_image, result_image);
-		char buff[100];
-		sprintf(buff, "Regions%d", user_clicked_key);
-		cvNamedWindow(buff, 1);
-		//cvShowImage(buff, bin_image);
 		//analyse_contour(components->h_next->h_next->h_next->h_next->h_next);
 		ident_numbers(components, sample_number_images, selected_image);
-        //cvShowImage( "Result", result_image);
-        //cvShowImage( "Original", selected_image );
-        char buff2[100];
-		sprintf(buff2, "Result%d", user_clicked_key);
-		cvNamedWindow(buff2, 1);
-		cvShowImage(buff2, selected_image);
+       // cvShowImage( "Result", selected_image);
+       cvShowImage("Result", selected_image);
+        
 
 
 		// Wait for user input
-        /*user_clicked_key = (char) cvWaitKey(0);
+        user_clicked_key = (char) cvWaitKey(0);
 		if ((user_clicked_key >= '1') && (user_clicked_key <= '0'+NUM_IMAGES))
 		{
 			selected_image_num = user_clicked_key-'0';
-		}*/
-		user_clicked_key++;
-	} while ( user_clicked_key < 9 );
-	cvWaitKey(0);
+		}
+	} while ( user_clicked_key != ESC );
 
     return 1;
 }
