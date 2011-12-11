@@ -470,7 +470,7 @@ void keypressdown(unsigned char key, int x, int y){
 		ypos = TERRIAN_WIDTH / 2;
 	}
 	if(key == 'k'){
-		_playerCollisions = 100;
+		_playerCollisions = 10;
 	}
 	if (key==27)
     {
