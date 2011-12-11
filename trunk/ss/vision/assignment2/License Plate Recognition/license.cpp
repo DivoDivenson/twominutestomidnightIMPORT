@@ -7,21 +7,30 @@
 #include <float.h>
 #include <math.h>
 
+
 #define NUM_IMAGES 9
 #define NUMBER_OF_KNOWN_CHARACTERS 10
 #define MIN_AREA 50.0 	//This is just easier. Had a method to get this from the set of sample images. That was a 
 						//waste of time.
 
+#define CROPX 20
+#define CROPY 12
+#define CROPW 250
+#define CROPH 250
+
+#define THRESHADJ 15
 
 
 
+//Crop image to just leave the numbers. Size is fixed. Given the nature of the input set
+//this seem to be a constraint on the probem
 IplImage * crop_image(IplImage * src){
 	IplImage * temp;
-	cvSetImageROI(src, cvRect(20,12,250,250));
+	cvSetImageROI(src, cvRect(CROPX, CROPY, CROPW, CROPH));
 	temp = cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
 	cvCopy(src, temp, NULL);
 	cvResetImageROI(src);
-	return temp;
+	return temp; //oh god, don't release
 }
 
 //Simple invert
@@ -48,6 +57,8 @@ void invert_image( IplImage* source)
 	
 }
 
+//Retrun a binary version of the source. The threshold is just the avergae luminance value of the image
+//This works because the licence plates are already 'very binary' in nature
 IplImage * binary_image(IplImage * source){
 	IplImage* binary_image = cvCreateImage( cvGetSize(source), 8, 1 );
 	cvConvertImage( source, binary_image );
@@ -55,13 +66,15 @@ IplImage * binary_image(IplImage * source){
 	cvSmooth(temp, binary_image);
 	CvScalar c = cvAvg(binary_image);
 	float threshold = c.val[0];
-	cvThreshold( binary_image, binary_image, threshold-15, 255, CV_THRESH_BINARY );
+	cvThreshold( binary_image, binary_image, threshold - THRESHADJ, 255, CV_THRESH_BINARY );
 	//cvMorphologyEx(binary_image, binary_image, NULL, NULL, CV_MOP_CLOSE, 1);
 
 	cvReleaseImage(&temp);
 	return binary_image;
 }
 
+//Pull the connected components out of an image.
+//This is used to pull the individual numbers out of a licence plate number
 CvSeq* connected_components( IplImage* source, IplImage* result )
 {
 
@@ -73,7 +86,7 @@ CvSeq* connected_components( IplImage* source, IplImage* result )
 	float threshold = c.val[0];
 	//FIX. So this is done twice for some image, but is need to pull out holes.
 	//This was a clever hack but now I forget how it works
-	cvThreshold( binary_image, binary_image, threshold-15, 255, CV_THRESH_BINARY );
+	cvThreshold( binary_image, binary_image, threshold - THRESHADJ, 255, CV_THRESH_BINARY );
 	cvFindContours( binary_image, storage, &contours, sizeof(CvContour),	CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
 	if (result)
 	{
@@ -98,7 +111,8 @@ int seq_len(CvSeq * sequence){
 	}
 	return result;
 }
-//DO THIS
+
+//Counting the number of holes in a number is used to help the template matching
 int count_num_holes(CvSeq * contour){
 	CvScalar color = CV_RGB( 255, 255, 255 );
 	//40 x 40 should be plenty big for the moment
@@ -111,12 +125,14 @@ int count_num_holes(CvSeq * contour){
 	//sequence, ambiguous name as it's reused for several things
 	CvSeq * sequence = connected_components(tempImage, tempImage);
 	int no_holes = seq_len(sequence) -1 ; //-1 to account for background
+
 	cvReleaseImage(&tempImage);
 
 
 	return no_holes;
 }
 
+//Xor two images and return the difference
 int template_match(IplImage * input, IplImage * template_img){
 	IplImage * result = cvCreateImage(cvGetSize(input),8,1);
 	cvXor(input, template_img, result);
@@ -134,13 +150,14 @@ int template_match(IplImage * input, IplImage * template_img){
 			}
 		}
 	}	
+	cvReleaseImage(&result);
 	return diff;
 }
 
 //Pass in a sequence of components and classify them
 void ident_numbers(CvSeq * components, IplImage * known[], IplImage * result){
 	//smooth image
-	CvSeq * contour = components->h_next->h_next->h_next->h_next;
+	// WTF CvSeq * contour = components->h_next->h_next->h_next->h_next;
 	int i;
 	float diff = FLT_MAX;
 	int number = 0;
@@ -148,6 +165,7 @@ void ident_numbers(CvSeq * components, IplImage * known[], IplImage * result){
 	IplImage * number_image;
 	IplImage * translated_number;
 
+	//Was analysing sample image for number of holes but this is just cleaner
 	int known_holes[] = {1, 0, 0, 0, 1, 0, 1, 0, 2, 1,};
 
 	for(CvSeq * contour = components; contour != 0; contour = contour->h_next){
@@ -155,6 +173,10 @@ void ident_numbers(CvSeq * components, IplImage * known[], IplImage * result){
 		if(cvContourArea(contour) < MIN_AREA){
 			continue;
 		}
+
+		//Copy the sequence data into an image for comparison with the known images.
+		//Padding is added so the images align. As the orientations of the input images and
+		//sample images are known at compile time there is no need to check every orientation
 		number_image = cvCreateImage( cvSize(400, 400), 8, 1);
 		cvZero(number_image);
 		cvDrawContours( number_image, contour, color, color, -1, CV_FILLED, 8);
@@ -181,6 +203,7 @@ void ident_numbers(CvSeq * components, IplImage * known[], IplImage * result){
 					diff = newDiff;
 					recoginized_number = i;
 				}
+				cvReleaseImage(&tempScaled);
 			}
 		}
 
@@ -198,6 +221,9 @@ void ident_numbers(CvSeq * components, IplImage * known[], IplImage * result){
 
 		
 	}
+
+	cvReleaseImage(&number_image);
+	cvReleaseImage(&translated_number);
 
 }
 
@@ -223,7 +249,7 @@ int main( int argc, char** argv )
 			return 0;
 		sample_number_images[character] = binary_image(sample_number_images[character]);
 		invert_image(sample_number_images[character]);
-		components = connected_components(sample_number_images[character], sample_number_images[character]);
+		//components = connected_components(sample_number_images[character], sample_number_images[character]);
 	}
 
 
@@ -265,11 +291,14 @@ int main( int argc, char** argv )
 		// Process image (i.e. setup and find the number of spoons)
 		//cvCopyImage( images[selected_image_num-1], selected_image );
 		selected_image = cvCloneImage(images[selected_image_num-1]);
+	    selected_image = cvCloneImage(images[user_clicked_key]);
+
 		selected_image = crop_image(selected_image);
 		bin_image = cvCloneImage(selected_image);
 		result_image = cvCloneImage(selected_image);
 
 		printf("\nProcessing Image %d:\n",selected_image_num);
+	
 		//Get binary image of licence plate
 		bin_image = binary_image(selected_image);
 		//Invert binary image
@@ -277,19 +306,29 @@ int main( int argc, char** argv )
 
 		//ident_number(selected_image, result_image);
 		components = connected_components( bin_image, result_image);
+		char buff[100];
+		sprintf(buff, "Regions%d", user_clicked_key);
+		cvNamedWindow(buff, 1);
+		//cvShowImage(buff, bin_image);
 		//analyse_contour(components->h_next->h_next->h_next->h_next->h_next);
 		ident_numbers(components, sample_number_images, selected_image);
-        cvShowImage( "Result", result_image);
-        cvShowImage( "Original", selected_image );
+        //cvShowImage( "Result", result_image);
+        //cvShowImage( "Original", selected_image );
+        char buff2[100];
+		sprintf(buff2, "Result%d", user_clicked_key);
+		cvNamedWindow(buff2, 1);
+		cvShowImage(buff2, selected_image);
 
 
 		// Wait for user input
-        user_clicked_key = (char) cvWaitKey(0);
+        /*user_clicked_key = (char) cvWaitKey(0);
 		if ((user_clicked_key >= '1') && (user_clicked_key <= '0'+NUM_IMAGES))
 		{
 			selected_image_num = user_clicked_key-'0';
-		}
-	} while ( user_clicked_key != ESC );
+		}*/
+		user_clicked_key++;
+	} while ( user_clicked_key < 9 );
+	cvWaitKey(0);
 
     return 1;
 }
