@@ -33,7 +33,6 @@ class DirectoryServer(SocketServer.BaseRequestHandler, ServicesServer):
 		#Else, check if user is already authenticated
 		elif(data['type'] == "request"):
 			#If user authenticated
-			print self.users
 			if(self.users.has_key(data['user'])):
 				message = decrypt(data['message'], self.users[data['user']])
 				message = json.loads(message, strict=False)
@@ -43,11 +42,11 @@ class DirectoryServer(SocketServer.BaseRequestHandler, ServicesServer):
 
 				#Server only has one function for the moment
 				response = self.map_request(args)
+				print response
 				self.respond(response, data['user'])
 
 	
 	def map_request(self, filename):
-		print filename
 		result = "not found"
 		for i in dir_map:
 			#Virtual drive
@@ -55,6 +54,7 @@ class DirectoryServer(SocketServer.BaseRequestHandler, ServicesServer):
 			if (filename.find(temp) != -1):
 				filename = filename.split(temp)
 				result = dir_map[i][1] + filename[1]
+				result = json.dumps({"server" : i, "file" : result});
 				break
 
 		return result
