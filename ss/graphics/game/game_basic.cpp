@@ -15,14 +15,15 @@
 #define SPEED 1.2f
 
 using namespace std;
-const int NUM_HIT_BOXS = 40;
+const int NUM_HIT_BOXS = 100;
 
-const float TERRIAN_WIDTH = 50.0f; //Defines cube region of the game
+const float TERRIAN_WIDTH = 150.0f; //Defines cube region of the game
+const float BORDER = 20.0f;
 
 int cameraZ;
 int camX, camY;
 //
-float xpos = TERRIAN_WIDTH / 2, ypos = 0, zpos = TERRIAN_WIDTH / 2, xrot = 0, yrot = 0, angle=0.0;
+float xpos = TERRIAN_WIDTH / 2, ypos = TERRIAN_WIDTH / 2, zpos = TERRIAN_WIDTH / 2, xrot = 0, yrot = 0, angle=0.0;
 float lastx, lasty;
 
 float cRadius = 10.0f;
@@ -80,6 +81,7 @@ struct box_pair {
 //The amount of time until we next check for and handle all collisions
 float _timeUntilHandleCollisions = 0;
 int _numCollisions; //The total number of collisions that have occurred
+int _playerCollisions;
 
 const int MAX_QUADTREE_DEPTH = 6;
 const int MIN_HIT_BOXS_PER_QUADTREE = 2;
@@ -362,13 +364,13 @@ bool handleCollisions(vector<hit_box*> &hit_boxs,
 			shot * v1 = dynamic_cast<shot*>(g1);
 			shot * v2 = dynamic_cast<shot*>(g2);
 			if(v1 != 0 || v2 != 0){
-				dying.push_back(g1);
-				dying.push_back(g2);
-				g1->kill();
-				g2->kill();
+				//dying.push_back(g1);
+				//dying.push_back(g2);
+				if(g1->kill() || g2->kill()){
+					result = true;
+				}
 				quadtree->remove(g1);
 				quadtree->remove(g2);
-				result = true;
 			}
 		}
 	}
@@ -405,6 +407,7 @@ void playerCollide(hit_box * _player, vector<hit_box*> &hit_boxs){
 			_player->bounceOff(hit_boxs[i]);
 			//hit_boxs[i]->bounceOff(_player);
 			hit_boxs.erase(hit_boxs.begin() + i);
+			_playerCollisions++;
 			//Update player life here
 		}
 	}
@@ -461,6 +464,14 @@ void keypressdown(unsigned char key, int x, int y){
 	if(key == 'd'){
 		button_presses[D] = 10;
 	}
+	if(key == 'r'){
+		xpos = TERRIAN_WIDTH / 2;
+		zpos = TERRIAN_WIDTH / 2;
+		ypos = TERRIAN_WIDTH / 2;
+	}
+	if(key == 'k'){
+		_playerCollisions = 100;
+	}
 	if (key==27)
     {
     exit(0);
@@ -493,48 +504,88 @@ void move_player(){
     
 
     if (xrot < -360) xrot += 360;
-    
 
     if (button_presses[W]){
+    	float xtemp =0, ytemp =0, ztemp =0;
+
 	    float xrotrad, yrotrad;
 	    yrotrad = (yrot / 180 * M_PI);
 	    xrotrad = (xrot / 180 * M_PI);
 	    float adj_speed = float(button_presses[W] / 10.0f) * SPEED;
-	    xpos += float(sin(yrotrad) * adj_speed);
-	    zpos -= float(cos(yrotrad) * adj_speed);
-	    ypos -= float(sin(xrotrad) * adj_speed);
+	    xtemp = float(sin(yrotrad) * adj_speed);
+	    ztemp = float(cos(yrotrad) * adj_speed);
+	    ytemp = float(sin(xrotrad) * adj_speed);
+	    if(xpos > -BORDER && xpos < TERRIAN_WIDTH - BORDER){
+	    	xpos += xtemp;
+	    }
+	    if(ypos > -BORDER && ypos < TERRIAN_WIDTH - BORDER){
+	    	ypos -= ytemp;
+	    }
+	    if(zpos > -BORDER && zpos < TERRIAN_WIDTH - BORDER){
+	    	zpos -= ztemp;
+	    }
+
 	    button_presses[W]--;
     }
 
     if (button_presses[S]){
+    	float xtemp =0, ytemp =0, ztemp =0;
+
 	    float xrotrad, yrotrad;
 	    yrotrad = (yrot / 180 * M_PI);
 	    xrotrad = (xrot / 180 * M_PI); 
 	   	float adj_speed = float(button_presses[S] / 10.0f) * SPEED;
 
-	    xpos -= float(sin(yrotrad) * adj_speed);
-	    zpos += float(cos(yrotrad) * adj_speed) ;
-	    ypos += float(sin(xrotrad) * adj_speed);
+	    xtemp = float(sin(yrotrad) * adj_speed);
+	    ztemp = float(cos(yrotrad) * adj_speed) ;
+	    ytemp = float(sin(xrotrad) * adj_speed);
+	    if(xpos > -BORDER && xpos < TERRIAN_WIDTH - BORDER){
+	    	xpos -= xtemp;
+	    }
+	    if(ypos > -BORDER && ypos < TERRIAN_WIDTH - BORDER){
+	    	ypos += ytemp;
+	    }
+	    if(zpos > -BORDER && zpos < TERRIAN_WIDTH - BORDER){
+	    	zpos += ztemp;
+	    }
 	    button_presses[S]--;
     }
 
     if (button_presses[D]){
+    	float xtemp =0, ztemp =0;
+
     	float yrotrad;
 		yrotrad = (yrot / 180 * M_PI);
 		float adj_speed = float(button_presses[D] / 10.0f) * SPEED;
 
-		xpos += float(cos(yrotrad)) * adj_speed;
-		zpos += float(sin(yrotrad)) * adj_speed;
+		xtemp = float(cos(yrotrad)) * adj_speed;
+		ztemp = float(sin(yrotrad)) * adj_speed;
+		if(xpos > -BORDER && xpos < TERRIAN_WIDTH - BORDER){
+	    	xpos += xtemp;
+	    }
+	   
+	    if(zpos > -BORDER && zpos < TERRIAN_WIDTH - BORDER){
+	    	zpos += ztemp;
+	    }
 		button_presses[D]--;
     }
 
     if (button_presses[A]){
+    	float xtemp =0, ztemp =0;
+
    		float yrotrad;
 		yrotrad = (yrot / 180 * M_PI);
 		float adj_speed = float(button_presses[A] / 10.0f)* SPEED;
 
-		xpos -= float(cos(yrotrad)) * adj_speed;
-		zpos -= float(sin(yrotrad)) * adj_speed;
+		xtemp = float(cos(yrotrad)) * adj_speed;
+		ztemp = float(sin(yrotrad)) * adj_speed;
+		if(xpos > -BORDER && xpos < TERRIAN_WIDTH - BORDER){
+	    	xpos -= xtemp;
+	    }
+	   
+	    if(zpos > -BORDER && zpos < TERRIAN_WIDTH - BORDER){
+	    	zpos -= ztemp;
+	    }
 		button_presses[A]--;
     }
    
@@ -664,56 +715,55 @@ void draw_sky(){
     glDisable(GL_LIGHTING);
     glDisable(GL_BLEND);
 
-    float border = 10;
-    float width = TERRIAN_WIDTH + border;
+    float width = TERRIAN_WIDTH + BORDER;
  
     // Just in case we set all vertices to white.
     //glColor4f(1,1,1,1);
     glBindTexture(GL_TEXTURE_2D, t_xneg);
     glBegin(GL_QUADS);
-        glTexCoord2f(0, 0); glVertex3f(  width, -border, -border );
-        glTexCoord2f(1, 0); glVertex3f( width, -border, width  );
+        glTexCoord2f(0, 0); glVertex3f(  width, -BORDER, -BORDER );
+        glTexCoord2f(1, 0); glVertex3f( width, -BORDER, width  );
         glTexCoord2f(1, 1); glVertex3f( width,  width, width );
-        glTexCoord2f(0, 1); glVertex3f(  width,  width, -border );
+        glTexCoord2f(0, 1); glVertex3f(  width,  width, -BORDER );
     glEnd();
 
     glBindTexture(GL_TEXTURE_2D, t_xpos);
     glBegin(GL_QUADS);
-        glTexCoord2f(0, 0); glVertex3f(  -border, -border, width );
-        glTexCoord2f(1, 0); glVertex3f( -border, -border, -border  );
-        glTexCoord2f(1, 1); glVertex3f( -border,  width, -border );
-        glTexCoord2f(0, 1); glVertex3f(  -border,  width, width );
+        glTexCoord2f(0, 0); glVertex3f(  -BORDER, -BORDER, width );
+        glTexCoord2f(1, 0); glVertex3f( -BORDER, -BORDER, -BORDER  );
+        glTexCoord2f(1, 1); glVertex3f( -BORDER,  width, -BORDER );
+        glTexCoord2f(0, 1); glVertex3f(  -BORDER,  width, width );
     glEnd();
 
     glBindTexture(GL_TEXTURE_2D, t_zneg);
     glBegin(GL_QUADS);
-        glTexCoord2f(0, 0); glVertex3f(  -border, -border, -border );
-        glTexCoord2f(1, 0); glVertex3f( width, -border, -border  );
-        glTexCoord2f(1, 1); glVertex3f( width,  width, -border );
-        glTexCoord2f(0, 1); glVertex3f(  -border,  width, -border );
+        glTexCoord2f(0, 0); glVertex3f(  -BORDER, -BORDER, -BORDER );
+        glTexCoord2f(1, 0); glVertex3f( width, -BORDER, -BORDER  );
+        glTexCoord2f(1, 1); glVertex3f( width,  width, -BORDER );
+        glTexCoord2f(0, 1); glVertex3f(  -BORDER,  width, -BORDER );
     glEnd();
 
     glBindTexture(GL_TEXTURE_2D, t_zpos);
     glBegin(GL_QUADS);
-        glTexCoord2f(0, 0); glVertex3f(  width, -border, width );
-        glTexCoord2f(1, 0); glVertex3f( -border, -border, width );
-        glTexCoord2f(1, 1); glVertex3f( -border,  width, width );
+        glTexCoord2f(0, 0); glVertex3f(  width, -BORDER, width );
+        glTexCoord2f(1, 0); glVertex3f( -BORDER, -BORDER, width );
+        glTexCoord2f(1, 1); glVertex3f( -BORDER,  width, width );
         glTexCoord2f(0, 1); glVertex3f(  width,  width, width );
     glEnd();
 
     glBindTexture(GL_TEXTURE_2D, t_yneg);
     glBegin(GL_QUADS);
-        glTexCoord2f(0, 0); glVertex3f(  width, -border, -border );
-        glTexCoord2f(1, 0); glVertex3f( width, -border, width );
-        glTexCoord2f(1, 1); glVertex3f( -border,  -border, width );
-        glTexCoord2f(0, 1); glVertex3f(  -border,  -border, -border );
+        glTexCoord2f(0, 0); glVertex3f(  width, -BORDER, -BORDER );
+        glTexCoord2f(1, 0); glVertex3f( width, -BORDER, width );
+        glTexCoord2f(1, 1); glVertex3f( -BORDER,  -BORDER, width );
+        glTexCoord2f(0, 1); glVertex3f(  -BORDER,  -BORDER, -BORDER );
     glEnd();
 
     glBindTexture(GL_TEXTURE_2D, t_ypos);
     glBegin(GL_QUADS);
-        glTexCoord2f(0, 0); glVertex3f(  width,  width, -border );
-        glTexCoord2f(1, 0); glVertex3f(  -border, width, -border );
-        glTexCoord2f(1, 1); glVertex3f( -border, width, width );
+        glTexCoord2f(0, 0); glVertex3f(  width,  width, -BORDER );
+        glTexCoord2f(1, 0); glVertex3f(  -BORDER, width, -BORDER );
+        glTexCoord2f(1, 1); glVertex3f( -BORDER, width, width );
         glTexCoord2f(0, 1); glVertex3f( width,  width, width );
     glEnd();
 
@@ -727,23 +777,46 @@ void updateScene(int value){
 	/*for (unsigned int i = 0; i < _objects.size(); i++){
 		_objects[i]->advance(0.01f);
 	}*/
-	move_player();
-	if(shoot == 3){
-		//_objects.push_back(new shot(1.0f, xpos, ypos, zpos, yrot -90, xrot));
-		_shots.push_back(new shot(1.0f, xpos, ypos, zpos, yrot -90, xrot));
-		//shoot =0;
+	if(_playerCollisions < 10){
+			move_player();
+			if(shoot == 3){
+			//_objects.push_back(new shot(1.0f, xpos, ypos, zpos, yrot -90, xrot));
+			_shots.push_back(new shot(1.0f, xpos, ypos, zpos, yrot -90, xrot));
+			//shoot =0;
 
-	}else if(shoot != 0){
-		shoot++;
+		}else if(shoot != 0){
+			shoot++;
+		}
+
 	}
+	
 	advance(_objects, _quadtree, 0.025f, _timeUntilHandleCollisions, _numCollisions);
 	advance(_shots, _quadtree, 0.00000001f, _timeUntilHandleCollisions, _numCollisions);
 	clean_shots(_shots);
 	playerCollide(_player, _objects);
 	glutPostRedisplay();
 	glutTimerFunc(25, updateScene, 0);
-	printf("Current Score is %d\n", _numCollisions );
+	printf("Current Score is %d and life is%d\n", _numCollisions * 100, 100 - (_playerCollisions * 10));
 
+}
+
+void drawScore()
+{
+	glDisable(GL_LIGHTING);
+	glPushMatrix();
+		char * scorecount=(char *)malloc(200);
+		//glTranslatef(xpos+1.4,ypos+0.1,zpos+0.7);
+		glColor4f(0,0,0,1); 
+		//glRotatef(90.0f,1,0,0);
+		//glRotatef(180.0f,0,1,0);            
+		glScalef( 0.000000000000001f, 0.000000000000001f, 0.000000000000005f );
+		sprintf(scorecount,"Score: %d    Life %d ",_numCollisions * 100, (100 - (10 *_playerCollisions)));
+		for (int i = 0; scorecount[i]!=NULL; i++){
+			glutStrokeCharacter(GLUT_STROKE_ROMAN,scorecount[i]);
+		}
+		free(scorecount);
+	glPopMatrix();
+	//glEnable(GL_LIGHTING);
 }
 
 float oldX, oldZ;
@@ -763,8 +836,13 @@ void renderScene(){
 
 	glTranslatef(0.0f, -2.0f, -cRadius);
 	if(!freelook){
+		//drawScore();
 		glEnable(GL_TEXTURE_2D);
-		_player->draw();
+		if(_playerCollisions >= 10){
+			_player->explode();
+		}else{
+			_player->draw();
+		}
 		glPushMatrix();
 		glTranslatef(0, -1.5, 0);
 		glRotatef(180, 0, 1, 0);
@@ -792,7 +870,11 @@ void renderScene(){
 	glRotatef(yrot,0.0,1.0,0.0);  //rotate our camera on the y-axis
 	if(freelook){
 		glEnable(GL_TEXTURE_2D);
-		_player->draw();
+		if(_playerCollisions >= 10){
+			_player->explode();
+		}else{
+			_player->draw();
+		}
 		
 	}
 		
@@ -815,6 +897,7 @@ void renderScene(){
 		_shots[i]->draw();
 	}
 
+
 	glutSwapBuffers();
 	
 }
@@ -824,6 +907,7 @@ int main(int argc, char ** argv){
 	srand((unsigned int)time(0));
 
 	shoot = false;
+	_playerCollisions = 0;
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -834,7 +918,7 @@ int main(int argc, char ** argv){
 
 	baddy = new model3DS("./player/baddy.3ds");
 	_objects = makeObjects(NUM_HIT_BOXS, baddy);
-	_player = new player(1.0f, 0.0f, 0.0f, 0.0f, new model3DS("./player/playerwholenogun.3ds"));
+	_player = new player(1.0f, 0.0f, 0.0f, 0.0f, new model3DS("./player/playerbitsnogun.3ds"));
 
 	//_objects.push_back(_player);
 

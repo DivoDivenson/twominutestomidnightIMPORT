@@ -26,6 +26,7 @@
 #include "textureTGA.h"
 //#include "textureBMP.h"
 #include "Vector.h"
+#include <math.h>
 
 #define CHUNK_MAIN					0x4D4D
 #define CHUNK_3D_EDITOR				0x3D3D
@@ -202,11 +203,14 @@ private:
 	// to prevent object being copied
 	model3DS(const model3DS &model);
 	model3DS &operator=(const model3DS &model);
+
+	int * explode_coords;
     
 public:
 	model3DS(const char* filename, float scale = 1);
     
     void draw();
+    void explode();
     
     std::string getFilename(){return m_filename;}
 	const material3DS& getMaterial(const std::string &matName){return m_materials[matName];}
