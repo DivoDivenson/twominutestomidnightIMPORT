@@ -11,7 +11,8 @@ from misc import *
 class RemoteFile():
 
 	#Only one directory server for the moment
-	ds_server = (read_config("./config/servers.json"))['servers']['ds']
+	all_servers = (read_config("./config/servers.json"))['servers']
+	ds_server = all_servers['ds']
 	open_file = ""
 	permission = ""
 
@@ -32,18 +33,15 @@ class RemoteFile():
 
 
 	def open(self, filename, mode="r"):
-		self.open_file = filename
 		#first contact directory server and map the filename
-		print filename
 		filename = self.map_filename(filename)
-		print filename
+		filename = json.loads(filename)
+		self.server = filename['server']
+		self.open_file = filename['file']
+		self.fs_key = get_ss_key(self.server)
 
-
-
-
-
-		'''message = self.construct_message("lookup")
-		response = self.send_message(message)
+		message = self.construct_message("lookup", self.fs_key)
+		response = self.send_message(message, self.all_servers[self.server])
 		response = decrypt(response, self.fs_key)
 
 		if response == "file found":
@@ -54,21 +52,21 @@ class RemoteFile():
 			raise IOError ("No such file " + filename)
 		elif mode == "w":
 			#create the file
-			message = self.construct_message("create")
-			response = self.send_message(message)
-			response = decrypt(response, self.fs_key)'''
+			message = self.construct_message("create", self.fs_key)
+			response = self.send_message(message, self.all_servers[self.server])
+			response = decrypt(response, self.fs_key)
 
 	#Extend for size and such later
 	def read(self, size=0):
-		message = self.construct_message("read")
-		response = self.send_message(message)
+		message = self.construct_message("read", self.fs_key)
+		response = self.send_message(message, self.all_servers[self.server])
 		response = decrypt(response, self.fs_key)
 
 		return response
 
 	def write(self, data,):
-		message = self.construct_message("write", data)
-		response = self.send_message(message)
+		message = self.construct_message("write", self.fs_key, data)
+		response = self.send_message(message, self.all_servers[self.server])
 		response = decrypt(response, self.fs_key)	
 
 		return response
@@ -104,6 +102,6 @@ if __name__ == "__main__":
 	user = "divines"
 	r_file = RemoteFile(user)
 	r_file.open("/home/divo/vdrive/test.txt", 'w')
-	#print r_file.read()
-	#r_file.write("test")
+	print r_file.read()
+	r_file.write("test write")
 

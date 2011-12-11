@@ -1,4 +1,24 @@
 #!/usr/bin/python
+
+
+
+'''
+
+
+DEPRICATD
+
+
+
+
+'''
+
+
+
+
+
+
+
+
 from SimpleXMLRPCServer import SimpleXMLRPCServer
 import xmlrpclib
 import os
