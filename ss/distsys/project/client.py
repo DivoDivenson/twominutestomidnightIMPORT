@@ -21,6 +21,7 @@ class RemoteFile():
 		#self.fs_key = get_ss_key("fs")
 		self.ds_key = get_ss_key("ds")
 		self.user = user
+		self.cache = {}
 
 	#Query directory server to map filename
 	def map_filename(self, filename):
@@ -56,18 +57,35 @@ class RemoteFile():
 			response = self.send_message(message, self.all_servers[self.server])
 			response = decrypt(response, self.fs_key)
 
-	#Extend for size and such later
-	def read(self, size=0):
-		message = self.construct_message("read", self.fs_key)
+	def get_sum(self):
+		message = self.construct_message("check", self.fs_key)
 		response = self.send_message(message, self.all_servers[self.server])
 		response = decrypt(response, self.fs_key)
+		return response
+
+
+
+	#Extend for size and such later
+	def read(self, size=0):
+		#Check if in cache and if the file has been modified
+		if (self.open_file in self.cache.keys()) and (self.get_sum() == genKey(self.cache[self.open_file])):
+			#Compute checksum of file and ask server to verify
+			return self.cache[self.open_file]
+		else:
+			#Get the file and store in local cache
+			message = self.construct_message("read", self.fs_key)
+			response = self.send_message(message, self.all_servers[self.server])
+			response = decrypt(response, self.fs_key)
+			self.cache[self.open_file] = response
 
 		return response
 
-	def write(self, data,):
+	def write(self, data):
 		message = self.construct_message("write", self.fs_key, data)
 		response = self.send_message(message, self.all_servers[self.server])
-		response = decrypt(response, self.fs_key)	
+		response = decrypt(response, self.fs_key)
+		#Update cached copy
+		self.cache[self.open_file] = data
 
 		return response
 
@@ -103,5 +121,7 @@ if __name__ == "__main__":
 	r_file = RemoteFile(user)
 	r_file.open("/home/divo/vdrive/test.txt", 'w')
 	print r_file.read()
-	r_file.write("test write")
+	print r_file.read()
+
+	r_file.write("test write 1234")
 

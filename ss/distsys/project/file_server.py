@@ -26,7 +26,7 @@ class TCPServer(SocketServer.TCPServer):
 
 
 class FileServer(SocketServer.BaseRequestHandler, ServicesServer):
-
+	cache = {}
 
 	def handle(self):
 		#Read in message of any length
@@ -50,19 +50,20 @@ class FileServer(SocketServer.BaseRequestHandler, ServicesServer):
 				filename = message['file']
 				args = message['args']
 
+				response = "Invalid request"
 				#Now process the request
 				if(message['type'] == "lookup"):
 					response = self.lookup(filename)
-					self.respond(response, data['user'])
 				elif(message['type'] == "create"):
 					response = self.create(filename)
-					self.respond(response, data['user'])
 				elif(message['type'] == "read"):
 					response = self.read(filename)
-					self.respond(response, data['user'])
 				elif(message['type'] == "write"):
 					response = self.write(filename, args)
-					self.respond(response, data['user'])
+				elif(message['type'] == "check"):
+					response = self.check(filename)
+				
+				self.respond(response, data['user'])
 
 
 	
@@ -77,17 +78,32 @@ class FileServer(SocketServer.BaseRequestHandler, ServicesServer):
 
 	def read(self, filename):
 		if(self.lookup(filename)):
-			f = open(filename)
-			#add size
-			data = f.read()
-			f.close
+			if(filename in self.cache.keys()):
+				data = self.cache[filename]
+			else:
+				f = open(filename)
+				data = f.read()
+				f.close
+				self.cache[filename] = data #Server side caching
+			
 			return data
+
+	##Returns a checksum of the file for the client to do with as they please
+	def check(self, filename):
+		if(filename in self.cache.keys()):
+			return genKey(self.cache[filename])
+		else:
+			data = self.read(filename)
+			return genKey(data)	
+
 
 	def write(self, filename, data):
 		#Need to enforce permissions
 		if(self.lookup(filename)):
 			f = open(filename, 'w')
 			f.write(data)
+			if(filename in self.cache.keys()):
+				self.cache[filename] = data
 			f.close()
 			return "file modified"
 		
@@ -124,6 +140,7 @@ class FileServer(SocketServer.BaseRequestHandler, ServicesServer):
 				return False
 			
 		return True
+
 
 		
 if __name__ == "__main__":
