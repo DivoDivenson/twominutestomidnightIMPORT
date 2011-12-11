@@ -77,6 +77,15 @@ model3DS::model3DS(const char* filename, float scale) : m_filename(filename), m_
 	delete modelFile;
     std::cout<<"[3DS] Model '"<<filename<<"' loaded"<<std::endl;
 
+    explode_coords = (int*)malloc(sizeof(int) * m_meshes.size());
+    for(int i = 0; i < m_meshes.size(); i++){
+    	if(i % 2){
+		  	explode_coords[i] = i + rand() % 5;
+		}else{
+			explode_coords[i] = i - rand() % 5;
+		}
+    }
+
 }
 
 bool model3DS::readChunk(std::ifstream *modelFile, const int objectStart, const int objectLength){
@@ -607,5 +616,31 @@ void model3DS::draw(){
 			meshIter->draw();
 		}
 	glPopMatrix();
+}
+
+void model3DS::explode(){
+	std::vector<mesh3DS>::iterator meshIter;
+
+	glPushMatrix();
+		glTranslatef(-m_centerX,-m_centerY,-m_centerZ);
+		int i =0;
+		for(meshIter = m_meshes.begin(); meshIter != m_meshes.end(); meshIter++){
+			glPushMatrix();
+			if( i % 2){
+				glRotatef(explode_coords[i] * 10, 1, 0, 1);
+				glTranslatef(-m_centerX + (float(explode_coords[i]++) / 100.0f), -m_centerY + 
+				(float(explode_coords[i]++) / 100.0f), -m_centerZ + (float(explode_coords[i]-=3) / 100.0f));
+			}else{
+				glRotatef(explode_coords[i] * 10, 1, 1, 1);
+				glTranslatef(-m_centerX + (float(explode_coords[i]-=2) / 100.0f), -m_centerY + 
+				(float(explode_coords[i]--) / 100.0f), -m_centerZ + (float(explode_coords[i]--) / 100.0f));
+			}
+
+			meshIter->draw();
+			i++;
+			glPopMatrix();
+		}
+	glPopMatrix();
+	
 }
 

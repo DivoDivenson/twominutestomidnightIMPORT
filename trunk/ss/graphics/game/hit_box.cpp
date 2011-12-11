@@ -117,9 +117,6 @@ hit_box::hit_box(float terrainScale1){
 
 }
 
-void hit_box::kill(){
-	dead = true;
-}
 
 bool hit_box::isDead(){
 
@@ -206,6 +203,15 @@ void hit_box::bounceOff(hit_box * otherBox){
 		angle = atan2(vz, vx);
 	}
 	//printf("BALL\n");
+}
+
+bool hit_box::kill(){
+	dead = true;
+	return false;
+}
+
+void hit_box::explode(){
+	;
 }
 
 void player::bounceOff(hit_box * otherBox){
@@ -316,6 +322,8 @@ enemy::enemy(float a, model3DS * _model) : hit_box(a){
 	radius0 = 2.0f;
 }
 
+
+
 void enemy::draw(){
 	if(!dead){
 		glPushMatrix();
@@ -372,4 +380,34 @@ void enemy::advance(float dt){
 	}
 	//printf("Ball %f %f\n", x0, z0);
 
+}
+
+bool enemy::kill(){
+	if(!dead){
+		dead = true;
+		return dead;
+	}
+	return false;
+}
+
+bool shot::kill(){
+	dead = true;
+	return false;
+}
+
+bool player::kill(){
+	dead = true;
+	return false;
+}
+
+void player::explode(){
+	model->explode();
+}
+
+void enemy::explode(){
+	model->draw();
+}
+
+void shot::explode(){
+	;
 }

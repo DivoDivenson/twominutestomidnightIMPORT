@@ -10,8 +10,8 @@
 
 //#include "model3DS.h" //for later
 
-const int t_width = 50;
-const int t_length = 50;
+const int t_width = 150;
+const int t_length = 150;
 
 const float step_time = 0.01f;
 
@@ -66,11 +66,12 @@ class hit_box{
 		float velocityY();
 		float radius();
 		float walkAngle();
-		void kill();
 		bool isDead();
 		virtual void bounceOff(hit_box * otherBox);
 		virtual void advance(float dt);
 		virtual void draw();
+		virtual bool kill();
+		virtual void explode();
 };
 
 
@@ -81,6 +82,8 @@ class enemy: public hit_box{
 		void bounceOff(hit_box * otherBox);
 		void advance(float dt);// Advance does nothing to the player
 		void draw();
+		bool kill(); //Hack to get score counting to work
+		void explode();
 
 };
 
@@ -92,6 +95,8 @@ class player: public hit_box{
 		void advance(float dt);// Advance does nothing to the player
 		void update_pos(float xpos, float ypos, float zpos, float angle);
 		void draw();
+		bool kill();
+		void explode();
 
 };
 
@@ -101,6 +106,8 @@ class shot: public hit_box{
 		void bounceOff(hit_box * otherBox);
 		void advance(float dt);
 		void draw();
+		bool kill();
+		void explode();
 };
 
 
