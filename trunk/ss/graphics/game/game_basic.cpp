@@ -11,6 +11,7 @@
 
 #include "model3DS.h"
 #include "hit_box.h"
+#include "text3d.h"
 
 #define SPEED 1.2f
 
@@ -29,6 +30,8 @@ float lastx, lasty;
 float cRadius = 10.0f;
 
 GLuint      textureId;
+
+float _scale;
 
 GLfloat white_light[] = {1.0, 1.0, 1.0, .5};
 GLfloat left_light_position[] = {-200,20.0,-1, 1.0}; 
@@ -86,6 +89,10 @@ int _playerCollisions;
 const int MAX_QUADTREE_DEPTH = 6;
 const int MIN_HIT_BOXS_PER_QUADTREE = 2;
 const int MAX_HIT_BOXS_PER_QUADTREE = 5;
+
+const char* STRS[4] = {"Score:", "a", "Life", "a"};
+
+
 
 template <class DstType, class SrcType>
 bool IsType(const SrcType* src)
@@ -702,6 +709,7 @@ void enable(){
 	//glEnable(GL_TEXTURE_2D);
 	//glColor3f(1.0,1.0,1.0);
     //glBindTexture(GL_TEXTURE_2D,textureId);
+    t3dInit();
     
 
 }
@@ -767,7 +775,7 @@ void draw_sky(){
         glTexCoord2f(0, 1); glVertex3f( width,  width, width );
     glEnd();
 
-
+    glEnable(GL_LIGHTING);
 
     glPopAttrib();
     glPopMatrix();
@@ -796,28 +804,11 @@ void updateScene(int value){
 	playerCollide(_player, _objects);
 	glutPostRedisplay();
 	glutTimerFunc(25, updateScene, 0);
-	printf("Current Score is %d and life is%d\n", _numCollisions * 100, 100 - (_playerCollisions * 10));
+	//printf("Current Score is %d and life is%d\n", _numCollisions * 100, 100 - (_playerCollisions * 10));
 
 }
 
-void drawScore()
-{
-	glDisable(GL_LIGHTING);
-	glPushMatrix();
-		char * scorecount=(char *)malloc(200);
-		//glTranslatef(xpos+1.4,ypos+0.1,zpos+0.7);
-		glColor4f(0,0,0,1); 
-		//glRotatef(90.0f,1,0,0);
-		//glRotatef(180.0f,0,1,0);            
-		glScalef( 0.000000000000001f, 0.000000000000001f, 0.000000000000005f );
-		sprintf(scorecount,"Score: %d    Life %d ",_numCollisions * 100, (100 - (10 *_playerCollisions)));
-		for (int i = 0; scorecount[i]!=NULL; i++){
-			glutStrokeCharacter(GLUT_STROKE_ROMAN,scorecount[i]);
-		}
-		free(scorecount);
-	glPopMatrix();
-	//glEnable(GL_LIGHTING);
-}
+
 
 float oldX, oldZ;
 void renderScene(){
@@ -833,12 +824,27 @@ void renderScene(){
 
 	enable();
 
-
+	glPushMatrix();
+		glTranslatef(-3.7, 3, -10);
+		char score[10];
+		sprintf(score, "%d", _numCollisions * 100);
+		t3dDraw3D(score, 0, 0, 0.1, 0.3f);
+	glPopMatrix();	
+	glPushMatrix();
+		glTranslatef(3.7, 3, -10);
+		char health[4];
+		sprintf(score, "%d%%", 100 - (_playerCollisions * 10));
+		t3dDraw3D(score, 0, 0, 0.1, 0.3f);
+	glPopMatrix();	
 	glTranslatef(0.0f, -2.0f, -cRadius);
 	if(!freelook){
-		//drawScore();
+		//drawScore();	
+	
+
 		glEnable(GL_TEXTURE_2D);
 		if(_playerCollisions >= 10){
+			t3dDraw3D("Game Over", 0, 0, 0.1, 0.3f);
+
 			_player->explode();
 		}else{
 			_player->draw();
@@ -860,6 +866,8 @@ void renderScene(){
 	_quadtree->hit_boxMoved(_player, oldX, oldZ);
 
 	if(freelook){
+		t3dDraw3D("Hello", 0, 0, 1.0f, 1.0f);
+
 		glPushMatrix();
 		glTranslatef(0, -1.5, 0);
 		glRotatef(180, 0, 1, 0);
@@ -877,6 +885,7 @@ void renderScene(){
 		}
 		
 	}
+
 		
     glTranslatef(-xpos,-ypos,-zpos); //translate the screen to the position of our camera
    // glTranslatef(-xpos,1.0f,-zpos); //translate the screen to the position of our camera
@@ -902,6 +911,19 @@ void renderScene(){
 	
 }
 
+//Computes a scaling value so that the strings
+float computeScale(const char* strs[4]) {
+	float maxWidth = 0;
+	for(int i = 0; i < 4; i++) {
+		float width = t3dDrawWidth(strs[i]);
+		if (width > maxWidth) {
+			maxWidth = width;
+		}
+	}
+	
+	return 2.6f / maxWidth;
+}
+
 
 int main(int argc, char ** argv){
 	srand((unsigned int)time(0));
@@ -909,12 +931,15 @@ int main(int argc, char ** argv){
 	shoot = false;
 	_playerCollisions = 0;
 
+
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(1280, 1000);
 
 	glutCreateWindow("A Game");
 	init();
+	//_scale = computeScale(STRS);
+
 
 	baddy = new model3DS("./player/baddy.3ds");
 	_objects = makeObjects(NUM_HIT_BOXS, baddy);
