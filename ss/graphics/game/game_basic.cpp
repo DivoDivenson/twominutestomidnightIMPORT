@@ -866,7 +866,6 @@ void renderScene(){
 	_quadtree->hit_boxMoved(_player, oldX, oldZ);
 
 	if(freelook){
-		t3dDraw3D("Hello", 0, 0, 1.0f, 1.0f);
 
 		glPushMatrix();
 		glTranslatef(0, -1.5, 0);
@@ -934,7 +933,7 @@ int main(int argc, char ** argv){
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-	glutInitWindowSize(1280, 1000);
+	glutInitWindowSize(600, 600);
 
 	glutCreateWindow("A Game");
 	init();
