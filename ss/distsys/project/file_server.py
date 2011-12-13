@@ -2,6 +2,7 @@
 
 import SocketServer
 import hashlib
+import sys
 from crypto import *
 import json
 from misc import *
@@ -144,6 +145,8 @@ class FileServer(SocketServer.BaseRequestHandler, ServicesServer):
 
 		
 if __name__ == "__main__":
+	if(len(sys.argv) == 2):
+		print sys.argv[1]
 	key = (read_config("./config/fs.json"))['key']
 	
 	config = (read_config("./config/servers.json"))['servers']['fs']

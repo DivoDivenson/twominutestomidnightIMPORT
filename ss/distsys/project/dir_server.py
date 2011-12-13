@@ -18,6 +18,8 @@ class TCPServer(SocketServer.TCPServer):
 
 class DirectoryServer(SocketServer.BaseRequestHandler, ServicesServer):
 
+	# { filename : user}
+	locks = {}
 
 	def handle(self):
 		temp = self.request.recv(msg_size)
@@ -33,21 +35,28 @@ class DirectoryServer(SocketServer.BaseRequestHandler, ServicesServer):
 		#Else, check if user is already authenticated
 		elif(data['type'] == "request"):
 			#If user authenticated
-			if(self.users.has_key(data['user'])):
-				message = decrypt(data['message'], self.users[data['user']])
+			user = data['user']
+			if(self.users.has_key(user)):
+				message = decrypt(data['message'], self.users[user])
 				message = json.loads(message, strict=False)
 
 				filename = message['file']
-				args = message['args']
+				args = message['args'] #Args contains a lock request
+				
 
 				#Server only has one function for the moment
-				response = self.map_request(args)
-				print response
-				self.respond(response, data['user'])
-
+				response = self.map_request(filename)
+				if(args and (response != "Not Found")):
+					#lock request
+					print "Locking file"
+			else:
+				response = "Invalid User"
+					
+			self.respond(response, user)
+			
 	
 	def map_request(self, filename):
-		result = "not found"
+		result = "Not Found"
 		for i in dir_map:
 			#Virtual drive
 			temp = dir_map[i][0]

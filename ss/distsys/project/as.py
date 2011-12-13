@@ -47,19 +47,21 @@ class AuthenticationServer(SocketServer.BaseRequestHandler):
 		user = self.request.recv(msg_size)
 	
 		client_key = self.lookup(user)
-
+		if(client_key):
 			#Client-TGS session key
-		client_TGS_key = encrypt(client_key, TGS_key)
-		a = encrypt(client_TGS_key, client_key)
-		
+			client_TGS_key = encrypt(client_key, TGS_key)
+			a = encrypt(client_TGS_key, client_key)
+			
 
-			#Encryptde ticket
-		b = json.dumps({"user" : user, "address" : self.client_address[0], "client_tgs" : client_TGS_key})
-		b = encrypt(b, TGS_key)
-		response = json.dumps({"public" : a, "private" : b})
-
-			#reply
+				#Encryptde ticket
+			b = json.dumps({"user" : user, "address" : self.client_address[0], "client_tgs" : client_TGS_key})
+			b = encrypt(b, TGS_key)
+			response = json.dumps({"public" : a, "private" : b})
+		else:
+			response = "Invalid User"
+				#reply
 		self.request.send(response)
+
 		print "Session key sent to " + user
 
 
@@ -73,6 +75,8 @@ class AuthenticationServer(SocketServer.BaseRequestHandler):
 			password = users[name]
 			key = genKey(password)
 			return key
+		else:
+			return None
 
 
 

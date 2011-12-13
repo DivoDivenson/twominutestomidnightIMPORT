@@ -3,6 +3,7 @@
 	"servers" : { 
 					"tgs" : ["localhost", "8082" ],
 					"fs" : ["localhost", "8083" ],
+					"fs1" :["localhost", "8085"],
 					"as" : ["localhost", "8081"],
 					"ds" : ["localhost", "8084"]
 	}
