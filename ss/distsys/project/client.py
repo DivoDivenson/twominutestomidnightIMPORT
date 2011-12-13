@@ -12,6 +12,7 @@ class RemoteFile():
 
 	#Only one directory server for the moment
 	all_servers = (read_config("./config/servers.json"))['servers']
+	services = (read_config("./config/servers.json"))['services']
 	ds_server = all_servers['ds']
 	open_file = ""
 	permission = ""
@@ -28,7 +29,7 @@ class RemoteFile():
 		#self.mapped = {} #File already looked up
 
 	#Query directory server to map filename
-	def map_filename(self, filename, lock):
+	def map_filename(self, filename, lock, server=0):
 		#Check if filename has already been lookeduo and ask dir server if it has changed
 		#if(filename in self.mapped.keys() and (self.get_sum(self.ds_server) == genKey(self.mapped[filename]))):
 		#Actauly, there is no point doing this as the amount of work needed to check if the file
@@ -36,9 +37,14 @@ class RemoteFile():
 
 		#If the directory server is down, try another one
 		try:
-			self.ds_key = get_ss_key("ds", self.user, self.password)
+			self.ds_key = get_ss_key(self.services['dir'][server], self.user, self.password)
 		except socket.error:
-			print "hello"
+			#Using exception handeling for flow control cous i'm cool like that. RECURSIVE EXCEPTIONS
+			if(server+1 < len(self.services['dir'])):
+				self.ds_key = get_ss_key(self.services['dir'][server+1], self.user, self.password)
+			else:
+				raise Exception ("All the directory servers are down")
+
 		#Username, filename and a if a lock is being requested
 		self.open_file = filename #This is a hack to send the filename to the directory server
 		message = self.construct_message("map", self.ds_key, lock)

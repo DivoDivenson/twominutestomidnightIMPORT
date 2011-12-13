@@ -11,8 +11,12 @@ msg_size = 1024
 #No need for service ID as we only have one
 
 TGS_key = ""
-FS_key = ""
-DS_key = ""
+#FS_key = ""
+#DS_key = ""
+
+DS_KEYS = ""
+FS_KEYS = ""
+keys = {}
 
 
 class TCPServer(SocketServer.TCPServer):
@@ -26,10 +30,11 @@ class TicketGrantingServer(SocketServer.BaseRequestHandler):
 		
 		data = json.loads(data, strict=False)
 		#Decrypt AS private payload and get client_TGS_key
-		if(data['request'] == "ds"):
-			service_key = DS_key
+		'''if(data['request'] == "ds"):
+			service_key = 
 		elif(data['request'] == "fs"):
-			service_key = FS_key
+			service_key = FS_key'''
+		service_key = keys[data['request']]
 
 		ticket = decrypt(data['ticket'], TGS_key)
 		ticket = json.loads(ticket, strict=False)
@@ -61,8 +66,13 @@ class TicketGrantingServer(SocketServer.BaseRequestHandler):
 if __name__ == "__main__":
 	keys = read_config("./config/tgs.json")
 	TGS_key = keys['tgs_key']
-	FS_key = keys['fs_key']
-	DS_key = keys['ds_key']
+	FS_KEYS  = keys['fs_keys']
+
+	DS_KEYS = keys['ds_keys']
+
+	keys = dict(FS_KEYS.items() + DS_KEYS.items())
+
+
 
 	config = (read_config("./config/servers.json"))['servers']['tgs']
 	server = TCPServer((config[0], int(config[1])), TicketGrantingServer)
