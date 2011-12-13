@@ -5,7 +5,11 @@
 					"fs" : ["localhost", "8083" ],
 					"fs1" :["localhost", "8085"],
 					"as" : ["localhost", "8081"],
-					"ds" : ["localhost", "8084"]
-	}
+					"ds" : ["localhost", "8084"],
+					"ds1" : ["localhost", "8086"]
+	},
+
+	"services" : { "file" : ["fs", "fs1" ],
+					"dir" : ["ds", "ds1"] }
 
 }
