@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import SocketServer
+import sys
 import hashlib
 from crypto import *
 import json
@@ -9,6 +10,7 @@ from ss import *
 
 key = ""
 dir_map = ""
+locks = []
 
 #Should really move these into misc
 
@@ -46,9 +48,9 @@ class DirectoryServer(SocketServer.BaseRequestHandler, ServicesServer):
 
 				#Server only has one function for the moment
 				response = self.map_request(filename)
-				if(args and (response != "Not Found")):
-					#lock request
-					print "Locking file"
+				#if(args and (response != "Not Found")):
+					#locks.append(response)
+					
 			else:
 				response = "Invalid User"
 					
@@ -77,10 +79,18 @@ class DirectoryServer(SocketServer.BaseRequestHandler, ServicesServer):
 
 if __name__ == "__main__":
 
-	key = (read_config("./config/ds.json"))['key']
-	dir_map = (read_config("./config/ds.json"))['directories']
+	#If server name not specifed, default
+	if(len(sys.argv) == 2):
+		name = sys.argv[1]
+	else:
+		name = "ds"
+	
+	key = (read_config("./config/"+name+".json"))['key']
 
-	config = (read_config("./config/servers.json"))['servers']['ds']
+
+	dir_map = (read_config("./config/mapping.json"))['directories']
+
+	config = (read_config("./config/servers.json"))['servers'][name]
 	server = TCPServer((config[0], int(config[1])), DirectoryServer)
 
 	try:

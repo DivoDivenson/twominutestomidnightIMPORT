@@ -2,6 +2,7 @@
 
 import SocketServer
 import hashlib
+import base64
 from crypto import *
 import json
 from misc import *
@@ -48,7 +49,7 @@ class ServicesServer():
 	def respond(self, message, user):
 		response = encrypt(message, self.users[user])
 		print "Sending response to " + user
-		self.request.send(response)
+		self.request.sendall(response)
 
 
 
