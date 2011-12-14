@@ -13,10 +13,11 @@ class RemoteFile():
 	#Only one directory server for the moment
 	all_servers = (read_config("./config/servers.json"))['servers']
 	services = (read_config("./config/servers.json"))['services']
-	ds_server = all_servers['ds']
+	#ds_server = all_servers['ds']
 	open_file = ""
 	permission = ""
 	opened = False
+	lock = False
 
 	#user and client_ss_key
 	def __init__(self, _user, _password):
@@ -29,25 +30,35 @@ class RemoteFile():
 		#self.mapped = {} #File already looked up
 
 	#Query directory server to map filename
-	def map_filename(self, filename, lock, server=0):
+	def map_filename(self, filename, server=0):
 		#Check if filename has already been lookeduo and ask dir server if it has changed
 		#if(filename in self.mapped.keys() and (self.get_sum(self.ds_server) == genKey(self.mapped[filename]))):
 		#Actauly, there is no point doing this as the amount of work needed to check if the file
 		#has moved is roughly the same as just looking it up again
 
-		#If the directory server is down, try another one
+		#If the directory server is down, try another one. Also, WARNING, this may make your eyes bleed
+		
 		try:
 			self.ds_key = get_ss_key(self.services['dir'][server], self.user, self.password)
+			#This only works because python exits the try block completly when an exception is thrown.
+			#Theres some fancy name for that, and another fancy name for the opposit behaviour. I'm smart me
+			self.ds_server = self.all_servers[self.services['dir'][server]]
 		except socket.error:
 			#Using exception handeling for flow control cous i'm cool like that. RECURSIVE EXCEPTIONS
 			if(server+1 < len(self.services['dir'])):
-				self.ds_key = get_ss_key(self.services['dir'][server+1], self.user, self.password)
+				print "Server down, trying the next one " + self.services['dir'][server+1]
+				#self.ds_key = get_ss_key(self.services['dir'][server+1], self.user, self.password)
+
+				return self.map_filename(filename, server+1) # yup
+
+				#self.ds_server = self.services['dir'][server+1]
+
 			else:
 				raise Exception ("All the directory servers are down")
 
 		#Username, filename and a if a lock is being requested
 		self.open_file = filename #This is a hack to send the filename to the directory server
-		message = self.construct_message("map", self.ds_key, lock)
+		message = self.construct_message("map", self.ds_key)
 		response = self.send_message(message, self.ds_server)
 	
 		response = decrypt(response, self.ds_key)
@@ -56,9 +67,10 @@ class RemoteFile():
 
 
 	
-	def open(self, filename, mode="r", lock=False):
+	def open(self, filename, mode="r", _lock=False):
 		#first contact directory server and map the filename
-		filename = self.map_filename(filename, lock)
+		filename = self.map_filename(filename)
+		self.lock = _lock
 		if(filename == "Invalid User" or filename == "Not Found"):
 			self.open_file = ""
 			raise IOError(filename)
@@ -68,7 +80,7 @@ class RemoteFile():
 			self.open_file = filename['file']
 			self.fs_key = get_ss_key(self.server, self.user, self.password)
 
-			message = self.construct_message("lookup", self.fs_key)
+			message = self.construct_message("lookup", self.fs_key, self.lock)
 			response = self.send_message(message, self.all_servers[self.server])
 			response = decrypt(response, self.fs_key)
 
@@ -83,7 +95,7 @@ class RemoteFile():
 				raise IOError ("No such file")
 			elif mode == "w":
 				#create the file
-				message = self.construct_message("create", self.fs_key)
+				message = self.construct_message("create", self.fs_key, self.lock)
 				response = self.send_message(message, self.all_servers[self.server])
 				response = decrypt(response, self.fs_key)
 				self.opened = True
@@ -125,6 +137,8 @@ class RemoteFile():
 		return response
 
 	def close(self):
+		message = self.construct_message("close", self.fs_key)
+		self.send_message(message, self.all_servers[self.server])
 		self.opened = False;
 		self.open_file = ""
 		#if locked then release
@@ -146,10 +160,12 @@ class RemoteFile():
 			
 			response = ""
 			while 1:
-				data = sock.recv(msg_size)
+				data = 	sock.recv(msg_size)
+				#print "#"+data+"#"
 				if not data: break
 				response += data
 			
+
 			return response
 	
 		finally:
@@ -161,12 +177,17 @@ if __name__ == "__main__":
 	user = "divines"
 	password = "thisisapassword"
 	r_file = RemoteFile(user, password)
-	r_file.open("/home/divo/vdrive/test.txt", 'r', True)
+	r_file.open("/home/divo/vdrive/test2.txt", 'r', True)
 	print r_file.read()
-	'''print r_file.read()
+	#print r_file.read()
 	r_file.close()
-	r_file.open("/home/divo/vdrive/test.txt" , 'w')
 
-	r_file.write("test write 1234")'''
+	r_file.open("/home/divo/vdrive/test.txt", 'w', True)
+
+	#text = f.read()
+
+	#r_file.open("/home/divo/vdrive/test3.txt" , 'w')
+
+	r_file.write("String")
 	r_file.close()
 
