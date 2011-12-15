@@ -71,13 +71,17 @@ class RemoteFile():
 		#first contact directory server and map the filename
 		filename = self.map_filename(filename)
 		self.lock = _lock
-		if(filename == "Invalid User" or filename == "Not Found"):
+		filename = json.loads(filename)
+		self.server = filename['server']
+		self.open_file = filename['file']
+		self.permission = mode #If stuff broke, this is why
+
+
+		if(self.open_file == "Invalid User" or (self.open_file == "Not Found" and mode !='w')):
 			self.open_file = ""
 			raise IOError(filename)
 		else:
-			filename = json.loads(filename)
-			self.server = filename['server']
-			self.open_file = filename['file']
+			
 			self.fs_key = get_ss_key(self.server, self.user, self.password)
 
 			message = self.construct_message("lookup", self.fs_key, self.lock)
@@ -85,7 +89,6 @@ class RemoteFile():
 			response = decrypt(response, self.fs_key)
 
 			if response == "file found":
-				self.permission = mode
 				self.opened = True
 			elif response == "invalid directory":
 				self.opened = False
@@ -182,8 +185,8 @@ if __name__ == "__main__":
 	#print r_file.read()
 	r_file.close()
 
-	r_file.open("/home/divo/vdrive/test.txt", 'w', True)
-
+	r_file.open("/home/divo/vdrive1/test.txt", 'w', True)
+	raw_input()
 	#text = f.read()
 
 	#r_file.open("/home/divo/vdrive/test3.txt" , 'w')
