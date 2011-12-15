@@ -88,7 +88,7 @@ class FileServer(SocketServer.BaseRequestHandler, ServicesServer):
 				if(message['type'] == "lookup"):
 					response = self.lookup(filename, args)
 				elif(message['type'] == "create"):
-					response = self.create(filename)
+					response = self.create(filename, args)
 				elif(message['type'] == "read"):
 					response = self.read(filename)
 				elif(message['type'] == "write"):
@@ -196,13 +196,17 @@ class FileServer(SocketServer.BaseRequestHandler, ServicesServer):
 		
 if __name__ == "__main__":
 	if(len(sys.argv) == 2):
-		print sys.argv[1]
+		name = sys.argv[1]
+	else:
+		name = "fs"
 
 
-	key = (read_config("./config/fs.json"))['key']
+
+
+	key = (read_config("./config/"+name+".json"))['key']
 	stack_size = int((read_config("./config/fs.json"))['cache_size'])
 	
-	config = (read_config("./config/servers.json"))['servers']['fs']
+	config = (read_config("./config/servers.json"))['servers'][name]
 	server = TCPServer((config[0], int(config[1])), FileServer)
 
 	try:
