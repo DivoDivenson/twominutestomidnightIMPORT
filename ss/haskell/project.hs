@@ -3,7 +3,7 @@ import System.Environment
 
 main = do
 	args <- getArgs
-	mapM_ (interactFile (unlines . map processIt . lines)) args
+	mapM_ (interactFile (unlines . map show . lines)) args
 
 interactFile f filename = do
 	s <- readFile filename
