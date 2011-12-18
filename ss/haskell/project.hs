@@ -1,12 +1,21 @@
 --ghc --make ./project.hs 
 import System.Environment
+import Run
+import Parse
 
+main::IO()
 main = do
-	args <- getArgs
-	mapM_ (interactFile (unlines . map show . lines)) args
+	execute []
 
-interactFile f filename = do
-	s <- readFile filename
-	putStr (f s)
+execute x = do
+		line <- getLine
+		let ins = parse line
+		case ins of
+			Left str ->do
+							putStrLn str
+							execute x
+			Right command ->do
+							x2 <-run x command
+							execute x2
 
-processIt s = show (length s)
+
