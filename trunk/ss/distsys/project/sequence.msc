@@ -1,0 +1,27 @@
+# MSC for some fictional process
+msc {
+  hscale = "2";
+
+  Client,Client_Proxy,Auth_Server,Ticket_Granting_Server,Directory_Server,File_Server;
+
+  Client->Client_Proxy [ label = "Open" ] ;
+  Client_Proxy->Auth_Server [ label = "Login"];
+  Auth_Server->Client_Proxy [label = "Client TGS Session Key"];
+  Client_Proxy->Ticket_Granting_Server [label = "Server ID: Directory Server"];
+  Ticket_Granting_Server->Client_Proxy [label = "Client SS Session key"];
+  Client_Proxy->Directory_Server [label = "Ticket"];
+  Directory_Server->Client_Proxy [label = "Verify"];
+  Client_Proxy->Directory_Server [label = "Map filename"];
+  Directory_Server=>Directory_Server [label = "Lookup"];
+  Directory_Server->Client_Proxy [label = "(Filename, Server)"];
+  Client_Proxy->Ticket_Granting_Server [label = "Server ID: File Server"];
+  Ticket_Granting_Server->Client_Proxy [label = "Client SS Session key"];
+  Client_Proxy->File_Server [label = "Ticket"];
+  File_Server->Client_Proxy [label = "Verify"];
+  Client_Proxy->File_Server [label = "Lookup"];
+  File_Server=>File_Server [label = "Lookup filename"];
+  File_Server->Client_Proxy [label = "Filename"];
+  Client_Proxy=>Client_Proxy [label = "OpenFile = Filename"];
+  Client_Proxy->Client [label = "Success"];
+
+}

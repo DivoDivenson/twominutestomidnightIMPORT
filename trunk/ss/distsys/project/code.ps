@@ -1,0 +1,3017 @@
+%!PS-Adobe-3.0
+%%Title: as.py, client_auth.py, client.py, crypto.py, dir_server.py, file_server.py, misc.py, ss.py, tgs.py
+%%For: Mr.Divenson
+%%Creator: a2ps version 4.14
+%%CreationDate: Sun Dec 18 18:09:37 2011
+%%BoundingBox: 24 24 571 818
+%%DocumentData: Clean7Bit
+%%Orientation: Landscape
+%%Pages: 12
+%%PageOrder: Ascend
+%%DocumentMedia: A4 595 842 0 () ()
+%%DocumentNeededResources: font Courier
+%%+ font Courier-Bold
+%%+ font Courier-BoldOblique
+%%+ font Courier-Oblique
+%%+ font Helvetica
+%%+ font Helvetica-Bold
+%%+ font Symbol
+%%+ font Times-Bold
+%%+ font Times-Roman
+%%DocumentProcessColors: Black 
+%%DocumentSuppliedResources: procset a2ps-a2ps-hdr
+%%+ procset a2ps-black+white-Prolog
+%%+ encoding ISO-8859-1Encoding
+%%EndComments
+/a2psdict 200 dict def
+a2psdict begin
+%%BeginProlog
+%%Copyright: (c) 1988, 89, 90, 91, 92, 93 Miguel Santana
+%%Copyright: (c) 1995, 96, 97, 98 Akim Demaille, Miguel Santana
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+
+% EPSF import as in the Red Book
+/BeginInclude {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack 
+  userdict begin
+    0 setgray 0 setlinecap
+    1 setlinewidth 0 setlinejoin
+    10 setmiterlimit [ ] 0 setdash newpath
+    gs_languagelevel 1 ne {
+      false setstrokeadjust false setoverprint 
+    } if
+} bind def
+
+/EndInclude {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+/BeginEPSF {
+  BeginInclude
+  /showpage { } def
+} bind def
+
+/EndEPSF {
+  EndInclude
+} bind def
+
+% Page prefeed
+/page_prefeed {         % bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} bind def
+
+/deffont {
+  findfont exch scalefont def
+} bind def
+
+/reencode_font {
+  findfont reencode 2 copy definefont pop def
+} bind def
+
+% Function c-show (str => -)
+% centers text only according to x axis.
+/c-show { 
+  dup stringwidth pop
+  2 div neg 0 rmoveto
+  show
+} bind def
+
+% Function l-show (str => -)
+% prints texts so that it ends at currentpoint
+/l-show {
+  dup stringwidth pop neg 
+  0 
+  rmoveto show
+} bind def
+
+% center-fit show (str w => -)
+% show centered, and scale currentfont so that the width is less than w
+/cfshow {
+  exch dup stringwidth pop
+  % If the title is too big, try to make it smaller
+  3 2 roll 2 copy
+  gt
+  { % if, i.e. too big
+    exch div
+    currentfont exch scalefont setfont
+  } { % ifelse
+    pop pop 
+  }
+  ifelse
+  c-show			% center title
+} bind def
+
+% Return the y size of the current font
+% - => fontsize
+/currentfontsize {
+  currentfont /FontType get 0 eq {
+    currentfont /FontMatrix get 3 get
+  }{
+    currentfont /FontMatrix get 3 get 1000 mul
+  } ifelse
+} bind def
+
+% reencode the font
+% <encoding-vector> <fontdict> -> <newfontdict>
+/reencode { %def
+  dup length 5 add dict begin
+    { %forall
+      % <vector> <key> <val>
+      1 index /FID ne 
+      { def }{ pop pop } ifelse
+    } forall
+    /Encoding exch def % -
+
+    % Use the font's bounding box to determine the ascent, descent,
+    % and overall height; don't forget that these values have to be
+    % transformed using the font's matrix.
+    % We use `load' because sometimes BBox is executable, sometimes not.
+    % Since we need 4 numbers an not an array avoid BBox from being executed
+    /FontBBox load aload pop
+    FontMatrix transform /Ascent exch def pop
+    FontMatrix transform /Descent exch def pop
+    /FontHeight Ascent Descent sub def
+
+    % Get the underline position and thickness if they're defined.
+    % Use 1 if they are not defined.
+    currentdict /FontInfo 2 copy known
+    { get
+      /UnderlinePosition 2 copy % <FontInfo> /UP <FontInfo> /UP
+      2 copy known
+      { get }{ pop pop 1 } ifelse
+      0 exch FontMatrix transform exch pop
+      def % <FontInfo>
+
+      /UnderlineThickness 2 copy % <FontInfo> /UT <FontInfo> /UT
+      2 copy known
+      { get }{ pop pop 1 } ifelse
+      0 exch FontMatrix transform exch pop
+      def % <FontInfo>
+      pop % -
+    }{ pop pop
+    } ifelse
+
+    currentdict
+  end 
+} bind def
+
+% composite fonts for ASCII-EUC mixed strings
+% Version 1.2 1/31/1990
+% Original Ken'ichi HANDA (handa@etl.go.jp)
+% Modified Norio Katayama (katayama@rd.nacsis.ac.jp),1998
+% Extend & Fix Koji Nakamaru (maru@on.cs.keio.ac.jp), 1999
+% Anyone can freely copy, modify, distribute this program.
+
+/copyfont {	% font-dic extra-entry-count  copyfont  font-dic
+	1 index maxlength add dict begin
+	{	1 index /FID ne 2 index /UniqueID ne and
+		{def} {pop pop} ifelse
+	} forall
+	currentdict
+	end
+} bind def
+
+/compositefont { % ASCIIFontName EUCFontName RomanScale RomanOffset Rot(T/F) compositefont font
+    /RomanRotation exch def
+    /RomanOffset exch def
+    /RomanScale exch def
+    userdict /fixeucfont_dict known not {
+	userdict begin
+	    /fixeucfont_dict 2 dict begin
+		/UpperByteEncoding [
+		    16#00 1 16#20 { pop 0 } for
+		    16#21 1 16#28 { 16#20 sub } for
+		    16#29 1 16#2F { pop 0 } for
+		    16#30 1 16#74 { 16#27 sub } for
+		    16#75 1 16#FF { pop 0 } for
+		] def
+	        /LowerByteEncoding [
+		    16#00 1 16#A0 { pop /.notdef } for
+		    16#A1 1 16#FE { 16#80 sub 16 2 string cvrs
+				    (cXX) dup 1 4 -1 roll
+				    putinterval cvn } for
+		    /.notdef
+		] def
+		currentdict
+	    end def
+	end
+    } if
+    findfont dup /FontType get 0 eq {
+	14 dict begin
+	    %
+	    % 7+8 bit EUC font
+	    %
+	    12 dict begin
+		/EUCFont exch def
+		/FontInfo (7+8 bit EUC font) readonly def
+		/PaintType 0 def
+		/FontType 0 def
+		/FontMatrix matrix def
+		% /FontName
+		/Encoding fixeucfont_dict /UpperByteEncoding get def
+		/FMapType 2 def
+		EUCFont /WMode known
+		{ EUCFont /WMode get /WMode exch def }
+		{ /WMode 0 def } ifelse
+		/FDepVector [
+		    EUCFont /FDepVector get 0 get
+		    [ 16#21 1 16#28 {} for 16#30 1 16#74 {} for ]
+		    {
+			13 dict begin
+			    /EUCFont EUCFont def
+			    /UpperByte exch 16#80 add def	
+			    % /FontName
+			    /FontInfo (EUC lower byte font) readonly def
+			    /PaintType 0 def
+			    /FontType 3 def
+			    /FontMatrix matrix def
+			    /FontBBox {0 0 0 0} def
+			    /Encoding
+				fixeucfont_dict /LowerByteEncoding get def
+			    % /UniqueID
+			    % /WMode
+			    /BuildChar {
+				gsave
+				exch dup /EUCFont get setfont
+				/UpperByte get
+				2 string
+				dup 0 4 -1 roll put
+				dup 1 4 -1 roll put
+				dup stringwidth setcharwidth
+				0 0 moveto show
+				grestore
+			    } bind def
+			    currentdict
+			end
+			/lowerbytefont exch definefont
+		    } forall
+		] def
+		currentdict
+	    end
+	    /eucfont exch definefont
+	    exch
+	    findfont 1 copyfont dup begin
+		RomanRotation {
+			/FontMatrix FontMatrix
+			[ 0 RomanScale neg RomanScale 0 RomanOffset neg 0 ]
+			matrix concatmatrix def
+		}{
+			/FontMatrix FontMatrix
+			[ RomanScale 0 0 RomanScale 0 RomanOffset ] matrix concatmatrix
+			def
+			/CDevProc
+			    {pop pop pop pop 0 exch -1000 exch 2 div 880} def
+		} ifelse
+	    end
+	    /asciifont exch definefont
+	    exch
+	    /FDepVector [ 4 2 roll ] def
+	    /FontType 0 def
+	    /WMode 0 def
+	    /FMapType 4 def
+	    /FontMatrix matrix def
+	    /Encoding [0 1] def
+	    /FontBBox {0 0 0 0} def
+%	    /FontHeight 1.0 def % XXXX
+	    /FontHeight RomanScale 1.0 ge { RomanScale }{ 1.0 } ifelse def
+	    /Descent -0.3 def   % XXXX
+	    currentdict
+	end
+	/tmpfont exch definefont
+	pop
+	/tmpfont findfont
+    }{
+	pop findfont 0 copyfont
+    } ifelse
+} def	
+
+/slantfont {	% FontName slant-degree  slantfont  font'
+    exch findfont 1 copyfont begin
+    [ 1 0 4 -1 roll 1 0 0 ] FontMatrix exch matrix concatmatrix
+    /FontMatrix exch def
+    currentdict
+    end
+} def
+
+% Function print line number (<string> # -)
+/# {
+  gsave
+    sx cw mul neg 2 div 0 rmoveto
+    f# setfont
+    c-show
+  grestore
+} bind def
+
+% -------- Some routines to enlight plain b/w printings ---------
+
+% Underline
+% width --
+/dounderline {
+  currentpoint
+  gsave
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    0 rlineto
+    stroke
+  grestore
+} bind def
+
+% Underline a string
+% string --
+/dounderlinestring {
+  stringwidth pop
+  dounderline
+} bind def
+
+/UL {
+  /ul exch store
+} bind def
+
+% Draw a box of WIDTH wrt current font
+% width --
+/dobox {
+  currentpoint
+  gsave
+    newpath
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    dup 0 rlineto
+    0 currentfont /FontHeight get currentfontsize mul rlineto
+    neg 0 rlineto
+    closepath
+    stroke
+  grestore
+} bind def
+
+/BX {
+  /bx exch store
+} bind def
+
+% Box a string
+% string --
+/doboxstring {
+  stringwidth pop
+  dobox
+} bind def
+
+%
+% ------------- Color routines ---------------
+%
+/FG /setrgbcolor load def
+
+% Draw the background
+% width --
+/dobackground {
+  currentpoint
+  gsave
+    newpath
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    dup 0 rlineto
+    0 currentfont /FontHeight get currentfontsize mul rlineto
+    neg 0 rlineto
+    closepath
+    bgcolor aload pop setrgbcolor
+    fill
+  grestore
+} bind def
+
+% Draw bg for a string
+% string --
+/dobackgroundstring {
+  stringwidth pop
+  dobackground
+} bind def
+
+
+/BG {
+  dup /bg exch store
+  { mark 4 1 roll ] /bgcolor exch store } if
+} bind def
+
+
+/Show {
+  bg { dup dobackgroundstring } if
+  ul { dup dounderlinestring } if
+  bx { dup doboxstring } if
+  show
+} bind def
+
+% Function T(ab), jumps to the n-th tabulation in the current line
+/T {
+  cw mul x0 add
+  bg { dup currentpoint pop sub dobackground } if
+  ul { dup currentpoint pop sub dounderline } if
+  bx { dup currentpoint pop sub dobox } if
+  y0 moveto
+} bind def
+
+% Function n: move to the next line
+/n {
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+% Function N: show and move to the next line
+/N {
+  Show
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+/S {
+  Show
+} bind def
+
+%%BeginResource: procset a2ps-a2ps-hdr 2.0 2
+%%Copyright: (c) 1988, 89, 90, 91, 92, 93 Miguel Santana
+%%Copyright: (c) 1995, 96, 97, 98 Akim Demaille, Miguel Santana
+% Function title: prints page header.
+% <ct> <rt> <lt> are passed as argument
+/title { 
+  % 1. Draw the background
+  x v get y v get moveto
+  gsave
+    0 th 2 div neg rmoveto 
+    th setlinewidth
+    0.95 setgray
+    pw 0 rlineto stroke
+  grestore
+  % 2. Border it
+  gsave
+    0.7 setlinewidth
+    pw 0 rlineto
+    0 th neg rlineto
+    pw neg 0 rlineto
+    closepath stroke
+  grestore
+  % stk: ct rt lt
+  x v get y v get th sub 1 add moveto
+%%IncludeResource: font Helvetica
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  % 3. The left title
+  gsave
+    dup stringwidth pop fnfs 0.8 mul add exch % leave space took on stack
+    fnfs 0.8 mul hm rmoveto
+    show			% left title
+  grestore
+  exch
+  % stk: ct ltw rt
+  % 4. the right title
+  gsave
+    dup stringwidth pop fnfs 0.8 mul add exch % leave space took on stack
+    dup
+    pw exch stringwidth pop fnfs 0.8 mul add sub
+    hm
+    rmoveto
+    show			% right title
+  grestore
+  % stk: ct ltw rtw
+  % 5. the center title
+  gsave
+    pw 3 1 roll
+    % stk: ct pw ltw rtw
+    3 copy 
+    % Move to the center of the left room
+    sub add 2 div hm rmoveto
+    % What is the available space in here?
+    add sub fnfs 0.8 mul sub fnfs 0.8 mul sub
+    % stk: ct space_left
+%%IncludeResource: font Helvetica-Bold
+  fHelvetica-Bold fnfs scalefont setfont
+    cfshow
+  grestore
+} bind def
+
+% Function border: prints virtual page border
+/border { %def
+  gsave				% print four sides
+    0 setgray
+    x v get y v get moveto
+    0.7 setlinewidth		% of the square
+    pw 0 rlineto
+    0 ph neg rlineto
+    pw neg 0 rlineto
+    closepath stroke
+  grestore
+} bind def
+
+% Function water: prints a water mark in background
+/water { %def
+  gsave
+    scx scy moveto rotate
+%%IncludeResource: font Times-Bold
+  fTimes-Bold 100 scalefont setfont
+    .97 setgray
+    dup stringwidth pop 2 div neg -50 rmoveto
+    show
+  grestore
+} bind def
+
+% Function rhead: prints the right header
+/rhead {  %def
+  lx ly moveto
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  l-show
+} bind def
+
+% Function footer (cf rf lf -> -)
+/footer {
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  dx dy moveto
+  show
+
+  snx sny moveto
+  l-show
+  
+  fnx fny moveto
+  c-show
+} bind def
+%%EndResource
+%%BeginResource: procset a2ps-black+white-Prolog 2.0 1
+
+% Function T(ab), jumps to the n-th tabulation in the current line
+/T { 
+  cw mul x0 add y0 moveto
+} bind def
+
+% Function n: move to the next line
+/n { %def
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+% Function N: show and move to the next line
+/N {
+  Show
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+}  bind def
+
+/S {
+  Show
+} bind def
+
+/p {
+  false UL
+  false BX
+  fCourier bfs scalefont setfont
+  Show
+} bind def
+
+/sy {
+  false UL
+  false BX
+  fSymbol bfs scalefont setfont
+  Show
+} bind def
+
+/k {
+  false UL
+  false BX
+  fCourier-Oblique bfs scalefont setfont
+  Show
+} bind def
+
+/K {
+  false UL
+  false BX
+  fCourier-Bold bfs scalefont setfont
+  Show
+} bind def
+
+/c {
+  false UL
+  false BX
+  fCourier-Oblique bfs scalefont setfont
+  Show
+} bind def
+
+/C {
+  false UL
+  false BX
+  fCourier-BoldOblique bfs scalefont setfont
+  Show 
+} bind def
+
+/l {
+  false UL
+  false BX
+  fHelvetica bfs scalefont setfont
+  Show
+} bind def
+
+/L {
+  false UL
+  false BX
+  fHelvetica-Bold bfs scalefont setfont
+  Show 
+} bind def
+
+/str{
+  false UL
+  false BX
+  fTimes-Roman bfs scalefont setfont
+  Show
+} bind def
+
+/e{
+  false UL
+  true BX
+  fHelvetica-Bold bfs scalefont setfont
+  Show
+} bind def
+
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier
+%%IncludeResource: font Courier-Oblique
+%%IncludeResource: font Courier-Bold
+%%IncludeResource: font Times-Roman
+%%IncludeResource: font Symbol
+%%IncludeResource: font Courier-BoldOblique
+%%BeginResource: encoding ISO-8859-1Encoding
+/ISO-8859-1Encoding [
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quoteright 
+/parenleft /parenright /asterisk /plus /comma /minus /period /slash 
+/zero /one /two /three /four /five /six /seven 
+/eight /nine /colon /semicolon /less /equal /greater /question 
+/at /A /B /C /D /E /F /G 
+/H /I /J /K /L /M /N /O 
+/P /Q /R /S /T /U /V /W 
+/X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore 
+/quoteleft /a /b /c /d /e /f /g 
+/h /i /j /k /l /m /n /o 
+/p /q /r /s /t /u /v /w 
+/x /y /z /braceleft /bar /braceright /asciitilde /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/space /exclamdown /cent /sterling /currency /yen /brokenbar /section 
+/dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron 
+/degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /bullet 
+/cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown 
+/Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla 
+/Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis 
+/Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply 
+/Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls 
+/agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla 
+/egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis 
+/eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide 
+/oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis 
+] def
+%%EndResource
+% Initialize page description variables.
+/sh 595 def
+/sw 842 def
+/llx 24 def
+/urx 818 def
+/ury 571 def
+/lly 24 def
+/#copies 1 def
+/th 15.000000 def
+/fnfs 11 def
+/bfs 8.005733 def
+/cw 4.803440 def
+
+% Dictionary for ISO-8859-1 support
+/iso1dict 8 dict begin
+  /fCourier ISO-8859-1Encoding /Courier reencode_font
+  /fCourier-Bold ISO-8859-1Encoding /Courier-Bold reencode_font
+  /fCourier-BoldOblique ISO-8859-1Encoding /Courier-BoldOblique reencode_font
+  /fCourier-Oblique ISO-8859-1Encoding /Courier-Oblique reencode_font
+  /fHelvetica ISO-8859-1Encoding /Helvetica reencode_font
+  /fHelvetica-Bold ISO-8859-1Encoding /Helvetica-Bold reencode_font
+  /fTimes-Bold ISO-8859-1Encoding /Times-Bold reencode_font
+  /fTimes-Roman ISO-8859-1Encoding /Times-Roman reencode_font
+currentdict end def
+/bgcolor [ 0 0 0 ] def
+/bg false def
+/ul false def
+/bx false def
+% The font for line numbering
+/f# /Helvetica findfont bfs .6 mul scalefont def
+/fSymbol /Symbol findfont def
+/hm fnfs 0.25 mul def
+/pw
+   cw 81.400000 mul
+def
+/ph
+   501.959430 th add
+def
+/pmw urx llx sub pw 2 mul sub 1 div def
+/pmh 0 def
+/v 0 def
+/x [
+  0
+  dup pmw add pw add
+] def
+/y [
+  pmh ph add 0 mul ph add
+  dup
+] def
+/scx sw 2 div def
+/scy sh 2 div def
+/snx urx def
+/sny lly 2 add def
+/dx llx def
+/dy sny def
+/fnx scx def
+/fny dy def
+/lx snx def
+/ly ury fnfs 0.8 mul sub def
+/sx 0 def
+/tab 8 def
+/x0 0 def
+/y0 0 def
+%%EndSetup
+
+%%Page: (1-2) 1
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(#!/usr/bin/python) c n
+() p n
+(import) K
+( SocketServer) p n
+(import) K
+( hashlib) p n
+(from) K
+( crypto ) p
+(import) K
+( *) p n
+(import) K
+( json) p n
+(from) K
+( misc ) p
+(import) K
+( *) p n
+() N
+(#Put all this stuff in files later) c n
+(#users = {'divines' : "pass"}) N
+() p n
+(#Make these complicated later) c n
+(#Secret key) N
+(#TGS_key = "thisbeakey") N
+(TGS_key = "") p n
+(users = "") N
+() N
+() N
+(msg_size = 1024) N
+() N
+() N
+(requests = [") S
+(login) str
+("]) p n
+() N
+(#Leave expiry out for now) c n
+(''') p n
+(All messages are now using json) str n
+(Messages) N
+(Client -> Server) N
+(Login request: "login\\n<username>\\n") N
+() N
+(Server -> Client) N
+(Login response: "client_key\(<client tgs key>\)\\nTGS\(<username>,<client address>,<client tgs key>\\n) N
+() N
+() N
+(''') p n
+() N
+(class) K
+( TCPServer\(SocketServer.TCPServer\):) p n
+() S 8 T (allow_reuse_address = True) N
+() N
+() S 8 T () N
+(#Login works) c n
+(#Client-TGS key is just a AES of the client key against the TGS secret key) N
+(class) K
+( AuthenticationServer\(SocketServer.BaseRequestHandler\):) p n
+() N
+() S 8 T () S
+(def) K
+( handle\(self\):) p n
+() S 8 T () S 16 T () S
+(#for the moment presume all message are under 1024) c n
+() p 8 T () S 16 T (user = self.request.recv\(msg_size\)) N
+() S 8 T () N
+() S 8 T () S 16 T (client_key = self.lookup\(user\)) N
+() S 8 T () S 16 T () S
+(if) K
+(\(client_key\):) p n
+() S 8 T () S 16 T () S 24 T () S
+(#Client-TGS session key) c n
+() p 8 T () S 16 T () S 24 T (client_TGS_key = encrypt\(client_key, TGS_key\)) N
+() S 8 T () S 16 T () S 24 T (a = encrypt\(client_TGS_key, client_key\)) N
+() S 8 T () S 16 T () S 24 T () N
+() N
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(#Encryptde ticket) c n
+() p 8 T () S 16 T () S 24 T (b = json.dumps\({") S
+(user) str
+(" : user, ") p
+(address) str
+(" : self.client_addr) p n
+(ess[0], ") S
+(client_tgs) str
+(" : client_TGS_key}\)) p n
+() S 8 T () S 16 T () S 24 T (b = encrypt\(b, TGS_key\)) N
+() S 8 T () S 16 T () S 24 T (response = json.dumps\({") S
+(public) str
+(" : a, ") p
+(private) str
+(" : b}\)) p n
+() S 8 T () S 16 T () S
+(else) K
+(:) p n
+() S 8 T () S 16 T () S 24 T (response = ") S
+(Invalid User) str
+(") p n
+(as.py) (Page 1/2) (Dec 14, 11 22:14) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p 8 T () S 16 T () S 24 T () S 32 T () S
+(#reply) c n
+() p 8 T () S 16 T (self.request.send\(response\)) N
+() N
+() S 8 T () S 16 T () S
+(print) K
+( ") p
+(Session key sent to ) str
+(" + user) p n
+() N
+() N
+() N
+() S 8 T () S 16 T () N
+() S 8 T () S 16 T () S 24 T () N
+() N
+() S 8 T () S
+(#Lookup a user an return a client key) c n
+() p 8 T () S
+(def) K
+( lookup\(self, name\):) p n
+() S 8 T () S 16 T () S
+(if) K
+( name ) p
+(in) K
+( users:) p n
+() S 8 T () S 16 T () S 24 T (password = users[name]) N
+() S 8 T () S 16 T () S 24 T (key = genKey\(password\)) N
+() S 8 T () S 16 T () S 24 T () S
+(return) K
+( key) p n
+() S 8 T () S 16 T () S
+(else) K
+(:) p n
+() S 8 T () S 16 T () S 24 T () S
+(return) K
+( None) p n
+() N
+() N
+() N
+() N
+(if) K
+( __name__ == ") p
+(__main__) str
+(":) p n
+() S 8 T (users = \(read_config\(") S
+(./config/users.json) str
+("\)\)[') p
+(users) str
+(']) p n
+() S 8 T (TGS_key = \(read_config\(") S
+(./config/as.json) str
+("\)\)[') p
+(key) str
+(']) p n
+() N
+() S 8 T (config = \(read_config\(") S
+(./config/servers.json) str
+("\)\)[') p
+(servers) str
+('][') p
+(as) str
+(']) p n
+() N
+() N
+() S 8 T (server = TCPServer\(\(config[0], int\(config[1]\)\), AuthenticationServer\)) N
+() N
+() S 8 T () S
+(try) K
+(:) p n
+() S 8 T () S 16 T () S
+(print) K
+( ") p
+(Authentication Server Running) str
+(") p n
+() S 8 T () S 16 T (server.serve_forever\(\)) N
+() S 8 T () S
+(except) K
+( KeyboardInterrupt:) p n
+() S 8 T () S 16 T (server.shutdown\(\)) N
+() N
+() N
+(as.py) (Page 2/2) (Dec 14, 11 22:14) title
+border
+grestore
+(Printed by Mr.Divenson) rhead
+(./as.py) (1/12) (Sunday December 18, 2011) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1-2) 2
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(#!/usr/bin/python) c n
+(import) K
+( socket) p n
+(import) K
+( sys) p n
+(from) K
+( crypto ) p
+(import) K
+( *) p n
+(import) K
+( json) p n
+(import) K
+( time) p n
+(from) K
+( misc ) p
+(import) K
+( *) p n
+() N
+(#READ THIS IN LATER) c n
+(HOST, AS_PORT = ") p
+(localhost) str
+(", 8081) p n
+(TGS_PORT = 8082) N
+(SS_PORT =  8083) N
+() N
+(servers = "") N
+() N
+(#USER = "divines") c n
+(#PASS = "thisisapassword") N
+() p n
+(#Auth with AS) c n
+(def) K
+( login\(server, user\):) p n
+() S 8 T (sock = socket.socket\(socket.AF_INET, socket.SOCK_STREAM\)) N
+() S 8 T () S
+(try) K
+(:) p n
+() S 8 T () S 16 T (sock.connect\(server\)) N
+() S 8 T () S 16 T (sock.send\(user\)) N
+() S 8 T () S 16 T (response = "") N
+() S 8 T () S 16 T () S
+(while) K
+( 1:) p n
+() S 8 T () S 16 T () S 24 T (data = sock.recv\(msg_size\)) N
+() S 8 T () S 16 T () S 24 T () S
+(if) K
+( ) p
+(not) K
+( data: ) p
+(break) K n
+() p 8 T () S 16 T () S 24 T (response += data) N
+() S 8 T () S 16 T () N
+() S 8 T () S 16 T () S
+(return) K
+( response) p n
+() S 8 T () N
+() S 8 T () S
+(finally) K
+(:) p n
+() S 8 T () S 16 T (sock.close\(\)) N
+() N
+(#Get a ticket from ticket granting server) c n
+(def) K
+( getTicket\(server, as_ticket, tgs_client_key, time_stamp, service, user\):) p n
+() S 8 T (sock = socket.socket\(socket.AF_INET, socket.SOCK_STREAM\)) N
+() S 8 T () S
+(try) K
+(:) p n
+() S 8 T () S 16 T (sock.connect\(server\)) N
+() N
+() S 8 T () S 16 T (authenticator = build_authenticator\(time_stamp, user\)) N
+() S 8 T () S 16 T (authenticator = encrypt\(authenticator, tgs_client_key\)) N
+() N
+() S 8 T () S 16 T (message = json.dumps\({") S
+(request) str
+(" : service, ") p
+(ticket) str
+(" : as_ticket, ") p
+(aut) str n
+(h) S
+(" : authenticator}\)) p n
+() S 8 T () S 16 T (sock.send\(message\)) N
+() S 8 T () S 16 T (response = "") N
+() S 8 T () S 16 T () S
+(while) K
+( 1:) p n
+() S 8 T () S 16 T () S 24 T (data = sock.recv\(msg_size\)) N
+() S 8 T () S 16 T () S 24 T () S
+(if) K
+( ) p
+(not) K
+( data: ) p
+(break) K n
+() p 8 T () S 16 T () S 24 T (response += data) N
+() S 8 T () N
+() S 8 T () S 16 T () S
+(return) K
+( response) p n
+() N
+() S 8 T () S
+(finally) K
+(:) p n
+() S 8 T () S 16 T (sock.close\(\)) N
+() N
+(#Supposed to encrypt tgs_ticket with TGS key. That must be wrong? Encrypted with) c n
+( SS key surly?) N
+(def) K
+( auth_ss\(server, tgs_ticket, client_ss, time_stamp, user\):) p n
+() S 8 T (sock = socket.socket\(socket.AF_INET, socket.SOCK_STREAM\)) N
+(client_auth.py) (Page 1/3) (Dec 14, 11 22:14) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p n
+() S 8 T () S
+(try) K
+(:) p n
+() S 8 T () S 16 T (sock.connect\(server\)) N
+() N
+() S 8 T () S 16 T (authenticator = build_authenticator\(time_stamp, user\)) N
+() S 8 T () S 16 T (authenticator = encrypt\(authenticator, client_ss\)) N
+() N
+() S 8 T () S 16 T () S
+(#Service servers have arequest type because they can do more tha) c n
+(n one thing) N
+() p 8 T () S 16 T (message = json.dumps\({") S
+(type) str
+(" : ") p
+(auth) str
+(", ") p
+(ticket) str
+(" : tgs_ticket, ") p
+(auth) str
+(" ) p n
+(: authenticator}\)) N
+() S 8 T () S 16 T (sock.send\(message\)) N
+() N
+() S 8 T () S 16 T (response = "") N
+() S 8 T () S 16 T () S
+(#Really no need for these while loops, but just in case I decide) c n
+(d to use some crazy crypto algo....) N
+() p 8 T () S 16 T () S
+(#That's never going to happen is it?) c n
+() p 8 T () S 16 T () S
+(#Probably not, no.....) c n
+() p 8 T () S 16 T () S
+(#.....) c n
+() p 8 T () S 16 T () S
+(#*smack*) c n
+() p 8 T () S 16 T () S
+(#;_;) c n
+() p 8 T () S 16 T () S
+(while) K
+( 1:) p n
+() S 8 T () S 16 T () S 24 T (data = sock.recv\(msg_size\)) N
+() S 8 T () S 16 T () S 24 T () S
+(if) K
+( ) p
+(not) K
+( data: ) p
+(break) K n
+() p 8 T () S 16 T () S 24 T (response += data) N
+() S 8 T () N
+() S 8 T () S 16 T () S
+(return) K
+( response) p n
+() N
+() S 8 T () S
+(finally) K
+(:) p n
+() S 8 T () S 16 T (sock.close\(\)) N
+() N
+() N
+(def) K
+( build_authenticator\(time_stamp, user\):) p n
+() S 8 T () S
+(return) K
+( json.dumps\({") p
+(user) str
+(" : user, ") p
+(time) str
+(" : time_stamp}\)) p n
+() N
+(#Convert input json to a typle to be used in initing a socket) c n
+(def) K
+( json_to_tuple\(json_data, service\):) p n
+() S 8 T () S
+(return) K
+( \(json_data[service][0], int\(json_data[service][1]\)\)) p n
+() N
+() N
+(#Authenticate and get a Client-SS key to use) c n
+(#Put in error checkign on service type) N
+() p n
+(#IMPLEMENT THIS) c n
+(#def get_ss_key\(service_type, user, password\):) N
+(def) K
+( get_ss_key\(service_type, user, password\):) p n
+() N
+() S 8 T (servers = read_config\(") S
+(./config/servers.json) str
+("\)) p n
+() S 8 T (servers = servers[') S
+(servers) str
+(']) p n
+() S 8 T (as_tuple = json_to_tuple\(servers, ") S
+(as) str
+("\)) p n
+() N
+() S 8 T (as_response = login\(as_tuple, user\)) N
+() N
+() S 8 T () S
+(if) K
+(\(as_response == ") p
+(Invalid User) str
+("\):) p n
+() S 8 T () S 16 T () S
+(raise) K
+( Warning \(as_response\)) p n
+() N
+() S 8 T (login_ticket = json.loads\(as_response, strict=False\)) N
+() S 8 T (key = genKey\(password\)) N
+() S 8 T (tgs_client_key = decrypt\(login_ticket[') S
+(public) str
+('], key\)) p n
+() S 8 T () S
+(print) K
+( ") p
+(Session key obtained, contacting TGS) str
+(") p n
+() N
+() S 8 T () S
+(#Convert timestamps to strings for simplicity) c n
+(client_auth.py) (Page 2/3) (Dec 14, 11 22:14) title
+border
+grestore
+(Printed by Mr.Divenson) rhead
+(./client_auth.py) (2/12) (Sunday December 18, 2011) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (3) 3
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p 8 T (time_stamp = str\(time.time\(\)\)) N
+() S 8 T (tgs_tuple = json_to_tuple\(servers, ') S
+(tgs) str
+('\)) p n
+() S 8 T (tgs_response = getTicket\(tgs_tuple, login_ticket[') S
+(private) str
+('], tgs_client_ke) p n
+(y, time_stamp, service_type, user\)) N
+() S 8 T () S
+(print) K
+( ") p
+(TGS ticket obtained, contacing services server) str
+(") p n
+() N
+() S 8 T (tgs_response = json.loads\(tgs_response, strict=False\)) N
+() S 8 T (tgs_ticket = tgs_response[') S
+(ticket) str
+(']) p n
+() N
+() S 8 T (client_ss = tgs_response[') S
+(client_ss) str
+(']) p n
+() S 8 T (client_ss = decrypt\(client_ss, tgs_client_key\)) N
+() S 8 T (client_ss = json.loads\(client_ss, strict=False\)[') S
+(client_ss) str
+(']) p n
+() N
+() S 8 T (time_stamp = str\(time.time\(\)\)) N
+() N
+() S 8 T (ss_tuple = json_to_tuple\(servers, service_type\)) N
+() S 8 T (ss_response = auth_ss\(ss_tuple, tgs_ticket, client_ss, time_stamp, user\)) N
+() S 8 T (ss_response = json.loads\(ss_response, strict=False\)) N
+() N
+() S 8 T (ss_time = ss_response[') S
+(time) str
+(']) p n
+() S 8 T (ss_time = decrypt\(ss_time, client_ss\)) N
+() N
+() S 8 T () S
+(if) K
+(\(ss_time == time_stamp\):) p n
+() S 8 T () S 16 T () S
+(return) K
+( client_ss) p n
+() S 8 T () S
+(else) K
+(:) p n
+() S 8 T () S 16 T () S
+(raise) K
+( Warning \(") p
+(Something went wrong contacting SS server) str
+("\)) p n
+() N
+() N
+() S 8 T () N
+() N
+() N
+(client_auth.py) (Page 3/3) (Dec 14, 11 22:14) title
+border
+grestore
+(Printed by Mr.Divenson) rhead
+(./client_auth.py) (3/12) (Sunday December 18, 2011) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1-2) 4
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(#!/usr/bin/python) c n
+(import) K
+( socket) p n
+(import) K
+( sys) p n
+(from) K
+( crypto ) p
+(import) K
+( *) p n
+(import) K
+( json) p n
+(import) K
+( time) p n
+(from) K
+( client_auth ) p
+(import) K
+( *) p n
+(from) K
+( misc ) p
+(import) K
+( *) p n
+(import) K
+( errno) p n
+(#Tcp version) c n
+(class) K
+( RemoteFile\(\):) p n
+() N
+() S 8 T () S
+(#Only one directory server for the moment) c n
+() p 8 T (all_servers = \(read_config\(") S
+(./config/servers.json) str
+("\)\)[') p
+(servers) str
+(']) p n
+() S 8 T (services = \(read_config\(") S
+(./config/servers.json) str
+("\)\)[') p
+(services) str
+(']) p n
+() S 8 T () S
+(#ds_server = all_servers['ds']) c n
+() p 8 T (open_file = "") N
+() S 8 T (permission = "") N
+() S 8 T (opened = False) N
+() S 8 T (lock = False) N
+() N
+() S 8 T () S
+(#user and client_ss_key) c n
+() p 8 T () S
+(def) K
+( __init__\(self, _user, _password\):) p n
+() S 8 T () S 16 T () S
+(#self.fs_key = get_ss_key\("fs"\)) c n
+() p 8 T () S 16 T (self.user = _user) N
+() S 8 T () S 16 T (self.password = _password) N
+() S 8 T () S 16 T () N
+() S 8 T () S 16 T (self.user = user) N
+() S 8 T () S 16 T (self.cache = {} ) S
+(#Files opened already) c n
+() p 8 T () S 16 T () S
+(#self.mapped = {} #File already looked up) c n
+() p n
+() S 8 T () S
+(#Query directory server to map filename) c n
+() p 8 T () S
+(def) K
+( map_filename\(self, filename, server=0\):) p n
+() S 8 T () S 16 T () S
+(#Check if filename has already been lookeduo and ask dir server ) c n
+(if it has changed) N
+() p 8 T () S 16 T () S
+(#if\(filename in self.mapped.keys\(\) and \(self.get_sum\(self.ds_ser) c n
+(ver\) == genKey\(self.mapped[filename]\)\)\):) N
+() p 8 T () S 16 T () S
+(#Actauly, there is no point doing this as the amount of work nee) c n
+(ded to check if the file) N
+() p 8 T () S 16 T () S
+(#has moved is roughly the same as just looking it up again) c n
+() p n
+() S 8 T () S 16 T () S
+(#If the directory server is down, try another one. Also, WARNING) c n
+(, this may make your eyes bleed) N
+() p 8 T () S 16 T () N
+() S 8 T () S 16 T () S
+(try) K
+(:) p n
+() S 8 T () S 16 T () S 24 T (self.ds_key = get_ss_key\(self.services[') S
+(dir) str
+('][server], se) p n
+(lf.user, self.password\)) N
+() S 8 T () S 16 T () S 24 T () S
+(#This only works because python exits the try block comp) c n
+(letly when an exception is thrown.) N
+() p 8 T () S 16 T () S 24 T () S
+(#Theres some fancy name for that, and another fancy name) c n
+( for the opposit behaviour. I'm smart me) N
+() p 8 T () S 16 T () S 24 T (self.ds_server = self.all_servers[self.services[') S
+(dir) str
+('][se) p n
+(rver]]) N
+() S 8 T () S 16 T () S
+(except) K
+( socket.error:) p n
+() S 8 T () S 16 T () S 24 T () S
+(#Using exception handeling for flow control cous i'm coo) c n
+(l like that. RECURSIVE EXCEPTIONS) N
+() p 8 T () S 16 T () S 24 T () S
+(if) K
+(\(server+1 < len\(self.services[') p
+(dir) str
+(']\)\):) p n
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(print) K
+( ") p
+(Server down, trying the next one ) str
+(" + self.services[) p n
+(') S
+(dir) str
+('][server+1]) p n
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(#self.ds_key = get_ss_key\(self.services['dir'][s) c n
+(erver+1], self.user, self.password\)) N
+() p n
+(client.py) (Page 1/4) (Dec 15, 11 13:34) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p 8 T () S 16 T () S 24 T () S 32 T () S
+(return) K
+( self.map_filename\(filename, server+1\) ) p
+(# y) c n
+(up) N
+() p n
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(#self.ds_server = self.services['dir'][server+1]) c n
+() p n
+() S 8 T () S 16 T () S 24 T () S
+(else) K
+(:) p n
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(raise) K
+( Exception \(") p
+(All the directory servers are down) str
+("\)) p n
+() N
+() S 8 T () S 16 T () S
+(#Username, filename and a if a lock is being requested) c n
+() p 8 T () S 16 T (self.open_file = filename ) S
+(#This is a hack to send the filename t) c n
+(o the directory server) N
+() p 8 T () S 16 T (message = self.construct_message\(") S
+(map) str
+(", self.ds_key\)) p n
+() S 8 T () S 16 T (response = self.send_message\(message, self.ds_server\)) N
+() S 8 T () N
+() S 8 T () S 16 T (response = decrypt\(response, self.ds_key\)) N
+() N
+() S 8 T () S 16 T () S
+(return) K
+( response) p n
+() N
+() N
+() S 8 T () N
+() S 8 T () S
+(def) K
+( open\(self, filename, mode=") p
+(r) str
+(", _lock=False\):) p n
+() S 8 T () S 16 T () S
+(#first contact directory server and map the filename) c n
+() p 8 T () S 16 T (filename = self.map_filename\(filename\)) N
+() S 8 T () S 16 T (self.lock = _lock) N
+() S 8 T () S 16 T (filename = json.loads\(filename\)) N
+() S 8 T () S 16 T (self.server = filename[') S
+(server) str
+(']) p n
+() S 8 T () S 16 T (self.open_file = filename[') S
+(file) str
+(']) p n
+() S 8 T () S 16 T (self.permission = mode ) S
+(#If stuff broke, this is why) c n
+() p n
+() N
+() S 8 T () S 16 T () S
+(if) K
+(\(self.open_file == ") p
+(Invalid User) str
+(" ) p
+(or) K
+( \(self.open_file == ") p
+(Not Found) str
+(") p n
+( ) S
+(and) K
+( mode !=') p
+(w) str
+('\)\):) p n
+() S 8 T () S 16 T () S 24 T (self.open_file = "") N
+() S 8 T () S 16 T () S 24 T () S
+(raise) K
+( IOError\(filename\)) p n
+() S 8 T () S 16 T () S
+(else) K
+(:) p n
+() S 8 T () S 16 T () S 24 T () N
+() S 8 T () S 16 T () S 24 T (self.fs_key = get_ss_key\(self.server, self.user, self.pa) N
+(ssword\)) N
+() N
+() S 8 T () S 16 T () S 24 T (message = self.construct_message\(") S
+(lookup) str
+(", self.fs_key, s) p n
+(elf.lock\)) N
+() S 8 T () S 16 T () S 24 T (response = self.send_message\(message, self.all_servers[s) N
+(elf.server]\)) N
+() S 8 T () S 16 T () S 24 T (response = decrypt\(response, self.fs_key\)) N
+() N
+() S 8 T () S 16 T () S 24 T () S
+(if) K
+( response == ") p
+(file found) str
+(":) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (self.opened = True) N
+() S 8 T () S 16 T () S 24 T () S
+(elif) K
+( response == ") p
+(invalid directory) str
+(":) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (self.opened = False) N
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(raise) K
+( IOError \(") p
+(No such directory) str
+("\)) p n
+() S 8 T () S 16 T () S 24 T () S
+(elif) K
+(  mode == ") p
+(r) str
+(":) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (self.opened = False) N
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(raise) K
+( IOError \(") p
+(No such file) str
+("\)) p n
+() S 8 T () S 16 T () S 24 T () S
+(elif) K
+( mode == ") p
+(w) str
+(":) p n
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(#create the file) c n
+() p 8 T () S 16 T () S 24 T () S 32 T (message = self.construct_message\(") S
+(create) str
+(", self.fs) p n
+(_key, self.lock\)) N
+() S 8 T () S 16 T () S 24 T () S 32 T (response = self.send_message\(message, self.all_s) N
+(ervers[self.server]\)) N
+() S 8 T () S 16 T () S 24 T () S 32 T (response = decrypt\(response, self.fs_key\)) N
+() S 8 T () S 16 T () S 24 T () S 32 T (self.opened = True) N
+() N
+(client.py) (Page 2/4) (Dec 15, 11 13:34) title
+border
+grestore
+(Printed by Mr.Divenson) rhead
+(./client.py) (4/12) (Sunday December 18, 2011) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (3-4) 5
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p 8 T () S
+(def) K
+( get_sum\(self, server\):) p n
+() S 8 T () S 16 T (message = self.construct_message\(") S
+(check) str
+(", self.fs_key\)) p n
+() S 8 T () S 16 T (response = self.send_message\(message, server\)) N
+() S 8 T () S 16 T (response = decrypt\(response, self.fs_key\)) N
+() S 8 T () S 16 T () S
+(return) K
+( response) p n
+() N
+() N
+() N
+() S 8 T () S
+(#Extend for size and such later) c n
+() p 8 T () S
+(def) K
+( read\(self, size=0\):) p n
+() S 8 T () S 16 T () S
+(if) K
+(\(self.permission == ') p
+(w) str
+(' ) p
+(or) K
+( self.opened == False\):) p n
+() S 8 T () S 16 T () S 24 T () S
+(raise) K
+( IOError\(") p
+(File not open for reading) str
+("\)) p n
+() S 8 T () S 16 T () S
+(#Check if in cache and if the file has been modified) c n
+() p 8 T () S 16 T () S
+(if) K
+( \(self.open_file ) p
+(in) K
+( self.cache.keys\(\)\) ) p
+(and) K
+( \(self.get_sum\(self.) p n
+(all_servers[self.server]\) == genKey\(self.cache[self.open_file]\)\):) N
+() S 8 T () S 16 T () S 24 T () S
+(#Compute checksum of file and ask server to verify) c n
+() p 8 T () S 16 T () S 24 T () S
+(return) K
+( self.cache[self.open_file]) p n
+() S 8 T () S 16 T () S
+(else) K
+(:) p n
+() S 8 T () S 16 T () S 24 T () S
+(#Get the file and store in local cache) c n
+() p 8 T () S 16 T () S 24 T (message = self.construct_message\(") S
+(read) str
+(", self.fs_key\)) p n
+() S 8 T () S 16 T () S 24 T (response = self.send_message\(message, self.all_servers[s) N
+(elf.server]\)) N
+() S 8 T () S 16 T () S 24 T (response = decrypt\(response, self.fs_key\)) N
+() S 8 T () S 16 T () S 24 T (self.cache[self.open_file] = response) N
+() N
+() S 8 T () S 16 T () S
+(return) K
+( response) p n
+() N
+() S 8 T () S
+(def) K
+( write\(self, data\):) p n
+() S 8 T () S 16 T () S
+(if) K
+(\(self.permission == ') p
+(r) str
+(' ) p
+(or) K
+( self.opened == False\):) p n
+() S 8 T () S 16 T () S 24 T () S
+(raise) K
+( IOError\(") p
+(File not open for writing) str
+("\)) p n
+() S 8 T () S 16 T (message = self.construct_message\(") S
+(write) str
+(", self.fs_key, data\)) p n
+() S 8 T () S 16 T (response = self.send_message\(message, self.all_servers[self.serv) N
+(er]\)) N
+() S 8 T () S 16 T (response = decrypt\(response, self.fs_key\)) N
+() S 8 T () S 16 T () S
+(#Update cached copy) c n
+() p 8 T () S 16 T (self.cache[self.open_file] = data) N
+() N
+() S 8 T () S 16 T () S
+(return) K
+( response) p n
+() N
+() S 8 T () S
+(def) K
+( close\(self\):) p n
+() S 8 T () S 16 T (message = self.construct_message\(") S
+(close) str
+(", self.fs_key\)) p n
+() S 8 T () S 16 T (self.send_message\(message, self.all_servers[self.server]\)) N
+() S 8 T () S 16 T (self.opened = False;) N
+() S 8 T () S 16 T (self.open_file = "") N
+() S 8 T () S 16 T () S
+(#if locked then release) c n
+() p n
+() N
+() S 8 T () S
+(def) K
+( construct_message\(self, request, key, args=""\):) p n
+() S 8 T () S 16 T () S
+(#file is also being sent with directory server requests \(as empt) c n
+(y field\). Optimize later) N
+() p 8 T () S 16 T (payload = json.dumps\({") S
+(type) str
+(" : request, ") p
+(file) str
+(" : self.open_file, ") p
+(a) str n
+(rgs) S
+(" : args}\)) p n
+() S 8 T () S 16 T (payload = encrypt\(payload, key\)) N
+() S 8 T () S 16 T (message = json.dumps\({") S
+(type) str
+(" : ") p
+(request) str
+(", ") p
+(user) str
+(" : self.user, ") p
+(messag) str n
+(e) S
+(" : payload}\)) p n
+() S 8 T () S 16 T () S
+(return) K
+( message) p n
+() N
+() S 8 T () S
+(#Open a connection to services server and return the response) c n
+() p 8 T () S
+(def) K
+( send_message\(self, message, server\):) p n
+() S 8 T () S 16 T (sock = socket.socket\(socket.AF_INET, socket.SOCK_STREAM\)) N
+() S 8 T () S 16 T () S
+(try) K
+(:) p n
+() S 8 T () S 16 T () S 24 T (sock.connect\(\(server[0], int\(server[1]\)\)\)) N
+(client.py) (Page 3/4) (Dec 15, 11 13:34) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p 8 T () S 16 T () S 24 T (sock.send\(message\)) N
+() S 8 T () S 16 T () S 24 T () N
+() S 8 T () S 16 T () S 24 T (response = "") N
+() S 8 T () S 16 T () S 24 T () S
+(while) K
+( 1:) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (data = ) S 40 T (sock.recv\(msg_size\)) N
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(#print "#"+data+"#") c n
+() p 8 T () S 16 T () S 24 T () S 32 T () S
+(if) K
+( ) p
+(not) K
+( data: ) p
+(break) K n
+() p 8 T () S 16 T () S 24 T () S 32 T (response += data) N
+() S 8 T () S 16 T () S 24 T () N
+() N
+() S 8 T () S 16 T () S 24 T () S
+(return) K
+( response) p n
+() S 8 T () N
+() S 8 T () S 16 T () S
+(finally) K
+(:) p n
+() S 8 T () S 16 T () S 24 T (sock.close\(\)) N
+() N
+() S 8 T () N
+() N
+(if) K
+( __name__ == ") p
+(__main__) str
+(":) p n
+() S 8 T (user = ") S
+(divines) str
+(") p n
+() S 8 T (password = ") S
+(thisisapassword) str
+(") p n
+() S 8 T (r_file = RemoteFile\(user, password\)) N
+() S 8 T (r_file.open\(") S
+(/home/divo/vdrive/test2.txt) str
+(", ') p
+(r) str
+(', True\)) p n
+() S 8 T () S
+(print) K
+( r_file.read\(\)) p n
+() S 8 T () S
+(#print r_file.read\(\)) c n
+() p 8 T (r_file.close\(\)) N
+() N
+() S 8 T (r_file.open\(") S
+(/home/divo/vdrive1/test.txt) str
+(", ') p
+(w) str
+(', True\)) p n
+() S 8 T (raw_input\(\)) N
+() S 8 T () S
+(#text = f.read\(\)) c n
+() p n
+() S 8 T () S
+(#r_file.open\("/home/divo/vdrive/test3.txt" , 'w'\)) c n
+() p n
+() S 8 T (r_file.write\(") S
+(String) str
+("\)) p n
+() S 8 T (r_file.close\(\)) N
+() N
+(client.py) (Page 4/4) (Dec 15, 11 13:34) title
+border
+grestore
+(Printed by Mr.Divenson) rhead
+(./client.py) (5/12) (Sunday December 18, 2011) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 6
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(#/usr/bin/python) c n
+() p n
+(import) K
+( os) p n
+(import) K
+( hashlib) p n
+(import) K
+( base64) p n
+() N
+(def) K
+( encrypt\(text, key\):) p n
+() S 8 T (data = base64.b64encode\(text\)) N
+() S 8 T () S
+(return) K
+( aes\(data, key\)) p n
+() S 8 T () N
+() N
+(def) K
+( decrypt\(text, key\):) p n
+() S 8 T (data = aes\(text, key, ") S
+(-d) str
+("\)) p n
+() S 8 T () S
+(return) K
+( base64.b64decode\(data\)) p n
+() N
+(#mode = "" is encryption) c n
+(#mode = "-d" is decryption) N
+(def) K
+( aes\(text, key, mode=""\):) p n
+() S 8 T (command = ") S
+(echo \\') str
+("+text+") p
+(\\' | openssl enc ) str
+("+mode+") p
+( -aes-256-cbc -a -salt -pass pass:\\") str
+("+key) p n
+(+") S
+(\\") str
+(") p n
+() S 8 T (pipe = os.popen\(command\)) N
+() S 8 T (data = pipe.read\(\).strip\(\)) N
+() S 8 T (pipe.close\(\)) N
+() S 8 T (''') S
+(f = open\("output.txt"\)) str n
+() S 8 T (data = f.read\(\)) N
+() S 8 T (f.close\(\)) S
+(''') p n
+() S 8 T () S
+(return) K
+( data) p n
+() N
+(def) K
+( genKey\(text\):) p n
+() S 8 T () S
+(return) K
+( hashlib.sha1\(text\).hexdigest\(\)) p n
+() N
+(crypto.py) (Page 1/1) (Dec 14, 11 22:14) title
+border
+grestore
+(Printed by Mr.Divenson) rhead
+(./crypto.py) (6/12) (Sunday December 18, 2011) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1-2) 7
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(#!/usr/bin/python) c n
+() p n
+(import) K
+( SocketServer) p n
+(import) K
+( sys) p n
+(import) K
+( hashlib) p n
+(from) K
+( crypto ) p
+(import) K
+( *) p n
+(import) K
+( json) p n
+(from) K
+( misc ) p
+(import) K
+( *) p n
+(from) K
+( ss ) p
+(import) K
+( *) p n
+() N
+(key = "") N
+(dir_map = "") N
+(locks = []) N
+() N
+(#Should really move these into misc) c n
+() p n
+(class) K
+( TCPServer\(SocketServer.TCPServer\):) p n
+() S 8 T (allow_reuse_address = True) N
+() N
+() N
+(class) K
+( DirectoryServer\(SocketServer.BaseRequestHandler, ServicesServer\):) p n
+() N
+() S 8 T () S
+(# { filename : user}) c n
+() p 8 T (locks = {}) N
+() N
+() S 8 T () S
+(def) K
+( handle\(self\):) p n
+() S 8 T () S 16 T (temp = self.request.recv\(msg_size\)) N
+() S 8 T () S 16 T (data = temp) N
+() S 8 T () S 16 T () S
+(while) K
+( len\(temp\) == msg_size:) p n
+() S 8 T () S 16 T () S 24 T (temp = self.request.recv\(msg_size\)) N
+() S 8 T () S 16 T () S 24 T (data += temp) N
+() S 8 T () S 16 T () N
+() S 8 T () S 16 T (data = json.loads\(data, strict=False\)) N
+() S 8 T () S 16 T () S
+(#Two types of unencrypted packets, login request and requests \(t) c n
+(he contents of which is encrypted\)) N
+() p 8 T () S 16 T () S
+(if) K
+(\(data[') p
+(type) str
+('] == ") p
+(auth) str
+("\):) p n
+() S 8 T () S 16 T () S 24 T (self.handle_auth\(data, key\)) N
+() S 8 T () S 16 T () S
+(#Else, check if user is already authenticated) c n
+() p 8 T () S 16 T () S
+(elif) K
+(\(data[') p
+(type) str
+('] == ") p
+(request) str
+("\):) p n
+() S 8 T () S 16 T () S 24 T () S
+(#If user authenticated) c n
+() p 8 T () S 16 T () S 24 T (user = data[') S
+(user) str
+(']) p n
+() S 8 T () S 16 T () S 24 T () S
+(if) K
+(\(self.users.has_key\(user\)\):) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (message = decrypt\(data[') S
+(message) str
+('], self.users[use) p n
+(r]\)) N
+() S 8 T () S 16 T () S 24 T () S 32 T (message = json.loads\(message, strict=False\)) N
+() N
+() S 8 T () S 16 T () S 24 T () S 32 T (filename = message[') S
+(file) str
+(']) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (args = message[') S
+(args) str
+('] ) p
+(#Args contains a lock requ) c n
+(est) N
+() p 8 T () S 16 T () S 24 T () S 32 T () N
+() N
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(#Server only has one function for the moment) c n
+() p 8 T () S 16 T () S 24 T () S 32 T (response = self.map_request\(filename\)) N
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(#if\(args and \(response != "Not Found"\)\):) c n
+() p 8 T () S 16 T () S 24 T () S 32 T () S 40 T () S
+(#locks.append\(response\)) c n
+() p 8 T () S 16 T () S 24 T () S 32 T () S 40 T () N
+() S 8 T () S 16 T () S 24 T () S
+(else) K
+(:) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (response = ") S
+(Invalid User) str
+(") p n
+() S 8 T () S 16 T () S 24 T () S 32 T () S 40 T () N
+() S 8 T () S 16 T () S 24 T (self.respond\(response, user\)) N
+() S 8 T () S 16 T () S 24 T () N
+() S 8 T () N
+(dir_server.py) (Page 1/2) (Dec 14, 11 22:14) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p 8 T () S
+(def) K
+( map_request\(self, filename\):) p n
+() S 8 T () S 16 T (result = ") S
+(Not Found) str
+(") p n
+() S 8 T () S 16 T () S
+(for) K
+( i ) p
+(in) K
+( dir_map:) p n
+() S 8 T () S 16 T () S 24 T () S
+(#Virtual drive) c n
+() p 8 T () S 16 T () S 24 T (temp = dir_map[i][0]) N
+() S 8 T () S 16 T () S 24 T () S
+(if) K
+( \(filename.find\(temp\) != -1\):) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (filename = filename.split\(temp\)) N
+() S 8 T () S 16 T () S 24 T () S 32 T (result = dir_map[i][1] + filename[1]) N
+() S 8 T () S 16 T () S 24 T () S 32 T (result = json.dumps\({") S
+(server) str
+(" : i, ") p
+(file) str
+(" : result}) p n
+(\);) N
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(break) K n
+() p n
+() S 8 T () S 16 T () S
+(return) K
+( result) p n
+() N
+() N
+() N
+() N
+() N
+() N
+() S 8 T () N
+() N
+(if) K
+( __name__ == ") p
+(__main__) str
+(":) p n
+() N
+() S 8 T () S
+(#If server name not specifed, default) c n
+() p 8 T () S
+(if) K
+(\(len\(sys.argv\) == 2\):) p n
+() S 8 T () S 16 T (name = sys.argv[1]) N
+() S 8 T () S
+(else) K
+(:) p n
+() S 8 T () S 16 T (name = ") S
+(ds) str
+(") p n
+() S 8 T () N
+() S 8 T (key = \(read_config\(") S
+(./config/) str
+("+name+") p
+(.json) str
+("\)\)[') p
+(key) str
+(']) p n
+() N
+() N
+() S 8 T (dir_map = \(read_config\(") S
+(./config/mapping.json) str
+("\)\)[') p
+(directories) str
+(']) p n
+() N
+() S 8 T (config = \(read_config\(") S
+(./config/servers.json) str
+("\)\)[') p
+(servers) str
+('][name]) p n
+() S 8 T (server = TCPServer\(\(config[0], int\(config[1]\)\), DirectoryServer\)) N
+() N
+() S 8 T () S
+(try) K
+(:) p n
+() S 8 T () S 16 T () S
+(print) K
+( ") p
+(Directory Server Running) str
+(") p n
+() S 8 T () S 16 T (server.serve_forever\(\)) N
+() S 8 T () S
+(except) K
+( KeyboardInterrupt:) p n
+() S 8 T () S 16 T (server.shutdown\(\)) S
+(dir_server.py) (Page 2/2) (Dec 14, 11 22:14) title
+border
+grestore
+(Printed by Mr.Divenson) rhead
+(./dir_server.py) (7/12) (Sunday December 18, 2011) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1-2) 8
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(#!/usr/bin/python) c n
+() p n
+(import) K
+( SocketServer) p n
+(import) K
+( hashlib) p n
+(import) K
+( sys) p n
+(from) K
+( crypto ) p
+(import) K
+( *) p n
+(import) K
+( json) p n
+(from) K
+( misc ) p
+(import) K
+( *) p n
+(from) K
+( ss ) p
+(import) K
+( *) p n
+() N
+() N
+(#Servers private key) c n
+(key = "") p n
+(cache_size = "") N
+(#filename : user) c n
+() p n
+(''') N
+() str n
+(Services Server, this is the fileserver) N
+() N
+(So far the client sends lovely formatted messages with all sort of magical fields.) N
+(The server just farts data back across the wire.) N
+() N
+(''') p n
+() N
+() N
+() N
+(class) K
+( TCPServer\(SocketServer.TCPServer\):) p n
+() S 8 T (allow_reuse_address = True) N
+() N
+() N
+(class) K
+( FileServer\(SocketServer.BaseRequestHandler, ServicesServer\):) p n
+() S 8 T (cache = {}) N
+() S 8 T (key_stack = []) N
+() S 8 T (locks = {}) N
+() N
+() N
+() S 8 T () S
+(#Inserts value in the cache, and also cleans the cache on every run. \(Ke) c n
+(y is filename\)) N
+() p 8 T () S
+(def) K
+( write_to_cache\(self, key, value\):) p n
+() S 8 T () S 16 T () S
+(if) K
+(\(len\(self.key_stack\) > cache_size\):) p n
+() S 8 T () S 16 T () S 24 T () S
+(#If the cache is full, delete the oldest entry) c n
+() p 8 T () S 16 T () S 24 T () S
+(del) K
+( cache[self.key_stack.pop\(0\)]) p n
+() S 8 T () S 16 T () N
+() S 8 T () S 16 T () S
+(#if file already in cache, update position) c n
+() p 8 T () S 16 T () S
+(if) K
+(\(key ) p
+(in) K
+( self.key_stack\):) p n
+() S 8 T () S 16 T () S 24 T (self.key_stack.remove\(key\)) N
+() S 8 T () S 16 T () S 24 T (self.key_stack.append\(key\)) N
+() S 8 T () S 16 T () S
+(#else cache the file) c n
+() p 8 T () S 16 T () S
+(else) K
+(:) p n
+() S 8 T () S 16 T () S 24 T (self.cache[key] = value) N
+() S 8 T () S 16 T () S 24 T (self.key_stack.append\(key\)) N
+() N
+() S 8 T () S 16 T () N
+() S 8 T () S
+(#On read, update keys position in stack) c n
+() p 8 T () S
+(def) K
+( read_from_cache\(self, key\):) p n
+() S 8 T () S 16 T (self.key_stack.remove\(key\)) N
+() S 8 T () S 16 T (self.key_stack.append\(key\)) N
+() S 8 T () S 16 T () S
+(return) K
+( self.cache[key]) p n
+() N
+() S 8 T () N
+() N
+(file_server.py) (Page 1/4) (Dec 15, 11 11:16) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p 8 T () S
+(def) K
+( handle\(self\):) p n
+() S 8 T () S 16 T () S
+(#Read in message of any length) c n
+() p 8 T () S 16 T (temp = self.request.recv\(msg_size\)) N
+() S 8 T () S 16 T (data = temp) N
+() S 8 T () S 16 T () S
+(while) K
+( len\(temp\) == msg_size:) p n
+() S 8 T () S 16 T () S 24 T (temp = self.request.recv\(msg_size\)) N
+() S 8 T () S 16 T () S 24 T () S
+(print) K
+( temp) p n
+() S 8 T () S 16 T () S 24 T (data += temp) N
+() S 8 T () S 16 T () N
+() S 8 T () S 16 T (data = json.loads\(data, strict=False\)) N
+() S 8 T () S 16 T () S
+(#Two types of unencrypted packets, login request and requests \(t) c n
+(he contents of which is encrypted\)) N
+() p 8 T () S 16 T () S
+(if) K
+(\(data[') p
+(type) str
+('] == ") p
+(auth) str
+("\):) p n
+() S 8 T () S 16 T () S 24 T (self.handle_auth\(data, key\)) N
+() S 8 T () S 16 T () S
+(#Else, check if user is already authenticated) c n
+() p 8 T () S 16 T () S
+(elif) K
+(\(data[') p
+(type) str
+('] == ") p
+(request) str
+("\):) p n
+() S 8 T () S 16 T () S 24 T () S
+(#If user authenticated) c n
+() p 8 T () S 16 T () S 24 T () S
+(if) K
+(\(self.users.has_key\(data[') p
+(user) str
+(']\)\):) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (message = decrypt\(data[') S
+(message) str
+('], self.users[dat) p n
+(a[') S
+(user) str
+(']]\)) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (self.user = data[') S
+(user) str
+(']) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (message = json.loads\(message, strict=False\)) N
+() N
+() S 8 T () S 16 T () S 24 T () S 32 T (filename = message[') S
+(file) str
+(']) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (args = message[') S
+(args) str
+(']) p n
+() N
+() S 8 T () S 16 T () S 24 T () S 32 T (response = ") S
+(Invalid request) str
+(") p n
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(#Now process the request) c n
+() p 8 T () S 16 T () S 24 T () S 32 T () S
+(if) K
+(\(message[') p
+(type) str
+('] == ") p
+(lookup) str
+("\):) p n
+() S 8 T () S 16 T () S 24 T () S 32 T () S 40 T (response = self.lookup\(filename, args\)) N
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(elif) K
+(\(message[') p
+(type) str
+('] == ") p
+(create) str
+("\):) p n
+() S 8 T () S 16 T () S 24 T () S 32 T () S 40 T (response = self.create\(filename, args\)) N
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(elif) K
+(\(message[') p
+(type) str
+('] == ") p
+(read) str
+("\):) p n
+() S 8 T () S 16 T () S 24 T () S 32 T () S 40 T (response = self.read\(filename\)) N
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(elif) K
+(\(message[') p
+(type) str
+('] == ") p
+(write) str
+("\):) p n
+() S 8 T () S 16 T () S 24 T () S 32 T () S 40 T (response = self.write\(filename, args\)) N
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(elif) K
+(\(message[') p
+(type) str
+('] == ") p
+(check) str
+("\):) p n
+() S 8 T () S 16 T () S 24 T () S 32 T () S 40 T (response = self.check\(filename\)) N
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(elif) K
+(\(message[') p
+(type) str
+('] == ") p
+(close) str
+("\):) p n
+() S 8 T () S 16 T () S 24 T () S 32 T () S 40 T (self.close\(filename\)) N
+() S 8 T () S 16 T () S 24 T () S 32 T () N
+() S 8 T () S 16 T () S 24 T () S 32 T (self.respond\(response, data[') S
+(user) str
+(']\)) p n
+() N
+() N
+() S 8 T () N
+() N
+() S 8 T () S
+(def) K
+( create\(self, filename, args\):) p n
+() N
+() S 8 T () S 16 T () S
+(if) K
+(\(args\):) p n
+() S 8 T () S 16 T () S 24 T (self.locks[filename] = self.user) N
+() S 8 T () S 16 T () S
+(if) K
+(\(self.lookupDir\(filename\)\):) p n
+() S 8 T () S 16 T () S 24 T (f = open\(filename, ') S
+(w) str
+('\)) p n
+() S 8 T () S 16 T () S 24 T (f.close\(\);) N
+() S 8 T () S 16 T () S 24 T () S
+(return) K
+( ") p
+(created successfully) str
+(") p n
+() S 8 T () S 16 T () S
+(return) K
+( ") p
+(invalid directory) str
+(") p n
+() N
+() S 8 T () S
+(#give up lock on close if file is locked by current user) c n
+() p 8 T () S
+(def) K
+( close\(self, filename\):) p n
+() S 8 T () S 16 T () S
+(if) K
+( \(filename ) p
+(in) K
+( self.locks\):) p n
+() S 8 T () S 16 T () S 24 T () S
+(if) K
+( self.locks[filename] == self.user:) p n
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(del) K
+( self.locks[filename]) p n
+() N
+(file_server.py) (Page 2/4) (Dec 15, 11 11:16) title
+border
+grestore
+(Printed by Mr.Divenson) rhead
+(./file_server.py) (8/12) (Sunday December 18, 2011) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (3-4) 9
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p n
+() S 8 T () S
+(def) K
+( read\(self, filename\):) p n
+() S 8 T () S 16 T () S
+(if) K
+(\(self.lookup\(filename, False\)\):) p n
+() S 8 T () S 16 T () S 24 T () S
+(if) K
+(\(filename ) p
+(in) K
+( self.cache.keys\(\)\):) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (data = self.read_from_cache\(filename\)) N
+() S 8 T () S 16 T () S 24 T () S
+(else) K
+(:) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (f = open\(filename\)) N
+() S 8 T () S 16 T () S 24 T () S 32 T (data = f.read\(\)) N
+() S 8 T () S 16 T () S 24 T () S 32 T (f.close) N
+() S 8 T () S 16 T () S 24 T () S 32 T (self.write_to_cache\(filename, data\)) N
+() S 8 T () S 16 T () S 24 T () N
+() S 8 T () S 16 T () S 24 T () S
+(return) K
+( data) p n
+() N
+() S 8 T () S
+(##Returns a checksum of the file for the client to do with as they pleas) c n
+(e) N
+() p 8 T () S
+(def) K
+( check\(self, filename\):) p n
+() S 8 T () S 16 T () S
+(if) K
+(\(filename ) p
+(in) K
+( self.cache.keys\(\)\):) p n
+() S 8 T () S 16 T () S 24 T () S
+(return) K
+( genKey\(self.cache[filename]\)) p n
+() S 8 T () S 16 T () S
+(else) K
+(:) p n
+() S 8 T () S 16 T () S 24 T (data = self.read\(filename\)) N
+() S 8 T () S 16 T () S 24 T () S
+(return) K
+( genKey\(data\)) p 48 T () N
+() N
+() N
+() S 8 T () S
+(def) K
+( write\(self, filename, data\):) p n
+() S 8 T () S 16 T () S
+(#Need to enforce permissions) c n
+() p 8 T () S 16 T () S
+(if) K
+(\(filename ) p
+(in) K
+( self.locks.keys\(\)\):) p n
+() S 8 T () S 16 T () S 24 T () S
+(if) K
+(\(self.locks[filename] != self.user\):) p n
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(return) K
+( ") p
+(Could not write, file locked) str
+(") p n
+() N
+() S 8 T () S 16 T () S
+(if) K
+(\(self.lookup\(filename, False\)\):) p n
+() S 8 T () S 16 T () S 24 T (f = open\(filename, ') S
+(w) str
+('\)) p n
+() S 8 T () S 16 T () S 24 T (f.write\(data\)) N
+() S 8 T () S 16 T () S 24 T () S
+(if) K
+(\(filename ) p
+(in) K
+( self.cache.keys\(\)\):) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (self.write_to_cache\(filename, data\)) N
+() S 8 T () S 16 T () S 24 T (f.close\(\)) N
+() S 8 T () S 16 T () S 24 T () S
+(return) K
+( ") p
+(file modified) str
+(") p n
+() S 8 T () S 16 T () N
+() S 8 T () S 16 T () S
+(return) K
+( ") p
+(Could not write) str
+(") p n
+() N
+() N
+() S 8 T () S
+(def) K
+( lookup\(self, filename, args\):) p n
+() S 8 T () S 16 T () S
+(#set lock on lookup) c n
+() p 8 T () S 16 T () S
+(if) K
+(\(args\):) p n
+() S 8 T () S 16 T () S 24 T (self.locks[filename] = self.user) N
+() S 8 T () S 16 T () S
+(#Check the directory exists) c n
+() p 8 T () S 16 T () S
+(if) K
+(\(self.lookupDir\(filename\)\):) p n
+() S 8 T () S 16 T () S 24 T (name = filename.split\(') S
+(/) str
+('\).pop\(\)) p n
+() S 8 T () S 16 T () S 24 T (path = filename.rstrip\(name\)) N
+() S 8 T () S 16 T () S 24 T () S
+(#Check the file exists) c n
+() p 8 T () S 16 T () S 24 T () S
+(if) K
+(\(name ) p
+(in) K
+( os.listdir\(path\)\):) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (result = ") S
+(file found) str
+(") p n
+() S 8 T () S 16 T () S 24 T () S
+(else) K
+(:) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (result = ") S
+(file not found) str
+(") p n
+() S 8 T () S 16 T () S
+(else) K
+(:) p n
+() S 8 T () S 16 T () S 24 T (result = ") S
+(invalid directory) str
+(") p n
+() S 8 T () S 16 T () S 24 T () N
+() S 8 T () S 16 T () S
+(return) K
+( result) p n
+() N
+() N
+() S 8 T () S
+(def) K
+( lookupDir\(self, filename\):) p n
+() S 8 T () S 16 T (temp = filename.split\(') S
+(/) str
+('\)) p n
+() S 8 T () S 16 T (temp.pop\(\)) N
+(file_server.py) (Page 3/4) (Dec 15, 11 11:16) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p 8 T () S 16 T (temp.pop\(0\)) N
+() S 8 T () S 16 T (path = ') S
+(/) str
+(' + temp.pop\(0\)) p n
+() N
+() S 8 T () S 16 T () S
+(for) K
+( i ) p
+(in) K
+( temp:) p n
+() S 8 T () S 16 T () S 24 T (contents = os.listdir\(path\)) N
+() S 8 T () S 16 T () S 24 T () S
+(if) K
+(\(i ) p
+(in) K
+( contents\):) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (path += ') S
+(/) str
+(' + i) p n
+() S 8 T () S 16 T () S 24 T () S
+(else) K
+(:) p n
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(return) K
+( False) p n
+() S 8 T () S 16 T () S 24 T () N
+() S 8 T () S 16 T () S
+(return) K
+( True) p n
+() N
+() N
+() S 8 T () S 16 T () N
+(if) K
+( __name__ == ") p
+(__main__) str
+(":) p n
+() S 8 T () S
+(if) K
+(\(len\(sys.argv\) == 2\):) p n
+() S 8 T () S 16 T (name = sys.argv[1]) N
+() S 8 T () S
+(else) K
+(:) p n
+() S 8 T () S 16 T (name = ") S
+(fs) str
+(") p n
+() N
+() N
+() N
+() N
+() S 8 T (key = \(read_config\(") S
+(./config/) str
+("+name+") p
+(.json) str
+("\)\)[') p
+(key) str
+(']) p n
+() S 8 T (stack_size = int\(\(read_config\(") S
+(./config/fs.json) str
+("\)\)[') p
+(cache_size) str
+(']\)) p n
+() S 8 T () N
+() S 8 T (config = \(read_config\(") S
+(./config/servers.json) str
+("\)\)[') p
+(servers) str
+('][name]) p n
+() S 8 T (server = TCPServer\(\(config[0], int\(config[1]\)\), FileServer\)) N
+() N
+() S 8 T () S
+(try) K
+(:) p n
+() S 8 T () S 16 T () S
+(print) K
+( ") p
+(Services server running) str
+(") p n
+() S 8 T () S 16 T (server.serve_forever\(\)) N
+() S 8 T () S
+(except) K
+( KeyboardInterrupt:) p n
+() S 8 T () S 16 T (server.shutdown\(\)) N
+(file_server.py) (Page 4/4) (Dec 15, 11 11:16) title
+border
+grestore
+(Printed by Mr.Divenson) rhead
+(./file_server.py) (9/12) (Sunday December 18, 2011) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 10
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(#!/usr/bin/python) c n
+() p n
+(import) K
+( json) p n
+(msg_size = 1024) N
+() N
+() N
+(def) K
+( read_config\(filename\):) p n
+() S 8 T (config = open\(filename\)) N
+() S 8 T (config = json.loads\(config.read\(\)\)) N
+() S 8 T () S
+(return) K
+( config) p n
+(misc.py) (Page 1/1) (Nov 28, 11 13:21) title
+border
+grestore
+(Printed by Mr.Divenson) rhead
+(./misc.py) (10/12) (Sunday December 18, 2011) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 11
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(#!/usr/bin/python) c n
+() p n
+(import) K
+( SocketServer) p n
+(import) K
+( hashlib) p n
+(import) K
+( base64) p n
+(from) K
+( crypto ) p
+(import) K
+( *) p n
+(import) K
+( json) p n
+(from) K
+( misc ) p
+(import) K
+( *) p n
+() N
+(#Servers private key) c n
+() p n
+() N
+() N
+(class) K
+( ServicesServer\(\):) p n
+() S 8 T () S 16 T () N
+() S 8 T (users = {}) N
+() S 8 T () S
+(#Takes in a bunch of json) c n
+() p 8 T () S
+(def) K
+( handle_auth\(self, data, key\):) p n
+() S 8 T () S 16 T (tgs_ticket = data[') S
+(ticket) str
+(']) p n
+() S 8 T () S 16 T (tgs_ticket = decrypt\(tgs_ticket, key\)) N
+() S 8 T () S 16 T (tgs_ticket = json.loads\(tgs_ticket, strict=False\)) N
+() N
+() S 8 T () S 16 T (tgs_user = tgs_ticket[') S
+(user) str
+(']) p n
+() N
+() S 8 T () S 16 T (client_ss_key = tgs_ticket[') S
+(client_ss) str
+(']) p n
+() N
+() S 8 T () S 16 T (authenticator = data[') S
+(auth) str
+(']) p n
+() S 8 T () S 16 T (authenticator = decrypt\(authenticator, client_ss_key\)) N
+() S 8 T () S 16 T (authenticator = json.loads\(authenticator, strict=False\)) N
+() N
+() S 8 T () S 16 T (ss_user = authenticator[') S
+(user) str
+(']) p n
+() S 8 T () S 16 T () S
+(#Verfiy that it's the user that contaced the TGS) c n
+() p 8 T () S 16 T () S
+(if) K
+(\(tgs_user == ss_user\):) p n
+() S 8 T () S 16 T () S 24 T () S
+(#If users match, store them as authenticated and) c n
+() p 8 T () S 16 T () S 24 T () S
+(#send back user timestamp encryptde with Client_ss_key) c n
+() p 8 T () S 16 T () S 24 T (self.users.update\({ss_user : client_ss_key}\)) N
+() N
+() S 8 T () S 16 T () S 24 T (response = encrypt\(authenticator[') S
+(time) str
+('], client_ss_key\)) p n
+() S 8 T () S 16 T () S 24 T (response = json.dumps\({") S
+(time) str
+(" : response}\)) p n
+() S 8 T () S 16 T () S
+(else) K
+(:) p n
+() S 8 T () S 16 T () S 24 T () S
+(print) K
+( ") p
+(Client authentication failed) str
+(") p n
+() S 8 T () S 16 T () S 24 T (response = ") S
+(Nope) str
+(") p n
+() N
+() S 8 T () S 16 T () S
+(print) K
+(\(") p
+(Sending response to client) str
+("\)) p n
+() S 8 T () S 16 T (self.request.send\(response\)) N
+() N
+() N
+() S 8 T () S 16 T () S
+(#Encrypt message for ser and send) c n
+() p 8 T () S
+(def) K
+( respond\(self, message, user\):) p n
+() S 8 T () S 16 T (response = encrypt\(message, self.users[user]\)) N
+() S 8 T () S 16 T () S
+(print) K
+( ") p
+(Sending response to ) str
+(" + user) p n
+() S 8 T () S 16 T (self.request.sendall\(response\)) N
+() N
+() N
+() N
+() N
+() S 8 T () S 16 T () N
+(ss.py) (Page 1/1) (Dec 14, 11 22:14) title
+border
+grestore
+(Printed by Mr.Divenson) rhead
+(./ss.py) (11/12) (Sunday December 18, 2011) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1-2) 12
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(#!/usr/bin/python) c n
+() p n
+(import) K
+( SocketServer) p n
+(import) K
+( hashlib) p n
+(from) K
+( crypto ) p
+(import) K
+( *) p n
+(import) K
+( json) p n
+(from) K
+( misc ) p
+(import) K
+( *) p n
+() N
+(msg_size = 1024) N
+() N
+(#No need for service ID as we only have one) c n
+() p n
+(TGS_key = "") N
+(#FS_key = "") c n
+(#DS_key = "") N
+() p n
+(DS_KEYS = "") N
+(FS_KEYS = "") N
+(keys = {}) N
+() N
+() N
+(class) K
+( TCPServer\(SocketServer.TCPServer\):) p n
+() S 8 T (allow_reuse_address = True) N
+() N
+() N
+(class) K
+( TicketGrantingServer\(SocketServer.BaseRequestHandler\):) p n
+() N
+() S 8 T () S
+(def) K
+( handle\(self\):) p n
+() S 8 T () S 16 T (data = self.request.recv\(msg_size\)) N
+() S 8 T () S 16 T () N
+() S 8 T () S 16 T (data = json.loads\(data, strict=False\)) N
+() S 8 T () S 16 T () S
+(#Decrypt AS private payload and get client_TGS_key) c n
+() p 8 T () S 16 T (''') S
+(if\(data[) str
+('request') p
+(] == "ds"\):) str n
+() S 8 T () S 16 T () S 24 T (service_key = ) N
+() S 8 T () S 16 T (elif\(data[) S
+('request') p
+(] == "fs"\):) str n
+() S 8 T () S 16 T () S 24 T (service_key = FS_key) S
+(''') p n
+() S 8 T () S 16 T (service_key = keys[data[') S
+(request) str
+(']]) p n
+() N
+() S 8 T () S 16 T (ticket = decrypt\(data[') S
+(ticket) str
+('], TGS_key\)) p n
+() S 8 T () S 16 T (ticket = json.loads\(ticket, strict=False\)) N
+() S 8 T () S 16 T (client_TGS_key = ticket[') S
+(client_tgs) str
+(']) p n
+() N
+() S 8 T () S 16 T (authenticator = decrypt\(data[') S
+(auth) str
+('], client_TGS_key\)) p n
+() S 8 T () S 16 T (authenticator = json.loads\(authenticator, strict=False\)) N
+() N
+() S 8 T () S 16 T () S
+(#Client-SS key is sha1 of username encrypted with AES against th) c n
+(e SS key) N
+() p 8 T () S 16 T (client_SS_key = encrypt\(genKey\(authenticator[') S
+(user) str
+(']\), service_ke) p n
+(y\)) N
+() S 8 T () S 16 T (ticket = json.dumps\({") S
+(user) str
+(" : authenticator[') p
+(user) str
+('], ") p
+(address) str
+(" : sel) p n
+(f.client_address[0], ") S
+(client_ss) str
+(" : client_SS_key} \)) p n
+() S 8 T () S 16 T (ticket = encrypt\(ticket, service_key\);) N
+() N
+() S 8 T () S 16 T () S
+(#Not quite sure what the point of this part is) c n
+() p 8 T () S 16 T (client_ss = json.dumps\({") S
+(client_ss) str
+(" : client_SS_key}\)) p n
+() S 8 T () S 16 T (client_ss = encrypt\(client_ss, client_TGS_key\)) N
+() N
+() S 8 T () S 16 T (response = json.dumps\({") S
+(ticket) str
+(" : ticket, ") p
+(client_ss) str
+(" : client_ss}\)) p n
+() N
+() S 8 T () S 16 T (self.request.send\(response\)) N
+() S 8 T () S 16 T () S
+(print) K
+( ") p
+(Response sent to client) str
+(") p n
+() N
+(tgs.py) (Page 1/2) (Dec 14, 11 22:14) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p n
+() N
+() N
+() N
+() N
+() N
+(if) K
+( __name__ == ") p
+(__main__) str
+(":) p n
+() S 8 T (keys = read_config\(") S
+(./config/tgs.json) str
+("\)) p n
+() S 8 T (TGS_key = keys[') S
+(tgs_key) str
+(']) p n
+() S 8 T (FS_KEYS  = keys[') S
+(fs_keys) str
+(']) p n
+() N
+() S 8 T (DS_KEYS = keys[') S
+(ds_keys) str
+(']) p n
+() N
+() S 8 T (keys = dict\(FS_KEYS.items\(\) + DS_KEYS.items\(\)\)) N
+() N
+() N
+() N
+() S 8 T (config = \(read_config\(") S
+(./config/servers.json) str
+("\)\)[') p
+(servers) str
+('][') p
+(tgs) str
+(']) p n
+() S 8 T (server = TCPServer\(\(config[0], int\(config[1]\)\), TicketGrantingServer\)) N
+() N
+() S 8 T () S
+(try) K
+(:) p n
+() S 8 T () S 16 T () S
+(print) K
+( ") p
+(Ticket granting server running) str
+(") p n
+() S 8 T () S 16 T (server.serve_forever\(\)) N
+() S 8 T () S
+(except) K
+( KeyboardInterrupt:) p n
+() S 8 T () S 16 T (server.shutdown\(\)) N
+() N
+() S 8 T () S
+(tgs.py) (Page 2/2) (Dec 14, 11 22:14) title
+border
+grestore
+(Printed by Mr.Divenson) rhead
+(./tgs.py) (12/12) (Sunday December 18, 2011) footer
+end % of iso1dict
+pagesave restore
+showpage
+
+%%Trailer
+end
+%%EOF
