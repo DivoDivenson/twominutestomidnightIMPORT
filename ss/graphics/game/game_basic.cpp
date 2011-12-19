@@ -16,10 +16,10 @@
 #define SPEED 1.2f
 
 using namespace std;
-const int NUM_HIT_BOXS = 100;
+const int NUM_HIT_BOXS = 300;
 
 const float TERRIAN_WIDTH = 150.0f; //Defines cube region of the game
-const float BORDER = 20.0f;
+const float BORDER = 50.0f; //This + width = skybox
 
 int cameraZ;
 int camX, camY;
@@ -789,7 +789,7 @@ void updateScene(int value){
 			move_player();
 			if(shoot == 3){
 			//_objects.push_back(new shot(1.0f, xpos, ypos, zpos, yrot -90, xrot));
-			_shots.push_back(new shot(1.0f, xpos, ypos, zpos, yrot -90, xrot));
+			_shots.push_back(new shot(1.0f, xpos, ypos-2, zpos, yrot -90, xrot));
 			//shoot =0;
 
 		}else if(shoot != 0){
@@ -798,10 +798,10 @@ void updateScene(int value){
 
 	}
 	
-	advance(_objects, _quadtree, 0.025f, _timeUntilHandleCollisions, _numCollisions);
-	advance(_shots, _quadtree, 0.00000001f, _timeUntilHandleCollisions, _numCollisions);
-	clean_shots(_shots);
-	playerCollide(_player, _objects);
+	advance(_objects, _quadtree, 0.025f, _timeUntilHandleCollisions, _numCollisions); //Check for enemy collisions every 25 milli secs
+	advance(_shots, _quadtree, 0.00000001f, _timeUntilHandleCollisions, _numCollisions); //Check for shot collision every frame
+	clean_shots(_shots); //Get rid of any shots gone out of bounds
+	playerCollide(_player, _objects); //Find player collisions every frame. Need to really ensure nothing gets by, so linear it is
 	glutPostRedisplay();
 	glutTimerFunc(25, updateScene, 0);
 	//printf("Current Score is %d and life is%d\n", _numCollisions * 100, 100 - (_playerCollisions * 10));
@@ -824,7 +824,7 @@ void renderScene(){
 
 	enable();
 
-	glPushMatrix();
+	glPushMatrix(); //Draw the text
 		glTranslatef(-3.7, 3, -10);
 		char score[10];
 		sprintf(score, "%d", _numCollisions * 100);
@@ -836,8 +836,8 @@ void renderScene(){
 		sprintf(score, "%d%%", 100 - (_playerCollisions * 10));
 		t3dDraw3D(score, 0, 0, 0.1, 0.3f);
 	glPopMatrix();	
-	glTranslatef(0.0f, -2.0f, -cRadius);
-	if(!freelook){
+	glTranslatef(0.0f, -2.0f, -cRadius); //Move the camera back from the player
+	if(!freelook){ //Freelook toggeled with middle click
 		//drawScore();	
 	
 
