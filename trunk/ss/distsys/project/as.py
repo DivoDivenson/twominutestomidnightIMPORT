@@ -21,18 +21,6 @@ msg_size = 1024
 
 requests = ["login"]
 
-#Leave expiry out for now
-'''
-All messages are now using json
-Messages
-Client -> Server
-Login request: "login\n<username>\n"
-
-Server -> Client
-Login response: "client_key(<client tgs key>)\nTGS(<username>,<client address>,<client tgs key>\n
-
-
-'''
 
 class TCPServer(SocketServer.TCPServer):
 	allow_reuse_address = True

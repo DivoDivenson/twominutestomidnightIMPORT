@@ -18,13 +18,28 @@ run _ (Load, [Filename s]) = do
 			return db
 
 run db (Save, [Filename s]) = do
-				writeFile s $ unparseDB db
+				--writeFile s $ unparseDB db
+				putStrLn $ unparseDB db
 				return db
 
-run db (Report, [Registrations]) = do
+--run db (Report, [Registrations]) = do
+run db (Distinct, [Column x]) = do
+				--putStrLn $ show $ findColumn x 0 $ head db -- Take first row as column names, seems reasonable
+				putStrLn $ x
+				return db
 				
-					
- 	
+
+findColumn::String -> Int -> Record -> Int
+findColumn ('$':x) 0 _= read x::Int
+findColumn x i ((Value y):ys)
+	| (x == y) = i
+	| otherwise = findColumn x (i+1) ys
+
+
+
+--findDistinct::Database -> Int -> String
+--findDistinct [] _ = 0
+--findDistinct x a = x!!a
 
 parseRecord::String -> Record
 parseRecord s = map parseField $ split_on s ','
