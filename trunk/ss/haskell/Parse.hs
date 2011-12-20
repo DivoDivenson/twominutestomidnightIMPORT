@@ -1,11 +1,11 @@
 module Parse where
 import System.IO
 
-
+--Filename became a bit of a hold all
 data Args = Filename String | Registrations | Column String
 	deriving(Eq, Show)
 
-data Command = Load | Save | Report | Distinct
+data Command = Load | Save | Report | Distinct | Help
 	deriving(Eq, Show)
 
 parse::String -> Either String (Command, [Args])
@@ -15,7 +15,8 @@ parse2::[String]->Either String (Command,[Args])
 parse2 ("load":x:[]) = Right (Load, [Filename x])
 parse2 ("save":x:[]) = Right (Save, [Filename x])
 parse2 ("report":"registrations":[]) = Right (Report, [Registrations])
-parse2 ("dist":x:[]) = Right (Distinct, [Column x]) --SHORT HAND FTM
+parse2 ("distinct":x:[]) = Right (Distinct, [Column x])
+parse2 ("help":x:[]) = Right (Help, [Filename x])
 parse2 (_) = Left "Error"
 
 --String to split, seperator, "tokens"
