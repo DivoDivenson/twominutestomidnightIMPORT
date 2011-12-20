@@ -1,10 +1,14 @@
 module Run where
 import Parse
 import System.IO
+import Data.List
+import Data.Maybe
+import Help
 
 type Database = [Record]
 type Record = [Field]
 data Field = Value String | Blank
+	deriving(Eq, Ord)
 instance Show (Field) where
 	show Blank = ""
 	show (Value s) = s
@@ -19,25 +23,35 @@ run _ (Load, [Filename s]) = do
 
 run db (Save, [Filename s]) = do
 				--writeFile s $ unparseDB db
-				putStrLn $ unparseDB db
-				return db
+			putStrLn $ unparseDB db
+			return db
 
 --run db (Report, [Registrations]) = do
 run db (Distinct, [Column x]) = do
-				putStrLn $ show $ findColumn x 0 $ head db -- Take first row as column names, seems reasonable
-				--putStrLn $ x
-				return db
+			let colNo =  findColumn x $ head db 
+			if isJust colNo
+				then putStrLn $ (show $ findDist (fromJust colNo) db )++" distinct values for "++x
+				else putStrLn "Invalid Column"
+			return db
+
+run db (Help, [Filename x]) = do
+			putStrLn help x
+			return db
 				
 
-findColumn::String -> Int -> Record -> Int
---findColumn ('$':x) 0 _= read x::Int
-findColumn x i ((Value y):ys)
-	| (x == y) = i
-	| otherwise = findColumn x (i+1) ys
-findColumn _ _ [] = -1
+findColumn::String -> Record ->Maybe Int
+findColumn ('$':x) _ = Just (read x::Int)
+findColumn str heads = findIndex (==str) $ map show heads --Figure this out later
+
+--Find distinct values in a column
+findDist::Int -> Database  -> Int
+findDist i db = length $ nub $ getCol i db []
 
 
-
+--Return a column
+getCol::Int -> Database -> Record ->Record
+getCol _ [] col = col
+getCol i (x:xs) acc = getCol i xs (acc++[x!!i])
 --findDistinct::Database -> Int -> String
 --findDistinct [] _ = 0
 --findDistinct x a = x!!a
