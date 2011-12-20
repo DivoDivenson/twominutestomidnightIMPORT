@@ -35,7 +35,7 @@ run db (Distinct, [Column x]) = do
 			return db
 
 run db (Help, [Filename x]) = do
-			putStrLn help x
+			putStrLn $ help x
 			return db
 				
 
