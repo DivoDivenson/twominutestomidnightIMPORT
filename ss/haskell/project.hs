@@ -7,17 +7,17 @@ import Parse
 --UNIX NEWLINES ONLY
 main::IO()
 main = do
-	execute []
-
-execute x = do
+	execute ([],[])
+--original database and selected part
+execute (db,sel) = do
 		line <- getLine
 		let ins = parse line
 		case ins of
 			Left str ->do
 							putStrLn str
-							execute x
+							execute (db,sel)
 			Right command ->do
-							x2 <-run x command
-							execute x2
+							new <-run (db,sel) command
+							execute new
 
 
