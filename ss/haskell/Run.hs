@@ -4,8 +4,9 @@ import System.IO
 import Data.List
 import Data.Maybe
 import Help
+import Control.Exception
 
-type Result = (Database, Database)
+type Result = (Database, Database, Handle)
 type Database = [Record]
 type Record = [Field]
 data Field = Value String | Blank
@@ -18,57 +19,50 @@ run::Result -> (Command, [Args]) -> IO Result
 
 
 --Row numbers added in, so the data starts at col 1, but the user can access col 0 if the want
-run (_, _) (Load, [Filename s]) = do
+run (_, _, out) (Load, [Filename s]) = do
 			file <- readFile s
 			let db = map parseRecord $ lines file
 			let sel = indexDB db 0
-			putStrLn $ show $ length db
-			return (db,sel)
+			hPutStrLn out $ show $ length db
+			return (db,sel,out)
 
 
-run (db,sel) (Save, [Filename s]) = do
+run (db,sel, out) (Save, [Filename s]) = do
 			writeFile s $ unparseDB sel
-			return (db,sel)
+			return (db,sel, out)
 
-run (db,sel) (Report, [Registrations]) = do
-			putStrLn $ show $ registrations sel
-			return (db,sel)
+--run (db,sel,file) (Report, [Registrations]) = do
+		--	putStrLn $ show $ registrations sel
+			--return (db,sel, file)
 
-run (db,sel) (List, [Conditions s]) = do
+run (db,sel, out) (List, [Conditions s]) = do
 			let slct = list sel s
-			putStrLn $ show  $ removeRowNums slct
-			return (db,sel)
+			hPutStrLn out $ show  $ removeRowNums slct
+			return (db,sel, out)
 
-run (db,sel) (Count, [Conditions s]) = do
-			putStrLn $ (show $ length $ list sel s)++" for "++(show s)
-			return (db,sel)
+run (db,sel, out) (Count, [Conditions s]) = do
+			hPutStrLn out $ (show $ length $ list sel s)++" for "++(show s)
+			return (db,sel, out)
 
 
-run (db,sel) (Distinct, [Column x]) = do
+run (db,sel, out) (Distinct, [Column x]) = do
 			let colNo =  findColumn x $ head db
 			if isJust colNo
-				then putStrLn $ (show $ findDist (fromJust colNo) sel )++" distinct values for "++x
-				else putStrLn "Invalid Column"
-			return (db,sel)
+				then hPutStrLn out $ (show $ findDist (fromJust colNo) sel )++" distinct values for "++x
+				else hPutStrLn out $ "Invalid Column"
+			return (db,sel, out)
 
 --Select always runs on the complete DB, having it run on smaller and smaller selections seems silly?
-run (db,sel) (Select, [Conditions s]) = do
+run (db,sel, out) (Select, [Conditions s]) = do
 			let sel_new = selection db sel s
-			return (db, sel_new)
+			return (db, sel_new, out)
 
-run (db,sel) (Show, [Empty]) = do
-			--Show headings
-			--if (head db) == (head sel)
-				--then putStrLn $ unlines $ showDB sel 
-				--else 
-					--do
-						--putStrLn $ unparseRecord (head db)
-						--putStrLn $ unlines $ showDB sel 
-			putStrLn $ unlines $ showDB sel
-			return (db,sel)
+run (db,sel, out) (Show, [Empty]) = do
+			hPutStrLn out $ unlines $ showDB sel
+			return (db,sel, out)
 
 --Delect row from selected. db _always_ holds a complete copy
-run (db, sel) (Delete, [Conditions s]) =do
+run (db, sel,out) (Delete, [Conditions s]) =do
 			let row = (read (head s)::Int)
 			let mapped_row = mapRowSel sel row
 			if isJust mapped_row
@@ -77,14 +71,14 @@ run (db, sel) (Delete, [Conditions s]) =do
 						let row_sel = fromJust mapped_row
 						let db_new = deleteRow db row
 						let sel_new = deleteFromSel row_sel sel
-						return (db_new, sel_new)
+						return (db_new, sel_new,out)
 				else
 					do
-						putStrLn "Invalid row"
-						return (db, sel)
+						hPutStrLn out $ "Invalid row"
+						return (db, sel,out)
 
 
-run (db, sel) (Update, [Conditions s]) = do
+run (db, sel,out) (Update, [Conditions s]) = do
 			let row = (read (s!!0)::Int)
 			let col = findColumn (s!!1) (head db)
 			let mapped_row = mapRowSel sel row
@@ -94,14 +88,14 @@ run (db, sel) (Update, [Conditions s]) = do
 					do
 						let db_new = insertField db row ((fromJust col) -1) value
 						let sel_new = insertField sel (fromJust mapped_row) (fromJust col) value
-						return (db_new, sel_new)
+						return (db_new, sel_new,out)
 				else
 					do
-						putStrLn "Invalid args"
-						return (db, sel)
+						hPutStrLn out $ "Invalid args"
+						return (db, sel,out)
 
 	
-run (db, sel) (Insert, [Conditions s])=do
+run (db, sel,out) (Insert, [Conditions s])=do
 			let blank = createRow (head db)
 			let new = buildRecord blank  s
 			let db_new = db++[new]
@@ -109,16 +103,20 @@ run (db, sel) (Insert, [Conditions s])=do
 				where num = ((length db))
 			--putStrLn $ show $ selectionTokens s
 			--putStrLn $ show $ blank++[Value "thing"]
-			putStrLn $ "Inserted "++(show new)
-			return (db_new,sel_new)
+			hPutStrLn out $ "Inserted "++(show new)
+			return (db_new,sel_new,out)
 
+run (db, sel, out) (Output, [Filename x]) = do
+			handle <- openFile x WriteMode
+			return (db, sel, handle)
 			
 			
+			
 
 
-run (db,sel) (Help, [Filename x]) = do
-			putStrLn $ help x
-			return (db,sel)
+run (db,sel,out) (Help, [Filename x]) = do
+			hPutStrLn out $  help x
+			return (db,sel,out)
 
 buildRecord::Record -> [String] ->Record
 buildRecord rec [] = rec
