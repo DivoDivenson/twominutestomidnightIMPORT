@@ -2,10 +2,10 @@ module Parse where
 import System.IO
 
 --Filename became a bit of a hold all
-data Args = Filename String | Registrations | Completions |Column String | Conditions [String]
+data Args = Filename String | Registrations | Completions |Column String | Conditions [String] | Empty
 	deriving(Eq, Show)
 
-data Command = Load | Save | Report | Distinct | Help | List | Count | Select
+data Command = Load | Save | Report | Distinct | Help | List | Count | Select |Show | Delete | Update
 	deriving(Eq, Show) 
 
 --Called in user input. Outputs a Command and it's arguments
@@ -28,6 +28,9 @@ comParse "list" xs = Right(List, [Conditions xs])
 comParse "count" xs = Right(Count, [Conditions xs])
 comParse "report" ("registrations":[]) = Right(Report, [Registrations])
 comParse "select" xs = Right(Select, [Conditions xs])
+comParse "show" [] = Right(Show, [Empty])
+comParse "delete" x = Right(Delete, [Conditions x])
+comParse "update" xs = Right(Update, [Conditions xs])
 --comParse "report" ("completions":[]) = Right(Report, [Completions]) --Needs a date parser
 
 comParse _ _ = Left "Error: Invalid command or arguments"		 
