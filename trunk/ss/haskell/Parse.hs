@@ -2,23 +2,38 @@ module Parse where
 import System.IO
 
 --Filename became a bit of a hold all
-data Args = Filename String | Registrations | Column String
+data Args = Filename String | Registrations | Completions |Column String | Conditions [String]
 	deriving(Eq, Show)
 
-data Command = Load | Save | Report | Distinct | Help
-	deriving(Eq, Show)
+data Command = Load | Save | Report | Distinct | Help | List | Count | Select
+	deriving(Eq, Show) 
 
+--Called in user input. Outputs a Command and it's arguments
 parse::String -> Either String (Command, [Args])
-parse s = parse2(split_on s ' ')
+parse s 
+		| (arg_len == 0) = Left "Error: No Input"
+		| (arg_len == 1) = comParse (head tokens) []
+		| (arg_len >= 2) = comParse (head tokens) $ tail tokens
+		where 
+			tokens = split_on s ' '
+			arg_len = length tokens
 
-parse2::[String]->Either String (Command,[Args])
-parse2 ("load":x:[]) = Right (Load, [Filename x])
-parse2 ("save":x:[]) = Right (Save, [Filename x])
-parse2 ("report":"registrations":[]) = Right (Report, [Registrations])
-parse2 ("distinct":x:[]) = Right (Distinct, [Column x])
-parse2 ("help":x:[]) = Right (Help, [Filename x])
-parse2 (_) = Left "Error"
+--Check if command is valid, then executes it
+comParse::String -> [String] -> Either String (Command, [Args])
+comParse "load" (x:[]) = Right(Load, [Filename x])
+comParse "save" (x:[]) = Right(Save, [Filename x])
+comParse "distinct" (x:[]) = Right (Distinct, [Column x])
+comParse "help" (x:[]) = Right(Help, [Filename x])
+comParse "list" xs = Right(List, [Conditions xs])
+comParse "count" xs = Right(Count, [Conditions xs])
+comParse "report" ("registrations":[]) = Right(Report, [Registrations])
+comParse "select" xs = Right(Select, [Conditions xs])
+--comParse "report" ("completions":[]) = Right(Report, [Completions]) --Needs a date parser
 
+comParse _ _ = Left "Error: Invalid command or arguments"		 
+
+
+--parse2 ("report":"registrations":[]) = Right (Report, [Registrations])
 --String to split, seperator, "tokens"
 split_on::String-> Char -> [String]
 split_on [] _ = [""]

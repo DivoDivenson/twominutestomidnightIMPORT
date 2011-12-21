@@ -5,6 +5,7 @@ import Data.List
 import Data.Maybe
 import Help
 
+type Result = (Database, Database)
 type Database = [Record]
 type Record = [Field]
 data Field = Value String | Blank
@@ -13,34 +14,105 @@ instance Show (Field) where
 	show Blank = ""
 	show (Value s) = s
 
-run::Database -> (Command, [Args]) -> IO Database
+run::Result -> (Command, [Args]) -> IO Result
 
-run _ (Load, [Filename s]) = do
+run (_, _) (Load, [Filename s]) = do
 			file <- readFile s
 			let db = map parseRecord $ lines file
 			putStrLn $ show $ length db
-			return db
+			return (db,db)
 
-run db (Save, [Filename s]) = do
+
+run (db,sel) (Save, [Filename s]) = do
 				--writeFile s $ unparseDB db
-			putStrLn $ unparseDB db
-			return db
+			putStrLn $ unparseDB sel
+			return (db,sel)
 
---run db (Report, [Registrations]) = do
-run db (Distinct, [Column x]) = do
+run (db,sel) (Report, [Registrations]) = do
+			putStrLn $ show $ registrations sel
+			return (db,sel)
+
+run (db,sel) (List, [Conditions s]) = do
+			putStrLn $ show  $ list sel s--list db s
+			return (db,sel)
+
+run (db,sel) (Count, [Conditions s]) = do
+			putStrLn $ (show $ length $ list sel s)++" for "++(show s)
+			return (db,sel)
+
+
+run (db,sel) (Distinct, [Column x]) = do
 			let colNo =  findColumn x $ head db 
 			if isJust colNo
-				then putStrLn $ (show $ findDist (fromJust colNo) db )++" distinct values for "++x
+				then putStrLn $ (show $ findDist (fromJust colNo) sel )++" distinct values for "++x
 				else putStrLn "Invalid Column"
-			return db
+			return (db,sel)
 
-run db (Help, [Filename x]) = do
+--Select always runs on the complete DB, having it run on smaller and smaller selections seems silly?
+run (db,sel) (Select, [Conditions s]) = do
+			let sel_new = selection db sel s
+			return (db, sel_new)
+			
+			
+
+
+run (db,sel) (Help, [Filename x]) = do
 			putStrLn $ help x
-			return db
+			return (db,sel)
+
+registrations::Database -> [String]
+registrations db = club_register clubNames db
+	where 
+		clubNames = tail $ nub ( getCol (fromJust $ findColumn "Club" $ head db) db [])
+		
+
+--club names
+club_register::Record -> Database -> [String]
+club_register [] _ = []
+club_register (x:xs) db = ([(show x)++" , "++(show $ length maps)])++club_register xs db
+	where 
+		mapCol = (fromJust $ findColumn "Map Name" $ head db)
+		mapIdx = "$"++(show mapCol)
+		club = select db $ [mapIdx++"="++(show x)]
+		maps = getCol mapCol club []
+
+
 				
+list::Database -> [String] -> Database
+list db args = select db args
+
+selection::Database -> Database -> [String] -> Database
+selection full _ ("all":[]) = full
+selection full selected args = select full args --Don't do select on a selection
+
+select::Database -> [String] -> Database
+select _ [] = []
+select db (x:xs) = (findRows db col (args!!1)) `myIntersect` (select db xs)
+	where 
+		args = selectionTokens [x]
+		col = fromJust $ findColumn (args!!0) $ head db
+
+--Same as intersect but ignores empty lists
+myIntersect:: (Eq a) => [a] -> [a] -> [a]
+myIntersect xs [] = xs
+myIntersect [] ys = ys
+myIntersect xs ys = intersect xs ys
+
+findRows::Database -> Int -> String ->Database
+findRows [] _ _  = []
+findRows (x:xs) i cond = 
+	if cond == show (x!!i) --do globbing here IMPORTANT
+		then (findRows xs i cond)++[x]
+		else findRows xs i cond
+
+-- Turns [$3=abc, $4=xyz] into [$3,abc,$4,xyz]
+selectionTokens::[String] -> [String]
+selectionTokens [] = []
+selectionTokens (x:xs) = (split_on x '=')++selectionTokens xs
+
 
 findColumn::String -> Record ->Maybe Int
-findColumn ('$':x) _ = Just (read x::Int)
+findColumn ('$':x) _ = Just ((read x::Int) - 1)
 findColumn str heads = findIndex (==str) $ map show heads --Figure this out later
 
 --Find distinct values in a column
