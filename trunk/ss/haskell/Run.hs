@@ -84,7 +84,21 @@ run (db, sel) (Delete, [Conditions s]) =do
 						return (db, sel)
 
 
---run (db, sel) (Update, [Conditions s]) = do	
+run (db, sel) (Update, [Conditions s]) = do
+			let row = (read (s!!0)::Int)
+			let col = findColumn (s!!1) (head db)
+			let mapped_row = mapRowSel sel row
+			let value = (s!!2)
+			if(isJust mapped_row) && (isJust col)
+				then
+					do
+						let db_new = insertField db row ((fromJust col) -1) value
+						let sel_new = insertField sel (fromJust mapped_row) (fromJust col) value
+						return (db_new, sel_new)
+				else
+					do
+						putStrLn "Invalid args"
+						return (db, sel)
 
 	
 			
@@ -94,6 +108,14 @@ run (db,sel) (Help, [Filename x]) = do
 			putStrLn $ help x
 			return (db,sel)
 
+
+insertField::Database -> Int -> Int -> String -> Database
+insertField db row col value = top++[new]++bottom
+	where 
+		(top,xs) = splitAt row db
+		bottom = tail xs
+		(row_top,rest) = splitAt col (head xs)
+		new = row_top++[Value value]++(tail rest)
 
 --Decremnt col values greater than Int
 deleteFromSel::Int -> Database -> Database
