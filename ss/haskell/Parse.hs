@@ -5,7 +5,7 @@ import System.IO
 data Args = Filename String | Registrations | Completions |Column String | Conditions [String] | Empty
 	deriving(Eq, Show)
 
-data Command = Load | Save | Report | Distinct | Help | List | Count | Select |Show | Delete | Update
+data Command = Load | Save | Report | Distinct | Help | List | Count | Select |Show | Delete | Update | Insert
 	deriving(Eq, Show) 
 
 --Called in user input. Outputs a Command and it's arguments
@@ -26,12 +26,14 @@ comParse "distinct" (x:[]) = Right (Distinct, [Column x])
 comParse "help" (x:[]) = Right(Help, [Filename x])
 comParse "list" xs = Right(List, [Conditions xs])
 comParse "count" xs = Right(Count, [Conditions xs])
---comParse "report" ("registrations":[]) = Right(Report, [Registrations]) BROKEN
 comParse "select" xs = Right(Select, [Conditions xs])
 comParse "show" [] = Right(Show, [Empty])
 comParse "delete" x = Right(Delete, [Conditions x])
 comParse "update" xs = Right(Update, [Conditions xs])
+comParse "insert" xs = Right(Insert, [Conditions xs])
 --comParse "report" ("completions":[]) = Right(Report, [Completions]) --Needs a date parser
+--comParse "report" ("registrations":[]) = Right(Report, [Registrations]) BROKEN
+
 
 comParse _ _ = Left "Error: Invalid command or arguments"		 
 

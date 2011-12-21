@@ -101,6 +101,18 @@ run (db, sel) (Update, [Conditions s]) = do
 						return (db, sel)
 
 	
+run (db, sel) (Insert, [Conditions s])=do
+			let blank = createRow (head db)
+			let new = buildRecord blank  s
+			let db_new = db++[new]
+			let sel_new = sel++[[Value (show num)]++new]
+				where num = ((length db))
+			--putStrLn $ show $ selectionTokens s
+			--putStrLn $ show $ blank++[Value "thing"]
+			putStrLn $ "Inserted "++(show new)
+			return (db_new,sel_new)
+
+			
 			
 
 
@@ -108,6 +120,20 @@ run (db,sel) (Help, [Filename x]) = do
 			putStrLn $ help x
 			return (db,sel)
 
+buildRecord::Record -> [String] ->Record
+buildRecord rec [] = rec
+buildRecord rec (x:xs) = buildRecord (top++[Value (tokens!!1)]++bottom) xs
+	where
+		tokens = selectionTokens [x]
+		col_str = tail (tokens!!0)
+		col = (read col_str::Int)
+		(top,a) = splitAt (col-1) rec
+		bottom = tail a
+
+
+createRow::Record -> Record
+createRow [] = []
+createRow (x:xs) = [Blank]++createRow xs
 
 insertField::Database -> Int -> Int -> String -> Database
 insertField db row col value = top++[new]++bottom
