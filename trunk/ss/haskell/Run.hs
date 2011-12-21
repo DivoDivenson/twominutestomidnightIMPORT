@@ -24,8 +24,7 @@ run (_, _) (Load, [Filename s]) = do
 
 
 run (db,sel) (Save, [Filename s]) = do
-				--writeFile s $ unparseDB db
-			putStrLn $ unparseDB sel
+			writeFile s $ unparseDB db
 			return (db,sel)
 
 run (db,sel) (Report, [Registrations]) = do
@@ -52,13 +51,36 @@ run (db,sel) (Distinct, [Column x]) = do
 run (db,sel) (Select, [Conditions s]) = do
 			let sel_new = selection db sel s
 			return (db, sel_new)
-			
+
+run (db,sel) (Show, [Empty]) = do
+			--Show headings
+			if (head db) == (head sel)
+				then putStrLn $ unlines $ showDB sel 1
+				else 
+					do
+						putStrLn $ unparseRecord (head db)
+						putStrLn $ unlines $ showDB sel 1
+			return (db,sel)
+
+--Delect row from selected. db _always_ holds a complete copy
+run (db, sel) (Delete, [Conditions s]) =do
+			let sel_new  = deleteRow sel $ (read (head s)::Int)
+			putStrLn $ "Deleted row "++(head s)
+			return (db,sel_new)
+
+run (db, sel) (Update, [Conditions s]) = do	
+
+			return (db, sel_new)	
 			
 
 
 run (db,sel) (Help, [Filename x]) = do
 			putStrLn $ help x
 			return (db,sel)
+
+deleteRow::Database -> Int -> Database
+deleteRow db i = x++(tail xs)
+	where (x,xs) = splitAt (i-1) db
 
 registrations::Database -> [String]
 registrations db = club_register clubNames db
@@ -82,7 +104,7 @@ list::Database -> [String] -> Database
 list db args = select db args
 
 selection::Database -> Database -> [String] -> Database
-selection full _ ("all":[]) = full
+selection full _ ("all":[]) = full --This effectively reloads the DB
 selection full selected args = select full args --Don't do select on a selection
 
 select::Database -> [String] -> Database
@@ -135,11 +157,19 @@ parseField::String -> Field
 parseField "" = Blank
 parseField s = Value s
 
+showDB::Database -> Int -> [String]
+showDB [] 1 = ["Nothing selected"]
+showDB [] _ = []
+showDB (x:xs) c = [(show c)++" : "++showRecord x]++showDB xs (c+1)
+
 unparseDB::Database -> String
 unparseDB db = unlines $ map unparseRecord db
 
 unparseRecord::Record -> String
-unparseRecord x = joinFields ',' $ map show x	
+unparseRecord x = joinFields ',' $ map show x
+
+showRecord::Record ->String
+showRecord x = joinFields '\t' $ map show x	
 
 --Make sure to put the quotes back in
 joinFields::Char -> [String]-> String
