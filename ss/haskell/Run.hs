@@ -16,15 +16,18 @@ instance Show (Field) where
 
 run::Result -> (Command, [Args]) -> IO Result
 
+
+--Row numbers added in, so the data starts at col 1, but the user can access col 0 if the want
 run (_, _) (Load, [Filename s]) = do
 			file <- readFile s
 			let db = map parseRecord $ lines file
+			let sel = indexDB db 0
 			putStrLn $ show $ length db
-			return (db,db)
+			return (db,sel)
 
 
 run (db,sel) (Save, [Filename s]) = do
-			writeFile s $ unparseDB db
+			writeFile s $ unparseDB sel
 			return (db,sel)
 
 run (db,sel) (Report, [Registrations]) = do
@@ -32,7 +35,8 @@ run (db,sel) (Report, [Registrations]) = do
 			return (db,sel)
 
 run (db,sel) (List, [Conditions s]) = do
-			putStrLn $ show  $ list sel s--list db s
+			let slct = list sel s
+			putStrLn $ show  $ removeRowNums slct
 			return (db,sel)
 
 run (db,sel) (Count, [Conditions s]) = do
@@ -41,7 +45,7 @@ run (db,sel) (Count, [Conditions s]) = do
 
 
 run (db,sel) (Distinct, [Column x]) = do
-			let colNo =  findColumn x $ head db 
+			let colNo =  findColumn x $ head db
 			if isJust colNo
 				then putStrLn $ (show $ findDist (fromJust colNo) sel )++" distinct values for "++x
 				else putStrLn "Invalid Column"
@@ -54,23 +58,35 @@ run (db,sel) (Select, [Conditions s]) = do
 
 run (db,sel) (Show, [Empty]) = do
 			--Show headings
-			if (head db) == (head sel)
-				then putStrLn $ unlines $ showDB sel 1
-				else 
-					do
-						putStrLn $ unparseRecord (head db)
-						putStrLn $ unlines $ showDB sel 1
+			--if (head db) == (head sel)
+				--then putStrLn $ unlines $ showDB sel 
+				--else 
+					--do
+						--putStrLn $ unparseRecord (head db)
+						--putStrLn $ unlines $ showDB sel 
+			putStrLn $ unlines $ showDB sel
 			return (db,sel)
 
 --Delect row from selected. db _always_ holds a complete copy
 run (db, sel) (Delete, [Conditions s]) =do
-			let sel_new  = deleteRow sel $ (read (head s)::Int)
-			putStrLn $ "Deleted row "++(head s)
-			return (db,sel_new)
+			let row = (read (head s)::Int)
+			let mapped_row = mapRowSel sel row
+			if isJust mapped_row
+				then
+					do
+						let row_sel = fromJust mapped_row
+						let db_new = deleteRow db row
+						let sel_new = deleteFromSel row_sel sel
+						return (db_new, sel_new)
+				else
+					do
+						putStrLn "Invalid row"
+						return (db, sel)
 
-run (db, sel) (Update, [Conditions s]) = do	
 
-			return (db, sel_new)	
+--run (db, sel) (Update, [Conditions s]) = do	
+
+	
 			
 
 
@@ -78,10 +94,29 @@ run (db,sel) (Help, [Filename x]) = do
 			putStrLn $ help x
 			return (db,sel)
 
+
+--Decremnt col values greater than Int
+deleteFromSel::Int -> Database -> Database
+deleteFromSel _ [] = []
+deleteFromSel i (x:xs)
+	| num == i = deleteFromSel i xs
+	| num > i = [[Value (show (num-1))]++(tail x)]++deleteFromSel i xs
+	| otherwise = [x]++deleteFromSel i xs
+	where num = (read (show (head x))::Int) 
+
 deleteRow::Database -> Int -> Database
 deleteRow db i = x++(tail xs)
-	where (x,xs) = splitAt (i-1) db
+	where (x,xs) = splitAt (i) db
 
+--Map a row number to the index of said row based on the row num column
+mapRowSel::Database -> Int ->Maybe Int
+mapRowSel [] _ = Nothing
+mapRowSel (x:xs) i
+	| (read (show (head x))::Int) == i = Just i
+	| otherwise = mapRowSel xs i
+
+
+--BROKEN
 registrations::Database -> [String]
 registrations db = club_register clubNames db
 	where 
@@ -104,8 +139,9 @@ list::Database -> [String] -> Database
 list db args = select db args
 
 selection::Database -> Database -> [String] -> Database
-selection full _ ("all":[]) = full --This effectively reloads the DB
-selection full selected args = select full args --Don't do select on a selection
+selection full _ ("all":[]) = indexDB full 0
+selection full selected args = [[Value "0"]++(head full)]++(select selected args)
+
 
 select::Database -> [String] -> Database
 select _ [] = []
@@ -113,6 +149,10 @@ select db (x:xs) = (findRows db col (args!!1)) `myIntersect` (select db xs)
 	where 
 		args = selectionTokens [x]
 		col = fromJust $ findColumn (args!!0) $ head db
+
+removeRowNums::Database -> Database
+removeRowNums [] = []
+removeRowNums (x:xs) = [(tail x)]++removeRowNums xs
 
 --Same as intersect but ignores empty lists
 myIntersect:: (Eq a) => [a] -> [a] -> [a]
@@ -123,8 +163,8 @@ myIntersect xs ys = intersect xs ys
 findRows::Database -> Int -> String ->Database
 findRows [] _ _  = []
 findRows (x:xs) i cond = 
-	if cond == show (x!!i) --do globbing here IMPORTANT
-		then (findRows xs i cond)++[x]
+	if cond == show (x!!i) --do globbing here IMPORTANT, -1 to account for col numbers
+		then [x]++(findRows xs i cond)
 		else findRows xs i cond
 
 -- Turns [$3=abc, $4=xyz] into [$3,abc,$4,xyz]
@@ -134,8 +174,8 @@ selectionTokens (x:xs) = (split_on x '=')++selectionTokens xs
 
 
 findColumn::String -> Record ->Maybe Int
-findColumn ('$':x) _ = Just ((read x::Int) - 1)
-findColumn str heads = findIndex (==str) $ map show heads --Figure this out later
+findColumn ('$':x) _ = Just (read x::Int)
+findColumn str heads = Just (1 + (fromJust $ findIndex (==str) $ map show heads )) --TEMP
 
 --Find distinct values in a column
 findDist::Int -> Database  -> Int
@@ -150,6 +190,13 @@ getCol i (x:xs) acc = getCol i xs (acc++[x!!i])
 --findDistinct [] _ = 0
 --findDistinct x a = x!!a
 
+indexDB::Database -> Int -> Database
+indexDB [] _ = []
+indexDB (x:xs) i = [(indexRecord x i)]++(indexDB xs (i+1))
+
+indexRecord::Record -> Int -> Record
+indexRecord rec i = [Value (show i)]++rec
+
 parseRecord::String -> Record
 parseRecord s = map parseField $ split_on s ','
 
@@ -157,19 +204,18 @@ parseField::String -> Field
 parseField "" = Blank
 parseField s = Value s
 
-showDB::Database -> Int -> [String]
-showDB [] 1 = ["Nothing selected"]
-showDB [] _ = []
-showDB (x:xs) c = [(show c)++" : "++showRecord x]++showDB xs (c+1)
+showDB::Database -> [String]
+showDB []  = []
+showDB (x:xs)  = [(showRecord  x)]++showDB xs 
 
 unparseDB::Database -> String
 unparseDB db = unlines $ map unparseRecord db
 
 unparseRecord::Record -> String
-unparseRecord x = joinFields ',' $ map show x
+unparseRecord x = joinFields ',' $ map show $ (tail x)
 
 showRecord::Record ->String
-showRecord x = joinFields '\t' $ map show x	
+showRecord x = joinFields '\t' $ map show x
 
 --Make sure to put the quotes back in
 joinFields::Char -> [String]-> String
