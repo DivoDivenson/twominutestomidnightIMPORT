@@ -25,7 +25,7 @@ run::Result -> (Command, [Args]) -> IO Result
 
 --Row numbers added in, so the data starts at col 1, but the user can access col 0 if the want
 --Comments describe any functionality that may not be immediately obvious, but for the
---mpst part the Command passed describes that instance of run
+--most part the Command passed describes that instance of run
 
 run (_, _,Just out) (Load, [Filename s]) = do
 			file <- readFile s
@@ -68,7 +68,8 @@ run (db,sel, out) (Select, [Conditions s]) = do
 
 --Print out the current selection
 run (db,sel,Just out) (Show, [Empty]) = do
-			hPutStrLn out $ unlines $ showDB sel
+			let blah = groupDB sel 1
+			hPutStrLn out $ unlines $ showDB (blah!!6)
 			return (db,sel,Just out)
 
 
@@ -154,18 +155,78 @@ run (db, sel, Just out) (Reformat, [Conditions xs]) = do
 			let col = xs!!0
 			let ins = xs!!1
 			let col_num = fromJust $ findColumn col $ head db
-			let sel_new = reform ins col_num sel
+			let nums = getNums sel
+			let sel_new = reform_DB ins col_num nums sel
+			let db_tmp = reform_DB ins col_num nums db_idx
+				where db_idx = indexDB db 0
+			let db_new = removeRowNums db_tmp
+
 			--let db_new = reform ins col_num db --CHANGE
 			putStrLn $ "Reformatted col "++col
+			--putStrLn $ unlines $ map show nums
 
 
-			return (db, sel_new, Just out)
+			return (db_new, sel_new, Just out)
 			
+
+run (db, sel, Just out) (Sort, [Conditions xs]) = do
+			let sel_new = sortDB sel xs
+			putStrLn "Sorting set"
+			return (db, sel_new, Just out)
 
 
 run (db,sel, Just out) (Help, [Filename x]) = do
 			hPutStrLn out $  help x
 			return (db,sel, Just out)
+
+
+--Return an list of DB where every DB has the same entry in column i
+groupDB::Database -> Int -> [Database]
+groupDB [] _ = []
+groupDB (x:xs) i = (x:ys) : groupBy zs i
+	where (ys,zs) = recSpan x xs
+--groupDB (x:xs:rest) i
+--	| (show (x!!i)) == (show (x!!i)) = [x,xs]++(groupDB rest i)
+--	| otherwise = [[x]]++(groupDB (xs:rest) i)
+
+sortDB::Database -> [String] -> Database
+sortDB [] _ = []
+sortDB db (col:ordering:rest)
+	| ordering == "ascending" = quicksortDBAsce db col_num
+	| ordering == "descending" = quicksortDBDesc db col_num
+	| otherwise = db
+	where
+		col_num = fromJust $ findColumn col $ head db --This could blow up but I need to finish this and start studying
+
+--HURRICANE CODING MODE,  ENGAGED
+quicksortDBAsce ::Database -> Int-> Database
+quicksortDBAsce [] _  = []
+quicksortDBAsce (p:xs) i = (quicksortDBAsce lesser i) ++ [p] ++ (quicksortDBAsce greater i)
+    where
+		lesser  = filterRecord ( (show (p!!i)) >=) xs i
+		greater = filterRecord ( (show (p!!i)) <) xs i
+
+
+--Sort DB on column
+quicksortDBDesc ::Database -> Int-> Database
+quicksortDBDesc [] _  = []
+quicksortDBDesc (p:xs) i = (quicksortDBDesc lesser i) ++ [p] ++ (quicksortDBDesc greater i)
+    where
+		lesser  = filterRecord ( (show (p!!i)) <) xs i
+		greater = filterRecord ( (show (p!!i)) >=) xs i
+
+
+filterRecord::(String -> Bool) -> [Record] -> Int -> [Record]
+filterRecord _ [] _ = []
+filterRecord pred (x:xs) i
+	| pred (show (x!!i)) = x:(filterRecord (pred) xs i)
+	| otherwise = filterRecord (pred) xs i
+
+--Get all the row numbers in a DB
+getNums::Database -> [Int]
+getNums [] = []
+getNums (x:xs) = [read (show (head x))::Int]++getNums xs
+
 
 upperString::String -> String
 upperString "" = ""
@@ -184,7 +245,29 @@ trim :: String -> String
 trim = f . f
     where f = reverse . dropWhile isSpace
 
+reform_DB::String -> Int -> [Int]-> Database -> Database
+reform_DB _ _ _ [] = []
+reform_DB "uppercase" i nums (x:xs) = reform_DB' upperString i nums xs
+reform_DB "capitalize" i nums (x:xs) = reform_DB' capital i nums xs
+reform_DB "lowercase" i nums (x:xs) = reform_DB' lowerString i nums xs
+reform_DB "trim" i nums (x:xs) = reform_DB' trim i nums xs
 
+
+
+reform_DB'::(String -> String) -> Int -> [Int] -> Database -> Database
+reform_DB' _ _ _ [] = []
+reform_DB' func i nums (x:xs) 
+	| isJust index = [new_rec]++(reform_DB' func i nums xs)
+	| otherwise = [x]++(reform_DB' func i nums xs)
+		where --If rows number is int nums, apply reform. Remove row num from nums. Not needed but I coded it anyway :)
+			index = elemIndex row nums
+			row = read (show (head x))::Int
+			idx = fromJust index
+			--(a,b) = splitAt idx nums
+			--new_nums = a++(tail b)
+			new_rec = reform_rec func i x
+
+--NOT USED
 reform::String -> Int -> Database ->Database
 reform _ _ [] = []
 --lets just do it live instead of reusing
@@ -192,20 +275,24 @@ reform "uppercase" i (x:xs) = [x]++(reform' upperString i xs) --Ignore the col s
 reform "capitalize" i (x:xs) = [x]++(reform' capital i xs )
 reform "lowercase" i (x:xs) = [x]++(reform' lowerString i xs )
 reform "trim" i (x:xs) = [x]++(reform' trim i xs)
-
-
 reform _ _ db = db
 
-
+--NOT USED
 reform'::(String -> String) -> Int -> Database -> Database
 reform' _ _ [] = []
 reform' func i (x:xs) = [new_rec]++(reform' func i xs)
+	where 
+		new_rec = reform_rec func i x
+
+
+reform_rec::(String -> String) -> Int ->Record ->Record
+reform_rec _ _ [] = []
+reform_rec func i x = new_rec
 	where 
 		(top,rest) = splitAt i x
 		bot = tail rest
 		new = func $ show $ head rest
 		new_rec= top++[(parseField new)]++rest 
-
 
 
 
