@@ -35,7 +35,7 @@ comParse "output" (x:[]) = Right(Output, [Filename x])
 comParse "nooutput" [] = Right(NoOutput, [Empty])
 comParse "quit" [] = Right(Quit, [Empty])
 comParse "reformat" xs = Right(Reformat, [Conditions xs])
---comParse "sort" xs = Right(Sort, [Conditions xs])
+comParse "sort" xs = Right(Sort, [Conditions xs])
 --comParse "report" ("completions":[]) = Right(Report, [Completions]) --Needs a date parser
 --comParse "report" ("registrations":[]) = Right(Report, [Registrations]) BROKEN
 
