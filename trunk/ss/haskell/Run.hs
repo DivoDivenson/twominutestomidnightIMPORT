@@ -7,6 +7,7 @@ import Help
 import Control.Exception
 import Text.Regex.Posix
 import GlobRegex
+import Data.Char
 
 --Full DB, Selected part of DB, Place to shove output (maybe so we can communicate the fact
 --the user got bored and is gone to do something more fulfilling than spreadsheet work. (Or possibly to cry, it's really up to them)
@@ -111,7 +112,7 @@ run (db, sel, Just out) (Insert, [Conditions s])=do
 			let blank = createRow (head db)
 			let new = buildRecord blank  s
 			let db_new = db++[new]
-			let sel_new = sel++[[Value (show num)]++new]
+			let sel_new = sel++[[(parseField (show num))]++new]
 				where num = ((length db))
 			--putStrLn $ show $ selectionTokens s
 			--putStrLn $ show $ blank++[Value "thing"]
@@ -148,7 +149,17 @@ run (db, sel,Just out) (Quit, [Empty]) = do
 						putStrLn "Closing"
 						return (db, sel, Nothing)
 			
-			
+
+run (db, sel, Just out) (Reformat, [Conditions xs]) = do
+			let col = xs!!0
+			let ins = xs!!1
+			let col_num = fromJust $ findColumn col $ head db
+			let sel_new = reform ins col_num sel
+			--let db_new = reform ins col_num db --CHANGE
+			putStrLn $ "Reformatted col "++col
+
+
+			return (db, sel_new, Just out)
 			
 
 
@@ -156,11 +167,39 @@ run (db,sel, Just out) (Help, [Filename x]) = do
 			hPutStrLn out $  help x
 			return (db,sel, Just out)
 
+upperString::String -> String
+upperString x = map toUpper x
+
+capital::String -> String
+capital "" = ""
+capital (x:xs) = [toUpper x]++(map toLower xs)
+
+
+reform::String -> Int -> Database ->Database
+reform _ _ [] = []
+--lets just do it live instead of reusing
+reform "uppercase" i (x:xs) = [x]++(reform' upperString i xs) --Ignore the col strings
+reform "capitalize" i (x:xs) = [x]++(reform' capital i xs )
+reform _ _ db = db
+
+
+reform'::(String -> String) -> Int -> Database -> Database
+reform' _ _ [] = []
+reform' func i (x:xs) = [new_rec]++(reform' func i xs)
+	where 
+		(top,rest) = splitAt i x
+		bot = tail rest
+		new = func $ show $ head rest
+		new_rec= top++[(parseField new)]++rest 
+
+
+
+
 --Given a template record (a bunch of blank fields), fill it with the values
 --as specified in the second argument
 buildRecord::Record -> [String] ->Record
 buildRecord rec [] = rec
-buildRecord rec (x:xs) = buildRecord (top++[Value (tokens!!1)]++bottom) xs
+buildRecord rec (x:xs) = buildRecord (top++[(parseField (tokens!!1))]++bottom) xs
 	where
 		tokens = selectionTokens [x]
 		col_str = tail (tokens!!0)
@@ -181,7 +220,7 @@ insertField db row col value = top++[new]++bottom
 		(top,xs) = splitAt row db
 		bottom = tail xs
 		(row_top,rest) = splitAt col (head xs)
-		new = row_top++[Value value]++(tail rest)
+		new = row_top++[(parseField value)]++(tail rest)
 
 --Remove Record i from a Database. Uses the row number in the first column to find the record
 --It then decrments the row number of all rows after the deleted one 
@@ -189,7 +228,7 @@ deleteFromSel::Int -> Database -> Database
 deleteFromSel _ [] = []
 deleteFromSel i (x:xs)
 	| num == i = deleteFromSel i xs
-	| num > i = [[Value (show (num-1))]++(tail x)]++deleteFromSel i xs
+	| num > i = [[(parseField (show (num-1)))]++(tail x)]++deleteFromSel i xs
 	| otherwise = [x]++deleteFromSel i xs
 	where num = (read (show (head x))::Int) 
 
@@ -208,7 +247,7 @@ mapRowSel (x:xs) i
 	| otherwise = mapRowSel xs i
 
 
---BROKEN
+--BROKEN, cant call find column here
 registrations::Database -> [String]
 registrations db = club_register clubNames db
 	where 
@@ -292,7 +331,7 @@ indexDB (x:xs) i = [(indexRecord x i)]++(indexDB xs (i+1))
 
 --Create a field at the start of record consisting on passed integer
 indexRecord::Record -> Int -> Record
-indexRecord rec i = [Value (show i)]++rec
+indexRecord rec i = [(parseField (show i))]++rec
 
 --Parse a record (line) from a csv file
 parseRecord::String -> Record
