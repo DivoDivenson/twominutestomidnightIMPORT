@@ -8,9 +8,12 @@ import IO
 --UNIX NEWLINES ONLY
 main::IO()
 main = do
-	execute ([],[],stdout)
+	execute ([],[],(Just stdout))
 --original database and selected part
-execute (db,sel,file) = do
+execute (_, _, Nothing) =do
+	putStrLn "Daisy Daisy...."
+
+execute (db,sel, file) = do
 		line <- getLine
 		let ins = parse line
 		case ins of
