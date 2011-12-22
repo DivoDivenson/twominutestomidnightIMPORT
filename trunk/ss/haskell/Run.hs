@@ -5,6 +5,8 @@ import Data.List
 import Data.Maybe
 import Help
 import Control.Exception
+import Text.Regex.Posix
+import GlobRegex
 
 type Result = (Database, Database, Maybe Handle)
 type Database = [Record]
@@ -234,7 +236,7 @@ myIntersect xs ys = intersect xs ys
 findRows::Database -> Int -> String ->Database
 findRows [] _ _  = []
 findRows (x:xs) i cond = 
-	if cond == show (x!!i) --do globbing here IMPORTANT, -1 to account for col numbers
+	if show (x!!i) =~ (globToRegex cond) :: Bool --do globbing here IMPORTANT, -1 to account for col numbers
 		then [x]++(findRows xs i cond)
 		else findRows xs i cond
 
