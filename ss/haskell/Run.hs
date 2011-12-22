@@ -168,11 +168,21 @@ run (db,sel, Just out) (Help, [Filename x]) = do
 			return (db,sel, Just out)
 
 upperString::String -> String
+upperString "" = ""
 upperString x = map toUpper x
 
 capital::String -> String
 capital "" = ""
 capital (x:xs) = [toUpper x]++(map toLower xs)
+
+lowerString::String -> String
+lowerString "" = ""
+lowerString x = map toLower x
+
+--Not gonna lie, found this online
+trim :: String -> String
+trim = f . f
+    where f = reverse . dropWhile isSpace
 
 
 reform::String -> Int -> Database ->Database
@@ -180,6 +190,10 @@ reform _ _ [] = []
 --lets just do it live instead of reusing
 reform "uppercase" i (x:xs) = [x]++(reform' upperString i xs) --Ignore the col strings
 reform "capitalize" i (x:xs) = [x]++(reform' capital i xs )
+reform "lowercase" i (x:xs) = [x]++(reform' lowerString i xs )
+reform "trim" i (x:xs) = [x]++(reform' trim i xs)
+
+
 reform _ _ db = db
 
 
@@ -208,7 +222,7 @@ buildRecord rec (x:xs) = buildRecord (top++[(parseField (tokens!!1))]++bottom) x
 		bottom = tail a
 
 
---Create a record full of blanks the same length as the column index of the current spreadsheat
+--Create a record full of blanks the same length as the column index of the current spreadsheet
 createRow::Record -> Record
 createRow [] = []
 createRow (x:xs) = [Blank]++createRow xs
@@ -223,7 +237,7 @@ insertField db row col value = top++[new]++bottom
 		new = row_top++[(parseField value)]++(tail rest)
 
 --Remove Record i from a Database. Uses the row number in the first column to find the record
---It then decrments the row number of all rows after the deleted one 
+--It then decrements the row number of all rows after the deleted one 
 deleteFromSel::Int -> Database -> Database
 deleteFromSel _ [] = []
 deleteFromSel i (x:xs)
