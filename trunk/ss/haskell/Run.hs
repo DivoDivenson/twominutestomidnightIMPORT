@@ -6,7 +6,7 @@ import Data.Maybe
 import Help
 import Control.Exception
 
-type Result = (Database, Database, Handle)
+type Result = (Database, Database, Maybe Handle)
 type Database = [Record]
 type Record = [Field]
 data Field = Value String | Blank
@@ -19,12 +19,12 @@ run::Result -> (Command, [Args]) -> IO Result
 
 
 --Row numbers added in, so the data starts at col 1, but the user can access col 0 if the want
-run (_, _, out) (Load, [Filename s]) = do
+run (_, _,Just out) (Load, [Filename s]) = do
 			file <- readFile s
 			let db = map parseRecord $ lines file
 			let sel = indexDB db 0
 			hPutStrLn out $ show $ length db
-			return (db,sel,out)
+			return (db,sel, Just out)
 
 
 run (db,sel, out) (Save, [Filename s]) = do
@@ -35,34 +35,34 @@ run (db,sel, out) (Save, [Filename s]) = do
 		--	putStrLn $ show $ registrations sel
 			--return (db,sel, file)
 
-run (db,sel, out) (List, [Conditions s]) = do
+run (db,sel,Just out) (List, [Conditions s]) = do
 			let slct = list sel s
 			hPutStrLn out $ show  $ removeRowNums slct
-			return (db,sel, out)
+			return (db,sel,Just out)
 
-run (db,sel, out) (Count, [Conditions s]) = do
+run (db,sel,Just out) (Count, [Conditions s]) = do
 			hPutStrLn out $ (show $ length $ list sel s)++" for "++(show s)
-			return (db,sel, out)
+			return (db,sel,Just out)
 
 
-run (db,sel, out) (Distinct, [Column x]) = do
+run (db,sel,Just out) (Distinct, [Column x]) = do
 			let colNo =  findColumn x $ head db
 			if isJust colNo
 				then hPutStrLn out $ (show $ findDist (fromJust colNo) sel )++" distinct values for "++x
 				else hPutStrLn out $ "Invalid Column"
-			return (db,sel, out)
+			return (db,sel, Just out)
 
 --Select always runs on the complete DB, having it run on smaller and smaller selections seems silly?
 run (db,sel, out) (Select, [Conditions s]) = do
 			let sel_new = selection db sel s
 			return (db, sel_new, out)
 
-run (db,sel, out) (Show, [Empty]) = do
+run (db,sel,Just out) (Show, [Empty]) = do
 			hPutStrLn out $ unlines $ showDB sel
-			return (db,sel, out)
+			return (db,sel,Just out)
 
 --Delect row from selected. db _always_ holds a complete copy
-run (db, sel,out) (Delete, [Conditions s]) =do
+run (db, sel, Just out) (Delete, [Conditions s]) =do
 			let row = (read (head s)::Int)
 			let mapped_row = mapRowSel sel row
 			if isJust mapped_row
@@ -71,14 +71,14 @@ run (db, sel,out) (Delete, [Conditions s]) =do
 						let row_sel = fromJust mapped_row
 						let db_new = deleteRow db row
 						let sel_new = deleteFromSel row_sel sel
-						return (db_new, sel_new,out)
+						return (db_new, sel_new, Just out)
 				else
 					do
 						hPutStrLn out $ "Invalid row"
-						return (db, sel,out)
+						return (db, sel, Just out)
 
 
-run (db, sel,out) (Update, [Conditions s]) = do
+run (db, sel, Just out) (Update, [Conditions s]) = do
 			let row = (read (s!!0)::Int)
 			let col = findColumn (s!!1) (head db)
 			let mapped_row = mapRowSel sel row
@@ -88,14 +88,14 @@ run (db, sel,out) (Update, [Conditions s]) = do
 					do
 						let db_new = insertField db row ((fromJust col) -1) value
 						let sel_new = insertField sel (fromJust mapped_row) (fromJust col) value
-						return (db_new, sel_new,out)
+						return (db_new, sel_new, Just out)
 				else
 					do
 						hPutStrLn out $ "Invalid args"
-						return (db, sel,out)
+						return (db, sel, Just out)
 
 	
-run (db, sel,out) (Insert, [Conditions s])=do
+run (db, sel, Just out) (Insert, [Conditions s])=do
 			let blank = createRow (head db)
 			let new = buildRecord blank  s
 			let db_new = db++[new]
@@ -104,19 +104,44 @@ run (db, sel,out) (Insert, [Conditions s])=do
 			--putStrLn $ show $ selectionTokens s
 			--putStrLn $ show $ blank++[Value "thing"]
 			hPutStrLn out $ "Inserted "++(show new)
-			return (db_new,sel_new,out)
+			return (db_new,sel_new, Just out)
 
-run (db, sel, out) (Output, [Filename x]) = do
+run (db, sel, _) (Output, [Filename x]) = do 
 			handle <- openFile x WriteMode
-			return (db, sel, handle)
+			return (db, sel,Just handle)
+
+run (db, sel,Just out) (NoOutput, [Empty]) = do
+			if out == stdout
+				then
+					putStrLn "Output to screen"
+				else
+					do
+						hClose out
+			return (db, sel,Just stdout)
+
+run (db, sel,Just out) (Quit, [Empty]) = do
+			putStrLn "Save file? (y|n)"
+			ans <- getLine
+			if(ans == "y")
+				then 
+					do
+						putStrLn "Save to? (filename)"
+						file <- getLine
+						writeFile file $ unparseDB sel
+						putStrLn $ "File saved to "++file
+						return (db, sel, Nothing)
+				else
+					do
+						putStrLn "Closing"
+						return (db, sel, Nothing)
 			
 			
 			
 
 
-run (db,sel,out) (Help, [Filename x]) = do
+run (db,sel, Just out) (Help, [Filename x]) = do
 			hPutStrLn out $  help x
-			return (db,sel,out)
+			return (db,sel, Just out)
 
 buildRecord::Record -> [String] ->Record
 buildRecord rec [] = rec
