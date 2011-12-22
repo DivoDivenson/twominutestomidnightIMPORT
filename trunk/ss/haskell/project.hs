@@ -3,6 +3,7 @@ import System.Environment
 import Run
 import Parse
 import IO
+--import Control.Exception
 
 --HAVE TO FIX THE NEWLINE CHARS IN INPUT FILE
 --UNIX NEWLINES ONLY
@@ -21,7 +22,12 @@ execute (db,sel, file) = do
 							putStrLn str
 							execute (db,sel,file)
 			Right command ->do
-							new <-run (db,sel,file) command
-							execute new
+							new <- try(run (db,sel,file) command)
+							case new of
+										Left e->do
+												putStrLn "Malformed command"
+												execute (db, sel, file)
+										Right res->do
+												execute res 
 
 
