@@ -23,9 +23,11 @@ execute (db,sel, file) = do
 							execute (db,sel,file)
 			Right command ->do
 							new <- try(run (db,sel,file) command)
+							--Prevent the user from crashing the program
+							--Yes I do feel slightly bad doing it this way.
 							case new of
 										Left e->do
-												putStrLn "Malformed command"
+												putStrLn $ "Malformed command "++(show e)
 												execute (db, sel, file)
 										Right res->do
 												execute res 
