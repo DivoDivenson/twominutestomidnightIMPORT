@@ -8,6 +8,8 @@ import Control.Exception
 import Text.Regex.Posix
 import GlobRegex
 
+--Full DB, Selected part of DB, Place to shove output (maybe so we can communicate the fact
+--the user got bored and is gone to do something more fulfilling than spreadsheet work. (Or possibly to cry, it's really up to them)
 type Result = (Database, Database, Maybe Handle)
 type Database = [Record]
 type Record = [Field]
@@ -21,6 +23,9 @@ run::Result -> (Command, [Args]) -> IO Result
 
 
 --Row numbers added in, so the data starts at col 1, but the user can access col 0 if the want
+--Comments describe any functionality that may not be immediately obvious, but for the
+--mpst part the Command passed describes that instance of run
+
 run (_, _,Just out) (Load, [Filename s]) = do
 			file <- readFile s
 			let db = map parseRecord $ lines file
@@ -54,16 +59,21 @@ run (db,sel,Just out) (Distinct, [Column x]) = do
 				else hPutStrLn out $ "Invalid Column"
 			return (db,sel, Just out)
 
---Select always runs on the complete DB, having it run on smaller and smaller selections seems silly?
+--Select selects from the current selection. In other words, the user can iteratively
+--refine their selection, going back to the full Database with select all
 run (db,sel, out) (Select, [Conditions s]) = do
 			let sel_new = selection db sel s
 			return (db, sel_new, out)
 
+--Print out the current selection
 run (db,sel,Just out) (Show, [Empty]) = do
 			hPutStrLn out $ unlines $ showDB sel
 			return (db,sel,Just out)
 
---Delect row from selected. db _always_ holds a complete copy
+
+--Any command that modifies the contents of the spread sheet must do so to both the current selection and the original so changes are saved properly.
+--That's why these functions like messy
+--Delete row from selected. db _always_ holds a complete copy
 run (db, sel, Just out) (Delete, [Conditions s]) =do
 			let row = (read (head s)::Int)
 			let mapped_row = mapRowSel sel row
@@ -108,6 +118,7 @@ run (db, sel, Just out) (Insert, [Conditions s])=do
 			hPutStrLn out $ "Inserted "++(show new)
 			return (db_new,sel_new, Just out)
 
+
 run (db, sel, _) (Output, [Filename x]) = do 
 			handle <- openFile x WriteMode
 			return (db, sel,Just handle)
@@ -145,6 +156,8 @@ run (db,sel, Just out) (Help, [Filename x]) = do
 			hPutStrLn out $  help x
 			return (db,sel, Just out)
 
+--Given a template record (a bunch of blank fields), fill it with the values
+--as specified in the second argument
 buildRecord::Record -> [String] ->Record
 buildRecord rec [] = rec
 buildRecord rec (x:xs) = buildRecord (top++[Value (tokens!!1)]++bottom) xs
@@ -156,10 +169,12 @@ buildRecord rec (x:xs) = buildRecord (top++[Value (tokens!!1)]++bottom) xs
 		bottom = tail a
 
 
+--Create a record full of blanks the same length as the column index of the current spreadsheat
 createRow::Record -> Record
 createRow [] = []
 createRow (x:xs) = [Blank]++createRow xs
 
+--Insert a string into a given position in a Database
 insertField::Database -> Int -> Int -> String -> Database
 insertField db row col value = top++[new]++bottom
 	where 
@@ -168,7 +183,8 @@ insertField db row col value = top++[new]++bottom
 		(row_top,rest) = splitAt col (head xs)
 		new = row_top++[Value value]++(tail rest)
 
---Decremnt col values greater than Int
+--Remove Record i from a Database. Uses the row number in the first column to find the record
+--It then decrments the row number of all rows after the deleted one 
 deleteFromSel::Int -> Database -> Database
 deleteFromSel _ [] = []
 deleteFromSel i (x:xs)
@@ -177,11 +193,14 @@ deleteFromSel i (x:xs)
 	| otherwise = [x]++deleteFromSel i xs
 	where num = (read (show (head x))::Int) 
 
+--Delete a row where the index corresponds to it's position in the list
 deleteRow::Database -> Int -> Database
 deleteRow db i = x++(tail xs)
 	where (x,xs) = splitAt (i) db
 
 --Map a row number to the index of said row based on the row num column
+--Given a row index, find the corresponding rows real position in a database.
+--If the records start with, say 5, and we want row 3, this will return 7
 mapRowSel::Database -> Int ->Maybe Int
 mapRowSel [] _ = Nothing
 mapRowSel (x:xs) i
@@ -207,15 +226,17 @@ club_register (x:xs) db = ([(show x)++" , "++(show $ length maps)])++club_regist
 		maps = getCol mapCol club []
 
 
-				
+--The list command				
 list::Database -> [String] -> Database
 list db args = select db args
 
+
+--The select command
 selection::Database -> Database -> [String] -> Database
 selection full _ ("all":[]) = indexDB full 0
 selection full selected args = [[Value "0"]++(head full)]++(select selected args)
 
-
+--Select a subset of the passed database
 select::Database -> [String] -> Database
 select _ [] = []
 select db (x:xs) = (findRows db col (args!!1)) `myIntersect` (select db xs)
@@ -223,6 +244,7 @@ select db (x:xs) = (findRows db col (args!!1)) `myIntersect` (select db xs)
 		args = selectionTokens [x]
 		col = fromJust $ findColumn (args!!0) $ head db
 
+--Remove the row number column (first column) for things like saving, printing etc
 removeRowNums::Database -> Database
 removeRowNums [] = []
 removeRowNums (x:xs) = [(tail x)]++removeRowNums xs
@@ -233,6 +255,7 @@ myIntersect xs [] = xs
 myIntersect [] ys = ys
 myIntersect xs ys = intersect xs ys
 
+--Find rows with fields at column i that match the given glob string
 findRows::Database -> Int -> String ->Database
 findRows [] _ _  = []
 findRows (x:xs) i cond = 
@@ -245,7 +268,9 @@ selectionTokens::[String] -> [String]
 selectionTokens [] = []
 selectionTokens (x:xs) = (split_on x '=')++selectionTokens xs
 
-
+--Find a column index given it's name, ie "Club" or number, ie $3.
+--Uses the first record to find the names so any spreadsheet can be used
+--Indexs start at 0, but because column 0 is the added row numbers normal human numbers are returned
 findColumn::String -> Record ->Maybe Int
 findColumn ('$':x) _ = Just (read x::Int)
 findColumn str heads = Just (1 + (fromJust $ findIndex (==str) $ map show heads )) --TEMP
@@ -255,48 +280,54 @@ findDist::Int -> Database  -> Int
 findDist i db = length $ nub $ getCol i db []
 
 
---Return a column
+--Return a column as a Record....
 getCol::Int -> Database -> Record ->Record
 getCol _ [] col = col
 getCol i (x:xs) acc = getCol i xs (acc++[x!!i])
---findDistinct::Database -> Int -> String
---findDistinct [] _ = 0
---findDistinct x a = x!!a
 
+--Write in a row number field to the start of each record (Column 0)
 indexDB::Database -> Int -> Database
 indexDB [] _ = []
 indexDB (x:xs) i = [(indexRecord x i)]++(indexDB xs (i+1))
 
+--Create a field at the start of record consisting on passed integer
 indexRecord::Record -> Int -> Record
 indexRecord rec i = [Value (show i)]++rec
 
+--Parse a record (line) from a csv file
 parseRecord::String -> Record
 parseRecord s = map parseField $ split_on s ','
 
+--Convert string to field
 parseField::String -> Field
 parseField "" = Blank
 parseField s = Value s
 
+--Print Database in a somewhat pretty format
 showDB::Database -> [String]
 showDB []  = []
 showDB (x:xs)  = [(showRecord  x)]++showDB xs 
 
+--Convert a DB to a string
 unparseDB::Database -> String
 unparseDB db = unlines $ map unparseRecord db
 
+--Convert Record to a string
 unparseRecord::Record -> String
 unparseRecord x = joinFields ',' $ map show $ (tail x)
 
+--Convert a Record to a string, delimited by tabs for the pretties
 showRecord::Record ->String
 showRecord x = joinFields '\t' $ map show x
 
---Make sure to put the quotes back in
+--Convert Record back to a string for writing
 joinFields::Char -> [String]-> String
 joinFields _ (x:[]) = x
 joinFields seperator (x:xs) = if (hasAnyMine x ',')
 							then ['"']++x++['"']++[seperator]++joinFields seperator xs 
 							else x++[seperator]++joinFields seperator xs
 
+--Check if a string contains a certain char
 hasAnyMine::String -> Char -> Bool --Cous I can't depend on the libraries apparently
 hasAnyMine [] _ = False
 hasAnyMine (x:xs) c 
