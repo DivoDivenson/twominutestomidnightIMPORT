@@ -5,7 +5,7 @@ import System.IO
 data Args = Filename String | Registrations | Completions |Column String | Conditions [String] | Empty
 	deriving(Eq, Show)
 
-data Command = Load | Save | Report | Distinct | Help | List | Count | Select |Show | Delete | Update | Insert | Output | NoOutput | Quit
+data Command = Load | Save | Report | Distinct | Help | List | Count | Select |Show | Delete | Update | Insert | Output | NoOutput | Quit | Sort | Reformat
 	deriving(Eq, Show) 
 
 --Called in user input. Outputs a Command and it's arguments
@@ -34,6 +34,8 @@ comParse "insert" xs = Right(Insert, [Conditions xs])
 comParse "output" (x:[]) = Right(Output, [Filename x])
 comParse "nooutput" [] = Right(NoOutput, [Empty])
 comParse "quit" [] = Right(Quit, [Empty])
+comParse "reformat" xs = Right(Reformat, [Conditions xs])
+--comParse "sort" xs = Right(Sort, [Conditions xs])
 --comParse "report" ("completions":[]) = Right(Report, [Completions]) --Needs a date parser
 --comParse "report" ("registrations":[]) = Right(Report, [Registrations]) BROKEN
 
