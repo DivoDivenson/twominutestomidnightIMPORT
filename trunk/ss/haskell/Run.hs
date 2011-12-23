@@ -11,7 +11,7 @@ import Data.Char
 
 --Full DB, Selected part of DB, Place to shove output (maybe so we can communicate the fact
 --the user got bored and is gone to do something more fulfilling than spreadsheet work. (Or possibly to cry, it's really up to them)
-type Result = (Database, Database, Maybe Handle)
+type Result = (Database, Database, Maybe Handle, [String])
 type Database = [Record]
 type Record = [Field]
 data Field = Value String | Blank
@@ -27,56 +27,62 @@ run::Result -> (Command, [Args]) -> IO Result
 --Comments describe any functionality that may not be immediately obvious, but for the
 --most part the Command passed describes that instance of run
 
-run (_, _,Just out) (Load, [Filename s]) = do
+run (_, _,Just out, order) (Load, [Filename s]) = do
 			file <- readFile s
 			let db = map parseRecord $ lines file
 			let sel = indexDB db 0
 			hPutStrLn out $ show $ length db
-			return (db,sel, Just out)
+			return (db,sel, Just out, order)
 
 
-run (db,sel, out) (Save, [Filename s]) = do
-			writeFile s $ unparseDB sel
-			return (db,sel, out)
+run (db,sel, Just out, order) (Save, [Filename s]) = do
+			let sel_tmp = sortDB sel order
+			writeFile s $ unparseDB sel_tmp
+			return (db,sel,Just out, order)
 
---run (db,sel,file) (Report, [Registrations]) = do
-		--	putStrLn $ show $ registrations sel
-			--return (db,sel, file)
+run (db,sel, Just out, order) (Report, [Registrations]) = do
+			let mapCol = ((fromJust $ findColumn "Map Name" $ head db))
+			let clubCol = ((fromJust $ findColumn "Club" $ head db))
+			putStrLn $  show mapCol
+			hPutStrLn out $ show  $ registrations sel clubCol mapCol
+			return (db,sel, Just out, order)
 
-run (db,sel,Just out) (List, [Conditions s]) = do
+run (db,sel,Just out, order) (List, [Conditions s]) = do
 			let slct = list sel s
+			let sorted = sortDB slct order
 			hPutStrLn out $ show  $ removeRowNums slct
-			return (db,sel,Just out)
+			return (db,sel,Just out, order)
 
-run (db,sel,Just out) (Count, [Conditions s]) = do
+run (db,sel,Just out, order) (Count, [Conditions s]) = do
 			hPutStrLn out $ (show $ length $ list sel s)++" for "++(show s)
-			return (db,sel,Just out)
+			return (db,sel,Just out, order)
 
 
-run (db,sel,Just out) (Distinct, [Column x]) = do
+run (db,sel,Just out, order) (Distinct, [Column x]) = do
 			let colNo =  findColumn x $ head db
 			if isJust colNo
 				then hPutStrLn out $ (show $ findDist (fromJust colNo) sel )++" distinct values for "++x
 				else hPutStrLn out $ "Invalid Column"
-			return (db,sel, Just out)
+			return (db,sel, Just out, order)
 
 --Select selects from the current selection. In other words, the user can iteratively
 --refine their selection, going back to the full Database with select all
-run (db,sel, out) (Select, [Conditions s]) = do
+run (db,sel, out, order) (Select, [Conditions s]) = do
 			let sel_new = selection db sel s
-			return (db, sel_new, out)
+			return (db, sel_new, out, order)
 
 --Print out the current selection
-run (db,sel,Just out) (Show, [Empty]) = do
-			let blah = groupDB sel 1
-			hPutStrLn out $ unlines $ showDB (blah!!6)
-			return (db,sel,Just out)
+run (db,sel,Just out, order) (Show, [Empty]) = do
+			--let blah = groupDB sel 1
+			let sel_tmp =sortDB sel order
+			hPutStrLn out $ unlines $ showDB sel_tmp
+			return (db,sel,Just out, order)
 
 
 --Any command that modifies the contents of the spread sheet must do so to both the current selection and the original so changes are saved properly.
 --That's why these functions like messy
 --Delete row from selected. db _always_ holds a complete copy
-run (db, sel, Just out) (Delete, [Conditions s]) =do
+run (db, sel, Just out, order) (Delete, [Conditions s]) =do
 			let row = (read (head s)::Int)
 			let mapped_row = mapRowSel sel row
 			if isJust mapped_row
@@ -85,14 +91,14 @@ run (db, sel, Just out) (Delete, [Conditions s]) =do
 						let row_sel = fromJust mapped_row
 						let db_new = deleteRow db row
 						let sel_new = deleteFromSel row_sel sel
-						return (db_new, sel_new, Just out)
+						return (db_new, sel_new, Just out, order)
 				else
 					do
 						hPutStrLn out $ "Invalid row"
-						return (db, sel, Just out)
+						return (db, sel, Just out, order)
 
 
-run (db, sel, Just out) (Update, [Conditions s]) = do
+run (db, sel, Just out, order) (Update, [Conditions s]) = do
 			let row = (read (s!!0)::Int)
 			let col = findColumn (s!!1) (head db)
 			let mapped_row = mapRowSel sel row
@@ -102,14 +108,14 @@ run (db, sel, Just out) (Update, [Conditions s]) = do
 					do
 						let db_new = insertField db row ((fromJust col) -1) value
 						let sel_new = insertField sel (fromJust mapped_row) (fromJust col) value
-						return (db_new, sel_new, Just out)
+						return (db_new, sel_new, Just out, order)
 				else
 					do
 						hPutStrLn out $ "Invalid args"
-						return (db, sel, Just out)
+						return (db, sel, Just out, order)
 
 	
-run (db, sel, Just out) (Insert, [Conditions s])=do
+run (db, sel, Just out, order) (Insert, [Conditions s])=do
 			let blank = createRow (head db)
 			let new = buildRecord blank  s
 			let db_new = db++[new]
@@ -118,23 +124,23 @@ run (db, sel, Just out) (Insert, [Conditions s])=do
 			--putStrLn $ show $ selectionTokens s
 			--putStrLn $ show $ blank++[Value "thing"]
 			hPutStrLn out $ "Inserted "++(show new)
-			return (db_new,sel_new, Just out)
+			return (db_new,sel_new, Just out, order)
 
 
-run (db, sel, _) (Output, [Filename x]) = do 
+run (db, sel, _, order) (Output, [Filename x]) = do 
 			handle <- openFile x WriteMode
-			return (db, sel,Just handle)
+			return (db, sel,Just handle, order)
 
-run (db, sel,Just out) (NoOutput, [Empty]) = do
+run (db, sel,Just out, order) (NoOutput, [Empty]) = do
 			if out == stdout
 				then
 					putStrLn "Output to screen"
 				else
 					do
 						hClose out
-			return (db, sel,Just stdout)
+			return (db, sel,Just stdout, order)
 
-run (db, sel,Just out) (Quit, [Empty]) = do
+run (db, sel,Just out, order) (Quit, [Empty]) = do
 			putStrLn "Save file? (y|n)"
 			ans <- getLine
 			if(ans == "y")
@@ -144,14 +150,14 @@ run (db, sel,Just out) (Quit, [Empty]) = do
 						file <- getLine
 						writeFile file $ unparseDB sel
 						putStrLn $ "File saved to "++file
-						return (db, sel, Nothing)
+						return (db, sel, Nothing, order)
 				else
 					do
 						putStrLn "Closing"
-						return (db, sel, Nothing)
+						return (db, sel, Nothing, order)
 			
 
-run (db, sel, Just out) (Reformat, [Conditions xs]) = do
+run (db, sel, Just out, order) (Reformat, [Conditions xs]) = do
 			let col = xs!!0
 			let ins = xs!!1
 			let col_num = fromJust $ findColumn col $ head db
@@ -166,37 +172,60 @@ run (db, sel, Just out) (Reformat, [Conditions xs]) = do
 			--putStrLn $ unlines $ map show nums
 
 
-			return (db_new, sel_new, Just out)
+			return (db_new, sel_new, Just out, order)
 			
 
-run (db, sel, Just out) (Sort, [Conditions xs]) = do
-			let sel_new = sortDB sel xs
+run (db, sel, Just out, order) (Sort, [Conditions xs]) = do
+			--let sel_new = sortDB sel xs
 			putStrLn "Sorting set"
-			return (db, sel_new, Just out)
+			return (db, sel, Just out, xs)
 
 
-run (db,sel, Just out) (Help, [Filename x]) = do
+run (db,sel, Just out, order) (Help, [Filename x]) = do
 			hPutStrLn out $  help x
-			return (db,sel, Just out)
+			return (db,sel, Just out, order)
+
+
+--sortDBcomplete::Database -> String -> Database
+--sortDBcomplete [] _ = []
+--sortDBcomplete _ [] = []
+--sortDBcomplete db (col:ordering:rest) = db_new
+	--where 
+	--	col_num = fromJust $ findColumn col $ head db --This could blow up but I need to finish this and start studying
+	--	db' = sortDB db col_num ordering
+	--	(x:xs) = groupDB db' col_num
+	--	db_new = (sortDBcomplete x rest):(sortDBcomplete xs rest)
+
 
 
 --Return an list of DB where every DB has the same entry in column i
 groupDB::Database -> Int -> [Database]
 groupDB [] _ = []
-groupDB (x:xs) i = (x:ys) : groupBy zs i
-	where (ys,zs) = recSpan x xs
+groupDB (x:xs) i = (x:ys) : groupDB zs i
+	where (ys,zs) = recSpan ((show(x!!i)) ==) xs i
+
+
+recSpan::(String -> Bool) -> Database -> Int -> (Database, Database)
+recSpan _ [] _ = ([], [])
+recSpan p a@(x:xs) i
+	| p (show(x!!i)) = let (ys,zs) = recSpan p xs i in (x:ys,zs)
+	| otherwise = ([],a)
+	
 --groupDB (x:xs:rest) i
 --	| (show (x!!i)) == (show (x!!i)) = [x,xs]++(groupDB rest i)
 --	| otherwise = [[x]]++(groupDB (xs:rest) i)
 
+--Only got sort working for the first arg
 sortDB::Database -> [String] -> Database
 sortDB [] _ = []
+sortDB db [""] = db
 sortDB db (col:ordering:rest)
 	| ordering == "ascending" = quicksortDBAsce db col_num
 	| ordering == "descending" = quicksortDBDesc db col_num
 	| otherwise = db
-	where
-		col_num = fromJust $ findColumn col $ head db --This could blow up but I need to finish this and start studying
+	where col_num = fromJust $ findColumn col $ head db
+	
+		
 
 --HURRICANE CODING MODE,  ENGAGED
 quicksortDBAsce ::Database -> Int-> Database
@@ -348,20 +377,19 @@ mapRowSel (x:xs) i
 	| otherwise = mapRowSel xs i
 
 
---BROKEN, cant call find column here
-registrations::Database -> [String]
-registrations db = club_register clubNames db
+registrations::Database -> Int -> Int -> [String]
+registrations db clubs maps = club_register clubNames db maps
 	where 
-		clubNames = tail $ nub ( getCol (fromJust $ findColumn "Club" $ head db) db [])
+		clubNames = tail $ nub ( getCol clubs db [])
 		
 
 --club names
-club_register::Record -> Database -> [String]
-club_register [] _ = []
-club_register (x:xs) db = ([(show x)++" , "++(show $ length maps)])++club_register xs db
+club_register::Record -> Database ->  Int -> [String]
+club_register [] _ _= []
+club_register (x:xs) db mapCol= ([(show x)++" , "++(show $ length maps)])++club_register xs db mapCol
 	where 
-		mapCol = (fromJust $ findColumn "Map Name" $ head db)
-		mapIdx = "$"++(show mapCol)
+		--mapCol = (fromJust $ findColumn "Map Name" $ head db)
+		mapIdx = "$"++(show (mapCol-1))
 		club = select db $ [mapIdx++"="++(show x)]
 		maps = getCol mapCol club []
 
