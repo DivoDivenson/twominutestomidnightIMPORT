@@ -9,6 +9,7 @@ import Text.Regex.Posix
 import GlobRegex
 import Data.Char
 
+
 --Full DB, Selected part of DB, Place to shove output (maybe so we can communicate the fact
 --the user got bored and is gone to do something more fulfilling than spreadsheet work. (Or possibly to cry, it's really up to them)
 type Result = (Database, Database, Maybe Handle, [String])

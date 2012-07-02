@@ -12,7 +12,7 @@ from misc import *
 
 
 class ServicesServer():
-		
+	
 	users = {}
 	#Takes in a bunch of json
 	def handle_auth(self, data, key):
@@ -23,6 +23,7 @@ class ServicesServer():
 		tgs_user = tgs_ticket['user']
 
 		client_ss_key = tgs_ticket['client_ss']
+
 
 		authenticator = data['auth']
 		authenticator = decrypt(authenticator, client_ss_key)
