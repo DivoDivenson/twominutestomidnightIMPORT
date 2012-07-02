@@ -7,6 +7,11 @@ import IO
 
 --HAVE TO FIX THE NEWLINE CHARS IN INPUT FILE
 --UNIX NEWLINES ONLY
+
+
+--Got everything done except for date-fix and grid-fix. Not the most
+--robust code in the world but nothing is hard coded so should work with 
+--any data thrown at it. Would have liked to complete it ( Haskell is fun :) ) but I really need to start studying
 main::IO()
 main = do
 	execute ([],[],(Just stdout), [""])
